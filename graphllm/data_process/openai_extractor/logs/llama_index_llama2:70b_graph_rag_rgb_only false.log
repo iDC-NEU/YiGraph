@@ -1,0 +1,782 @@
+-----------------------accuracy: 0.72-----------------------
+id : 6
+query: Which company acquired ShowBiz Cinemas?
+response:   Microsoft
+answer: ['EVO Entertainment Group']
+Is the response from the LLM correct?: No
+keywords: ['Company', 'Acquired', 'Showbiz', 'Cinemas']
+retrieve_result: ['Company Acquired Fire retardant chemical technologies, llc', 'Microsoft Acquired Activision', 'Activision Acquired_by Microsoft', 'Microsoft Acquired Activision blizzard', 'Microsoft Acquiring_company_of Activision blizzard', 'Microsoft Acquired Zenimax media and bethesda softworks', 'Jeremy devine Is_vice_president_of_marketing_at Showbiz', 'Activision blizzard Acquired_by Microsoft', 'At&t Spun_off Warner media', 'Powerset Acquired_by Microsoft', 'Microsoft Acquired_by Activision blizzard', 'Microsoft Acquired_stake_from Activision blizzard', 'Activision blizzard Is_acquired_by Microsoft', 'Activision Is_being_acquired_by Microsoft', 'Microsoft Announced Acquisition of activision blizzard', 'Microsoft Made_largest_acquisition Purchase of activision blizzard', 'Microsoft Purchased Activision blizzard', 'Microsoft Acquires Activision', 'Microsoft Announced_acquisition_of Activision blizzard', 'Executives Showcased_product_to Shareholders', 'Activision blizzard Will_be_acquired_by Microsoft', 'Activision blizzard Merger_with Microsoft', 'Microsoft Acquires Activision blizzard', 'Company Has_net_sales $127.1 billion', 'Company Thanks_to Shareholders', 'Microsoft Completed_acquisition_of Bethesda', 'Microsoft Announced Merger with activision blizzard', 'Netflix Partnered_with Microsoft', 'Microsoft Acquired Bethesda softworks', 'Microsoft Partner_of Netflix']
+
+
+id : 9
+query: What won best drama at 79th Golden Globes?
+response: The Fabelmans
+answer: ['The Power of the Dog']
+Is the response from the LLM correct?: No
+keywords: ['Golden globes', 'Best drama', 'Awards', 'Winner', '79th']
+retrieve_result: ['Nbc Announced_pulling 79th annual golden globes ceremony', 'Nbc Announced Pulling the 79th annual golden globes ceremony', '79th golden globes Announced Hfpa', 'Emmy Category Best drama', '80th annual golden globe awards Will_be_held_on Tuesday, january 10, 2023', 'Nbc Announced 79th annual golden globes ceremony cancellation', 'The fabelmans Won_award Golden globes', '80th golden globe awards Produced_by Dick clark productions', 'Golden globes Takes_place_on Tuesday, january 10, 2023', 'Golden globes Celebrated_in 80th time', 'The white lotus Received_award Golden globes', 'Nbc Aired Golden globes', 'Jennifer coolidge Won_award Golden globes', 'Nbc Declined_to_televisie 79th golden globe awards', 'The crown Nominated_for Golden globes', 'Golden globes Awarded_in January 2022', '80th golden globe awards Aired_on Nbc', 'The fabelmans Won_award_at Golden globes', 'Golden globes Awarded_on January 10, 2023', 'Nbc Hosts 80th annual golden globe awards', 'Golden globes Scheduled_on Tuesday, january 10, 2023', '2023 golden globe nominations Revealed January 10, 2023', 'Succession Is_award_winner_of Golden globes', 'Golden globes Announced_winner The fabelmans', 'Golden globe awards Produced_by Dick clark productions', 'Golden globe awards Broadcasted_on Nbc', 'Michaela jaé rodriguez Won_award_at Golden globes', 'The fabelmans Winner_of Best picture - drama', 'Nbc Broadcast Golden globes', 'Nicole kidman Won_award Best performance by an actress in a motion picture – drama']
+
+
+id : 10
+query: How much are GA Tech softball 2022 season tickets?
+response: $350
+answer: ['$100 per seat']
+Is the response from the LLM correct?: No
+keywords: ['Ga tech', 'Softball', 'Season tickets', '2022']
+retrieve_result: ["Season tickets for tech's upcoming 2023 campaign Start_at $350", 'Georgia tech softball Plays_at Mewborn field', 'Virginia tech athletics Sells Season tickets', 'Season tickets Same_price_as 2022', 'Virginia tech football season tickets Start_at $350', 'Season tickets Available_for_purchase_from April 18, 2023', "Tech fund Contribution_program_for Georgia tech football and men's basketball", 'Season tickets Available_for_purchase_until May 16, 2023', 'Season tickets Are_currently_on_sale_for 2023 virginia football home games', 'Season tickets Available_at $99 to $325**', 'Virginia tech football Has_season_tickets Season tickets', 'Season tickets Costs $400', 'Student hokie club gift Included_in Season ticket price', 'Season tickets Started_in 2023', 'Virginia football home games Have_season_tickets_on_sale_for 2023', 'Tech fund Is_part_of Georgia tech athletic association', 'Tech fund Allows_purchase_of Season tickets', 'Yellow zone season ticket Has_price $350', 'Season tickets Has_quantity $350', 'Season tickets Cost $100 per seat', 'Season tickets Guarantee General admission entry to all home games', 'Season tickets Located_in Mewborn field', 'The world games 2025 Includes_sport Softball', 'Student hokie club gift Included_in Season tickets', 'Athletic fee Required_for Season tickets', 'Charles huff Year_at_georgia_tech 2022', 'Tech fund Is_part_of Georgia tech', 'Atlanta open End_date June 18, 2022', 'Hokie ticket office Provide_information_on Season tickets', 'Atlanta open Start_date June 15, 2022']
+
+
+id : 14
+query: What is the price for a 30-second spot during the Super Bowl 2022?
+response: $7 million
+answer: ['$6.5 million']
+Is the response from the LLM correct?: No
+keywords: ['Super bowl', '2022', 'Advertising', 'Cost', 'Commercial']
+retrieve_result: ['Super bowl As_of 2022', 'Super bowl As_of May 13, 2022', 'Super bowl Happened_in 2022', 'Super bowl Took_place_on Feb 14, 2022', 'Super bowl Occured on 13, 2022', 'Super bowl Will_be_held_on Sunday, feb. 13, 2022', 'Super bowl Will_take_place_on Sunday, feb. 13, 2022', 'Super bowl Occurred_on Sunday, feb. 13, 2022', 'Super bowl Played_on February 13, 2022', 'Super bowl Occurred_on Feb 13, 2022', 'Super bowl Takes_place_on Sunday, feb. 13, 2022', 'Super bowl Has_event_date February 13, 2022', 'Super bowl 2022 Took_place_at Sofi stadium', 'Nfl Announced 2022 super bowl', 'Super bowl Has_date Feb. 13, 2022', 'Advertisers Paid $7 million for a thirty-second spot during super bowl lvi in 2022', 'Super bowl lvii Took_place_in 2022', 'Super bowl lvi Took_place_on February 13, 2022', 'Super bowl liii Took_place_on Feb 13, 2022', 'Super bowl Has_year 2022', 'Super bowl Reached_price_mark $2 million', 'Super bowl lvi Took_place_on Feb 13, 2022', 'Super bowl 2022 Located_in Sofi stadium', 'Super bowl lvi Was_played_on February 13, 2022', 'Super bowl lvi Took_place_on Feb 14, 2022', 'Sofi stadium Will_host Super bowl in 2022', 'Super bowl lvi Takes_place_on Sunday, feb. 13, 2022', '2022 nfl super bowl Happens_at Sofi stadium', 'Super bowl lvi Played_on February 13, 2022', 'Los angeles rams Played_in Super bowl 2022']
+
+
+id : 15
+query: When is the Sports Star of the Year Awards Show 2022?
+response: 
+The Sports Star of the Year Awards Show 2022 will be held on March 13, 2022.
+answer: ['May 26', 'May 26', 'May. 26', '26 May', '26 May', '26 May.']
+Is the response from the LLM correct?: No
+keywords: ['Sports star of the year awards show 2022', 'Awards show', 'Sports', 'Event date']
+retrieve_result: ['Nfl Announced 2022 super bowl', 'Nfl Announced 2023 nfl season', 'Nfl Held 2022 nfl draft', 'Nfl Starts_on Sept. 8, 2022', 'Nfl Announced 2023 nfl schedule', 'Nfl Announced March 13, 2019', 'Nfl Has_event Nfl season', 'Nfl Ends_regular_season_on January 8, 2023', 'Nfl Event_type Sports', 'Nfl Presents_award 1990', 'Nfl Approved_rule_change June 2021', 'Nfl Received_award_nominations_for 25 sports emmy awards', 'The athletic Covers World cup', 'Nfl Starts_on Thursday night, september 7, 2023', 'Nfl Has_event Super bowl', 'The athletic Provides_coverage_of Sports', "Nfl Announced_host_city_for_super_bowl_2025 Caesar's superdome", 'Nfl Announced_host_city_for_super_bowl_2023 State farm stadium', 'The athletic Covered Super bowl-related news', 'Nfl Gave_award Walter payton man of the year award', 'Movie info Belongs_to_genre Sports', 'Will jeanes Works_for The athletic', 'Nfl Released_schedule_on May 12', 'Nfl Announced State farm stadium will host 2023 super bowl', 'Nfl Received 25 sports emmy award nominations', 'Nfl Released_statement_on Sunday', 'Nfl Announced Las vegas', 'Nfl Adopted_schedule 17-game schedule in 2021', 'The athletic Has_contributor Nicole auerbach', 'Nfl Hosted_event Nfl draft']
+
+
+id : 16
+query: Who are the recipients of the 2022 Ivan Allen Jr. Prize for Social Courage?
+response: 
+The recipients of the 2022 Ivan Allen Jr. Prize for Social Courage are not explicitly stated in the provided context information. However, it is mentioned that the prize was awarded to individuals who have demonstrated moral courage in their work or actions.
+answer: ['Lawrence Williams', 'Ralph Long Jr.', 'Ford Greene', 'Ronald Yancey']
+Is the response from the LLM correct?: No
+keywords: ['Ivan allen jr.', 'Prize', 'Social courage', 'Recipients', '2022']
+retrieve_result: ['Ivan allen jr. prize for social courage Announced_on Jan 21, 2022', 'Ivan allen jr. Associated_with 2023 ivan allen jr. prize for social courage', 'Amanpour Recipient_of 2023 ivan allen jr. prize for social courage', "Prize for social courage Honors Ivan allen jr.'s legacy", 'The ivan allen jr. legacy awards Awards_for Social courage', 'Ivan allen jr. prize for social courage In_recognition_of Ivan allen jr.', 'Ivan allen jr. Awarded Prize for social courage', 'Ivan allen jr. prize for social courage Honors Individuals with moral courage', 'Ivan allen jr. prize for social courage Announced_in 2010', 'Ivan allen jr. prize for social courage Includes $100,000 stipend', 'Ivan allen jr. Established Ivan allen jr. prize for social courage', 'Ivan allen jr. Named_after Ivan allen jr. prize for social courage', 'Ivan allen jr. prize for social courage Established_in 2010', 'Ivan allen jr. Named_after The ivan allen jr. prize for social courage award ceremony', 'The ivan allen jr. prize for social courage award ceremony Takes_place_on Monday, april 24', 'Ivan allen jr. prize for social courage Established_by Georgia institute of technology', 'Ivan allen jr. prize for social courage Awarded_to Long jr.', 'Ivan allen jr. prize for social courage Awarded_to Williams', 'Christiane amanpour Received_award 2023 ivan allen jr. prize for social courage', 'Ivan allen jr. prize for social courage Awarded_to Ronald yancey', 'Ivan allen jr. prize for social courage Awarded_to Ralph long jr.', 'Ivan allen jr. prize for social courage Funded_by Wilbur and hilda glenn family foundation', 'Georgia tech Gives_award Ivan allen jr. prize for social courage', 'Ivan allen jr. prize for social courage Awarded_to Lawrence williams', 'Ivan allen jr. prize for social courage Presented_to Beatrice mtetwa', 'Ivan allen jr. prize for social courage Awarded_to Yancey', 'The ivan allen jr. prize for social courage award ceremony Awarded_to Christiane amanpour', 'Ivan allen jr. prize for social courage Awarded_to Ford greene', 'Ivan allen jr. prize for social courage Awarded_to Greene', 'Ángel cabrera Presented Ivan allen jr. prize for social courage']
+
+
+id : 17
+query: What is the codename for Google's AR headset project?
+response: Iris
+answer: ['Project Iris']
+Is the response from the LLM correct?: No
+keywords: ['Google', 'Ar', 'Headset', 'Project', 'Codename']
+retrieve_result: ['Google Developing Ar headset codenamed iris', 'Ar headset Developed_by Google iris project', 'Google iris project Has_technology Next-generation ar headset', 'Project iris Is_codename_for Augmented reality headset', 'Apple Announced_product Ar headset', 'Google Has_project Augmented reality glasses project', 'Meta Revealed_roadmap_for Three generations of ar headsets in 2024, 2026, and 2028', 'Augmented reality glasses project Has_codename Internal codename', 'Meta Delayed_commercialization_of_ar_headset_until 2026', 'Google Killed_off A project to build a pair of headsets', 'Google Needs_to_develop More compelling or convenient ar experiences', 'Apple vision pro Type Ar headset', 'Google Has_division Google vr/ar', 'Google Works_on Augmented reality (ar)', 'Apple Focussed_on Cheaper version of ar/vr headset', 'Apple Working_on Augmented-reality and virtual-reality headset devices', 'Meta Announced First version of ar headset will no longer be commercialized', 'Meta Working_on New ar device codenamed project cambria', 'Apple Developing Ar device', 'Google Invested_in R&d regarding ar devices', 'Apple vision pro Category Augmented and virtual reality headset', 'Apple vision pro Is_a Augmented and virtual reality headset', 'Google Announced Public tests of augmented reality glasses', 'Apple Will_release Vision pro headset', 'Mark lucovsky Leads_development_of Ar operating system for innovative ar device', 'Clay bavor Head_of Google vr/ar', 'Apple vision pro Is_a Wearable headset device', 'Apple Released Headset', 'Project glass Alias Augmented reality glasses', 'Meta Is_developing Ar glasses']
+
+
+id : 20
+query: When do the Paralympic Winter Games 2022 start?
+response: February 4-20, 2022
+answer: ['March 4', 'Mar 4', 'Mar. 4', '4 March', '4 Mar', '4 Mar.']
+Is the response from the LLM correct?: No
+keywords: ['Paralympic winter games', '2022', 'Start date']
+retrieve_result: ['Winter olympic games Starts_on 4 february 2022', 'Olympic winter games Date 2022', 'Winter olympic games Scheduled_for February 4-20, 2022', 'Paralympic games Follows Winter olympic games', 'Olympic winter games Happened_on Feb 9, 2022', '2022 olympic winter games Took_place_on 2022', 'Winter olympic games Happened_on 2022', 'Fifa world cup May_clash_with 2022 winter paralympics', 'Olympic winter games Has_year 2022', 'Winter olympic games Ends_on 20 february 2022', 'Russia Barred_from_entering 2022 winter paralympics', 'Beijing 2022 Hosted Olympic winter games', '2022 olympic winter games Awarded_to Beijing', 'Olympic games Scheduled_to_take_place_in 2022', 'Beijing Hosted 2022 olympic winter games', '2022 olympic winter games Supported_by United states', '2022 olympic winter games Hosted_in Beijing, china', 'China Hosts 2022 olympic winter games', 'The world games Takes_place_on 7th to 17th august 2025', 'The world games Takes_place_in 2022', 'The world games Starts_on August 7, 2025', '2022 olympic winter games Compete_in 109 events across 15 disciplines in 7 sports', 'World cup 2022 Started_on Dec 1, 2022', 'Beijing Selected_for 2022 olympic winter games', 'The world games Postponed_to 2022', 'Fifa 2022 world cup Starts_in 2022', 'International olympic committee Oversaw 2022 olympic winter games', 'Fifa world cup May_clash_with 2022 winter olympics', 'Beijing 2022 olympics Occurred_in 2022', 'Australian open Yearly_scheduled_in Mid-january']
+
+
+id : 29
+query: When was Elden Ring being released?
+response: 
+Jan. 21, 2022
+answer: ['February 25', 'Feb 25', 'Feb. 25', '25 February', '25 Feb', '25 Feb.']
+Is the response from the LLM correct?: No
+keywords: ['Elden ring', 'Release date']
+retrieve_result: ['Elden ring Released_on Jan. 21, 2022', 'Elden ring Released_on Feb 24, 2022', 'Elden ring Released_on February 25, 2022', 'Elden ring Released_in 2022', 'Elden ring Fully_released_on February 25, 2022', 'Elden ring Released_in Late february 2022', 'Elden ring Released_in February 2022', 'Elden ring Announced November 28, 2022', 'Elden ring Revealed_at E3 2019', 'Elden ring Released_on Xbox one', 'Elden ring Released_by Bandai namco entertainment', 'The ringed city Released_before Elden ring', 'Elden ring Received_review Universal acclaim', 'Elden ring Released_for Playstation 4', 'Elden ring Released_on Playstation 4', 'Elden ring Released_for Xbox one', 'Elden ring Released_on Windows pc', 'Elden ring Is_genre Dark fantasy and action-rpg', 'Elden ring Published_by Bandai namco entertainment inc.', 'Elden ring Published_by Bandai namco entertainment', 'Elden ring Released_on Xbox series x', 'Elden ring Released_on Playstation 5', 'Elden ring Released_for Playstation 5', 'Elden ring Developed_by Bandai namco entertainment', 'From software Developed Elden ring', 'Elden ring Directed_by Hidetaka miyazaki', 'Elden ring Released_for Xbox series x/s', 'Elden ring Sold_copies 13.4 million', 'Elden ring Released_for Windows', 'Elden ring Sold_copies_as_of March 2022']
+
+
+id : 30
+query: Who did Iga Swiatek defeat to win the Qatar Open 2022?
+response: 
+Not available.
+answer: ['Anett Kontaveit']
+Is the response from the LLM correct?: No
+keywords: ['Iga swiatek', 'Qatar open 2022', 'Defeated']
+retrieve_result: ['Iga świątek Won_tournament Qatar open', 'Iga świątek Won Qatar open', 'Iga swiatek Participated_in Qatar open', 'Iga świątek Defended_title Qatar open', '2022 french open Has_winner Iga świątek', '2022 french open Has_winner Iga swiatek', 'Iga swiatek Won 2022 french open', 'Swiatek Won_tournament Qatar open', 'Swiatek Winner_of Qatar open', 'Iga swiatek Won_event 2022 french open', 'Iga swiatek Defended_championship Qatar totalenergies open', 'Iga swiatek Won_title Qatar totalenergies open', 'Iga świątek Won_title_at 2022 french open', 'Iga swiatek Won 2022 us open', 'Świątek Entered_in_event Qatar open', 'Świątek Participated_in Qatar open', 'Świątek Won_title_at_event Qatar open', 'Iga swiatek Champion_of 2022 french open', 'Iga swiatek Won French open 2023', 'Świątek Played_in Qatar open', "Iga swiatek Won French open 2022 women's singles final", 'Iga swiatek Played_in 2022 us open', 'Iga swiatek Participates_in French open 2023', 'Iga swiatek Won Qatar totalenergies open', 'Iga swiatek Won 2022 us open tennis grand slam', 'Swiatek Won_title_at Qatar open', "Iga swiatek Won_title_at 2022 french open women's final", 'Iga swiatek Won 2020 french open', 'Świątek Entered_into Qatar open', 'Italian open Champion Iga świątek']
+
+
+id : 32
+query: Who won the Male Vocalist of the Year at the 2022 CMA ?
+response: Caleb Williams
+answer: ['Chris Stapleton']
+Is the response from the LLM correct?: No
+keywords: ['Cma', 'Male vocalist', 'Year', '2022']
+retrieve_result: ['Cma awards Has_winner_for Male vocalist of the year', 'Cma awards Presented_award Male vocalist of the year', 'Cma awards Has_award_category Male vocalist of the year', 'Cma awards Has_award_category Female vocalist of the year', 'Cma awards Presented_award Female vocalist of the year', 'Cma awards Announced 2022', 'Grammy awards Happened_in 2022', 'Cma awards Presented_award Vocal duo of the year', 'Cma awards Takes_place_on Nov. 9, 2022', 'Cma awards Presented_award New artist of the year', 'Cma awards Presented_award Vocal group of the year', 'Caleb williams Announced_as_winner_on Dec 10, 2022', 'Cma awards Presented_award Musician of the year', 'Cma awards Has_nominees_for Entertainer of the year', 'Cma awards Presented_award Song of the year', 'The voice Announced_on September 19, 2022', 'Cma awards Presented_award Single of the year', 'Grammy awards Took_place_on Apr 4, 2022', 'Cma awards Awarded Entertainer of the year', 'Cma awards Presented_award Musical event of the year', 'Mickey guyton Sang_national_anthem 2022', 'Cma awards Presented_award Album of the year', '56th annual country music association awards Took_place_in 2022', 'Grammy awards Occurred_on Feb 5, 2023', 'Rafael nadal Is_champion_of 2022', 'The voice Premiered_on September 19, 2022', 'Caleb williams Awarded_in 2022', '56th annual country music association awards Honored_at 2022', 'Cma awards Presented_award Music video of the year', '2022 masters Took_place_in 2022']
+
+
+id : 36
+query: who will direct Irredeemable film?
+response: Adam McKay
+answer: ['Jeymes Samuel']
+Is the response from the LLM correct?: No
+keywords: ['Director', 'Film', 'Irredeemable']
+retrieve_result: ['Adam mckay Directing Irredeemable', 'Irredeemable To_be_adapted_into Film', 'Adam mckay Will_direct Irredeemable film adaptation', 'Netflix Releases_film_adaptation_of Irredeemable', 'Gary sanchez productions Producing Irredeemable', 'Adam mckay Directing_debut_in_superhero_film_for Irredeemable', 'Tommy wirkola Writing_screenplay_for Irredeemable', '20th century fox Producing Irredeemable', 'Ross richie Producing_irredeemable_movie_adaptation Irredeemable movie adaptation', 'Adam mckay Directed_by Irredeemable', 'Stephen christy Co-producing_irredeemable_movie_adaptation Irredeemable movie adaptation', 'Mark waid Created Irredeemable', 'Boom! studios Co-producing Irredeemable', 'Netflix Developing Irredeemable and incorruptible film adaptation', 'Mark waid Wrote Irredeemable', 'Tommy wirkola Writing_screenplay_for Irredeemable movie adaptation', '20th century fox Acquired Irredeemable', 'Waid Said_about Irredeemable', 'Irredeemable Will_be_adapted_by Tommy wirkola', 'Boom! studios Published Irredeemable', 'Irredeemable Won_award Eisner award for best writer', 'Adam mckay Attached_to Irredeemable movie adaptation', 'Tommy wirkola Writing_for Irredeemable', 'Stephen christy Producing Irredeemable', 'Mark waid Created_comic Irredeemable', 'Hansel and gretel Is_related_to Irredeemable', 'Mark waid Created_comic_book_series Irredeemable', 'Ross richie Producing Irredeemable', 'Irredeemable Illustrated_by Peter krause', 'Boom! studios Publishes_comic_book_series Irredeemable']
+
+
+id : 42
+query: When did Apple M2 chip?
+response: 
+The answer to your question is not explicitly stated in the provided context information. However, we can infer that Apple released the M2 chip in the summer of 2022 based on the statement "Apple Released M2 chip in summer of 2022."
+answer: ['June 6', 'Jun 6', 'Jun. 6', '6 June', '6 Jun', '6 Jun.']
+Is the response from the LLM correct?: No
+keywords: ['Apple', 'M2', 'Chip', 'Release date']
+retrieve_result: ['Apple Introduced M2 chip', 'Apple Developed M2 chip', 'Apple Launched M2 chip', 'Apple Released M2 chip', 'Apple Unveiled M2 chip', 'Apple Released M2 system on chip', 'Apple Developed M2 ultra chip', 'Apple Released M2 chip in summer of 2022', 'Apple Announced M2 chips', 'Tsmc Manufactures_chip Apple m2', 'Apple m2 chip Debuted_in Macbook air', 'Apple m2 chip Debuted_in 13-inch macbook pro', 'M2 chip Starts_next_generation_of Apple silicon', 'Apple Released M2', 'M2 chip Used_in 2022 13-inch macbook pro', 'M2 chip Used_in 2022 \u200cmacbook air\u200c', 'Mac mini m2 Contains M2 chip', 'M2 chip Used_in Macs', 'Apple Unveiled M2', 'Macbook air Uses_chip Apple m2', 'Apple Claims Improved performance and power efficiency of m2 chip', 'Apple Introduced M2 ultra', '13-inch macbook pro Uses_chip Apple m2', 'M2 chip Used_in 2023 15-inch \u200cmacbook air\u200c', 'M2 chip Powers Other macs', 'M2 chip Used_in 13-inch macbook pro', 'M2 chip Used_in Macbook air', 'M2 chip Used_in Ipads', 'M2 chips Released_in March', 'M2 chip Released_in June 2022']
+
+
+id : 44
+query: When will the 94th Academy Awards be held?
+response: Sunday, March 28, 2022
+answer: ['March 27', 'Mar 27', 'Mar. 27', '27 March', '27 Mar', '27 Mar.']
+Is the response from the LLM correct?: No
+keywords: ['Academy awards', '94th', 'Held', 'Date', 'Schedule']
+retrieve_result: ['94th academy awards Held_at Dolby theatre', '94th academy awards Held in Dolby theatre', '94th academy awards Takes_place_in Hollywood', '94th academy awards ceremony Took_place_at Dolby theatre', 'Will smith Attended 94th academy awards', 'Will smith Participated_in 94th academy awards', '95th academy awards Announced_on Mar 13, 2023', '95th annual academy awards As_of Mar 13, 2023', 'Academy awards Announced Mar 13, 2023', 'Academy awards Held_on Sunday, mar 28, 2022', 'The academy awards Will_be_held_on Sunday, march 27', '95th academy awards Occurred_on Mar 13, 2023', 'Academy awards Date Sunday, march 27', 'Academy awards To_be_telecast_on March 27', 'Academy awards Occurred_on Mar 7, 2023', 'Oscars 2023 Alias 95th academy awards ceremony', 'Academy awards Happened_on March 13, 2023', '2023 academy award Happened_on March 13, 2023', '95th oscars ceremony Will_be_held_at Dolby theatre', 'The academy awards Will_be_held_at Dolby theatre', '95th annual oscars Will_be_held_in Dolby theatre', 'Oscars 2023 Announced Mar 3, 2023', 'Will smith Walked_onstage_at 94th academy awards', 'Academy awards Has_edition 95th', 'Academy awards Has_event 95th annual academy awards', '95th academy awards ceremony Happening_in Dolby theatre', '2023 academy awards Took_place_at Dolby theatre', 'The 95th academy awards Will_take_place_at Dolby theatre', 'Oscars 2023 Took_place_on March 13, 2023', 'Ampas Announced_rule_change_for 94th awards']
+
+
+id : 45
+query: When was A House Between the Earth and the Moon published?
+response: 
+2023
+answer: ['March 29', 'Mar 29', 'Mar. 29', '29 March', '29 Mar', '29 Mar.']
+Is the response from the LLM correct?: No
+keywords: ['A house between the earth and the moon', 'Published', 'Date', 'Release', 'Publication']
+retrieve_result: ['A house between the earth and the moon Authored_by Rebecca scherm', 'A house between earth and the moon Authored_by Rebecca scherm', 'Viking Published A house between the earth and the moon', 'Rebecca scherm Published A house between earth and the moon', 'Rebecca scherm Authored A house between the earth and the moon', 'Rebecca scherm Authored A house between earth and the moon', 'Rebecca scherm Author_of A house between earth and the moon', 'A house between the earth and the moon Centers_on Parallaxis', 'Rebecca scherm Imagines A house between earth and the moon', 'Ebook Published_by Viking', 'Emnlp 2023 Has_date Tbd, 2023', "Rebecca scherm Authored Scherm's novel", 'Emnlp 2023 Has_author_response_period Aug 22 – aug 28, 2023', 'Emnlp 2023 Has_author_response_period Aug 28, 2023', 'Emnlp 2023 End_date Dec 10, 2023', 'Emnlp 2023 Ends_on Dec 10, 2023', 'Emnlp 2023 Ends_on December 10, 2023', 'Emnlp 2023 End_date December 10, 2023', 'Emnlp 2023 Has_date Data tbd, 2023', 'Emnlp 2023 Ends_on Dec 10th, 2023', 'Emnlp 2023 Takes_place_on 7 december 2023', 'Rebecca scherm Included_in The most anticipated books of march 2022', 'Emnlp 2023 Start_date Dec 6, 2023', 'Emnlp 2023 Has_direct_paper_submission_deadline June 23, 2023', 'Emnlp 2023 Start_date December 6, 2023', 'Emnlp 2023 Takes_place_in Singapore', 'Emnlp 2023 Starts_on Dec 6, 2023', 'Emnlp 2023 Starts_on December 6, 2023', 'Emnlp 2023 Has_abstract_submission_deadline Date', 'Emnlp 2023 Starts_on December 6-10, 2023']
+
+
+id : 46
+query: Which alnum won the Album of the Year GRAMMYs 2022
+response: Beyonce
+answer: ['We are']
+Is the response from the LLM correct?: No
+keywords: ['Alnum', 'Grammy', 'Awards', '2022']
+retrieve_result: ['Grammy awards Happened_in 2022', 'Grammy awards Took_place_on Apr 4, 2022', 'Grammy awards Occurred_on Feb 5, 2023', 'The 2023 grammys Competes_with Oscars', 'Grammy awards Has_quantity Five', 'Grammy awards Has_quantity 64', 'Cma awards Presented_award Album of the year', 'Grammy award for best r&b album Announced Grammy awards', 'The recording academy of the united states Presents Grammy awards', 'Alcaraz Poised_to_end_at No. 1 in 2022', 'Grammy awards Also_known_as Gramophone awards', 'Grammy awards Awarded_to Lizzo', 'Alcaraz Claimed_crown_in 2022', 'Grammy awards Honors Recording artists', 'Alcaraz Debuted_in 2022', 'Carlos alcaraz Won_four_titles_in 2022', 'Djawadi Received_award_nomination Grammy awards', '56th annual country music association awards Took_place_in 2022', 'Grammy awards Awarded_to Adele', 'Cma awards Has_award_category Female vocalist of the year', 'Andrew unterberger Authored_article_about Grammy awards', 'Cma awards Presented_award Song of the year', 'Cma awards Presented_award Single of the year', 'Oscars Took_place_on 2022', 'Caleb williams Announced_as_winner_on Dec 10, 2022', '56th annual country music association awards Honored_at 2022', 'Cma awards Has_award_category Male vocalist of the year', 'Grammy awards Awarded Beyonce', 'Oscars ceremony Took_place_on 2022', 'Cma awards Has_winner_for Male vocalist of the year']
+
+
+id : 56
+query: Who won the women's singles French Open 2022?
+response: Iga Świątek
+answer: ['Iga Swiatek']
+Is the response from the LLM correct?: No
+keywords: ['French open', 'Womens singles', '2022', 'Tennis', 'Champion']
+retrieve_result: ['French open Has_winner_in_year 2022', '2022 french open Ended_on 5 june 2022', 'Victoria azarenka Participated_in 2022 french open', '2022 french open Started_on 22 may 2022', 'French open Took_place_in 2022', "Us open women's singles Took_place_on 2022", '2022 french open Held_at Stade roland garros', '2022 french open Part_of 2022 wta tour', 'Coco gauff Was_runner_up_in 2022 french open', 'French open Took_place_on Jun 3, 2022', "Iga świątek Won Women's singles 2022 french open", 'Coco gauff Participated_in 2022 french open', 'Coco gauff Played_in 2022 french open', "Iga swiatek Won_title_at 2022 french open women's final", 'Rafael nadal Won French open 2022', 'Rafael nadal Won_at 2022 french open', "2022 french open women's final Featured_competitors Coco gauff", 'Rafael nadal Won 2022 french open', 'Rafael nadal Won_title_in French open 2022', "Iga swiatek Won French open 2022 women's singles final", 'Rafael nadal Won_title_at 2022 french open', '2022 french open Won_by Rafael nadal', 'Iga swiatek Won_event 2022 french open', 'Rafael nadal Played_at 2022 french open', 'U.s. open women’s singles draw Featured 2022', 'French open 2023 Date Jun 11, 2023', '2023 french open Ended_on 11 june 2023', 'Novak djokovic Played_at 2022 french open', '2023 french open Hosted_at Roland garros', "2022 french open women's final Featured_competitors Iga swiatek"]
+
+
+id : 57
+query: Who won the women's singles French Open 2023?
+response: Iga Świątek
+answer: ['Iga Swiatek']
+Is the response from the LLM correct?: No
+keywords: ['French open', 'Womens singles', '2023', 'Winner']
+retrieve_result: ['2023 french open Ended_on 11 june 2023', '2023 french open Held_in Paris, france', 'French open 2023 Date Jun 11, 2023', '2023 french open Started_on 28 may 2023', '2023 french open Held_at Stade roland garros', 'French open Ended_on 11 june 2023', '2023 french open Took_place_in Paris, france', 'French open Took_place_in 2023', 'Novak djokovic Won_tournament 2023 french open', 'Novak djokovic Won 2023 french open', '2023 french open Hosted_at Roland garros', 'French open Took_place_on Jun 3, 2022', 'French open 2023 Had_participant Karolina muchova', "Roland garros 2023 Includes_event Women's singles", 'Novak djokovic Won 2023 french open final', 'Novak djokovic Plays_in 2023 french open', 'French open Took_place_on Jun 6, 2023', "Aryna sabalenka Won_title Women's singles 2023", "Iga swiatek Won French open 2023 women's singles title", 'Iga świątek Won Women’s singles in 2023 french open', 'French open 2023 Takes_place_in Paris', 'French open Date Jun 11, 2023', 'French open Took_place_on Jun 10, 2023', 'French open Has_winner_in_year 2022', "Women's singles final Took_place_on Jun 11, 2023", "Novak djokovic Won Men's singles tennis title at the 2023 french open", '2023 french open Takes_place_at Stade roland garros', 'Coco gauff Was_runner_up_in 2022 french open', '2022 french open Ended_on 5 june 2022', 'French open Started_on 28 may 2023']
+
+
+id : 58
+query: Who is the runner-up in the women's singles at the 2023 French Open?
+response: Iga Świątek
+answer: ['Karolina Muchova']
+Is the response from the LLM correct?: No
+keywords: ['Runner-up', 'Womens singles', '2023 french open']
+retrieve_result: ['2023 french open Held_in Paris, france', '2023 french open Ended_on 11 june 2023', '2023 french open Held_at Stade roland garros', '2023 french open Started_on 28 may 2023', '2023 french open Took_place_in Paris, france', 'Novak djokovic Plays_in 2023 french open', '2023 french open Hosted_at Roland garros', 'French open Ended_on 11 june 2023', 'Alexander zverev Plays_in 2023 french open', "Aryna sabalenka Won_title Women's singles 2023", 'Novak djokovic Won_tournament 2023 french open', 'Iga świątek Won Women’s singles in 2023 french open', '2023 french open Takes_place_at Stade roland garros', 'Novak djokovic Won 2023 french open', "Novak djokovic Won Men's singles tennis title at the 2023 french open", 'Novak djokovic Won 2023 french open final', 'Iga świątek Defending_champion_of 2023 french open', 'Aryna sabalenka Participates_in French open 2023', 'French open 2023 Located_at Roland garros', 'French open Started_on 28 may 2023', 'Carlos alcaraz Plays_in 2023 french open', 'Novak djokovic Won Men’s singles in 2023 french open', "Novak djokovic Participating_in French open 2023 men's singles final", 'Casper ruud Plays_in 2023 french open', "Iga świątek Won 2023 women's french open", "Iga świątek Won Women's singles 2022 french open", 'Elina avanesyan Became_first_lucky_loser 2023 french open', '2023 french open Has_prize_money €49,600,000', "Novak djokovic Won 2023 french open men's singles title", "Iga świątek Category_winner French open women's singles"]
+
+
+id : 64
+query: Who won the men's singles wimbledon 2023?
+response: Novak Djokovic
+answer: ['Carlos Alcaraz']
+Is the response from the LLM correct?: No
+keywords: ['Wimbledon', 'Mens singles', '2023', 'Winner']
+retrieve_result: ['Carlos alcaraz Won_event 2023 wimbledon championships', "Novak djokovic Won_title Men's singles 2023", 'Wimbledon championships Took_place_in 2023', 'Wimbledon championship Takes_place_in 2023', 'Wimbledon championship 2023 Took_place_on Jul 16, 2023', "Novak djokovic Winner_of Wimbledon 2022 men's singles", 'Novak djokovic Won 2022 wimbledon', 'Carlos alcaraz Won 2023 wimbledon championships', '2023 wimbledon championships Took_place_in England', 'Novak djokovic Won_event Wimbledon 2022', 'Wimbledon final Took_place_in 2022', "Novak djokovic Won Men's singles tennis title at the 2023 french open", 'Marketa vondrousova Won Wimbledon championship 2023', 'Novak djokovic Champion_of 2022 wimbledon', 'Wimbledon Took_place_on Jul 16, 2023', 'Marketa vondrousova Won 2023 wimbledon', 'Novak djokovic Won Men’s singles in 2023 french open', "Novak djokovic Is_winner_of Australian open 2023 men's singles", "Novak djokovic Won 2023 french open men's singles title", 'Wimbledon Took_place_in 2022', 'Sunday 3 july 2022 Honored_at Wimbledon', "Novak djokovic Won Men's singles 2023 australian open", "Roland garros 2023 Includes_event Men's singles", 'Novak djokovic Won_tournament 2023 french open', 'Marketa vondrousova Competes_in The championships wimbledon 2023', 'Wimbledon 2023 Has_winner Elena rybakina', 'Ons jabeur Plays_in The championships wimbledon 2023', 'Novak djokovic Earned_title_at Wimbledon 2022', 'Novak djokovic Won 2023 french open', "Novak djokovic Participating_in French open 2023 men's singles final"]
+
+
+id : 65
+query: How many titles has Swiatek won in 2022 season?
+response: 
+6
+answer: ['eight', '8']
+Is the response from the LLM correct?: No
+keywords: ['Swiatek', 'Titles', '2022 season']
+retrieve_result: ['Swiatek Won_in_year 2022', 'Świątek Won_in_year 2022', 'Swiatek Won_in 2022', 'Swiatek Won_title_in 2020', 'Iga świątek Won_titles_in_2022 Six', 'Swiatek Ended_year_at_number_one 2022', 'Swiatek Won_in_year 2020', 'Świątek Won_in_year 2020', 'Swiatek Won_in 2020', 'Swiatek Has_won 7 titles', 'Swiatek Won 2022 u.s. open', 'Swiatek Has_won_streak 6 titles', 'Swiatek Posted_win_streak 37-match win streak in 2022', 'Swiatek Has_record_against_top_20 21-2 in 2022', 'Swiatek Won Four championship trophies', 'Swiatek Has_grand_slam_record 21-2 in 2022', 'Swiatek Won_consecutive_titles Six', 'Swiatek Won_consecutive_titles 6', 'Swiatek Within_two_games_of Championship', 'Swiatek Achieved New career-high ranking', 'Świątek Won_title_at_event Qatar open', 'Swiatek Has_trophy_count Four championship trophies', 'Swiatek Added_titles Seven since first win', 'Swiatek Won_title_at Qatar open', 'Swiatek Won_title Third grand slam title', 'Swiatek Won_final 2020 french open', 'Swiatek Has_won_title French open singles title', 'Swiatek Won_tournament Qatar open', 'Swiatek Serves To stay ahead', 'Swiatek Won Four grand slam finals']
+
+
+id : 70
+query: When did the 148th Kentucky Derby take place?
+response: May 6, 2023
+answer: ['May 7', 'May 7', 'May. 7', '7 May', '7 May', '7 May.']
+Is the response from the LLM correct?: No
+keywords: ['Kentucky derby', '148th', 'Date', 'Location']
+retrieve_result: ['Kentucky derby Has_quantity 148th', 'Rich strike Won The 148th running of the kentucky derby', 'Kentucky derby Takes_place_at Churchill downs', 'Kentucky derby Take_place_at Churchill downs', 'Kentucky derby Takes_place_in Churchill downs', 'Kentucky derby Started_in 1875', 'Kentucky derby First_held_in 1875', 'Kentucky derby Located_at Churchill downs', 'Kentucky derby Located_in Churchill downs', 'Kentucky derby Held_annually_at Churchill downs', 'Kentucky derby Takes_place_in Louisville, kentucky', '2022 kentucky derby Took_place_at Churchill downs', 'Kentucky derby Associated_with Churchill downs incorporated', 'Kentucky derby Had_attendance 147,294', 'Kentucky derby Took_place_on May 6, 2023', 'Kentucky derby Was_streamed_on Peacock', 'Churchill downs Hosts Kentucky derby', 'Kentucky derby Has_location Kentucky', 'Kentucky derby Happened_on Saturday, may 7, 2022', 'Kentucky derby Takes_place_on Saturday', 'Master derby Won Kentucky derby', '2022 kentucky derby Occurred_on Saturday, may 7, 2022', 'Kentucky derby Take_place_on May 4, 2022', 'Churchill downs Hosted_event Recent horse racing events', 'Kentucky derby Takes_place_on First saturday in may', 'Kentucky oaks Takes_place_in Churchill downs', 'Kentucky derby Starts_at 6:57 pm edt', 'Kentucky derby Has_quantity 149th', 'Kentucky derby Was_broadcast_on Nbc', 'Kentucky derby Had_year 2023']
+
+
+id : 71
+query: What was Tesla's revenue in Q1 2022?
+response: $10.97 billion
+answer: ['18.76 billion']
+Is the response from the LLM correct?: No
+keywords: ['Tesla', 'Revenue', 'Q1 2022']
+retrieve_result: ['Tesla Announced Q1 2022', 'Tesla Reported_earnings_for Q1 2022', 'Tesla Generated_revenue_in_quarter Q2 2022', 'Tesla Announced Q1 2022 earnings preview', 'Tesla Operates_in Q1 2022', 'Tesla Released Q1 2022 financial results', 'Tesla Generated_revenue_from 2008-2022', 'Tesla Reported Q1 fy 2022 earnings results', 'Tesla Generated_revenue 2008-2022', 'Tesla Produced_vehicle_in Q1 2023', 'Tesla Posts Financial results for the first quarter of 2022', 'Tesla Reported 2023 first-quarter earnings', 'Tesla Announced Record margins in q1 2022', 'Tesla Produced_vehicles_in_quarter Ytd q1 2023', 'Tesla Announced_in Q1 2022 shareholder presentation', 'Tesla Produces_vehicles_in_quarter Q1 2023', 'Tesla Delivered_in 2022', 'Tesla Reported 2023 second-quarter earnings', 'Tesla Produced 305,407 vehicles in q1 fy 2022', 'Tesla Issues Q1 2022 update', 'Tesla Produced_vehicles_in_quarter Q4 2022', 'Tesla Expanded_in 2022', 'Tesla Reported_having $2.9 billion in deferred revenue at the end of 2022 related to access to our fsd features, internet connectivity, free supercharging programs and over-the-air software updates primarily on automotive sales', 'Tesla Announced Q1 earnings', 'Tesla Produced_vehicles_in_2022 1.37 million', 'Tesla Released_results_on Apr 20, 2022', "Tesla's vehicle production Are_tracked_by_quarter Ytd q1 2023", 'Tesla Delivered_vehicles_in_2022 1.31 million', 'Tesla Published_report_on Q4 2022 vehicle production and delivery', 'Tesla Announced Q4 & fy 2022 update']
+
+
+id : 76
+query: Who won the French Presidential Election 2022?
+response: I cannot answer your question as it is not related to the provided context information. The context information provided does not mention anything about the French Presidential Election 2022. My apologies.
+answer: ['Emmanuel Macron']
+Is the response from the LLM correct?: No
+keywords: ['French presidential election 2022', 'Winner']
+retrieve_result: ['2023 oscars Honor The fabelmans', 'Marcel the shell with shoes on Nominated_for Winner', 'Sabalenka Plays_in 2023 australian open', 'Harry styles Accepted_award_at 2023 grammys', '2023 grammys Awarded_to Harry styles', 'No time to die Nominated_for Oscars 2022', 'Harry styles Attended_event 2023 grammys', 'Close Nominated_for Winner', 'Tar Nominated_for Winner', 'Marcel the shell with shoes on Released_in 2023', 'Bardo Nominated_for Winner', 'Eo Nominated_for Winner', 'Kerry condon Nominated_for The banshees of inisherin', 'Golden globes Announced_winner The fabelmans', 'All quiet on the western front Released_in 2022', 'The voice season 23 Announced_on Dec 14, 2022', 'Jeremy allen white Winner_of The bear', 'The sea beast Released_in 2023', '2023 oscars Honor Elvis', 'Michelle williams Five_time_nominee_for The fabelmans', 'The voice season 23 Start_year 2023', 'Elvis Nominated_for Winner', 'Close Represents_country Belgium', 'Turning red Nominated_for Winner', 'Germany Has_nomination_for All quiet on the western front', 'Argentina, 1985 Nominated_for Winner', 'The sea beast Nominated_for Winner', 'Triangle of sadness Released_in 2022', 'Sabalenka Result 4-6, 6-3, 6-4 comeback victory', 'The fabelmans Nominated_for Winner']
+
+
+id : 79
+query: Where will the 2022 Met Gala take place?
+response: New York City
+answer: ['Metropolitan Museum of Art']
+Is the response from the LLM correct?: No
+keywords: ['Met gala', '2022', 'Location']
+retrieve_result: ['2022 met gala Takes_place_on May 2, 2022', 'Met gala Took_place_in 2022', 'The 2022 met gala Location New york', 'Met gala Held_on May 2, 2022', 'Met gala 2022 Has_date May 2', 'Met gala Takes_place_on May 2', '2022 met gala Held_at Metropolitan museum of art', 'The met gala Will_take_place_on Monday, may 2', 'Met gala Original_date_scheduled 4 may 2020', 'Met gala Scheduled_on May 2', 'Metropolitan museum of art Hosts 2023 met gala', 'Lin-manuel miranda Hosted 2022 met gala', 'The met gala Returned_to_holding_traditional_may_ceremony_in 2022', 'Dua lipa Hosted 2023 met gala', 'Michaela coel Hosted 2023 met gala', '2022 met gala Celebrates In america: an anthology of fashion', 'Regina king Hosted 2022 met gala', 'The met gala Takes_place_in New york city', 'Met gala Takes_place_in New york', 'Met gala Takes_place_in New york city', 'Regina king Hosts 2022 met gala', 'Met gala Took_place_in 2017', 'Penélope cruz Hosted 2023 met gala', 'The met gala Location Metropolitan museum of art', 'Met gala Postponed_on 16 march 2020', 'Adam mosseri Co-chair 2022 met gala', 'Roger federer Hosted 2023 met gala', 'Lil nas x Attended Met gala 2022', 'Tom ford Co-chair 2022 met gala', 'Rihanna Attended Met gala 2023']
+
+
+id : 80
+query: Who won the Champions League in the 2022-2023 season?
+response: Manchester City
+answer: ['Real Madrid']
+Is the response from the LLM correct?: No
+keywords: ['Champions league', '2022-2023 season', 'Winner']
+retrieve_result: ['Champions league Concluded_on 10 june 2023', 'Manchester city Won Uefa champions league 2022-23', '2022/23 uefa champions league Started_on 6 september', 'Manchester city Won 2022–23 uefa champions league', 'Manchester city Is_winner_of 2022-23 uefa champions league', 'Real madrid Won_title 2022', 'Liverpool Won Uefa champions league 2018-19', 'Chelsea Won Uefa champions league 2020-21', 'Manchester city Won_title 2023', 'Manchester city Played_in 2022–23 uefa champions league final', 'Manchester city Won_title_in Ucl 2022-23 season', 'Chelsea Is_winner_of 2020-21 uefa champions league', 'Real madrid Won Uefa champions league 2021-22', '2023 uefa champions league final Played_between Manchester city', 'Liverpool Is_winner_of 2018-19 uefa champions league', 'Real madrid Won Uefa champions league 2017-18', '2023 uefa champions league final Played_between Inter milan', 'Champions league winner Is Manchester city', 'Inter milan Played_in 2022–23 uefa champions league final', 'Real madrid Won_uefa_super_cup August 2022', 'Manchester city Qualified_for 2023–24 ucl group stage', 'Champions league Won_by Real madrid', 'Manchester city Qualified_for 2023 uefa super cup', 'Manchester city Qualified_for 2023 and 2025 fifa club world cups', 'Liverpool Won_title 2019', 'Liverpool Won Uefa champions league 2004-05', 'Manchester city Won Champions league', 'Real madrid Winner_of 2022 spanish super cup final', 'Real madrid Defending_champion_of Supercopa de espana 2022-23', 'Porto Won Uefa champions league 2003-04']
+
+
+id : 85
+query: How much was Apple's revenue in Q3? 2022
+response: $383.933 billion
+answer: ['83 billion', '83.0 billion']
+Is the response from the LLM correct?: No
+keywords: ['Apple', 'Revenue', 'Q3', '2022']
+retrieve_result: ['Apple Has_revenue 2004-2022', 'Apple Announced Financial results for its third fiscal quarter of 2022', 'Apple Reported_income Third quarter of fiscal year 2023', 'Apple Generated_revenue_worldwide_until 2022', 'Apple Announced Q3 2022 financial results conference call', 'Apple Hosted Fiscal q3 2022 financial results conference call', 'Apple Generated_revenue $383.933b', 'Apple Generated_revenue_worldwide_from 2004', 'Apple Has_revenue_growth 2%', 'Apple Announced Financial results for its fiscal 2022 fourth', 'Apple Generated_revenue $23 billion', 'Apple Reported Better-than-expected revenue', 'Apple Reported Q2 earnings', 'Apple Generated_revenue $394.328b', 'Apple Announced Financial results', 'Q3 2022 financial results conference call Available_on Apple.com', 'Netflix Generated_revenue Q3 2022 revenue', 'Apple Provides live streaming_of Q3 2022 financial results conference call', 'Apple Generated_revenue 20 billion u.s. dollars', 'Apple Generated_revenue $83b', 'Apple Recorded_revenue June quarter', 'Apple Announced_on Apr 13, 2023', 'Apple Released September 2022', 'Apple Announced_on March 7, 2023', 'Apple Reported_revenue_of $83.0 billion', 'Apple Announced Quarter revenue record', 'Apple Introduced_in June 2022', 'Tesla Generated_revenue_in_quarter Q2 2022', 'Netflix Reported_earnings Q3 2022', 'Apple Generated_revenue Physical products']
+
+
+id : 89
+query: What is the name of the horse in the movie "Nope"?
+response: Annie
+answer: ['Ghost']
+Is the response from the LLM correct?: No
+keywords: ['Horse', 'Movie', 'Nope']
+retrieve_result: ['Nope Features Horses', 'Nope Features A clothed rider and a thoroughbred mare named annie', 'Daniel kaluuya Plays_character_in Nope', 'Steven yeun Starred_in Nope', 'Nope Stars Daniel kaluuya', 'Daniel kaluuya Starred_in Nope', 'Brandon perea Starred_in Nope', 'Nope Showcases Images of pioneering actor, animal wrangler and stunt man', 'Nope Directed_by Jordan peele', 'Keke palmer Plays_character_in Nope', 'Keke palmer Starred_in Nope', 'Nope Stars Keke palmer', 'Nope Produced_by Jordan peele', 'Jordan peele Directed Nope', 'Keith david Starred_in Nope', 'Nope Features Oj haywood', 'Nope Features Emerald haywood', 'Nope Grossed $172 million', 'Ghost Played_by Real horse(s)', 'Michael wincott Starred_in Nope', 'Ghost Is_horse_of Heywood hollywood horses', 'Nope Features Ufo', 'Monkeypaw productions Produced Nope', 'Jordan peele Created Nope', 'Ghost Is_a Horse', 'Nope Written_by Jordan peele', 'Jordan peele Implied Identity of black horse rider is unknown', 'Nope Released_on Mar 21, 2023', 'Lucky Played_by Real horse(s)', 'Peele Directed Nope']
+
+
+id : 90
+query: When did Neal Lemlein pass away?
+response: Aug 5, 2022
+answer: ['July 22 2022', 'Jul 22, 2022', 'Jul. 22, 2022', 'July 22, 2022', '22 July 2022', '22 Jul, 2022', '22 Jul., 2022', '22 July, 2022']
+Is the response from the LLM correct?: No
+keywords: ['Neal lemlein', 'Passed away', 'Death', 'Obituary']
+retrieve_result: ['Neal lemlein Died_at 71', 'Neal lemlein Died_at_age 71', 'Neal lemlein Died_on Aug 5, 2022', 'Neal lemlein Age_at_death 71', 'Neal charles lemlein Was_age 71', 'Neal lemlein Died_of Kidney cancer', 'Neal charles lemlein Age_at_death 71', 'Neal charles lemlein Died_of Kidney cancer', 'Neal lemlein Was_born_on Sept. 29, 1950', 'Neal charles lemlein Born_on Sept. 29, 1950', 'Neal charles lemlein Graduated_from Tulane university', 'Neal lemlein Graduated_from Tulane university', 'Neal charles lemlein Was_diagnosed_with Kidney cancer', 'Neal lemlein Worked_for Fox', 'Neal lemlein Worked_for Cbs', 'Neal lemlein Confirmed Death of michael a. gray', 'Neal charles lemlein Worked_at Young & rubicam', 'Neal lemlein Worked_at Young & rubicam', 'Neal charles lemlein Announced Kidney cancer', 'Neal lemlein Earned_degree_from New york university', 'Neal charles lemlein Obtained_degree_at New york university', 'Neal charles lemlein Held_position_at Cbs', 'Neal lemlein Worked_at Universal studios hollywood', 'Neal lemlein Is_friend_of Gray', 'Neal lemlein Worked_for Universal studios', 'Neal charles lemlein Held_position_at Universal studios', 'Universal studios hollywood Employed Neal lemlein', 'Neal Died_of Kidney cancer', 'Neal Was_age_at_death 71', 'Neal Graduated_from Tulane university']
+
+
+id : 92
+query: When was BlenderBot 3 released?
+response: 
+Aug 11, 2022
+answer: ['August 5', 'Aug 5', 'Aug. 5', '5 August', '5 Aug', '5 Aug.']
+Is the response from the LLM correct?: No
+keywords: ['Blenderbot 3', 'Release date']
+retrieve_result: ['Blenderbot 3 Released_in Aug 8, 2022', 'Meta Released Blenderbot 3', 'Blenderbot 3 Released_in Us', 'Meta Releases Blenderbot 3', 'Blenderbot 3 Released_on Friday, aug 11, 2022', 'Blenderbot 3 Announced Aug 5, 2022', 'Blenderbot 3 Released_by Meta', 'Meta ai Released Blenderbot 3', 'Meta Announced Blenderbot 3', 'Meta Released Blenderbot 3 to the public', 'Meta Released Blender bot 3', 'Meta ai Announced Blenderbot 3', 'Blenderbot 3 Available_in Us', 'Meta Launched Blenderbot 3', 'Meta Developed Blender bot 3', 'Meta ai research Announced Blenderbot 3', 'Blender bot 3 Released_by Meta ai', 'Meta Released Blenderbot', 'Blenderbot 3 Achieves 31% rating increase', 'Blenderbot 3 Uses Artificial intelligence', 'Meta Created Blenderbot 3', 'Jason weston Explained_about Blenderbot 3', 'Kurt shuster Helped_create Blenderbot 3', 'Blenderbot 3 Uses Machine learning technology', 'Meta Released Blenderbot 2.0', 'Blender bot 3 Developed_by Meta', 'Blenderbot 3 Provides Safer experience for users', 'Meta Released Blenderbot ai', 'Blenderbot 3 Delivers_better_performance_than Blender bot 2', 'Blenderbot 3 Uses Machine learning approach']
+
+
+id : 94
+query: When was ChatGPT released?
+response: 
+March 1, 2023
+answer: ['November 30 2022', 'Nov 30, 2022', 'Nov. 30, 2022', 'November 30, 2022', '30 November 2022', '30 Nov, 2022', '30 Nov., 2022', '30 November, 2022']
+Is the response from the LLM correct?: No
+keywords: ['Chatgpt', 'Release date']
+retrieve_result: ['Chatgpt Released March 1, 2023', 'Chatgpt Released_on May 19, 2023', 'Chatgpt Released_in Late 2022', 'Chatgpt Released_in November', 'Chatgpt app Released_on May 19, 2023', 'Chatgpt plus Released_on March 14, 2023', 'Chatgpt Launched_on November 30, 2022', 'Chatgpt Released_on November 30, 2022', 'Chatgpt Developed_by Microsoft', 'Chatgpt Released Plugins', 'Chatgpt Released_on_platform Ios', 'Chatgpt Released_in_month May 2023', 'Chatgpt Released_by Openai', 'Chatgpt Available_in United states', 'Chatgpt Released_as Research preview', 'Chatgpt Uses Gpt-3.5', 'Microsoft Released Chatgpt', 'Chatgpt Announced_on Nov 30, 2022', 'Openai Released Chatgpt app for ios on may 19, 2023', 'Openai Released Chatgpt app', 'Openai Released Chatgpt', 'Chatgpt As_of February 8, 2023', 'Chatgpt Released_update Latest update', 'Openai Introduced Chatgpt', 'Openai Released Chatgpt mobile app', 'Chatgpt Announced December 2022', 'Chatgpt app for android Available_in United states', 'Chatgpt Available_on Google play store', 'Chatgpt Developed_by Openai', 'Chatgpt for android Available_in United states']
+
+
+id : 95
+query: When was GPT4 released?
+response: April 14, 2023
+answer: ['March 14 2023', 'Mar 14, 2023', 'Mar. 14, 2023', 'March 14, 2023', '14 March 2023', '14 Mar, 2023', '14 Mar., 2023', '14 March, 2023']
+Is the response from the LLM correct?: No
+keywords: ['Gpt4', 'Release date']
+retrieve_result: ['Release date Has_date April 14, 2023', 'Release date Announced_as_of Apr 24, 2023', 'Release date Released_on May 12, 2023', 'Dead cells Is_anniversary_of Release date', 'Carousel of time Release_date September 9, 2022', 'Release date Is_on September 9, 2022', 'The endgame Released_on Apr 24, 2023', 'The legend of zelda: tears of the kingdom Launched_on May 12, 2023', 'Release of the film As_of April 14, 2023', 'Splatoon 3 Releasing_on September 9, 2022', 'The legend of zelda: tears of the kingdom Released_on May 12, 2023', 'The legend of zelda: tears of the kingdom Release_date May 12, 2023', 'Sweetwater Released_on April 14, 2023', 'The film Released_on April 14, 2023', 'Splatoon 3 Released_date September 9, 2022', 'September 9, 2022 Marked_release_of Second trailer for hocus pocus 2', 'Splatoon 3 Released_on September 9, 2022', 'The tears of the kingdom Released_on May 12, 2023', 'Dead cells Celebrated_anniversary 2023', 'Erica messer Executive_produces Criminal minds: evolution', 'Erica messer Created Criminal minds: evolution', 'Criminal minds: evolution Has_showrunner Erica messer', 'Erica messer Is_showrunner_of Criminal minds: evolution', 'Zach gilford Cast_in_recurrening_role September 9, 2022', 'Erica messer Works_as Showrunner', 'Erica messer Is_showrunner_of The series', 'Erica messer Serves_as Executive producer', 'Erica messer Revealed Release date', 'Erica messer Serves_as Showrunner', 'Erica messer Confirmed_returning Zach']
+
+
+id : 96
+query: How much did Amazon agree to pay to acquire iRobot?
+response: $1.66 billion
+answer: ['1.7 billion']
+Is the response from the LLM correct?: No
+keywords: ['Amazon', 'Irobot', 'Acquire', 'Pay']
+retrieve_result: ['Amazon Acquired Irobot', 'Amazon Announced Acquisition of irobot', 'Irobot Acquirer Amazon', 'Irobot Acquired_by Amazon', 'Amazon Acquires Irobot', 'Amazon Offered_to buy Irobot', 'Amazon Proposed_acquisition_of Irobot', 'Amazon Entered_into_agreement_to_acquire Irobot', 'Amazon Proposed_purchase_of Irobot', 'Amazon Wants_to_acquire Irobot', 'Amazon Acquired_by Irobot', 'Amazon Made_offer_to Irobot', 'Amazon To_acquire Irobot for $61 per share', 'Amazon Acquired Irobot corp.', 'Amazon Acquired_company Irobot', 'Amazon Acquired_by Irobot corp.', 'Amazon Will_acquire Irobot for $61 per share', 'Amazon Announced_acquisition_of Irobot corp.', 'Irobot Merger_with Amazon.com', 'Amazon Agreed_to_acquire Irobot for $1.66 billion', 'Amazon Entered_into_merger_agreement_with Irobot', 'Irobot Will_be_owned_by Amazon', 'Irobot Accepted Acquisition offer', 'Amazon Agreed_to_buy Irobot corp. for $1.7 billion', 'Amazon.com Will_pay_less_than_original_agreement Irobot', 'Irobot Owned_by Amazon', 'Amazon Announced_intention_to_purchase Irobot in august last year', 'Irobot Rejected_offer Amazon', 'Irobot Worked_with Amazon', 'Amazon Made_its_fourth_largest_acquisition Purchase of irobot']
+
+
+id : 100
+query: Who won the U.S. all-around title at the U.S. Gymnastics Nationals 2022?
+response: Simone Biles
+answer: ['Konnor McClain']
+Is the response from the LLM correct?: No
+keywords: ['U.s. gymnastics nationals', 'All-around title', '2022']
+retrieve_result: ['U.s. gymnastics championships Was_held_in_year 2022', 'U.s. gymnastics championships Occurred_on Aug 21, 2022', 'U.s. gymnastics championships Occurred_on Aug 20-21, 2022', 'Carlos alcaraz Won_title_at 2022 us open', 'Simone biles Competed_at U.s. gymnastics championships', "Us open women's singles Took_place_on 2022", 'Atlanta open Has_winner_in_year 2022', 'Konnor mcclain Participated_in U.s. gymnastics championships', 'U.s. open women’s singles draw Featured 2022', '2022 us open Won_by Carlos alcaraz', 'Serena williams Participated_in 2022 us open', 'Tyler reddick Won_race_in 2022', 'Swiatek Won 2022 u.s. open', 'Serena williams Participated_in 2022 us open tennis tournament', 'Elena rybakina Won_title_at 2022 wimbledon championships', "Women's championship Featured_in 2022", '2022 olympic winter games Supported_by United states', 'Serena williams Retirement_event 2022 u.s. open', 'U.s. gymnastics championships Took_place_in Tampa', 'Us open 2022 Has_participant Carlos alcaraz', '2022 olympic winter games Took_place_on 2022', 'Winter olympic games Happened_on 2022', 'Scottie scheffler Won_event 2022 masters', 'Acc tournament title Year 2022', '2022 masters Took_place_in 2022', 'Washington sports Had_season_in 2022', 'Austin dillon Won_race_in 2022', '2022 masters Took_place_at Augusta national', 'Rafael nadal Won_title_at 2022 french open', 'Rafael nadal Is_champion_of 2022']
+
+
+id : 102
+query: What is the date of the premiere of House of the Dragon?
+response: 
+The date of the premiere of House of the Dragon is December 10, 2023.
+answer: ['August 21', 'Aug 21', 'Aug. 21', '21 August', '21 Aug', '21 Aug.']
+Is the response from the LLM correct?: No
+keywords: ['Premiere', 'Date', 'House', 'Dragon']
+retrieve_result: ['Emnlp 2023 Starts_on Dec 6th, 2023', 'Emnlp 2023 Takes_place_on 7 december 2023', 'Emnlp 2023 Start_date Dec 6, 2023', 'House Witnessed_shift_in_power Dec 7, 2022', 'Emnlp 2023 Starts_on Dec 6, 2023', 'Emnlp 2023 Start_date December 6, 2023', 'Emnlp 2023 Has_date Tbd, 2023', 'Oct 18, 2022 Announced Emnlp 2023', 'Emnlp 2023 Starts_on December 6, 2023', 'Emnlp 2023 End_date Dec 10, 2023', 'Emnlp 2023 Starts_on December 6-10, 2023', 'Date Has_value December 17, 2022', 'Emnlp 2023 End_date December 10, 2023', 'Emnlp 2023 Conference_dates 10 december 2023', 'Emnlp 2023 Ends_on Dec 10th, 2023', 'Emnlp 2023 Announced Apr 7, 2023', 'Emnlp 2023 Ends_on Dec 10, 2023', 'Emnlp 2023 Conference_dates 6 december 2023', 'Emnlp 2023 Has_date Data tbd, 2023', 'Emnlp 2023 Ends_on December 10, 2023', 'Emnlp 2023 Announced_on 2023-7-19', 'Gregory house Is_character_in House', 'Emnlp 2023 Submission_deadline 16 june 2023', 'Emnlp 2023 Submission_deadline 23 june 2023', 'Students first act As_of January 24, 2023', 'Emnlp 2023 Has_submission_deadline June 16, 2023', 'Emnlp 2023 Has_abstract_submission_deadline Date', 'Emnlp 2023 Has_submission_deadline June 16', 'Emnlp 2023 Submission_deadline Jun 23, 2023', 'Emnlp 2023 Takes_place_in Singapore']
+
+
+id : 105
+query: Which company recently acquired Super.tech?
+response: Microsoft
+answer: ['ColdQuanta']
+Is the response from the LLM correct?: No
+keywords: ['Company', 'Acquired', 'Super.tech']
+retrieve_result: ['Super.tech Founded_in 2020', 'Super.tech Acquired_by Coldquanta', 'Coldquanta Acquired Supertech', 'Epiqc Partner_of Super.tech', 'Super.tech Released Supermarq', 'Super.tech Received_funding $150,000', 'Duality Incubated Super.tech', 'Powerset Acquired_by Microsoft', 'Coldquanta Backing Super.tech', 'Pranav gokhale Ceo_of Super.tech', 'Big tech Includes Microsoft', 'Coldquanta Collaborates_with Super.tech', 'Super.tech Spinout_of University of chicago', 'Super.tech Participates_in Quantum research', 'Company Acquired Fire retardant chemical technologies, llc', 'Activision Acquired_by Microsoft', 'George shultz innovation fund Funded Super.tech', 'Microsoft Acquired Zenimax media and bethesda softworks', 'Activision Is_being_acquired_by Microsoft', 'Microsoft Is_a Big tech', 'Microsoft Acquired_by Activision blizzard', 'Super.tech Developed_by Quantum software and benchmarking', 'Microsoft Acquired_for $68.7 billion', 'Microsoft Acquiring_company_of Activision blizzard', 'Activision blizzard Is_acquired_by Microsoft', 'Activision blizzard Acquired_by Microsoft', 'Fred chong Chief_scientist_of Super.tech', 'Microsoft Acquired_stake_from Activision blizzard', 'Microsoft Acquired Activision', 'Microsoft Selected_as_company_of_the_year 2021']
+
+
+id : 118
+query: What was the unemployment rate in August 2022 in U.S.?
+response: 6.0%
+answer: ['3.7%', '3.7 percent']
+Is the response from the LLM correct?: No
+keywords: ['Unemployment rate', 'August 2022', 'U.s.']
+retrieve_result: ['Unemployment rate As_of November 2022', 'Job market data As_of August 2022', 'August 2022 Has_unemployed_people 6.0 million', 'U.s. inflation Occurred_in August 2022', 'August 2022 Has_ratio_of_unemployed_to_job_openings 0.6', 'November 2022 Has_unemployment_rate 3.7 percent', 'November 2022 Reported_unemployment_rate 3.7 percent', 'November 2022 Has_unemployment_rate_for Hispanics', 'Unemployment rate Declines_in 2023', 'Cbo Forecasted Average unemployment rate over the 2022–2026 period to be 3.8 percent', 'November 2022 Transportation_sector_unemployment_rate 4.6%', 'August 2022 Has_job_openings 10.1 million', 'August 2022 Has_quantity 4.6%', 'U.s. Observed_in_month November 2022', 'U.s. Has_unemployment_rate 4.6%', 'Unemployment rate Decline_gradually_through The first half of 2023', 'Inflation pressures Remained_strong_in August 2022', 'United states Has_unemployment_rate 3.4 percent', 'United states Has_unemployment_rate 3.6 percent', 'Us economy As_of 2023', 'U.s. Reported_on_date Dec 2, 2022', 'U.s. Has_unemployment_rate 3.4%', 'Time period Ended_on August 2022', 'October unemployment rate Rate 3.5 percent', 'August 2022 Has_second_highest_inflation_cost Energy', 'November 2022 As_of 6.0%', 'November 2022 As_of 6.8%', 'Prices Stopped_increasing August 2022', 'November 2022 As_of 10.7%', 'U.s. Has_unemployment_rate 3.7%']
+
+
+id : 124
+query: What is the release date of Jackie Evancho's album Carousel of Time?
+response: 
+September 12, 2022
+answer: ['September 9', 'Sep 9', 'Sep. 9', '9 September', '9 Sep', '9 Sep.', 'Sept 9', 'Sept. 9', '9 Sept', '9 Sept.']
+Is the response from the LLM correct?: No
+keywords: ['Jackie evancho', 'Carousel of time', 'Album', 'Release date']
+retrieve_result: ['Jackie evancho Released_album Carousel of time', 'Carousel of time Released_by Jackie evancho', 'Jackie evancho Released Carousel of time', 'Jackie evancho Recorded_album Carousel of time', 'Jackie evancho Released A new album called carousel of time as an adult in the music industry', 'Evancho Released_album Carousel of time', 'Jackie evancho Created Carousel of time', 'Jackie Released_album Carousel of time', 'Jackie Released Carousel of time', 'Jackie evancho Releasing_on September 9', 'The debut Released_by Jackie evancho', 'Jackie evancho Released An ep', 'Jackie evancho Released_previous_album The debut', 'Jackie evancho Released_album The debut', 'Joni mitchell Inspired Jackie evancho’s carousel of time', 'Carousel of time Released_by 2022', 'Carousel of time Release_date Sep 12, 2022', 'Carousel of time Released_in 2022', 'Jackie evancho Released Awakening', 'Melody place music Released_album Carousel of time', 'Carousel of time Release_date September 9, 2022', 'Jackie evancho Released_single A case of you', 'Jackie evancho Released_single Both sides now', 'Heavenly christmas Released_by Jackie evancho', 'Jackie evancho Released_single River', 'Jackie evancho Released_single Blue', 'Jackie evancho Confirmed_release Another album of original songs', 'Jackie evancho Works_with Joan lader', 'Jackie evancho Sang_song Over the rainbow', 'Carousel of time Is_tribute_album_of Joni']
+
+
+id : 129
+query: Where did Leonard Francis escape from?
+response:  House arrest
+answer: ['San Diego']
+Is the response from the LLM correct?: No
+keywords: ['Escape', 'Leonard francis', 'Location']
+retrieve_result: ['Leonard francis Escaped_from Custody', 'Leonard francis Escaped_from House arrest', 'Leonard francis Fled_to Mexico', 'Leonard francis Escaped_from Luxury home detention arrangement', 'Leonard glenn francis Escaped_from House arrest', 'Leonard francis Was_on Home confinement', "U.s. marshals service Investigates Leonard francis' escape", 'Leonard francis Disappeared_from San diego neighborhood', 'Leonard francis Destination Russia', 'Leonard francis Stopped_over_in Cuba', 'Leonard glenn francis Entered_country_from Mexico', 'Pacific southwest regional fugitive task force Searching_for Leonard francis', 'Leonard glenn francis Might_have_crossed_into Mexico', 'Leonard glenn francis Stopped_over_in Mexico', 'Leonard francis Arrested_in Venezuela', 'Leonard francis Alias Fat leonard', 'Leonard glenn francis Stopped_over_in Cuba', 'U.s. marshals service Conducted_manhunt_for Leonard francis', 'Francis Fled_to Mexico', 'Multiple agencies Was_searching_for Leonard francis', 'Leonard francis Also_known_as Fat leonard', 'Leonard glenn francis Was_recaptured_in Venezuela', 'Leonard glenn francis Headed_to Russia', 'Leonard glenn francis Attempted_to_board_flight_to Russia', 'Leonard glenn francis Alias Fat leonard', 'Leonard francis Was_being_monitored_by Pretrial services', 'Leonard francis Owes $30 million in restitution', 'Leonard francis Owned_port_in Malaysia', 'Leonard francis Convicted_of Bribing navy officials', 'Leonard francis Was_granted Medical furlough']
+
+
+id : 132
+query: How much is the fine that Meta is facing for failing to safeguard children's information on Instagram?
+response: $400 million
+answer: ['405 million euros']
+Is the response from the LLM correct?: No
+keywords: ['Meta', 'Facing', 'Fine', 'Safeguard', 'Children', 'Information', 'Instagram']
+retrieve_result: ["Meta Facing_fine_for Failing to safeguard children's information on instagram", "Instagram Fined_for Failing to protect children's data", "Failing to safeguard children's information on instagram Involves_platform Instagram", "Instagram Violated_privacy_of Children's data", 'Instagram Fine_amount $400 million', 'Instagram Fine_amount €405 million', 'Instagram Boosted_protections_for Children', 'Instagram Fine_amount $401 million', 'Instagram Protects Children using the platform', 'Meta Has_fine_amount $400 million', 'Irish data protection commission (dpc) Imposed_fine_on Instagram', 'Instagram Fine_imposed_by Irish data protection commission (dpc)', "Instagram Fined_by Ireland's data protection commissioner", 'Instagram Handles_data_for Children', "Instagram Fine_imposed_by Ireland's data protection regulator", "Ireland's data protection commission Issued_fine_to Meta", "Meta Fined_by Ireland's data protection commission", 'Meta Owned_by Instagram', 'Eu Imposed_fine_on Instagram', "Meta Faces_fine_from Ireland's data protection commission", 'Instagram Owned_by Meta', "Ireland's data protection commission Imposed_fine_on Meta", 'Data protection commission Found_violation_by Instagram', 'Meta Has_fine_amount 405 million euros', 'Tiktok Fine_related_to Child data protection laws', "Instagram Security_failure_of Teenage users' data", 'Meta Received_fine_of $686 million', 'Data protection commission Fine_issued_to Meta', 'Instagram Allowed_access_to Business accounts to children', 'Instagram Introduced Tools to help protect children on the platform']
+
+
+id : 137
+query: who did Alcaraz beat in U.S. Open 2022 Men's Semifinals?
+response: 
+Marin Cilic
+answer: ['Frances Tiafoe']
+Is the response from the LLM correct?: No
+keywords: ['Alcaraz', 'U.s. open', '2022', 'Mens semifinals']
+retrieve_result: ["Alcaraz Is_participating_in 2022 u.s. open men's semifinal", "Carlos alcaraz Plays_in Us open 2022 men's singles final", 'Carlos alcaraz Participates_in 2022 us open', 'Carlos alcaraz Plays_in U.s. open 2022', '2022 us open Won_by Carlos alcaraz', 'Us open 2022 Has_participant Carlos alcaraz', 'Carlos alcaraz Won_title_at 2022 us open', 'Carlos alcaraz Reached_semifinals_of U.s. open', 'Carlos alcaraz Played_at 2022 french open', 'Alcaraz Played_in Semifinal', 'Carlos alcaraz Participates_in French open 2023', 'Alcaraz Plays_in Us open', 'Alcaraz Played_at U.s. open', 'Carlos alcaraz Playing_in U.s. open', 'Carlos alcaraz Plays_in Semifinal', "Us open men's final Features Alcaraz", 'Alcaraz Played_in Us open', "Carlos alcaraz Wins Men's singles u.s. open championship", 'U.s. open championship Participant Carlos alcaraz', 'Alcaraz Won U.s. open', 'Carlos alcaraz Won_tournament U.s. open', 'Carlos alcaraz Plays_in 2023 french open', 'Carlos alcaraz Won U.s. open men’s singles championship', 'Carlos alcaraz Won U.s. open', 'Carlos alcaraz Reached_quarterfinals_in U.s. open', 'Us open Has_participant Carlos alcaraz', 'Carlos alcaraz Won_event Us open', 'Carlos alcaraz Plays_in Us open', "Carlos alcaraz Wins U.s. open men's singles title", 'Carlos alcaraz Played_in Us open']
+
+
+id : 144
+query: What is men's year-end No 1 in tennis in 2022?
+response: Rafael Nadal
+answer: ['Carlos Alcaraz']
+Is the response from the LLM correct?: No
+keywords: ['Mens tennis', 'Year-end', 'No 1', '2022']
+retrieve_result: ["Rafael nadal Won Men's singles tennis title at the 2022 australian open", 'Australian open Took_place_in 2022', 'French open Has_winner_in_year 2022', 'Australian open Happened_in 2022', 'Djokovic Announced 2022', 'French open Took_place_in 2022', 'Rafael nadal Won_title_in French open 2022', 'Rafael nadal Won_title_at 2022 french open', 'Rafael nadal Won French open 2022', 'Wimbledon final Took_place_in 2022', "Rafael nadal Won 14th men's singles title at the 2022 french open", 'Australian open Took_place_on Jan 29, 2022', 'Rafael nadal Was_champion_of 2022 french open', 'Rafael nadal Is_champion_of 2022', "Carlos alcaraz Plays_in Us open 2022 men's singles final", 'Atlanta open Has_winner_in_year 2022', '2022 masters Took_place_in 2022', 'Rafael nadal Won 2022 french open', 'Rafael nadal Played_at 2022 french open', 'Djokovic Participated_in 2022 australian open', 'Rafael nadal Won_at 2022 french open', "2022 australian open men's singles final Won_by Rafael nadal", '2022 french open Won_by Rafael nadal', 'Wimbledon Included_in 2022 atp tour calendar', 'Atlanta open singles draw Occurred_in 2022', 'Masters Took_place_in 2022', 'Carlos alcaraz Won_title_at 2022 us open', 'Wimbledon Took_place_in 2022', 'French open Defending_points_from 2022 french open', 'Wimbledon Defending_points_from 2022 french open']
+
+
+id : 146
+query: What is Columbia University's QS ranking in 2023?
+response: 
+8th
+answer: ['22']
+Is the response from the LLM correct?: No
+keywords: ['Columbia university', 'Qs ranking', '2023']
+retrieve_result: ['Columbia university Ranked_in Qs global mba category for 2023', 'Columbia university Has_ranking 19th in qs world university rankings 2022', 'Qs world university rankings 2024 Ranks_university Columbia university', 'Columbia university Ranked_at 8th position in qs global mba category for 2023', 'Qs Released Qs world university rankings 2024', 'Columbia university Year_is 2022-23', 'Columbia university Year_was 2022', 'Columbia university Has_ranking 11th in times higher education (the) world university rankings 2022', 'Columbia university Ranked_at 8th position in best graduate business schools rankings by u.s. news & world report for 2023', 'Columbia university Ranked_in The subject rankings', 'Qs world university rankings 2024 Includes Universities from diverse locations across europe, asia and north america', 'Columbia university Ranked_by News & world report', 'Columbia university Has_ranking_position 18th', 'Columbia university Ranked_in #18', 'Columbia university Category_is Best global universities', 'Columbia university Ranking_in #18 in national universities (tie)', 'Columbia university Ranked_by Us news & world report', 'Columbia university Previously_ranked_by Us news & world report', 'Columbia university Has_ranking_position 7th', 'Columbia university Ranked_in National universities, #18', 'Columbia university Ranked_in #18 national universities', 'Columbia university Previous_ranking_position_was 2nd', 'Columbia university Ranked_by U.s. news & world report', 'U.s. news & world report Ranks Columbia university', 'Columbia university Ranked 7', 'Columbia university Withdrew_from Rankings', 'Columbia university Offers_program Quantitative methods in the social sciences', 'Columbia university Has_school Journalism school', 'Sat Taken_in 2023', 'Journalism school Part_of Columbia university']
+
+
+id : 147
+query: Who was the first Asian man to win Lead Actor in a Drama Series?
+response: Ke Huy Quan
+answer: ['Lee Jung-jae']
+Is the response from the LLM correct?: No
+keywords: ['Asian', 'Win', 'Lead actor', 'Drama series']
+retrieve_result: ['Michelle yeoh First_asian_woman_to_win Best actress', 'Michelle yeoh First_to_achieve Asian-identifying nominee for best actress', 'Michelle yeoh Makes_history_as First asian-identifying nominee for best actress', 'Michelle yeoh Is_a Asian winner for best actress', 'Michelle yeoh Won_award_for Actress in a leading role', 'Michelle yeoh Received_award_for Best actress in a leading role', 'Michelle yeoh Won_award Lead actress', 'Michelle yeoh Won_award_for Lead actress', 'Michelle yeoh Nominated_for Lead-actress', 'Michelle yeoh Winner_of Best actress', 'Michelle yeoh Received_award_for Lead actress', 'Michelle yeoh Won Best actress', 'Michelle yeoh Nominated_for Lead actress', 'Michelle yeoh Won_award Best actress', 'Michelle yeoh Potential_winner_of Best actress', 'Michelle yeoh Won_award_for Lead actress in everything everywhere all at once', 'Michelle yeoh Awarded_as Best actress', 'Michelle yeoh Won_award_at Oscars', 'Michelle yeoh Co-stars_with Ke huy quan', 'Michelle yeoh Won_award_for Best actress', 'Michelle yeoh Won_award_from Oscars', 'Michelle yeoh Accepted_award_for Best actress', 'Michelle yeoh Won_award Best actress oscar', 'Michelle yeoh Identifies_as Asian', 'Michelle yeoh Won_award_for Academy award', 'Michelle yeoh Awarded Best actress', 'Michelle yeoh Nominated_for Best actress', 'Michelle yeoh Co-stars_with Stephanie hsu', 'Michelle yeoh Nominated_for Award category not specified', 'Michelle yeoh Won_award_for Everything everywhere all at once']
+
+
+id : 150
+query: Who is receiving the 39th Walter Cronkite Award for Excellence in Journalism?
+response: 
+NBC's Lester Holt.
+answer: ['Gayle King']
+Is the response from the LLM correct?: No
+keywords: ['Walter cronkite award', 'Excellence in journalism', 'Recipient']
+retrieve_result: ['还未检索!']
+
+
+id : 154
+query: When is ACL 2023 taking place?
+response: 
+July 10-14, 2023
+answer: ['July 9', 'Jul 9', 'Jul. 9', '9 July', '9 Jul', '9 Jul.']
+Is the response from the LLM correct?: No
+keywords: ['Acl 2023', 'Date', 'Schedule', 'Conference', 'Event']
+retrieve_result: ['Acl 2023 Takes_place_on Jul 10, 2023', 'Acl festival Year 2023', 'Acl 2023 Takes_place_on July 10, 2023', 'Acl 2023 Date July 9-14, 2023', 'Acl festival Starts_on_year 2023', 'Emnlp 2023 Follows Acl 2023', 'Acl 2023 Held_in Toronto, canada', 'Acl 2023 Located_in Toronto, canada', 'Eacl/acl/emnlp 2023 Notified_on February 3rd, 2023', 'Eacl/acl/emnlp 2023 Has_deadline December 1st, 2022', 'Eacl/acl/emnlp 2023 Is_composed_of Acl 2023', 'Eacl/acl/emnlp 2023 Shares Dates', 'Eacl/acl/emnlp 2023 Has_notification_of_acceptance February 3rd, 2023', 'Acl 2023 Takes_place_in Westin harbour castle, toronto', 'Google Sponsor_of Acl 2023', 'Acl 2023 Format Hybrid', 'Acl 2023 Sponsored_by Google', 'Google Participates_in Acl 2023', 'Eacl/acl/emnlp 2023 Has_submission_deadline December 1st, 2022', 'Google Sponsors_event Acl 2023', 'Eacl/acl/emnlp 2023 Is_composed_of Eacl 2023', 'Eacl/acl/emnlp 2023 Is_composed_of Emnlp 2023', 'Google Exhibitor_at Acl 2023', 'Conference Takes_place_in 2023', 'Association for computational linguistics Hosts_event Acl 2023', 'Najoung kim Member_of_program_committee Acl 2023', 'Acl 2023 Organized_by Association for computational linguistics', 'Association for computational linguistics Co_hosts Acl 2023', 'Westin harbour castle Hosts_event Acl 2023', 'Emnlp Takes_place_in 2023']
+
+
+id : 157
+query: Where is EMNLP 2023 taking place?
+response:  EMNLP 2023 takes place in 2023.
+answer: ['Singapore']
+Is the response from the LLM correct?: No
+keywords: ['Emnlp', '2023', 'Location']
+retrieve_result: ['Emnlp Takes_place_in 2023', 'Emnlp 2023 Has_event_type Conference', 'Conference Takes_place_in 2023', 'Authors Submitting_more_than_one_paper_to Emnlp 2023', 'Spring game Happened_in 2023', 'Acl festival Year 2023', 'Vrto conference Takes_place_in 2023', 'Google i/o 2023 Takes_place_on 10 may 2023', 'Google i/o 2023 Takes_place_on May 10, 2023', 'Google i/o 2023 Happened_in 2023', 'Dyersville venue Has_construction_planned 2023', 'Nascar Has_event_in_year 2023', 'Google i/o 2023 Takes_place_on May 10', 'Super bowl lvii Takes_place_in 2023', 'Prime day Took_place_in 2023', 'Tour de france Announced 2023', 'Us economy As_of 2023', 'Authors Submitted_to Emnlp', 'Acl festival Happens_on October 2023', 'Submissions Must_follow_format Emnlp 2023 two-column format', 'United cup Reached_semifinals_in 2023', 'Super junior Releases_documentary_in 2023', 'Submissions Can_be_made_to Emnlp', 'Product launch Expected_in 2023', 'Meta connect Announced_in 2023', 'Google i/o 2023 Takes_place_on Wednesday, may 10', "Fifa women's world cup Has_year 2023", 'Xxiv olympic winter games Took_place_on 2023', 'Roland garros 2023 Takes_place_in 2023', 'Meta Announced Connect 2023']
+
+
+id : 159
+query: What is the date of the Wine OFF the Fox benefit concert?
+response: 
+December 17, 2022
+answer: ['October 22', 'Oct 22', 'Oct. 22', '22 October', '22 Oct', '22 Oct.']
+Is the response from the LLM correct?: No
+keywords: ['Wine off', 'Fox benefit concert', 'Date']
+retrieve_result: ['Date Has_value December 17, 2022', 'Emnlp 2023 End_date December 10, 2023', 'Emnlp 2023 End_date Dec 10, 2023', 'Emnlp 2023 Ends_on Dec 10th, 2023', 'Emnlp 2023 Ends_on December 10, 2023', 'Emnlp 2023 Starts_on Dec 6th, 2023', 'Emnlp 2023 Takes_place_on 7 december 2023', 'Emnlp 2023 Ends_on Dec 10, 2023', 'Emnlp 2023 Start_date December 6, 2023', 'Emnlp 2023 Start_date Dec 6, 2023', 'Emnlp 2023 Has_date Tbd, 2023', 'Emnlp 2023 Starts_on December 6-10, 2023', 'Emnlp 2023 Starts_on December 6, 2023', 'Emnlp 2023 Starts_on Dec 6, 2023', 'Emnlp 2023 Conference_dates 6 december 2023', 'Emnlp 2023 Conference_dates 10 december 2023', 'Oct 18, 2022 Announced Emnlp 2023', 'Emnlp 2023 Has_date Data tbd, 2023', 'Emnlp 2023 Announced_on 2023-7-19', 'Emnlp 2023 Has_event_type Conference', 'Emnlp 2023 Has_commitment_deadline August 22, 2023', 'Emnlp 2023 Announced Apr 7, 2023', 'Emnlp 2023 Hold_in Singapore', 'Emnlp 2023 Submission_deadline 16 june 2023', 'Emnlp 2023 Platform Openreview', 'Emnlp 2023 Includes_event Workshops & tutorials & conference', 'Emnlp 2023 Has_notification_of_acceptance Oct 6, 2023', 'Emnlp 2023 Has_submission_deadline June 16, 2023', 'Emnlp 2023 Submission_deadline 23 june 2023', 'Emnlp 2023 Uses_platform Openreview']
+
+
+id : 172
+query: when did Shinzo Abe die?
+response: Jul 18, 2022
+answer: ['July 8 2022', 'Jul 8, 2022', 'Jul. 8, 2022', 'July 8, 2022', '8 July 2022', '8 Jul, 2022', '8 Jul., 2022', '8 July, 2022']
+Is the response from the LLM correct?: No
+keywords: ['Shinzo abe', 'Die', 'Death', 'Date', 'Passing']
+retrieve_result: ['Shinzo abe Died_at_age 67', 'Shinzo abe Died_on Jul 18, 2022', 'Shinzo abe Died_on 8 july 2022', 'Shinzo abe Died_after Shot', 'Shinzo abe Died_on Jul 8, 2022', 'Shinzo abe Died_after Being shot', 'Shinzo abe Died_in Nara, japan', 'Shinzo abe Died_on July 8, 2022', 'Shinzo abe Died_on Friday', 'Shinzo abe Died_in Nara, july', 'Shinzo abe Died_in Nara', 'Shinzo abe Died_at Campaign event', 'Shinzo abe Was_pronounced_dead_at 5:03 p.m.', 'Shinzo abe Died_from Excessive bleeding', 'Shinzo abe Born_in Shinjuku, tokyo', 'Shinzo abe Born_on 21 september 1954', 'Shinzo abe Born_in Tokyo', 'Shinzo abe Died_after_being_shot July 8, 2022', 'Shinzo abe Was_killed Tragedy', 'Shinzo abe Assassinated_in Japan', 'Shinzo abe Pronounced_dead_at Nara medical university hospital', 'Shinzo abe Served_from 2006', 'Shinzo abe Was Former japanese prime minister', 'Shinzo abe Assassinated_on July 8', 'Shinzo abe Assassinated_at Yamato-saidaiji station', 'Shinzo abe Assassinated_in Tokyo', 'Shinzo abe Former_title Prime minister of japan', 'Shinzo abe Was_assassinated_in Japan', 'Shinzo abe Assassinated_in July', 'Shinzo abe Prime_minister_of Japan']
+
+
+id : 176
+query: Who has acquired Times Square Grand Slam?
+response: Iga Swiatek
+answer: ['EVO Entertainment Group']
+Is the response from the LLM correct?: No
+keywords: ['Times square', 'Grand slam', 'Acquisition']
+retrieve_result: ['Grand slam Took_place_on Jan 30, 2022', 'Grand slam Includes Singles, doubles and mixed doubles play', '2022 wta tour Includes Grand slam', '2022 atp tour Includes Grand slam', 'Grand slam Includes_event Australian open tennis championship', 'Iga swiatek Has_quantity 3 grand slam titles', 'Grand slam Has_quantity 22', 'Iga swiatek Won_grand_slam_titles 2', 'Grand slam Category_of Mixed doubles', 'Iga swiatek Won_title Grand slam', 'Iga swiatek Has_quantity Fourth grand slam title', "Grand slam Category_of Men's singles", '2020 french open Event_type Grand slam', 'Iga swiatek Won 2022 us open tennis grand slam', 'Iga swiatek Won_title_in Grand slam', "Grand slam Category_of Women's singles", 'Iga swiatek Won Grand slam titles', 'Iga swiatek First_player_to_win More than one grand slam title in a single season since 2016', 'Djokovic Bid_for Calendar grand slam and grand slam no. 21', 'Grand slam tennis tournament Includes Singles, doubles and mixed doubles play', 'Iga swiatek Has_quantity 4 grand slams', 'Rafael nadal Grand_slam_titles 21', 'Carlos alcaraz Is_a Grand slam champion', 'Djokovic Played_in Grand slam event', 'Rafael nadal Has_grand_slam_titles 22', 'Iga swiatek Has_won Three of the past 10 grand slam titles', 'Iga swiatek Won_title_count Third grand slam title', "Iga swiatek Won Women's title at the 2022 us open tennis grand slam", 'Rafael nadal Had_grand_slam_titles 22', 'Rafael nadal Has_grand_slam_titles 21']
+
+
+id : 177
+query: When is the premiere date of Derry Girls Season 3?
+response: Tuesday, April 12th, 2022
+answer: ['October 7', 'Oct 7', 'Oct. 7', '7 October', '7 Oct', '7 Oct.']
+Is the response from the LLM correct?: No
+keywords: ['Derry girls', 'Season 3', 'Premiere date']
+retrieve_result: ['Derry girls season 3 Released_on September 1, 2022', 'Derry girls season 3 Release_date Tuesday, april 12th, 2022', 'Channel 4 Announced Release date for derry girls season 3', 'Derry girls season 3 Starts_on Tuesday, april 12th, 2022', 'Netflix Releases Derry girls season 3', 'Netflix Announced The release of derry girls season 3', 'Derry girls Has_season Season 3', 'Derry girls season 3 Released_on Netflix', 'Season 3 of derry girls Premieres_on Channel 4', 'Channel 4 Airs Derry girls season 3', 'Derry girls Confirmed_for_season 3', 'Channel 4 Premieres Season 3 of derry girls', 'Derry girls Premiered_in April 2022', 'Channel 4 Airing_show Derry girls season 3', 'Derry girls Announced Third and final series', 'Derry girls Premiered_on_netflix December 2018', 'Derry girls Last_season Third season', 'Season 3 Is_last_season_of Derry girls', 'Derry girls season 3 Available_on All4', 'Derry girls Release_date September 1, 2022', 'Derry girls season 3 Release_platform Channel 4', 'Derry girls Starts_on Tuesday, april 12th, 2022', 'Derry girls Ends_on Aug 31, 2022', 'Derry girls Release_date October 7', 'Derry girls season 3 Aired_on Channel 4', 'Derry girls Release_date Tuesday 12th april', 'All4 Streams Derry girls season 3', 'Derry girls Released_in July 2019', 'Nicola coughlan Confirmed Series 3 of derry girls', 'Derry girls Released_on January 12, 2021']
+
+
+id : 189
+query: What gaming software development studio did Riot Games acquire?
+response: 
+Hypixel studios
+answer: ['Wargaming Sydney']
+Is the response from the LLM correct?: No
+keywords: ['Riot games', 'Gaming software', 'Development studio', 'Acquisition']
+retrieve_result: ['Riot games Is_involved_in Software development', 'Riot games Acquired_by Hypixel studios', "Riot games Acquired Wargaming's sydney development studio", 'Riot games Acquired Hypixel studios', 'Hypixel studios Acquired_by Riot games', 'Riot games Partnered_with Hypixel studios', 'Riot games Develops League of legends', 'Hypixel studios Supported_by Riot games', 'Riot games Developed League of legends', 'Riot games, inc. Acquired_by Tencent', 'Riot games Acquired_by Wargaming sydney', 'Tencent Acquires Riot games, inc.', 'Riot games Invested_in Hypixel studios', 'Riot games Collaborated_with Fortiche', 'Riot games Developed Legends of runeterra', 'Tencent Acquired Riot games', 'Riot games Announced_acquisition_on Oct 17, 2022', 'League of legends series Made_by Riot games', 'Fortiche Collaborated_with Riot games, inc.', 'Riot games Created League of legends', 'Tencent Acquired Riot games, inc.', 'Riot games Acquired Wargaming sydney', 'Riot forge Subsidiary_of Riot games, inc.', 'Riot games Acquired Radiant entertainment', 'Riot games Announced Acquisition completion', "Riot games Developed Tellstones: king's gambit", 'League of legends Created_by Riot games', 'Riot games Partnered_with Ftx', 'Riot games Announced May 10, 2010', 'Riot games Announced Acquisition of wargaming sydney']
+
+
+id : 191
+query: What is the subscriber growth of Netflix in Q3 2022?
+response: 3.8%
+answer: ['2.41 million']
+Is the response from the LLM correct?: No
+keywords: ['Netflix', 'Subscriber growth', 'Q3 2022']
+retrieve_result: ['Netflix Announced Growth in the third quarter of 2022', 'Netflix Reported_revenue_increase Q3 2022', 'Netflix Generated_revenue Q3 2022 revenue', 'Netflix Announced Q3 2022 eps', 'Netflix Generated_revenue_in_quarter Third quarter of 2022', 'Netflix As_of Second quarter of 2023', 'Netflix Reported_earnings Q3 2022', 'Netflix Has_subscriber_growth_rate 3.8%', 'Netflix Has_quantity Subscriber growth', 'Netflix Has_subscriber_growth Decline', 'Netflix Has_subscriber_growth_rate 13.6%', 'Netflix Forecasted_subscribers_q3 1 million', 'Netflix Has_subscriber_growth_rate 20.0% - 26.0%', 'Netflix Expects_strong_q4 Q4 2022', 'Netflix Lost_subscribers_during 2022', 'Netflix Has_subscriber_growth_rate 5.5%', 'Netflix Launched_in November 2022', 'Netflix Estimated_earnings_per_share_q3 $2', 'Netflix Announced Third-quarter expectations', 'Netflix Reported_on_date Oct 18, 2022', 'Netflix Forecast 2 million subscriber loss', 'Netflix Forecasted_gain_subscribers 2.5 million', 'Netflix Announced Oct 18, 2022', 'Netflix Has_subscriber_count 223.09 million', 'Netflix Announced Increase of 2.41 million net global subscribers', 'Netflix Forecasted_to_add 4.5 million subscribers', 'Netflix Executing_strategy Bolstering revenue and subscriber base', 'Netflix Reported The addition of 2.41 million net global subscribers', 'Netflix Projected_add_subscribers 4.5 million', 'Netflix Reported Subscriber losses']
+
+
+id : 192
+query: What is the title of Chicago P.D. Season 10, Episode 4?
+response: Donde vives
+answer: ['Dónde Vives']
+Is the response from the LLM correct?: No
+keywords: ['Chicago p.d.', 'Season 10', 'Episode 4', 'Title']
+retrieve_result: ["Nbc Releases Episode 4 of chicago pd's current season 10", "Nbc Revealed_information_about Episode 4 of chicago pd's current season 10", 'Chicago p.d. Has_season Season 10', 'Episode 4 Is_part_of Chicago p.d.', 'Chicago p.d. Has_number_of_seasons 10', 'Chicago p.d. Premiered_on Nbc', 'Chicago p.d. Premiered_on_date September 21, 2022', 'Chicago p.d. Premieres_on September 21, 2022', 'Chicago p.d. Included_episode_count 22', 'Good sam Airs_against Chicago p.d.', 'Episode 4 Airs_on October 12, 2022', 'Episode 4 Has_title Donde vives', 'Season 10 Announced Return with new episodes on wednesday, january 4', 'Chicago p.d. Has_rating 9.1/10', 'Nbc Released_press_statement_for Episode 4', 'Nbc Renewed Chicago p.d.', 'Chicago p.d. Streams_on Peacock', 'Season 10 Premieres_on Nbc', 'The tenth and final season Airing_on Nbc', 'Peacock Streams_shows Chicago p.d.', 'Season 10 Premieres_on Sunday, feb. 26', 'Gwen sigan Is_showrunner_of Chicago p.d.', 'Episode 4 Features_character Rookie officer', 'Chicago p.d. Has_character Dante torres', 'Chicago p.d. Has_character Upton', 'Episode 11 Available_on Nbc', "Chicago p.d. Has_character Sean o'neal", 'Nbc Airs The blacklist season 10', 'Nbc Confirmed_airdate_for The blacklist season 10', 'Chicago p.d. Has_character Jay halstead']
+
+
+id : 197
+query: when did rishi sunak became prime minister of uk?
+response: 
+Rishi Sunak became Prime Minister of the UK on Tuesday.
+answer: ['October 25 2022', 'Oct 25, 2022', 'Oct. 25, 2022', 'October 25, 2022', '25 October 2022', '25 Oct, 2022', '25 Oct., 2022', '25 October, 2022']
+Is the response from the LLM correct?: No
+keywords: ['Rishi sunak', 'Prime minister', 'Uk', 'Appointment', 'Date']
+retrieve_result: ['Rishi sunak Became Uk prime minister', 'Rishi sunak Became Prime minister of britain', 'Rishi sunak Became Prime minister of the united kingdom', 'Rishi sunak Becomes Prime minister of united kingdom', 'Rishi sunak Became_prime_minister_of United kingdom', 'Rishi sunak Became_prime_minister_of Britain', 'Rishi sunak To_become Prime minister of britain', 'Rishi sunak Took_office_as British prime minister', 'Rishi sunak Is_prime_minister_of United kingdom', 'Rishi sunak Assumed_office_as Prime minister of britain', 'Rishi sunak Is_prime_minister_of Britain', 'United kingdom Has_prime_minister Rishi sunak', 'Rishi sunak Title British prime minister', 'Uk Has_prime_minister Rishi sunak', 'Rishi sunak Is_first British asian prime minister', "Rishi sunak Becomes United kingdom's new prime minister", 'Rishi sunak Became_first British asian prime minister', 'Rishi sunak Will_be Prime minister of the uk', 'Britain Has_prime_minister Rishi sunak', 'Rishi sunak Became Prime minister', 'Rishi sunak Won_election_for Prime minister of britain', 'Rishi sunak Prime_minster_of United kingdom', 'Rishi sunak Is_first British asian and nonwhite person to become prime minister', 'Rishi sunak Became_position_of Prime minister', 'Uk Will_have_prime_minister Rishi sunak', "Rishi sunak Will_be Britain's next prime minister", 'Uk Has_prime_minister Sunak', 'Rishi sunak Appointed_as Prime minister', 'Rishi sunak Alias Prime minister', 'Rishi sunak Became_prime_minister Tuesday']
+
+
+id : 210
+query: What is the title of the new season of "Criminal Minds"?
+response: Title_of Criminal minds
+answer: ['Evolution']
+Is the response from the LLM correct?: No
+keywords: ['Criminal minds', 'New season', 'Title']
+retrieve_result: ['New criminal minds series title Title_of Criminal minds', 'Criminal minds Renewed_for_another_season January 2023', 'Criminal minds Has_season Evolution', 'Criminal minds Announced Revival', 'Criminal minds Revealed_in September 2022', 'Criminal minds Revival_of Original series', 'Criminal minds: evolution Renewed_for Season 2', 'Criminal minds Revival_gets_title Paramount+ series', 'Criminal minds: evolution Announced_on May 11, 2023', 'Criminal minds: evolution Is_title_of Criminal minds', 'Criminal minds Features Spencer reid', 'Criminal minds revival Has_official_title Paramount+ series', 'Cbs Aired Criminal minds', 'Criminal minds Created_by Jeff davis', 'Criminal minds: evolution Released_on November 24', 'Criminal minds: evolution Finale_on Feb. 9, 2023', 'Criminal minds: evolution Mid-season_finale_on Dec. 15', 'Criminal minds Features Matthew', 'Criminal minds reboot Released_on Paramount+', 'Criminal minds Has_setting Bau', 'Criminal minds: evolution First_airing_date Thursday, nov. 24', 'Criminal minds Features Derek morgan', 'Criminal minds Features Jason gideon', 'Criminal minds: evolution Returns_on Jan. 12', 'Criminal minds: evolution Alias Quasi-16th season', 'Criminal minds Subtitled_as Evolution', 'Criminal minds: evolution Is_a Reboot of criminal minds', 'Abc signature Produces Criminal minds: evolution', 'Criminal minds Available_on Paramount+', 'Criminal minds: evolution Followed_by Bau']
+
+
+id : 215
+query: What was the unemployment rate in November 2022?
+response: 3.7 percent
+answer: ['3.7%']
+Is the response from the LLM correct?: No
+keywords: ['Unemployment rate', 'November 2022']
+retrieve_result: ['Unemployment rate As_of November 2022', 'November 2022 Has_unemployment_rate 3.7 percent', 'November 2022 Reported_unemployment_rate 3.7 percent', 'November 2022 Has_unemployment_rate_for Hispanics', 'November 2022 Transportation_sector_unemployment_rate 4.6%', 'California Has_unemployment_rate_as_of December 2022', 'December 2022 Has_unemployment_benefits_claims 326,252', 'November 2022 As_of 6.8%', 'November 2022 As_of 6.0%', 'November 2022 As_of 10.7%', 'November 2022 As_of 7.3%', 'November 2022 As_of 3.8%', 'Unemployment rate Declines_in 2023', 'Cbo Forecasted Average unemployment rate over the 2022–2026 period to be 3.8 percent', 'Employment was little changed Occurred_on November 2022', 'U.s. Observed_in_month November 2022', 'December 2022 Reflects Labour market conditions during the week of december 4 to 10, 2022', 'November 2022 Has_quantity -0.2%', 'November 2022 Has_quantity 4.2%', 'November 2022 Has_quantity -0.6%', 'November 2022 Has_quantity 4.4%', 'November 2022 Has_quantity -0.8%', 'November 2022 Has_quantity -0.5%', 'November 2022 Has_quantity 5.8%', 'Unemployment rate Decline_gradually_through The first half of 2023', "The state's november total unemployment rate Announced 3.4 percent", 'General election Took_place_on November 2022', 'November 2022 Has_division -0.4%', 'November 2022 Same_as December 2022', 'November 2022 Has_employee_count 229,000']
+
+
+id : 216
+query: Who did the USA play in the round of 16 at 2022 FIFA World Cup?
+response: 
+The United States played against Argentina in the round of 16 at the 2022 FIFA World Cup.
+answer: ['Netherlands']
+Is the response from the LLM correct?: No
+keywords: ['Usa', 'Round of 16', '2022 fifa world cup']
+retrieve_result: ['2022 fifa world cup Has_round Round of 16', 'Round of 16 Part_of Fifa 2022 world cup', 'Team usa Plays_in 2022 fifa world cup', 'United states Played_in_event 2022 world cup', 'United states Participated_in 2022 world cup', "U.s. men's national team Plays_in 2022 fifa world cup", 'Usa Qualified_for World cup last 16', 'Usmnt Participates_in World cup round of 16', 'World cup Has_round Round of 16', '2022 world cup Features Team usa', "United states Participates_in 2022 fifa men's world cup", "Us men's national team Participates_in 2022 fifa world cup", 'Usmnt Plays_in 2022 fifa world cup qatar', 'Usa Played_on Nov 21 2022', '2022 world cup Has_participant United states', "United states men's national team Participating_in 2022 fifa world cup", 'Us men’s national team Qualified_for 2022 fifa world cup', 'United states Qualified_for Round of 16', "United states men's national team Participates_in 2022 fifa world cup", 'Usmnt Qualified_for 2022 fifa world cup', '2022 world cup Includes_team United states', "U.s. men's national team Participated_in 2022 fifa world cup", "United states men's national team Participates_in Fifa world cup 2022", 'Brazil Qualified_for Round of 16', 'United states Returned_to 2022 fifa world cup', 'Usa Plays_in World cup', "U.s. men's national team Participates_in 2022 world cup", 'Brazil Played_in_event 2022 world cup', 'Usa Played_in World cup', 'Argentina Qualified_for Round of 16']
+
+
+id : 217
+query: Who is Argentina's semi opponent?
+response: Brazil
+answer: ['Croatia']
+Is the response from the LLM correct?: No
+keywords: ['Argentina', 'Semi', 'Opponent']
+retrieve_result: ['Argentina Possible_semi_final_opponents Brazil', 'Argentina Could_face_in_semi-finals Brazil', 'Argentina Played_match Semi-final', 'Argentina Could_face_in_semi_finals Brazil', 'Argentina Possible_semi_final_opponents Spain', 'Argentina Will_face_in_semi_finals Brazil', 'Argentina May_face_in_semi_finals Brazil', 'Argentina Is_rival_of Brazil', 'Argentina Could.face_in.semi-finals Spain', 'Argentina Possible_opponent Brazil', 'Argentina Could_face_in_semi_finals Belgium', 'Argentina Could_face_in_semi_finals Portugal', 'Argentina Could_face_in_semi_finals Spain', 'Argentina Could_face_in_semi-finals_as_group_c_winner Brazil', 'Argentina Could_face_in_semi_finals Group f', 'Argentina Possible_opponent South korea', 'Brazil Potential_semifinal_opponent_for Argentina', 'Argentina Possibly_advances_to Semi-finals', 'Argentina First_to_win Non-european side', 'Brazil Potential_opponent_in_final Argentina', 'Argentina Has_next_opponents Mexico', 'Spain Potential_semifinal_opponent_for Argentina', 'Argentina Defeated_by Uruguay', 'Argentina Possible_opponent Croatia', 'Argentina Could_face_in_semi-finals_as_group_c_winner Spain', 'Argentina Has_next_opponents Poland', 'Spain Potential_opponent_in_final Argentina', 'Argentina Will_be_pitted_against France', 'Netherlands Potential_opponent_in_final Argentina', 'Argentina Will_be_pitted_against Tunisia']
+
+
+id : 218
+query: Who won the election in Georgia?
+response: Raphael Warnock
+answer: ['Brian Kemp']
+Is the response from the LLM correct?: No
+keywords: ['Election', 'Georgia', 'Winner']
+retrieve_result: ['Georgia Has_event_type Election results', 'Senate runoff election Took_place_in Georgia', 'Raphael warnock Won_election_in Georgia', 'Brian kemp Received_votes_from Georgia voters', 'Georgia Location_of_election President', 'Georgia Has_runoff_election Dec. 6, 2022', 'Georgia Defeated Tennessee', 'Georgia Location_of_election Senate runoff', 'Georgia Defeated Lsu', 'Georgia Defeated Oregon', 'Georgia Has_runoff_election_between Raphael warnock, herschel walker', 'Georgia Won_against Michigan', 'Georgia Defeated Ohio state', 'Herschel walker Lost_election_in Georgia', 'Georgia Won_against Ohio state', 'Georgia Defeats Ohio state', 'Georgia Wins Peach bowl', 'Georgia Won_against Tennessee in an ncaa college football game', 'Championship Featured No. 3 georgia', 'Raphael warnock Running_in Georgia runoff election', 'Georgia Has_governor Brian kemp', 'Herschel walker Is_participant_in Runoff in georgia', 'Georgia Advances_to College football playoff final', 'Georgia Played_in Championship', 'Raphael warnock Is_participant_in Runoff in georgia', 'Brian kemp Did_not_receive_votes_from 200,000 georgia voters', 'Georgia Advanced_to_play_in College football national championship', 'Georgia Has_early_voting_days 17', 'Lsu Lost_to Georgia', 'Georgia Defends_title National title']
+
+
+id : 220
+query: Who is the captain of the USA soccer team in the FIFA Men's World Cup 2022?
+response: Christian Pulisic
+answer: ['Tyler Adams']
+Is the response from the LLM correct?: No
+keywords: ['Usa', 'Soccer', 'Team', 'Captain', 'Fifa', 'Mens', 'World', 'Cup', '2022']
+retrieve_result: ["United states men's national team Participating_in 2022 fifa world cup", "Us men's national team Participates_in 2022 fifa world cup", '2022 world cup Features Team usa', 'Us men’s national team Qualified_for 2022 fifa world cup', "United states men's national team Participates_in 2022 fifa world cup", "U.s. men's national team Participated_in 2022 fifa world cup", "U.s. men's national team Plays_in 2022 fifa world cup", "U.s. men's national team Participates_in 2022 world cup", 'Team usa Plays_in 2022 fifa world cup', '2022 world cup Includes_team United states', 'Usmnt Qualified_for 2022 fifa world cup', 'United states Participated_in 2022 world cup', 'U.s. Qualified_for World cup 2022', 'United states Returned_to 2022 fifa world cup', 'Usmnt Participates_in World cup 2022', 'United states Played_in_event 2022 world cup', '2022 world cup Has_participant United states', 'United states Bidder_for 2022 world cup', '2022 world cup Includes_team Brazil', '2022 world cup Includes_team Australia', '2022 world cup Includes_team England', '2022 world cup Includes_team Senegal', 'Qatar 2022 Included_match Usa vs england', '2022 world cup Includes_team France', 'World cup Announced_in 2022', '2022 world cup Includes_team Netherlands', 'Fifa Scheduled 2022 world cup', '2022 fifa world cup Took_place_on 21 november 2022', '2022 fifa world cup Took_place_on Nov 21, 2022', '2022 world cup Includes_team Morocco']
+
+
+id : 227
+query: Who will be receiving the Mark Twain Prize for American Humor in 2023?
+response: 
+Dave Chappelle
+answer: ['Adam Sandler']
+Is the response from the LLM correct?: No
+keywords: ['Mark twain prize', 'American humor', '2023']
+retrieve_result: ['Jon stewart Receive 2022 mark twain prize for american humor', 'Mark twain prize for american humor Presented_by Kennedy center', 'Mark twain prize Is_awarded_to Comedian', 'Mark twain prize for american humor Celebrated_at Kennedy center', 'Lorne michaels Receive Mark twain prize for american humor', 'Jon stewart Received_award Mark twain prize for american humor', 'Richard pryor Inaugural_recipient_of The mark twain prize for american humor', 'Jonathan winters Second_recipient_of The mark twain prize for american humor', 'Tina fey Received_award Mark twain prize', 'Kennedy center Presents_award Mark twain prize', 'Golden globe awards Happened_in 2023', 'Dave chappelle Received_award Mark twain prize', 'George carlin Received_award Mark twain prize', 'Tina fey Received_award Kennedy center mark twain prize', 'Walter cronkite awards Awarded_in 2023', 'Jon stewart Received_award Mark twain prize', 'Will ferrell Received_award Mark twain prize', 'Bill cosby Received_award Mark twain prize', 'Lorne michaels Received_award Mark twain prize', 'Grammys Has_year 2023', 'Bill cosby Received_award Kennedy center mark twain prize', 'Dave chappelle Received_award Kennedy center mark twain prize', 'Lorne michaels Received_award Kennedy center mark twain prize', 'Carol burnett Received_award Mark twain prize', 'David letterman Received_award Mark twain prize', 'Merriam-webster Announced Words of the year for 2022', 'Us students Take_test_in 2023', 'Acl festival Year 2023', 'Carolyn kielma Received_award_in 2023', 'George carlin Received_award Kennedy center mark twain prize']
+
+
+id : 229
+query: who is the ceo of twitter?
+response: Parag Agrawal
+answer: ['Linda Yaccarino']
+Is the response from the LLM correct?: No
+keywords: ['Twitter', 'Ceo', 'Leadership', 'Executives', 'Management']
+retrieve_result: ['Elon musk Is_ceo_of Twitter', 'Elon musk Is_currently Ceo of twitter', 'Twitter Has_ceo Williams', 'Twitter Has_ceo Musk', 'Twitter Has_executive Chief executive', 'Twitter Has_ceo Jack dorsey', 'Elon musk Serves_as Ceo of twitter', 'Elon musk Is_ceo_of Twitter inc.', 'Twitter Has_ceo Dick costolo', 'Parag agrawal Is_ceo_of Twitter', 'The new ceo Has_position_at Twitter', 'Ceo Will_face_challenges Twitter', 'Twitter Has_executive Chief financial officer', 'Musk Appointed_as Ceo of twitter', 'Parag agrawal Ceo_of Twitter', 'Elon musk Previous_role Ceo of twitter', 'Twitter Has_ceo Linda yaccarino', 'Twitter Has_ceo Floki', 'Musk Assume_position Ceo of twitter', 'Twitter, inc. Operates Twitter', 'Elon musk Became_new_owner_and_ceo_of Twitter, inc.', 'Twitter Has_ceo Parag agrawal', 'Dorsey Led_as_chief_executive_officer Twitter', 'Linda yaccarino Named_as Ceo of twitter', 'Twitter Has_chairman_of_board Dorsey', 'Dick costolo Became Ceo of twitter', 'Twitter Has_new_ceo Linda yaccarino', 'Elon musk Step_down_as Ceo of twitter', 'Twitter Has_chief_executive Linda yaccarino', 'Parag agrawal Is_chief_executive_of Twitter']
+
+
+id : 232
+query: When was the Final Fantasy Pixel Remaster Series be released on Nintendo Switch?
+response: Dec 19, 2022
+answer: ['April 19 2023', 'Apr 19, 2023', 'Apr. 19, 2023', 'April 19, 2023', '19 April 2023', '19 Apr, 2023', '19 Apr., 2023', '19 April, 2023']
+Is the response from the LLM correct?: No
+keywords: ['Final fantasy', 'Pixel remaster series', 'Nintendo switch', 'Release date']
+retrieve_result: ['Final fantasy pixel remaster series Released_on Nintendo switch', 'The final fantasy pixel remaster series Released_on Nintendo switch', 'Final fantasy pixel remaster Released_on Nintendo switch', 'Final fantasy pixel remasters Released_on Nintendo switch', 'Final fantasy pixel remaster series Launching_on Nintendo switch', 'Final fantasy pixel remaster Launches_on Nintendo switch', 'Final fantasy pixel remaster series Available_on Nintendo switch', 'Final fantasy pixel remaster Released_on Switch', 'Nintendo switch Released_on Final fantasy i-vi pixel remaster', 'Final fantasy i-vi pixel remaster Released_on Nintendo switch', 'Final fantasy i-vi pixel remaster series Available_on Nintendo switch', 'Pixel remaster series Announced Final fantasy i through vi for switch', 'Final fantasy i-vi pixel remaster Released_on Nintendo switch™', 'Square enix Released Final fantasy pixel remaster series', 'Final fantasy pixel remaster series Released_on Dec 19, 2022', 'Final fantasy pixel remaster series Released_in 2022', 'Square enix Announced The final fantasy pixel remaster series', 'Final fantasy pixel remaster series Released_in Spring 2023', 'Square enix Announced Release of final fantasy pixel remaster series', 'Square enix Announced Final fantasy pixel remaster series', 'The final fantasy pixel remaster series Published_by Square enix', 'Final fantasy pixel remaster Released_in Spring 2023', 'Final fantasy pixel remasters Announced Apr 5, 2023', 'Final fantasy pixel remaster series Released_by Square enix', 'Square enix Announced Final fantasy pixel remaster series launch', 'Pixel remaster series Released_on Switch in spring 2023', 'Final fantasy pixel remaster series Released_on Playstation 4', 'Final fantasy pixel remasters Release_date April 19, 2023', 'Nintendo switch Has_game Final fantasy i-vi pixel remaster', 'Final fantasy pixel remaster series Released_on Ps4']
+
+
+id : 237
+query: What is the price of Microsoft 365 Basic per month?
+response: $22.00
+answer: ['$1.99']
+Is the response from the LLM correct?: No
+keywords: ['Microsoft 365', 'Basic', 'Price', 'Per month']
+retrieve_result: ['Microsoft 365 Costs $', 'Microsoft Announced Microsoft 365 basic plans pricing', 'Microsoft 365 Priced_at $22.00', 'Microsoft 365 Starts_from $6.00', 'Microsoft 365 apps for business Has_price $6.00', 'Microsoft 365 business premium Has_price $22.00', 'Microsoft Offers Microsoft 365 basic', 'Microsoft Offers Microsoft 365 business basic', 'Microsoft Releases Microsoft 365 basic', 'Microsoft Introduces Microsoft 365 basic', 'Microsoft Introduce Microsoft 365 basic', 'Microsoft 365 Offers Subscription benefits', 'Microsoft Introduced Microsoft 365 basic', 'Microsoft Offers Microsoft office 365 plans', 'Microsoft Introduced Office 365 home premium', 'Microsoft 365 basic Includes Excel', 'Microsoft 365 Is_sold_as One-time purchase', 'Microsoft Offered $95 per share', 'Microsoft 365 business basic Has_storage 1 tb of cloud storage per user', 'Microsoft 365 Includes 1 tb of cloud storage per user', 'Microsoft 365 Provides 1 tb of cloud storage per user', 'Microsoft 365 basic Includes Word', 'Microsoft 365 Generated_revenue $136 million', 'Microsoft 365 Announced_on Mar 6, 2023', 'Microsoft Does_not_have_plans_to_raise_prices_for Microsoft 365', 'Netflix Has_price $6.99 a month', 'Microsoft 365 family Includes 1 tb of cloud storage per user', 'Microsoft 365 Subscribes_to Benefits', 'Microsoft 365 basic Includes Powerpoint', 'Microsoft 365 basic Includes Onenote']
+
+
+id : 238
+query: When did Calvin Edgar Fox pass away?
+response: 1992
+answer: ['January 18 2023', 'Jan 18, 2023', 'Jan. 18, 2023', 'January 18, 2023', '18 January 2023', '18 Jan, 2023', '18 Jan., 2023', '18 January, 2023']
+Is the response from the LLM correct?: No
+keywords: ['Calvin edgar fox', 'Passed away', 'Death date']
+retrieve_result: ['Calvin edgar fox Served_in Us navy', 'Calvin edgar fox Born_in Hebron, illinois', 'Calvin edgar fox Retired_from Hunter power plant', 'Calvin edgar fox Married_to Ada wallace', 'Calvin Preceded_in_death_by Ivan fox', 'Calvin edgar fox Worked_for Utah power & light/pacificorp', 'Ivan fox Parent_of Calvin edgar fox', 'Calvin Preceded_in_death_by Ada wallace', 'Vivian mae peck Parent_of Calvin edgar fox', 'Us navy Had_fraud_scandal_involving Leonard glenn francis', 'Us navy Victim_of Fraud scandal', 'Us navy Celebrated_anniversary_of Women flying in the us navy', 'Malaysian businessman Scammed Us navy']
+
+
+id : 241
+query: What was the annual GDP growth rate of the U.S. economy in 2022?
+response: 
+The annual GDP growth rate of the U.S. economy in 2022 was 8.5%.
+answer: ['2.1']
+Is the response from the LLM correct?: No
+keywords: ['Gdp', 'Growth rate', 'Us economy', '2022']
+retrieve_result: ['U.s. economy Expanded_in 2022', 'Gdp growth As_of 2023', 'Us economy As_of 2023', 'Real gdp Increased_in 2022', 'Economic expansion Continued_in 2022', 'U.s. economy Growth_slowed_in Q1 2023', 'Business investment Contributes_to_gdp_growth_in 2022', 'Consumer spending Drives_gdp_expansion_in 2022', 'Economic recovery Ends_in 2022', '2022 Has_inflation_rate 8.5', '2022 Has_inflation_rate 7.5', '2022 Has_inflation_rate 8.6', '2022 Has_inflation_rate 8.2', '2022 Has_inflation_rate 7.7', '2022 Has_inflation_rate 6.5', '2022 Has_inflation_rate 7.9', 'Us economy Approaching Possible recession later in the year', 'Revenues Increases_in 2022', 'U.s. trade deficit Shrinks_in 2022', 'Congressional budget office Projected Inflation for 2022', '2022 Has_inflation_rate 8.0', '2022 Has_inflation_rate 8.3', 'Us economy Experiencing Slowing job growth', '2022 Has_inflation_rate 7.1', 'U.s. economy Recovered_jobs_lost March 2020', 'Real gdp Increased_in 2021', 'Real gdp Grew_by Lower than projected in 2021', 'Us economy Generated_revenue 2%', 'Unemployment rate Declines_in 2023', '2022 Has_inflation_rate 9.1']
+
+
+id : 244
+query: When is the congressional hearing for TikTok CEO Shou Zi Chew?
+response: The congressional hearing for TikTok CEO Shou Zi Chew is on [insert date].
+answer: ['March 23', 'Mar 23', 'Mar. 23', '23 March', '23 Mar', '23 Mar.']
+Is the response from the LLM correct?: No
+keywords: ['Tiktok', 'Ceo', 'Shou zi chew', 'Congressional hearing']
+retrieve_result: ['Shou zi chew Participates_in Congressional hearing', 'Tiktok Ceo Shou zi chew', 'Shou zi chew Ceo_of Tiktok', 'Shou zi chew Is_chief_executive_of Tiktok', 'Shou zi chew Is_ceo_of Tiktok', 'Tiktok ceo Is Shou zi chew', 'Tiktok Has_ceo Shou zi chew', 'Shou zi chew Testified_at Congressional hearing', 'Shou chew Ceo_of Tiktok', 'Shou zi chew Title Tiktok ceo', 'U.s. congress Held_hearing_on Tiktok', 'Tiktok Ceo Chew', 'Chew Ceo_of Tiktok', 'Shou zi chew Participated_in Hearing', 'Shou zi chew Leads Tiktok', 'Shou zi chew Faced_questioning_at Us congressional hearing', 'House energy and commerce committee Held_hearing_on Tiktok', 'Tiktok Face_challenges_from Us lawmakers', 'Shou zi chew Testified_at Committee hearing on capitol hill', 'House Held_hearing_with Tiktok', 'Us legislators Targets Tiktok', 'Hearing Title_is Tiktok: how congress can safeguard american data', "Shou zi chew Defended Tiktok's efforts to prevent misinformation", 'Congress Heard_from Chew', "Shou zi chew Emphasized Tiktok's reach in the u.s.", 'Chew Appointed_as Tiktok ceo', 'Shou zi chew Testified_before U.s. lawmakers', 'Rep. cammack press office Warning_about Tiktok', 'Cathy mcmorris rodgers Announces_hearing_with Shou chew', 'Chew Works_at Tiktok']
+
+
+id : 246
+query: What is the title of the AI-generated episode of Seinfeld?
+response: The title of the AI-generated episode of Seinfeld is "The Junior Mint".
+answer: ['Nothing, Forever']
+Is the response from the LLM correct?: No
+keywords: ['Seinfeld', 'Ai-generated', 'Episode', 'Title']
+retrieve_result: ['Seinfeld episode Generated_by Ai', 'Seinfeld Influenced Ai-generated version', 'Ai seinfeld Based_on Seinfeld', 'Nothing, forever Showcases Ai-generated episodes of seinfeld', 'Seinfeld Is_reproduced_by Ai', 'Nothing, forever Streams Ai-generated episodes of seinfeld', 'Nothing, forever Is_ai_generated_episode_of Seinfeld', 'Ai seinfeld Created_by Skyler hartle', 'Mismatch media Created Ai seinfeld', 'Seinfeld Has_episode The pilot', 'Seinfeld Included_episode The parking garage', 'Seinfeld Has_episode The bubble boy', 'Ai seinfeld Is_type_of Consumer ai application', 'Seinfeld Included_episode The chinese restaurant', 'Seinfeld Has_episode The cadillac', 'Seinfeld Created_by David', 'Seinfeld Has_episode The contest', 'Seinfeld Co_created_by Jerry seinfeld', 'Seinfeld Has_episode The bottle deposit', 'Seinfeld Has_episode The switch', 'Seinfeld Has_character Algorithmically animated characters', 'Seinfeld Included_episode The contest', 'Seinfeld Included_episode The soup nazi', 'Seinfeld Included_episode The marine biologist', 'Seinfeld Created_by Larry david', 'Seinfeld Has_episode The junior mint', 'Seinfeld Has_episode The understudy', 'Jerry Created Seinfeld', 'Ai seinfeld Hosted_on Twitch', 'Jerry seinfeld Co-created Seinfeld']
+
+
+id : 248
+query: Who won the Best R&B Album at the 2023 Grammys?
+response: Harry Styles
+answer: ['Robert Glasper']
+Is the response from the LLM correct?: No
+keywords: ['Grammys', 'R&b', 'Album', '2023', 'Winner']
+retrieve_result: ['Grammys Has_year 2023', 'The 2023 grammys Competes_with Oscars', 'Best r&b performance Category_of Grammys', 'Best progressive r&b album Category_of Grammys', 'Best traditional r&b performance Category_of Grammys', 'Jon batiste Won_award Album of the year at the 2022 grammys', '2023 grammys Awarded_to Harry styles', 'Best progressive r&b album Debuted_in 2020', 'Harry styles Accepted_award_at 2023 grammys', '2023 grammys Nominated_against Encanto at the hollywood bowl', 'Grammy awards Took_place_on Apr 4, 2022', 'Billie eilish Nominated_for Album of the year at the 2022 grammys', 'The 2023 grammys Competes_with Encanto at the hollywood bowl', 'Jon batiste Won_award_at 2022 grammy awards', '2022 grammys Presented_award_to Jon batiste', 'Harry styles Attended_event 2023 grammys', 'Grammys Took_place_on Apr 4, 2022', 'Jon batiste Participated_in_announcement_of 2022 grammy awards', 'Jon batiste Performed_at 2022 grammy awards', '2022 rock and roll hall of fame induction ceremony Nominated_for Grammys', 'Billie eilish Participated_in_announcement_of 2022 grammy awards', '2023 oscars Honor Elvis', 'Grammys Has_award Album of the year', '2022 grammy awards Honored Jon batiste', 'Oscars Announced_in 2023', 'Beyoncé Nominated_for Best r&b performance', 'Grammys Took_place_in 2021', 'Beyoncé Nominated_for Best traditional r&b performance', 'Golden globe awards Happened_in 2023', 'Babyface Winner_of Best traditional r&b performance']
+
+
+id : 251
+query: What technology has Microsoft incorporated into the new Bing?
+response: AI technology
+answer: ['ChatGPT']
+Is the response from the LLM correct?: No
+keywords: ['Microsoft', 'Bing', 'Technology']
+retrieve_result: ['Microsoft Released New bing', 'Microsoft Announced New version of bing', 'Microsoft Operates Bing', 'Microsoft Demonstrated New bing working in various configurations', 'Microsoft Launches New bing', 'Bing Developed_by Microsoft', 'Microsoft Unveiled New version of bing', 'Microsoft Announced New bing and edge', 'Microsoft Released Bing', 'Microsoft Invested_in New bing search engine', 'Bing Operated_by Microsoft', 'Microsoft Released New bing experiences', 'Microsoft Released Bing desktop', 'Microsoft Developed Bing bar', 'Microsoft Released Bing’s new ai assistant', 'Microsoft Announced_revamped_version_of Bing', 'Bing Owned_by Microsoft', 'Bing chat Introduced_by Microsoft', 'Microsoft Launched Public preview of new bing', 'Microsoft Announced Bing news for mobile devices with smart labels', 'Microsoft Introduced A.i.-powered bing search engine', 'Microsoft Developed Bing ai tooling', 'Microsoft Launched Bing search engine', 'Microsoft Announced Bing chat enterprise', 'Bing Unveiled_new_version_on Feb 7, 2023', 'Microsoft Owns Bing ai', 'Microsoft Released New bing sidebar', 'Microsoft Launching Limited version of ai-enhanced bing', 'Microsoft Released Bing chat', 'Bing Fine_tuned_by Microsoft']
+
+
+id : 259
+query: Which movie won Best Picture at the 95th Academy Awards Ceremony?
+response: 
+CODA
+answer: ['Everything Everywhere All at Once']
+Is the response from the LLM correct?: No
+keywords: ['Academy awards', 'Best picture', '95th', 'Ceremony', 'Movies']
+retrieve_result: ['Academy of motion picture arts and sciences Presents 95th academy awards', '95th academy awards Has_category Best international feature film', 'Academy awards Has_event 95th annual academy awards', 'Academy Hosts 95th academy awards', '95th academy awards Held at Dolby theater', 'International feature film Is_category_of 95th academy awards', '95th academy awards Has_quantity 95', 'Brendan fraser Won_award_at The 95th academy awards', '95th academy awards Held_in Hollywood', '95th academy awards Honors Movies released in 2022', '95th academy awards Held_at Dolby theater', '95th academy awards Has_winner Brendan fraser', '95th academy awards Presented_by Academy of motion picture arts and sciences (ampas)', '95th academy awards Includes_category International feature film', 'Academy awards Has_edition 95th', '95th academy awards Honored Films released in 2022', '95th academy awards Has_winner Jamie lee curtis', 'Coda Won_award_at 95th academy awards ceremony', '95th academy awards Has_quantity 95th', 'Jamie lee curtis Won_award_at The 95th academy awards', '95th academy awards Took_place_at Dolby theatre', '95th academy awards Take_place_at Dolby theatre', '95th academy awards Honoring Movies released in 2022', 'Jamie lee curtis Winner_of 95th annual academy awards', '95th academy awards Takes_place_at Dolby theatre at ovation hollywood', '95th academy awards ceremony Has_location Dolby theatre', 'Lindsey bahr Reports_on 95th academy awards', '95th academy awards Took_place_at Dolby theater', 'Ke huy quan Won_award_at The 95th academy awards', '95th academy awards Has_winner Front']
+
+
+id : 260
+query: Who won Best Director at the 95th Academy Awards Ceremony?
+response: 
+Brendan Fraser
+answer: ['Daniel Scheinert', 'Daniel Kwan']
+Is the response from the LLM correct?: No
+keywords: ['Academy awards', 'Best director', '95th', 'Ceremony', 'Won']
+retrieve_result: ['Nominees Announced_for 95th academy awards', '95th academy awards Has_winner Brendan fraser', 'Academy Hosts 95th academy awards', 'Academy of motion picture arts and sciences Presents 95th academy awards', 'Dolby theatre Host_of 95th academy awards', '95th academy awards Has_winner Front', 'Brendan fraser Won_award_at The 95th academy awards', 'Riz ahmed Announced_nominees 95th academy awards', 'Academy awards Has_event 95th annual academy awards', '95th academy awards Held at Dolby theater', 'Riz ahmed Announced_nominees_at 95th academy awards', '95th academy awards Has_winner Jamie lee curtis', '95th annual academy awards As_of Mar 13, 2023', 'Riz ahmed Announced_nominees_for 95th academy awards', 'Lindsey bahr Reports_on 95th academy awards', '95th academy awards Has_quantity 95', '95th academy awards Presented_by Academy of motion picture arts and sciences (ampas)', 'Jamie lee curtis Winner_of 95th annual academy awards', '95th academy awards Held_at Dolby theater', '95th academy awards Announced_on Mar 13, 2023', 'U.s. Host_of 95th annual academy awards', '95th academy awards Announced January 24, 2023', '95th academy awards Announced_on Tuesday, jan. 24, 2023', '95th academy awards Has_winner Ke huy quan', '95th academy awards Announced_on January 24, 2023', '95th academy awards Occurred_on Sunday, march 12, 2023', '95th academy awards Took_place_on Sunday, march 12, 2023', '95th academy awards Has_category Best international feature film', 'Academy awards Has_edition 95th', 'Academy Hosted_event 95th academy awards']
+
+
+id : 263
+query: Which movie won Best International Feature Film at the 95th Academy Awards Ceremony?
+response: 
+"Babylon"
+answer: ['Edward Berger']
+Is the response from the LLM correct?: No
+keywords: ['Academy awards', 'Best international feature film', '95th', 'Ceremony', 'Movies']
+retrieve_result: ['95th academy awards Has_category Best international feature film', 'International feature film Is_category_of 95th academy awards', '95th academy awards Includes_category International feature film', 'Academy of motion picture arts and sciences Presents 95th academy awards', 'Academy awards Has_event 95th annual academy awards', 'Academy Hosts 95th academy awards', '95th academy awards Has_quantity 95', '95th academy awards Honors Movies released in 2022', '95th academy awards ceremony Presented_by Academy of motion picture arts and sciences', '95th academy awards Honored Films released in 2022', 'Brendan fraser Won_award_at The 95th academy awards', 'Academy awards Has_edition 95th', '95th academy awards Has_quantity 95th', '95th academy awards Has_winner Brendan fraser', '95th academy awards Honoring Movies released in 2022', '95th academy awards Held at Dolby theater', 'Academy Hosted_event 95th academy awards', '95th academy awards Has_winner Jamie lee curtis', 'Academy of motion picture arts and sciences Announced 95th annual oscars', '95th academy awards Held_in Hollywood', 'Babylon Is_nominated_for 95th academy awards', 'Riz ahmed Announced_nominees 95th academy awards', '95th academy awards Presented_by Academy of motion picture arts and sciences (ampas)', 'Jamie lee curtis Winner_of 95th annual academy awards', '95th academy awards Has_location London', '95th academy awards Has_winner Michelle yeoh', '95th academy awards Takes_place_at Dolby theatre at ovation hollywood', 'Michelle yeoh Won_award_at The 95th academy awards', '95th oscars Anniversary_of Academy of motion picture arts and sciences', '95th academy awards Includes_category Documentary short film']
+
+
+id : 268
+query: Who is the Chairman of NBCUniversal Telemundo Enterprises?
+response: Cesar Conde
+answer: ['Beau Ferrari']
+Is the response from the LLM correct?: No
+keywords: ['Nbcuniversal', 'Telemundo', 'Enterprises', 'Chairman']
+retrieve_result: ['Nbcuniversal telemundo enterprises Owns Telemundo international', 'Nbcuniversal telemundo enterprises Owns Telemundo', 'Nbcuniversal telemundo enterprises Owns Telemundo station group', 'Telemundo Owned_by Nbcuniversal telemundo enterprises', 'Nbcuniversal telemundo enterprises Appointed_as_independent_director_to International group', 'Nbcuniversal telemundo enterprises Has_subsidiary Telemundo', 'Nbcuniversal telemundo enterprises Owns Telemundo studios', 'Telemundo Is_partner_of Nbc', 'Telemundo Owned_by Nbc', 'Nbcuniversal telemundo enterprises Is_a Division of nbcuniversal', 'Beau ferrari Is_chairman_of Nbcuniversal telemundo enterprises', 'Cesar conde Chairman_of Nbcuniversal telemundo enterprises', 'Nbcuniversal telemundo enterprises Subsidiary_of Nbcuniversal', 'Cesar conde Is_position_of Chairman, nbcuniversal international group and nbcuniversal telemundo enterprises', 'Nbcuniversal telemundo enterprises Announced Beau ferrari as executive vice president', 'Nbcuniversal telemundo enterprises Is_a_division_of Nbcuniversal', 'Nbcuniversal telemundo enterprises Encompasses Telemundo', 'Cesar conde Chairman_of Nbcuniversal international group and nbcuniversal telemundo enterprises', 'Nbcuniversal telemundo enterprises Owns Universo', 'Nbcuniversal telemundo enterprises Has_business_units News division', 'Telemundo station group Part_of Nbcuniversal local', 'Nbcuniversal telemundo enterprises Has_business_units Digital', 'Nbc Purchased Telemundo', 'Beau ferrari Promoted_to Chairman of nbcuniversal telemundo enterprises', 'Cesar conde Title Chairman of nbcuniversal international group and nbcuniversal telemundo enterprises', 'Beau ferrari Was_executive_vice_president_of Nbcuniversal telemundo enterprises', 'Nbcuniversal telemundo enterprises Owns Peacock', 'Nbcuniversal telemundo enterprises Has_business_units Sports division', 'Nbcuniversal telemundo enterprises Launches Telemundo international studios', 'Beau ferrari Served_as Executive vice president of nbcuniversal telemundo enterprises']
+
+
+id : 270
+query: Who won the Virginia Tech spring game 2023?
+response: Hokies
+answer: ['The maroon squad']
+Is the response from the LLM correct?: No
+keywords: ['Virginia tech', 'Spring game', '2023', 'Winner']
+retrieve_result: ['Virginia tech hokies Hosted 2023 annual spring game', 'Virginia tech Has_event Fall 2023 football season', 'Virginia tech Participated_in Spring game', 'Virginia tech Has_event Spring game', 'Spring game Happened_in 2023', 'Virginia tech Hosted_event_on Apr 15, 2023', 'Virginia tech Hosts Spring game', "Virginia tech hokies Won 2022 acc men's basketball tournament", 'Virginia tech Finished_with_record_of 3-8 in 2022', 'Virginia tech football Has_event Spring game', 'Spring game Occurred_on April 15, 2023', 'Georgia tech Plays_at Virginia cavaliers', 'Virginia tech Plays_at Virginia cavaliers', 'Virginia tech hokies Received_bid_to 2022 ncaa tournament', 'Virginia tech Hosts Spring football game', 'Virginia tech Announced Plans for the fall 2023 football season ticket sales', 'Acc tournament Title_of Virginia tech hokies', 'Will watson iii Plays_for Virginia tech', 'Virginia tech Announced Plans for fall 2023 football season ticket sales', 'Virginia tech Had losing_streak_of 7 games in 2022', 'Virginia tech Won_title_of Acc tournament', 'Hokies Played_in Spring game', 'Spring game Scheduled_for Saturday, april 15, 2023, 3:00 p.m. et', 'West virginia Won_against Virginia tech', 'Virginia tech hokies football team Finished 6–7 in 2021 season', 'Spring game Has_date April 15, 2023', 'Virginia tech Had_win_against Carolina', 'Virginia tech Played_against North carolina', 'Virginia tech Played_against Clemson', 'Spring game Is_part_of Hokies']
+
+
+id : 274
+query: where is 2023 CAA World Congress of Sports?
+response: New York, NY
+answer: ['JW Marriott Los Angeles']
+Is the response from the LLM correct?: No
+keywords: ['2023', 'Caa', 'World', 'Congress', 'Sports']
+retrieve_result: ['Caa Hosts 2021 caa world congress of sports', '2021 caa world congress of sports Located_in New york, ny', '2021 caa world congress of sports Takes_place_on October 12-13, 2021', 'Acl festival Year 2023', 'Conference Takes_place_in 2023', 'Us open tennis championships Takes_place_in 2023', 'Roland garros 2023 Takes_place_in 2023', 'Wimbledon championship Takes_place_in 2023', 'Australian open Took_place_in 2023', "Fifa women's world cup Has_year 2023", 'French open Took_place_in 2023', 'Acl festival Happens_on October 2023', 'Acl festival Starts_on_year 2023', 'The 2023 roland-garros tournament Started_in 2023', 'Wimbledon championships Took_place_in 2023', 'Tour de france Announced 2023', 'Manchester city Qualified_for 2023 fifa club world cup', 'Nascar Has_event_in_year 2023', 'Nba season Starts_on 2023', 'French open Took_place_on Jun 3, 2022', 'French open Took_place_on Jun 10, 2023', 'Vrto conference Takes_place_in 2023', "Roland garros 2023 Includes_event Men's singles", 'Roland garros 2023 Includes_event Quad tennis', 'French open Took_place_in 2022', 'French open Took_place_on Jun 6, 2023', 'Manchester city Qualified_for 2023 and 2025 fifa club world cups', 'Roland garros 2023 Includes_event Qualifying rounds', 'Australian open Took_place_in 2022', 'Australian open Took_place_on Jan 28, 2023']
+
+
+id : 276
+query: When is the Google I/O conference 2023?
+response: 
+May 8-10, 2023
+answer: ['May 10', 'May 10', 'May. 10', '10 May', '10 May', '10 May.']
+Is the response from the LLM correct?: No
+keywords: ['Google i/o conference 2023', 'Google i/o dates', 'Google i/o schedule']
+retrieve_result: ['还未检索!']
+
+
+id : 284
+query: Who hosted the 2023 White House Correspondents' Dinner?
+response: The Associated Press
+answer: ['Roy Wood Jr.']
+Is the response from the LLM correct?: No
+keywords: ['White house correspondents dinner', '2023', 'Host']
+retrieve_result: ['The associated press Hosts 2023 oscars', 'Golden globe awards Happened_in 2023', 'Conference Takes_place_in 2023', '2023 emmys nominations list Announced_on 2023', 'Met gala Guest_list_slimmed_down_in 2023', 'Grammys Has_year 2023', 'Golden globe awards Took_place_on Jan 10, 2023', 'The associated press Coverage_of 2023 oscars', 'Google Hosted Google i/o 2023', '2022 midterm elections Covered_by The associated press', 'Super bowl 2023 Hosted_at State farm stadium', 'Tim cook Participated_in Fiscal q3 2022 financial results conference call', 'Pinterest Has_year 2023', 'Walter cronkite award for excellence in journalism Inaugurated_in 2023', 'The associated press Covers 2023 oscars', 'Emnlp Takes_place_in 2023', 'Nascar Has_event_in_year 2023', 'Google i/o 2023 Takes_place_on May 10, 2023', 'State farm stadium Hosted_super_bowl 2023', 'Google i/o 2023 Hosted_by Google', 'The associated press Copyright_holder 2023', 'Super bowl lvii Takes_place_in 2023', 'State farm stadium Will_host Super bowl 2023', 'Emnlp 2023 Has_event_type Conference', 'Super bowl lvi Broadcast_date 2023', 'Google i/o 2023 Takes_place_on 10 may 2023', 'The associated press Copyright_holder_of 2023 news article', 'Google i/o 2023 Happened_in 2023', 'Met gala Took_place_in 2022', 'Google Streams_event Google i/o 2023']
+
+
+id : 285
+query: Which city will host The World Games 2025?
+response: Beijing
+answer: ['Chengdu']
+Is the response from the LLM correct?: No
+keywords: ['Host', 'City', 'World', 'Games', '2025']
+retrieve_result: ['World police and fire games Will_be_held_on June 27, 2025 to july 6, 2025', 'Olympic games Scheduled_to_take_place_in 2022', 'World police and fire games Takes_place_in 2025', 'World police and fire games Start_date 2025', 'Beijing Host_city_of 2022 winter olympics', '2022 olympic games Took_place_in Beijing', 'Beijing Selected_as_host_city_for 2022 winter olympics', 'Beijing Selected_as Host city of the 2022 winter olympics', 'Beijing Hosted Olympic winter games beijing 2022', 'Beijing Hosted 2022 olympic winter games', 'Beijing Selected_as_host_city_for 2022 winter olympics and paralympics', 'Beijing 2022 olympics Located_in Beijing', 'Beijing 2022 winter olympics Hosted_in Beijing', 'Games Concluded_on Feb 3, 2023', 'Olympic winter games beijing 2022 Took_place_in Beijing', '2022 winter olympics Hosted_by Beijing', 'Beijing 2022 olympic winter games Takes_place_in Beijing', 'Olympic winter games beijing 2022 Located_in Beijing', "Caesar's superdome Will_host_super_bowl 2025", '2022 winter olympics Took_place_in Beijing', 'Beijing Hosted_event 2022 winter olympics', '2022 winter olympics Located_in Beijing', 'Games Begin_on Feb 4, 2022', 'Xxiv. olympic winter games beijing 2022 Took_place_in Beijing', 'Beijing Hosts 2022 paralympic winter games', "Nfl Announced_host_city_for_super_bowl_2025 Caesar's superdome", '2022 olympic winter games Awarded_to Beijing', "2025 men's u20 championship Will_be_held_in 2025", 'Beijing Selected_for 2022 olympic winter games', 'International olympic committee (ioc) Selected_host_city Beijing']
+
+
+id : 286
+query: Who is the new CEO of TCW Group?
+response: Kathryn Koch
+answer: ['Katie Koch']
+Is the response from the LLM correct?: No
+keywords: ['Tcw group', 'Ceo', 'New']
+retrieve_result: ['Tcw group Has_ceo Katie koch', 'The tcw group Has_ceo Katie koch', 'Tcw group Has_president_and_ceo Kathryn koch', 'Tcw group Announced Kathryn koch as president and ceo', 'Tcw group Named_as_chief_executive Kathryn koch', 'Katie koch Is_ceo_of The tcw group', 'Katie koch Joined_as Chief executive officer of tcw group', 'Kathryn koch Named President and ceo of tcw group', 'Kathryn koch Becomes_president_and_ceo_of Tcw group', 'Kathryn koch Selected_as President and ceo of tcw group', 'Tcw Has_president_and_ceo David lippman', 'David lippman Retires_from_role_as Ceo of tcw group', 'Kathryn koch Appointed_as President and ceo of tcw', 'Kathryn koch Chief_executive_of Tcw group', 'Tcw group Headquartered_in Los angeles, california', 'Tcw group Headquartered_in California', 'Tcw group Named_as_president Kathryn koch', 'David lippman Retiring_from Ceo of tcw', 'Kathryn koch President_of Tcw group', 'Tcw group Hired Katie koch', 'Tcw group Is_led_by Katie koch', 'Tcw group Operates_in Los angeles', 'Tcw group Has_employee_count About $220 billion in assets under management', 'Tcw group Announced_hiring_of Kathryn koch', 'Société générale Acquired Tcw group', 'Tcw group Has_assets_under_management $200 billion', 'Tcw group Has_assets_under_management $210 billion', 'The carlyle group Acquired Tcw group', 'Tcw group Founded_by Robert addison day', 'Tcw management Increased_ownership_in Tcw group']
+
+
+id : 287
+query: When was Pixel Fold announced?
+response: April 18, 2023
+answer: ['May 10', 'May 10', 'May. 10', '10 May', '10 May', '10 May.']
+Is the response from the LLM correct?: No
+keywords: ['Pixel fold', 'Announcement', 'Release date']
+retrieve_result: ['Pixel fold Announced April 18, 2023', 'Pixel fold Announced_on May 10, 2023', 'Pixel fold Released_on June 27', 'Pixel fold Released_on March 10, 2023', 'Pixel fold Released_on May 11, 2023', 'Pixel fold Announced May 10, 2023', 'Google Announced Pixel fold', 'Pixel fold Announced_on May 10th', 'Pixel fold Released_on May 10, 2023', 'Pixel fold Released_in June 2023', 'Google pixel fold Released_on June 27', 'Pixel fold Released_in Late june', 'Google Introduced Pixel fold', 'Google Developed Pixel fold', 'Pixel fold Released_in June', 'Google Released Pixel fold', 'Pixel fold Released_by Google', 'Pixel fold Announced_at Google i/o 2023', 'Google Debuted Pixel fold', 'Google pixel fold Has_release_date_announced_on June 27', 'Google Showcased Pixel fold', 'Google Releases Pixel fold', 'Pixel fold Launched_in Us', 'Google pixel fold Release_date June 27', 'Pixel fold Announced_at Google i/o', 'Pixel fold Launched_in Uk', 'Google Introduces Pixel fold', 'Google pixel fold Released_at Google i/o 2023', 'Google Manufactures Pixel fold', 'Google Unveiled Pixel fold']
+
+
+id : 291
+query: What is the name of Microsoft's ai assistant in office?
+response:  Cortana
+answer: ['Copilot']
+Is the response from the LLM correct?: No
+keywords: ['Microsoft', 'Ai', 'Assistant', 'Office']
+retrieve_result: ['Microsoft Developed Office ai', 'Microsoft Released Bing’s new ai assistant', 'Microsoft Provides Ai solutions', 'Microsoft Delivers Enterprise-ready ai', 'Microsoft Uses_ai_systems_of Openai', 'Assistive ai Implemented_across Microsoft 365', 'Microsoft Using_concept Co-pilot assistive ai', 'Microsoft 365 copilot Enables_access_to Ai assistant', 'Microsoft Guided_by Ai principles', 'Microsoft Focused_on Assistive ai', 'Google workspace apps Integrates_with Ai', 'Office professional plus 2019 Software_product Microsoft', 'Microsoft Controls Openai', 'Microsoft office xp multilingual pack Included_assistant Monkey king', 'Cortana Is_type_of Ai-powered virtual assistant', 'Microsoft office xp multilingual pack Included_assistant Saeko sensei', 'Cortana Uses Ai', 'Microsoft Developed Bing ai tooling', 'Microsoft Released_software Office 2007', "Microsoft Incorporated Openai's technology", 'Microsoft Launching Ai-enhanced features for edge browser', 'Microsoft Built Ai supercomputer with openai', "Microsoft Uses Openai's language models", 'Google Announced Ai features for google workspace', 'Openai Currently_controlled_by Microsoft', 'Openai Controlled_by Microsoft', 'Microsoft Released_software Office 97', 'A.i.-powered assistant for office productivity software Was_announced_by Satya nadella', 'Microsoft Wants_to_capitalize_on Ai hype', 'Microsoft Incorporated_technology_from Openai']
+
+
+id : 293
+query: when is chatgpt app for ios launched?
+response: May 19, 2023
+answer: ['May 18', 'May 18', 'May. 18', '18 May', '18 May', '18 May.']
+Is the response from the LLM correct?: No
+keywords: ['Chatgpt', 'App', 'Ios', 'Launched']
+retrieve_result: ['Chatgpt app Launched_on May 18, 2023', 'Chatgpt app Released_on May 18, 2023', 'Chatgpt app Available_on U.s. ios users at launch', 'Openai Released Chatgpt app for ios on may 19, 2023', 'Chatgpt app Released_on May 19, 2023', 'Chatgpt app Released_on May 30, 2023', 'Chatgpt app Available_on Ios', 'Chatgpt Released_on_platform Ios', 'Chatgpt mobile app Available_on Ios', 'Openai Announced Chatgpt app for ios', 'Openai Announced Launch of chatgpt app for ios', 'Chatgpt app for ios Available_on Ios', 'Openai Announced Launch of chatgpt ios app', 'Chatgpt app Coming_soon_to Android', 'Chatgpt Launched_on November 30, 2022', 'Openai Launched Chatgpt ios app', 'Openai Launches Chatgpt ios app', "Chatgpt iphone app Available_on Apple's app store", 'Chatgpt Released_in Late 2022', 'Chatgpt Released_on May 19, 2023', 'Openai Launched Chatgpt iphone app', 'Chatgpt Released March 1, 2023', 'Chatgpt Available_as Ios app', "Chatgpt Available_on Apple's app store", 'Chatgpt Available_on Ios', 'Chatgpt Released_on November 30, 2022', 'Openai Announced Chatgpt mobile app availability', 'Chatgpt Available_on Iphone', 'Chatgpt app Available_on Us app store', 'Chatgpt plus Released_on March 14, 2023']
+
+

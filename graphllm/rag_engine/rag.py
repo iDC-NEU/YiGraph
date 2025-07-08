@@ -19,11 +19,11 @@ from llama_index.core.response_synthesizers.type import *
 
 from typing import List
 from typing import Optional
-from database.milvus import *
-from database.nebulagraph import *
-from database.entitiesdb import *
-from utils.pruning import simple_pruning
-from utils.retrieval_metric import parse_paths_to_triples, parse_paths_to_triples_by_sentence
+from graphllm.database.milvus import *
+from graphllm.database.nebulagraph import *
+from graphllm.database.entitiesdb import *
+from graphllm.utils.pruning import simple_pruning
+from graphllm.utils.retrieval_metric import parse_paths_to_triples, parse_paths_to_triples_by_sentence
 import time
 import spacy
 from abc import ABC, abstractmethod
@@ -64,14 +64,13 @@ class RAG(ABC):
     def generation(self, query_str, nodes):
         pass
 
-
 class GraphRAG(RAG):
 
     def __init__(
         self,
-        graph_k_hop,
-        llm_env_,
         graph_db: NebulaDB,
+        graph_k_hop = 2,
+        llm_env_ = None,
         pruning=30,
         data_type: str = 'qa',
         pruning_mode='embedding_for_perentity'  # embedding_for_perentity or embedding
@@ -521,32 +520,93 @@ class GraphRAG(RAG):
 
     def query(self, question):
         return self.kg_query_engine.query(question)
+    
+    def query_with_entity(self, entities):  #TODO
+        """
+          entities 是一个list类型的参数实体列表，
+          算法：遍历每个entities，从nebulagraph查询每个实体的子图， 并把将这些子图转成边表形式 edges: List[Tuple]
+        """
+        pass
 
 
 class VectorRAG(RAG):
 
     def __init__(
         self,
-        vector_k_similarity,
-        llm_env_,
         vector_db: MilvusDB,
+        vector_k_similarity: int,
+        llm_env_ = None,
         data_type: str = 'summary'
     ) -> None:
         super().__init__()
-        self.vector_db = vector_db
+        
+        self.vector_db =  vector_db
         self.vector_rag_retriever = vector_db.set_retriever_with_similarity_topk(
             similarity_top_k=vector_k_similarity)
-        if data_type.lower() == 'qa':
-            self.vector_query_engine = RetrieverQueryEngine.from_args(
-                self.vector_rag_retriever)
-        elif data_type.lower() == 'summary':
-            self.vector_query_engine = RetrieverQueryEngine.from_args(
-                self.vector_rag_retriever, response_mode=ResponseMode.TREE_SUMMARIZE)
-        else:
-            raise ValueError("Unsupported data type. Use 'qa' or'summary'.")
         self.llm_env_ = llm_env_
+        # if data_type.lower() == 'qa':
+        #     self.vector_query_engine = RetrieverQueryEngine.from_args(
+        #         self.vector_rag_retriever)
+        # elif data_type.lower() == 'summary':
+        #     self.vector_query_engine = RetrieverQueryEngine.from_args(
+        #         self.vector_rag_retriever, response_mode=ResponseMode.TREE_SUMMARIZE)
+        # else:
+        #     raise ValueError("Unsupported data type. Use 'qa' or'summary'.")
 
     def retrieve(self, query_str: str, query_id: Optional[int] = -1):
+        """检索相关的图算法论文"""
+        str_or_query_bundle = QueryBundle(query_str)
+
+        time_embeding = -time.time()
+        if self.vector_rag_retriever._vector_store.is_embedding_query:
+            if str_or_query_bundle.embedding is None and len(str_or_query_bundle.embedding_strs) > 0:
+                str_or_query_bundle.embedding = (
+                    self.vector_rag_retriever._embed_model.get_agg_embedding_from_queries(
+                        str_or_query_bundle.embedding_strs
+                    )
+                )
+        # embedding = self.llm_env_.embed_model.get_text_embedding(query_str)
+        time_embeding += time.time()
+        self.time_info['time_embeding'] = time_embeding
+
+        time_query = -time.time()
+        node_with_scores = self.vector_rag_retriever._get_nodes_with_embeddings(
+            str_or_query_bundle)
+        # node_with_scores = self.vector_db.retrieve_nodes(query_str, str_or_query_bundle.embedding)
+        time_query += time.time()
+        self.time_info['time_query'] = time_query
+
+        print(node_with_scores)
+        # node_with_scores = self.vector_query_engine.retrieve(QueryBundle(query_str))
+        if len(node_with_scores) == 0:
+            response = "No information was retrieved, LLM cannot generate a response"
+            retrieve_information = {
+                'id': query_id,
+                'query': query_str,
+                'retrieve_results': [],
+            }
+            return [], retrieve_information
+
+        self.time_info["time_retrieve"] = self.time_info['time_embeding'] + \
+            self.time_info['time_query']
+
+        retrieve_results = []
+        retrieved_context = []
+        for node in node_with_scores:
+            retrieve_results.append({
+                "node_score": node.get_score(),
+                "node_text": node.text,
+            })
+            retrieved_context.append(node.text)
+        retrieve_information = {
+            'id': query_id,
+            'query': query_str,
+            'retrieve_results': retrieve_results,
+        }
+        return retrieved_context, retrieve_information
+
+
+    def retrieve_delay(self, query_str: str, query_id: Optional[int] = -1):
         str_or_query_bundle = QueryBundle(query_str)
 
         time_embeding = -time.time()
@@ -608,8 +668,33 @@ class VectorRAG(RAG):
     def query(self, question):
         return self.vector_query_engine.query(question)
 
-    def retrieve_deduplication(self, query_str: str, query_id: Optional[int] = -1):
-        return ""
+
+class RAG_Engine:
+
+    def __init__(
+            self,
+            vector_db,
+            vector_k_similarity,
+            graph_db,
+            vector_rag_llm_env_ = None,
+            graph_rag_llm_env_ = None,
+    ):
+        self.vector_rag = VectorRAG(vector_db, vector_k_similarity, llm_env_=vector_rag_llm_env_)
+        self.graph_rag = GraphRAG(graph_db, llm_env_=graph_rag_llm_env_)
+
+    def _retrieve_graph_papers(self, query_str: str, query_id: Optional[int] = -1):
+        # TODO: 根据用户query，从vectorrag里检索相关的图算法论文，返回list[str1, str2, ...]
+        pass        
+
+    def _retrieve_graph_data(self, query_str: str, query_id: Optional[int] = -1):
+        # TODO: 根据用户query，从graphrag里检索相关的图数据，返回形式unknown
+        pass
+
+    def retrieve(self, query_str: str, query_id: Optional[int] = -1):
+        # TODO: 根据用户query，从vectorrag里检索相关的图算法论文，返回list[str1, str2, ...]
+        papers = self._retrieve_graph_papers(query_str, query_id)
+        graph_data = self._retrieve_graph_data(query_str, query_id)
+        return papers, graph_data
 
 
 if __name__ == "__main__":

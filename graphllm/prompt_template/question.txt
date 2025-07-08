@@ -1,0 +1,6 @@
+1. “Facebook 网络中的用户 Anna 被标记为异常账号，我们怀疑她可能与其他账号组成了一个协同行为的团体。我们想识别
+这个团体中最关键的账号，也就是那些在整个关系网络中起核心作用、可能负责联系或协调的人。”
+
+算法：Connected Components->Betweenness Centrality（介数中心性）
+(1) 找出与Anna有密切联系的账号群体（即“诈骗团伙”） → 用 Connected Components
+(2) 识别这个团伙中最关键的“联系人”或“枢纽”账号 → 用 Centrality 算法（例如 Betweenness Centrality）
