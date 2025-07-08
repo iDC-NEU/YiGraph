@@ -5,7 +5,10 @@ pymilvus
 llama-index
 llama-index-vector-stores-milvus
 llama-index-llms-huggingface
+llama-index-llms-ollama
 llama-index-embeddings-huggingface
+llama-index-legacy
+nebula3-python
 requests>=2.31.0
 lxml>=4.9.0
 PyPDF2>=3.0.0
