@@ -12,7 +12,6 @@ class Scheduler:
     """
     def __init__(
         self,
-        dag: "GraphWorkflowDAG",
         *,
         graph_engine: Any = None,   # 检索/子图/图算法等底层图后端
         gnn_engine: Any = None,     # 图学习后端（PyG/DGL等）
@@ -20,7 +19,7 @@ class Scheduler:
         max_retries: int = 0,
         retry_sleep_sec: float = 0.0,
     ):
-        self.dag = dag
+        self.dag: Optional[GraphWorkflowDAG] = None
         self.graph_engine = graph_engine
         self.gnn_engine = gnn_engine
         self.llm_client = llm_client
@@ -42,6 +41,14 @@ class Scheduler:
             "planning":         self._exec_llm_planning,   # 若有规划型步骤
             "aggregation":      self._exec_aggregation,    # 若需要聚合/汇总
         }
+
+    
+    def build_dag_from_subquery_plan(self, subquery: Dict[str, Any]) -> GraphWorkflowDAG:
+        """
+        根据 JSON 格式的 subquery 构造 DAG。
+        TODO: 实现从 subquery 到 GraphWorkflowDAG 的转换逻辑。
+        """
+        pass
 
     # ----------------- 外部入口 -----------------
 

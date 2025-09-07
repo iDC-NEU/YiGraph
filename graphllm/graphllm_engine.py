@@ -16,6 +16,8 @@ from graphllm.database.milvus import MilvusDB
 from rag_engine.rag import RAG_Engine
 from graphllm.model_deploy.model_deployment import OpenAIEnv, OllamaEnv, EmbeddingEnv
 from graphllm.graph_engine.graphcomputation_processor import GraphProcessor
+from graphllm.graph_engine.graphlearning_processor import GraphLearningProcessor
+from graphllm.planner_and_scheduler.scheduler import Scheduler
 
 
 
@@ -58,6 +60,8 @@ class GraphLLMEngine:
         self.llm_env: Optional[Union[OpenAIEnv, OllamaEnv]] = None
         self.embedding_env: Optional[EmbeddingEnv] = None
         self.graph_processor: Optional[GraphProcessor] = None
+        self.gnn_engine: Optional[GraphLearningProcessor] = None
+        self.scheduler: Optional[Scheduler] = None
         
         # 性能监控
         self.metrics = {
@@ -85,6 +89,12 @@ class GraphLLMEngine:
 
         # 4. 初始化图处理器
         self._init_graph_processor()
+
+        # 5. 初始化图学习处理器
+        self._init_graph_learning_processor()
+
+        # 6. 初始化调度器
+        self._init_scheduler()
         
         print("Engine initialization completed!")
     
@@ -175,6 +185,30 @@ class GraphLLMEngine:
         """初始化图处理器"""
         self.graph_processor = GraphProcessor()
 
+    def _init_graph_learning_processor(self):
+        """初始化图学习处理器"""
+        try:
+            self.gnn_engine = GraphLearningProcessor()
+            print("✓ Graph learning processor initialized")
+        except Exception as e:
+            print(f"✗ Graph learning processor initialization failed: {e}")
+            raise
+
+    def _init_scheduler(self):
+        """初始化调度器"""
+        try:
+            self.scheduler = Scheduler(
+                graph_engine=self.graph_processor,
+                gnn_engine=self.gnn_engine,
+                llm_client=self.llm_env,
+                max_retries=0,
+                retry_sleep_sec=0.0,
+            )
+            print("✓ Scheduler initialized")
+        except Exception as e:
+            print(f"✗ Scheduler initialization failed: {e}")
+            raise
+
  
     def query(self, question: str) -> str:
         """
@@ -188,6 +222,11 @@ class GraphLLMEngine:
         """
         start_time = time.time()
         
+        # TODO(zihan): 根据输入问题，生成 subquery 构成的 plan，并将 plan 转换为 DAG
+        query_plan =  self.llm_env.plan_subqueries()  # 在 /home/chency/GraphLLM/graphllm/model_deploy/model_deployment.py 中  OllamaEnv 和  OpenAIEnv 分别实现该函数
+        self.scheduler.build_dag_from_subquery_plan(question)
+
+
         # 1. 检索阶段: 调用self.rag_engine.vector_rag.retrieve() 检索与问题相关的论文
         retrieval_result, retrieve_information = self.rag_engine.vector_rag.retrieve(question)
 
