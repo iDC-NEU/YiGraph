@@ -1,5 +1,4 @@
 
-
 """提示词1. 根据问题识别图算法"""
 prompt_select_graph_algorithm_str_en = """
 You are a graph algorithm expert who is good at judging the most appropriate graph algorithm based on natural language questions and relevant context retrieved from the graph algorithm paper knowledge base.

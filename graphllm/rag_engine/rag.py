@@ -528,6 +528,35 @@ class GraphRAG(RAG):
         """
         pass
 
+    def get_all_edges(self):
+        """
+            从nebula中获取所有边,整张图的边表
+            Returns:
+                List[Tuple[str, str, str]]: 每个元素为(head, relation, tail)
+        """
+        triplets = []
+        result = self.graph_db.client.session.execute(
+            f'use {self.graph_db.space_name}; MATCH (n1)-[e]->(n2) RETURN n1, e, n2;'
+        )
+        if result.row_size() > 0:
+            for row in result.rows():
+                values = row.values
+                head = ''
+                relation = ''
+                tail = ''
+                for value in values:
+                    if value.field == 9:  # Vertex
+                        vertex = value.get_vVal()
+                        if not head:
+                            head = vertex.vid.get_sVal().decode('utf-8')
+                        else:
+                            tail = vertex.vid.get_sVal().decode('utf-8')
+                    elif value.field == 10:  # Edge
+                        edge = value.get_eVal()
+                        relation = edge.props.get(b'relationship').get_sVal().decode('utf-8')
+                triplets.append((head, relation, tail))
+        return triplets
+
 
 class VectorRAG(RAG):
 

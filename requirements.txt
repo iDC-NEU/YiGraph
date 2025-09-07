@@ -1,5 +1,5 @@
 python 3.11
-networkx latest
+networkx 3.5.1
 spacy
 pymilvus
 llama-index
@@ -12,3 +12,6 @@ nebula3-python
 requests>=2.31.0
 lxml>=4.9.0
 PyPDF2>=3.0.0
+python-louvain-0.16
+torch-geometric-2.6.1
+scikit-learn==1.7.0

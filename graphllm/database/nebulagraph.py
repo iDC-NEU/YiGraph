@@ -13,6 +13,7 @@ from llama_index.legacy.graph_stores.nebulagraph import NebulaGraphStore
 from nebula3.gclient.net import ConnectionPool
 from nebula3.Config import Config
 from nebula3.data.ResultSet import ResultSet
+from nebula3.data.DataObject import ValueWrapper
 # from nebula3.common import *
 import json
 
@@ -22,6 +23,7 @@ import json
 
 from graphllm.utils.FormatResp import print_resp
 from graphllm.utils.file_operation import *
+from graphllm.database.datatype import *
 import time
 # from database.utils import *
 
@@ -171,6 +173,319 @@ class NebulaClient:
         with open(json_path, 'w', encoding='utf-8') as file:
             json.dump(all_triples, file, ensure_ascii=False, indent=4)
             print(f'save {len(all_triples)} triples to {json_path}.')
+
+
+# 写一个 nebula 的类，将这个文件里（/home/chency/GraphLLM/graphllm/graph_data/AMLSim/load_data_into_nebulagraph.py）关于 nebulagraph的操作 提炼，写一个通用的nebula操作类
+# 需要完成的功能： 指定spacename， 创建tag（作为参数），创建edge_type(作为参数)， 插入点，插入边， 删除space， 提取整张图，提取所有顶点， 根据顶点集合返回每个顶点的k-hop子图 
+class NebulaGraphClient:
+    def __init__(self, 
+                 space_name,
+                 host='127.0.0.1', 
+                 port=9669, 
+                 username='root', 
+                 password='nebula',
+                 vid_type='INT64',
+                 partition_num=3,
+                 replica_factor=1):
+        self.space_name = space_name
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.vid_type = vid_type
+        self.partition_num = partition_num
+        self.replica_factor = replica_factor
+        self.connection_pool = None
+        self.session = None
+        self.vertices = []   
+        self.edges = []     
+        self._connect()
+
+    def _connect(self):
+        config = Config()
+        self.connection_pool = ConnectionPool()
+        assert self.connection_pool.init([(self.host, self.port)], config)
+        self.session = self.connection_pool.get_session(self.username, self.password)
+
+    def use_space(self):
+        resp = self.session.execute(f"USE {self.space_name}")
+        if not resp.is_succeeded():
+            raise RuntimeError(f"切换空间失败: {resp.error_msg()}")
+
+    def create_space(self):
+        resp = self.session.execute(
+            f"CREATE SPACE IF NOT EXISTS {self.space_name} (partition_num = {self.partition_num}, replica_factor = {self.replica_factor}, vid_type = {self.vid_type})")
+        if not resp.is_succeeded():
+            raise RuntimeError(f"创建空间失败: {resp.error_msg()}")
+        time.sleep(3)
+        self.use_space()
+
+    def drop_space(self):
+        resp = self.session.execute(f"DROP SPACE IF EXISTS {self.space_name}")
+        if not resp.is_succeeded():
+            raise RuntimeError(f"删除空间失败: {resp.error_msg()}")
+
+    def create_tag(self, tag_name, fields):
+        """
+        fields: list of (name, type) tuples, e.g. [('name', 'string'), ('age', 'int')]
+        """
+        self.use_space()
+        fields_str = ', '.join([f'{name} {ftype}' for name, ftype in fields])
+        resp = self.session.execute(f"CREATE TAG IF NOT EXISTS {tag_name}({fields_str})")
+        if not resp.is_succeeded():
+            raise RuntimeError(f"创建Tag失败: {resp.error_msg()}")
+        time.sleep(1)
+
+    def create_edge_type(self, edge_name, fields):
+        """
+        fields: list of (name, type) tuples
+        """
+        self.use_space()
+        fields_str = ', '.join([f'{name} {ftype}' for name, ftype in fields])
+        resp = self.session.execute(f"CREATE EDGE IF NOT EXISTS {edge_name}({fields_str})")
+        if not resp.is_succeeded():
+            raise RuntimeError(f"创建Edge Type失败: {resp.error_msg()}")
+        time.sleep(40)
+
+    def insert_vertex(self, tag_name, vid, prop_names, prop_values):
+        """
+        prop_names: list of property names
+        prop_values: list of property values (顺序与prop_names一致)
+        """
+        self.use_space()
+        values_str = ', '.join([self._format_value(v) for v in prop_values])
+        stmt = f'INSERT VERTEX {tag_name}({", ".join(prop_names)}) VALUES {vid}:({values_str})'
+        resp = self.session.execute(stmt)
+        if not resp.is_succeeded():
+            raise RuntimeError(f"插入顶点失败: {resp.error_msg()}\n语句: {stmt}")
+
+    def insert_edge(self, edge_name, src_vid, dst_vid, prop_names, prop_values, rank=None):
+        """
+        prop_names: list of property names
+        prop_values: list of property values (顺序与prop_names一致)
+        rank: 可选，边的rank
+        """
+        self.use_space()
+        values_str = ', '.join([self._format_value(v) for v in prop_values])
+        if rank is not None:
+            stmt = f'INSERT EDGE {edge_name}({", ".join(prop_names)}) VALUES {src_vid} -> {dst_vid}@{rank}:({values_str})'
+        else:
+            stmt = f'INSERT EDGE {edge_name}({", ".join(prop_names)}) VALUES {src_vid} -> {dst_vid}:({values_str})'
+        resp = self.session.execute(stmt)
+        if not resp.is_succeeded():
+            raise RuntimeError(f"插入边失败: {resp.error_msg()}\n语句: {stmt}")
+
+    def get_full_graph(self):
+        """提取整张图（所有顶点和边）"""
+        self.use_space()
+        self.get_all_vertices()
+        self.get_all_edges()
+        return self.vertices, self.edges
+
+    def get_all_vertices(self):
+        """提取所有顶点ID和属性"""
+        self.use_space()
+        self.vertices = []  # 清空之前的数据
+        # 提取顶点信息
+        vertex_resp = self.session.execute("MATCH (v) RETURN v")
+        if vertex_resp.is_succeeded():
+            for row in vertex_resp.rows():
+                v_val = row.values[0].get_vVal()
+                vid = int(v_val.vid.get_iVal())  # 假设 vid 是 int 类型
+                for tag in v_val.tags:
+                    tag_name = tag.name.decode("utf-8")
+                    props = {}
+                    for k, v_raw in tag.props.items():
+                        key = k.decode("utf-8")
+                        v = ValueWrapper(v_raw)
+                        # 按类型解包属性值
+                        if v.is_int():
+                            props[key] = v.as_int()
+                        elif v.is_string():
+                            props[key] = v.as_string()
+                        elif v.is_bool():
+                            props[key] = v.as_bool()
+                        elif v.is_double():
+                            props[key] = v.as_double()
+                        elif v.is_date():
+                            props[key] = v.as_date()
+                        elif v.is_time():
+                            props[key] = v.as_time()
+                        elif v.is_datetime():
+                            props[key] = v.as_datetime()
+                        else:
+                            props[key] = str(v)  # fallback
+                    self.vertices.append(VertexData(vid=vid, properties=props))
+        return self.vertices
+    
+    def get_all_edges(self):
+        """提取所有边和属性"""
+        self.use_space()
+        self.edges = []  # 清空之前的数据
+        edge_resp = self.session.execute("MATCH ()-[e]->() RETURN e")
+        if edge_resp.is_succeeded():
+            for row in edge_resp.rows():
+                e_val = row.values[0].get_eVal()
+                src = int(e_val.src.get_iVal())   # 假设 src 是 int
+                dst = int(e_val.dst.get_iVal())   # 假设 dst 是 int
+                edge_type = e_val.name.decode("utf-8")
+                rank = e_val.ranking
+                props = {}
+                for k, v_raw in e_val.props.items():
+                    key = k.decode("utf-8")
+                    v = ValueWrapper(v_raw)
+                    if v.is_int():
+                        props[key] = v.as_int()
+                    elif v.is_string():
+                        props[key] = v.as_string()
+                    elif v.is_bool():
+                        props[key] = v.as_bool()
+                    elif v.is_double():
+                        props[key] = v.as_double()
+                    elif v.is_date():
+                        props[key] = v.as_date()
+                    elif v.is_time():
+                        props[key] = v.as_time()
+                    elif v.is_datetime():
+                        props[key] = v.as_datetime()
+                    else:
+                        props[key] = str(v)  # fallback
+                self.edges.append(EdgeData(src=src, dst=dst, rank=rank, properties=props))
+        return self.edges
+    
+    def get_k_hop_subgraph(self, vertex_ids, k=1):
+        """
+        根据顶点集合返回每个顶点的k-hop子图
+        :param vertex_ids: list of vertex id (int or str)
+        :param k: hop数
+        :return: dict {vertex_id: [paths]}
+        """
+        self.use_space()
+        result = {}
+        for vid in vertex_ids:
+            # 根据vid_type格式化查询条件
+            if self.vid_type == 'INT64':
+                query = f"MATCH p=(v)-[*1..{k}]-(n) WHERE id(v)=={vid} RETURN p"
+            else:
+                query = f'MATCH p=(v)-[*1..{k}]-(n) WHERE id(v)=="{vid}" RETURN p'
+            resp = self.session.execute(query)
+            paths = []
+            if resp.is_succeeded():
+                for row in resp.rows():
+                    paths.append(row.values[0])
+            result[vid] = paths
+        return result
+
+    def get_vertex_by_id(self, vid):
+        """根据顶点ID获取顶点信息"""
+        self.use_space()
+        if self.vid_type == 'INT64':
+            query = f"MATCH (v) WHERE id(v)=={vid} RETURN v"
+        else:
+            query = f'MATCH (v) WHERE id(v)=="{vid}" RETURN v'
+        
+        resp = self.session.execute(query)
+        if resp.is_succeeded() and resp.row_size() > 0:
+            v_val = resp.rows()[0].values[0].get_vVal()
+            if self.vid_type == 'INT64':
+                vid_actual = int(v_val.vid.get_iVal())
+            else:
+                vid_actual = v_val.vid.get_sVal().decode('utf-8')
+            
+            props = {}
+            for tag in v_val.tags:
+                for k, v_raw in tag.props.items():
+                    key = k.decode("utf-8")
+                    v = ValueWrapper(v_raw)
+                    if v.is_int():
+                        props[key] = v.as_int()
+                    elif v.is_string():
+                        props[key] = v.as_string()
+                    elif v.is_bool():
+                        props[key] = v.as_bool()
+                    elif v.is_double():
+                        props[key] = v.as_double()
+                    else:
+                        props[key] = str(v)
+            return VertexData(vid=vid_actual, properties=props)
+        return None
+
+    def get_neighbors(self, vid, direction='both'):
+        """
+        获取指定顶点的邻居
+        :param vid: 顶点ID
+        :param direction: 'in', 'out', 'both'
+        :return: list of neighbor vertex IDs
+        """
+        self.use_space()
+        if direction == 'in':
+            if self.vid_type == 'INT64':
+                query = f"MATCH (n)-[e]->(v) WHERE id(v)=={vid} RETURN id(n)"
+            else:
+                query = f'MATCH (n)-[e]->(v) WHERE id(v)=="{vid}" RETURN id(n)'
+        elif direction == 'out':
+            if self.vid_type == 'INT64':
+                query = f"MATCH (v)-[e]->(n) WHERE id(v)=={vid} RETURN id(n)"
+            else:
+                query = f'MATCH (v)-[e]->(n) WHERE id(v)=="{vid}" RETURN id(n)'
+        else:  # both
+            if self.vid_type == 'INT64':
+                query = f"MATCH (v)-[e]-(n) WHERE id(v)=={vid} RETURN id(n)"
+            else:
+                query = f'MATCH (v)-[e]-(n) WHERE id(v)=="{vid}" RETURN id(n)'
+        
+        resp = self.session.execute(query)
+        neighbors = []
+        if resp.is_succeeded():
+            for row in resp.rows():
+                neighbor_id = row.values[0].cast()
+                neighbors.append(neighbor_id)
+        return neighbors
+
+    def count_vertices(self):
+        """统计顶点数量"""
+        self.use_space()
+        resp = self.session.execute("MATCH (v) RETURN count(v)")
+        if resp.is_succeeded():
+            return resp.rows()[0].values[0].as_int()
+        return 0
+
+    def count_edges(self):
+        """统计边数量"""
+        self.use_space()
+        resp = self.session.execute("MATCH ()-[e]->() RETURN count(e)")
+        if resp.is_succeeded():
+            return resp.rows()[0].values[0].as_int()
+        return 0
+
+    def execute_query(self, query):
+        """执行自定义查询"""
+        self.use_space()
+        resp = self.session.execute(query)
+        if resp.is_succeeded():
+            return resp
+        else:
+            raise RuntimeError(f"查询执行失败: {resp.error_msg()}")
+
+    def _format_value(self, v):
+        if v is None:
+            return 'NULL'
+        elif isinstance(v, str):
+            return f'"{v}"'
+        elif isinstance(v, bool):
+            return str(v).lower()
+        else:
+            return str(v)
+
+    def close(self):
+        if self.session:
+            self.session.release()
+        if self.connection_pool:
+            self.connection_pool.close()
+
+    def __del__(self):
+        self.close()
+
 
 
 class NebulaDB:
@@ -793,6 +1108,7 @@ def test_ppr(db: NebulaDB):
     return filter_rels, filter_triplets
 
 
+
 if __name__ == '__main__':
 
     # space_name = 'integrationrgb'
@@ -818,12 +1134,12 @@ if __name__ == '__main__':
     # space_name = 'kelm_1m'
     # space_name = 'rgb_llama2_70b'
     # space_name = 'newrgb'
-    db = NebulaDB(space_name)
+    # db = NebulaDB(space_name)
 
     # db.show_edges()
-    db.info()
-    db.count_edges()
-    db.show_space()
+    # db.info()
+    # db.count_edges()
+    # db.show_space()
 
     space_name = 'multihop_ccy'
     # client.drop_space('hotpotqa')
@@ -838,3 +1154,11 @@ if __name__ == '__main__':
     # test_query_time(db)
     # test_ppr(db)
     # test_simple_pruning(db)
+
+    testclient = NebulaGraphClient(space_name="AMLSim1K")
+    vertices = testclient.get_all_vertices()
+    edges = testclient.get_all_edges()
+    print(f"vertices number: {len(vertices)}, edge number: {len(edges)}")
+    print(vertices[0])
+    print(edges[0])
+ 

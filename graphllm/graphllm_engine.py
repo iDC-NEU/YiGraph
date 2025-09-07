@@ -15,7 +15,7 @@ from graphllm.database.nebulagraph import NebulaDB
 from graphllm.database.milvus import MilvusDB
 from rag_engine.rag import RAG_Engine
 from graphllm.model_deploy.model_deployment import OpenAIEnv, OllamaEnv, EmbeddingEnv
-from graphllm.graph_engine.graph_processor import GraphProcessor
+from graphllm.graph_engine.graphcomputation_processor import GraphProcessor
 
 
 
@@ -158,7 +158,6 @@ class GraphLLMEngine:
     def _init_rag_engines(self):
         """初始化RAG引擎"""
         try:
-
             self.rag_engine = RAG_Engine(
                 vector_db=self.vector_db,
                 vector_k_similarity=self.config.vector_rag_config.get("k_similarity", 5),
@@ -177,7 +176,6 @@ class GraphLLMEngine:
         self.graph_processor = GraphProcessor()
 
  
-    
     def query(self, question: str) -> str:
         """
         查询处理：多模态检索 + LLM生成
@@ -195,13 +193,14 @@ class GraphLLMEngine:
 
         # 2. 图算法和问题实体确定阶段，先调用 self.llm_env.get_graph_algorithm 确定图算法执行计划; 再调用 self.llm_env.get_question_entity 确定问题实体
         graph_algorithm_plan = self.llm_env.get_graph_algorithm(question, retrieval_result)
-        question_entity_list = self.llm_env.get_question_entity(question)
+        # question_entity_list = self.llm_env.get_question_entity(question)   # 暂时不使用
 
         # 3. 根据问题实体列表，调用self.rag_engine.graph_rag.query_with_entity() 获取这些子图的边表形式
-        graph_data_list = self.rag_engine.graph_rag.query_with_entity(question_entity_list)
+        # graph_data_list = self.rag_engine.graph_rag.query_with_entity(question_entity_list)
+        graph_data_list = self.rag_engine.graph_rag.get_all_edges()
 
         # 4. 将边表和算法执行计划传入self.graph_processor.graph_algorithm_execution() 执行图算法
-        results = graph_algorithm_result = self.graph_processor.execute_plan(graph_data_list, graph_algorithm_plan)
+        results  = self.graph_processor.execute_plan(graph_data_list, graph_algorithm_plan)
         
         # 5. 将图算法结果list中的最后一个结果和问题实体列表传入self.llm_env.get_graph_algorithm_result() 生成回答
         response = self.llm_env.get_graph_algorithm_result(results[-1], question_entity_list)

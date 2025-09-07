@@ -1,0 +1,6 @@
+[submodule "third_party/AMLSim"]
+	path = third_party/AMLSim
+	url = git@github.com:IBM/AMLSim.git
+[submodule "third_party/networkx"]
+	path = third_party/networkx
+	url = git@github.com:networkx/networkx.git
