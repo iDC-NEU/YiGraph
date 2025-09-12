@@ -20,9 +20,11 @@ from llama_index.core.embeddings import resolve_embed_model
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from prompt_template.llm_prompt import prompt_select_graph_algorithm_str_en, prompt_select_graph_algorithm_str_zh
+from graphllm.prompt_template.llm_prompt import prompt_select_graph_algorithm_str_en, prompt_select_graph_algorithm_str_zh
 
-from model_deploy.prompt import (
+import requests # deepseek
+
+from graphllm.model_deploy.prompt import (
     command_keyword_extract_prompt_template,
     command_synonym_expand_prompt_template,
     gemma_keyword_extract_prompt_template,
@@ -321,6 +323,52 @@ class OllamaEnv:
     def get_quetion_response(self, question, graph_result, language="en"):  #TODO: 需要补充一个函数
         """根据问题和图算法结果，生成响应"""
         pass
+    
+    def plan_subqueries(self, decompose: bool, query: str) -> dict:
+        if decompose == False: 
+            # Do not decompose, treat as a single question
+            return{"subqueries": [{
+                        "id": "q1",
+                        "query": query,
+                        "depends_on": []
+                    }]}  
+        prompt = f"""You are an AI assistant specialized in decomposing complex queries. Your task is to break down a complex question into multiple sub-queries that have logical dependencies.
+         Each sub-query must have a unique ID (e.g., "q1", "q2"), the query text itself, and a depends_on list specifying which other sub-query IDs must be resolved before this one can be answered. 
+         Infer dependencies based on logical necessity. If answering a sub-query requires the answer from another sub-query, specify that ID in the depends_on field. Dependencies should be based on prerequisites and the flow of information.
+         Example for Guidance:Input Query:
+"Recently I discovered that Anna's transaction behavior is anomalous and she might be a potential fraud user. I want to find the potential fraud community around her, suggest possible suspicious transaction paths, and determine how much cash has likely been illegally transferred out."
+Output:{{
+  "subqueries": [
+    {{
+      "id": "q1",
+      "query": "Is Anna a fraud user based on her anomalous transaction behavior?",
+      "depends_on": []
+    }},
+    {{
+      "id": "q2",
+      "query": "Find the potential fraud community centered around Anna.",
+      "depends_on": ["q1"]  
+    }},
+    {{
+      "id": "q3",
+      "query": "What are the possible suspicious transaction paths associated with Anna?",
+      "depends_on": ["q1"] 
+    }},
+    {{
+      "id": "q4",
+      "query": "Determine how much cash has likely been illegally transferred out.",
+      "depends_on": ["q1", "q2", "q3"]  
+    }}
+  ]
+}} Now, based on the instructions and example above, decompose the new complex query provided by the user. Your output must be the valid JSON object only.The query is : {query}.Note: Your response must be a valid JSON object without any additional text or explanation."""
+        response = self.llm.complete(prompt)
+        cleaned_response = str(response.text).strip()
+        if cleaned_response.startswith("```"):
+            cleaned_response = cleaned_response[3:]
+        if cleaned_response.endswith("```"):
+            cleaned_response = cleaned_response[:-3]
+        return json.loads(cleaned_response)
+
 
 class OpenAIEnv:
 
@@ -365,9 +413,59 @@ class OpenAIEnv:
     def get_quetion_response(self, question, graph_result, language="en"):  #TODO: 需要补充一个函数
         """根据问题和图算法结果，生成响应"""
         pass
+    
+    def plan_subqueries(self, decompose: bool, query: str) -> dict:
+        if decompose == False: 
+            # Do not decompose, treat as a single question
+            return{"subqueries": [{
+                        "id": "q1",
+                        "query": query,
+                        "depends_on": []
+                    }]}  
+        prompt = f"""You are an AI assistant specialized in decomposing complex queries. Your task is to break down a complex question into multiple sub-queries that have logical dependencies.
+        Each sub-query must have a unique ID (e.g., "q1", "q2"), the query text itself, and a depends_on list specifying which other sub-query IDs must be resolved before this one can be answered.
+        Infer dependencies based on logical necessity. If answering a sub-query requires the answer from another sub-query, specify that ID in the depends_on field. Dependencies should be based on prerequisites and the flow of information.
+        Example for Guidance:Input Query:
+        "Recently I discovered that Anna's transaction behavior is anomalous and she might be a potential fraud user. I want to find the potential fraud community around her, suggest possible suspicious transaction paths, and determine how much cash has likely been illegally transferred out."
+        Output:{{
+        "subqueries": [
+            {{
+            "id": "q1",
+            "query": "Is Anna a fraud user based on her anomalous transaction behavior?",
+            "depends_on": []
+            }},
+            {{
+            "id": "q2",
+            "query": "Find the potential fraud community centered around Anna.",
+            "depends_on": ["q1"]  
+            }},
+            {{
+            "id": "q3",
+            "query": "What are the possible suspicious transaction paths associated with Anna?",
+            "depends_on": ["q1"] 
+            }},
+            {{
+            "id": "q4",
+            "query": "Determine how much cash has likely been illegally transferred out.",
+            "depends_on": ["q1", "q2", "q3"]  
+            }}
+        ]
+        }} Now, based on the instructions and example above, decompose the new complex query provided by the user. Your output must be the valid JSON object only.The query is : {query}"""
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        response = response.choices[0].message.content
+        return json.loads(response)
+
 
 
 if __name__ == '__main__':
 
-    llm_env = OllamaEnv()
-    print(llm_env.complete("山西的省会城市？"))
+    llm_env = OpenAIEnv("https://gitaigc.com/v1/", "sk-G30rFStBigqXtuyIOkOo7Zh4QNxO8ZAjfZQ5DYPCgMXbPv8q", "gpt-4o-mini")
+    queries = "Reconstruct the main routes of the medieval Silk Road (overland), analyze the relationship between route changes and contemporary climate change (e.g., glacial meltwater, precipitation changes), and assess its impact on the distribution of cultural heritage sites in modern cities along the route."
+    print(llm_env.plan_subqueries(True,queries))
+
+    # llm_env = OllamaEnv()
+    # queries = "What is the name of the deskmate of the US President's son?"
+    # print(llm_env.plan_subqueries(True,queries))
