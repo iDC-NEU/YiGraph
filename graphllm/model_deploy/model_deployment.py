@@ -426,31 +426,32 @@ class OpenAIEnv:
         Each sub-query must have a unique ID (e.g., "q1", "q2"), the query text itself, and a depends_on list specifying which other sub-query IDs must be resolved before this one can be answered.
         Infer dependencies based on logical necessity. If answering a sub-query requires the answer from another sub-query, specify that ID in the depends_on field. Dependencies should be based on prerequisites and the flow of information.
         Example for Guidance:Input Query:
-        "Recently I discovered that Anna's transaction behavior is anomalous and she might be a potential fraud user. I want to find the potential fraud community around her, suggest possible suspicious transaction paths, and determine how much cash has likely been illegally transferred out."
+        "A customer has made several high-value purchases in the last month but has also initiated an unusually high number of returns. I need to determine if this is a case 
+        of 'wardrobing' or fraudulent returns, identify other accounts potentially linked to this behavior, and estimate the total financial loss to the company."
         Output:{{
         "subqueries": [
             {{
-            "id": "q1",
-            "query": "Is Anna a fraud user based on her anomalous transaction behavior?",
-            "depends_on": []
+                "id": "q1",
+                "query": "What are the specific patterns of the customer's high-value purchases and returns in the last month?",
+                "depends_on": []
             }},
             {{
-            "id": "q2",
-            "query": "Find the potential fraud community centered around Anna.",
-            "depends_on": ["q1"]  
+                "id": "q2",
+                "query": "Based on the purchase and return patterns, is this behavior indicative of 'wardrobing' or fraudulent activity?",
+                "depends_on": ["q1"]
             }},
             {{
-            "id": "q3",
-            "query": "What are the possible suspicious transaction paths associated with Anna?",
-            "depends_on": ["q1"] 
+                "id": "q3",
+                "query": "Can we find other user accounts that are linked to this customer (e.g., by shipping address, payment method, IP address) and exhibit similar behavior?",
+                "depends_on": ["q1", "q2"]
             }},
             {{
-            "id": "q4",
-            "query": "Determine how much cash has likely been illegally transferred out.",
-            "depends_on": ["q1", "q2", "q3"]  
+                "id": "q4",
+                "query": "What is the total estimated financial loss from the confirmed fraudulent returns, including from the original customer and any linked accounts?",
+                "depends_on": ["q2", "q3"]
             }}
         ]
-        }} Now, based on the instructions and example above, decompose the new complex query provided by the user. Your output must be the valid JSON object only.The query is : {query}"""
+        }}Now, based on the instructions and example above, decompose the new complex query provided by the user. Your output must be the valid JSON object only.The query is : {query}"""
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[{"role": "user", "content": prompt}]
@@ -463,8 +464,10 @@ class OpenAIEnv:
 if __name__ == '__main__':
 
     llm_env = OpenAIEnv("https://gitaigc.com/v1/", "sk-G30rFStBigqXtuyIOkOo7Zh4QNxO8ZAjfZQ5DYPCgMXbPv8q", "gpt-4o-mini")
-    queries = "Reconstruct the main routes of the medieval Silk Road (overland), analyze the relationship between route changes and contemporary climate change (e.g., glacial meltwater, precipitation changes), and assess its impact on the distribution of cultural heritage sites in modern cities along the route."
-    print(llm_env.plan_subqueries(True,queries))
+    queries = "Recently I discovered that Anna's transaction behavior is anomalous and she might be a potential fraud user. I want to find the potential fraud community around her, suggest possible suspicious transaction paths, and determine how much cash has likely been illegally transferred out."
+    sub_queries = llm_env.plan_subqueries(True,queries)
+    print(type(sub_queries))
+    print(sub_queries)
 
     # llm_env = OllamaEnv()
     # queries = "What is the name of the deskmate of the US President's son?"
