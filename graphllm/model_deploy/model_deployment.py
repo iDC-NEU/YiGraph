@@ -20,9 +20,9 @@ from llama_index.core.embeddings import resolve_embed_model
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from prompt_template.llm_prompt import prompt_select_graph_algorithm_str_en, prompt_select_graph_algorithm_str_zh
+from graphllm.prompt_template.llm_prompt import prompt_select_graph_algorithm_str_en, prompt_select_graph_algorithm_str_zh
 
-from model_deploy.prompt import (
+from graphllm.model_deploy.prompt import (
     command_keyword_extract_prompt_template,
     command_synonym_expand_prompt_template,
     gemma_keyword_extract_prompt_template,
