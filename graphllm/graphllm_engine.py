@@ -223,8 +223,8 @@ class GraphLLMEngine:
         start_time = time.time()
         
         # TODO(zihan): 根据输入问题，生成 subquery 构成的 plan，并将 plan 转换为 DAG
-        query_plan =  self.llm_env.plan_subqueries()  # 在 /home/chency/GraphLLM/graphllm/model_deploy/model_deployment.py 中  OllamaEnv 和  OpenAIEnv 分别实现该函数
-        self.scheduler.build_dag_from_subquery_plan(question)
+        query_plan =  self.llm_env.plan_subqueries(True, question)  # 在 /home/chency/GraphLLM/graphllm/model_deploy/model_deployment.py 中  OllamaEnv 和  OpenAIEnv 分别实现该函数
+        self.scheduler.build_dag_from_subquery_plan(query_plan)
 
 
         # 1. 检索阶段: 调用self.rag_engine.vector_rag.retrieve() 检索与问题相关的论文

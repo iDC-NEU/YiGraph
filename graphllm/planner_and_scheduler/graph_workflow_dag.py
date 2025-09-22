@@ -1,303 +1,246 @@
-# graph_workflow_dag.py
-from __future__ import annotations
-from enum import Enum
-from dataclasses import dataclass, field, asdict
-from typing import Any, Dict, List, Optional, Set, Iterable, Literal
-from datetime import datetime
-import json
+"""
+简化版本的GraphWorkflowDAG实现
+专注于DAG构建、拓扑排序和依赖关系管理
+"""
+
+from typing import Dict, List, Set, Any, Optional
+from dataclasses import dataclass
 import collections
-
-# ---- Step 定义 --------------------------------------------------------------
-
-class StepType(str, Enum):
-    RETRIEVAL = "retrieval"
-    PLANNING = "planning"
-    GRAPH_ALGORITHM = "graph_algorithm"
-    LLM_INTERACTION = "llm_interaction"
-    AGGREGATION = "aggregation"
 
 
 @dataclass
 class WorkflowStep:
+    """DAG节点，代表一个子问题"""
     step_id: int
-    step_type: StepType                 # "retrieval" | "planning" | "graph_algorithm" | "llm_interaction" | "aggregation" | ...
-    description: str
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    input_data: Any = None
-    output_data: Any = None
-    status: str = "pending"        # "pending" | "running" | "success" | "failed" | "skipped"
-    error: Optional[str] = None
-    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    question: str                           # 该节点代表子问题的问题描述
+    graph_algorithm: Optional[str] = None   # 该节点子问题解决的图算法（设置为None）
+    status: str = "pending"                 # 节点状态: pending, running, success, failed
+    result: Any = None                      # 节点执行结果
+    
+    def __str__(self):
+        return f"Step({self.step_id}): {self.question[:50]}..."
 
-    def to_dict(self) -> Dict[str, Any]:
-        d = asdict(self)
-        # input/output 可能是不可序列化对象，这里尽量转成字符串，避免导出报错
-        if not _is_jsonable(d["input_data"]):
-            d["input_data"] = str(d["input_data"])
-        if not _is_jsonable(d["output_data"]):
-            d["output_data"] = str(d["output_data"])
-        return d
-
-
-def _is_jsonable(x: Any) -> bool:
-    try:
-        json.dumps(x)
-        return True
-    except Exception:
-        return False
-
-
-def _frozen_params(step_type: StepType, params: Dict[str, Any]) -> str:
-    """
-    生成一个可哈希的签名，用于去重/命中缓存：
-    - 步骤类型 + 排序后的参数 JSON
-    """
-    return json.dumps({"t": step_type, "p": params}, sort_keys=True, ensure_ascii=False)
-
-
-# ---- DAG 管理器 ------------------------------------------------------------
 
 class GraphWorkflowDAG:
     """
-    面向图任务的 LLM+Graph 工作流内存（DAG 模式）：
-    - 记录每一步（节点）
-    - 维护依赖（有向无环图）
-    - 支持拓扑排序/就绪队列/回滚/导出/可解释
-    - 简单去重缓存：相同(step_type, parameters) 可复用结果
+    简化版本的GraphWorkflowDAG实现
+    支持拓扑排序和返回拓扑序，维护每个节点的入边和出边
     """
-
+    
     def __init__(self):
         self.steps: Dict[int, WorkflowStep] = {}
-        self.out_edges: Dict[int, Set[int]] = collections.defaultdict(set)  # parent -> children
-        self.in_edges: Dict[int, Set[int]] = collections.defaultdict(set)   # child  -> parents
-        self.next_step_id: int = 0
-        # （可选）结果缓存：signature -> step_id
-        self.signature_index: Dict[str, int] = {}
-
-    # -- 增加步骤 & 依赖 ------------------------------------------------------
-
-    def add_step(
-        self,
-        step_type: StepType,
-        description: str,
-        *,
-        parameters: Optional[Dict[str, Any]] = None,
-        input_data: Any = None,
-        parents: Optional[Iterable[int]] = None,
-        allow_dedup: bool = True
-    ) -> int:
+        self.out_edges: Dict[int, Set[int]] = collections.defaultdict(set)  # 出边: step_id -> {child_steps}
+        self.in_edges: Dict[int, Set[int]] = collections.defaultdict(set)   # 入边: step_id -> {parent_steps}
+        self.next_step_id: int = 1
+    
+    def add_step(self, question: str, graph_algorithm: Optional[str] = None) -> int:
         """
-        新增步骤节点，可一次性指定多个父依赖。
-        若 allow_dedup=True，会尝试用 (step_type, parameters) 去重并复用历史成功结果。
-        返回 step_id。
+        添加新步骤
+        
+        Args:
+            question: 子问题的问题描述
+            graph_algorithm: 图算法名称，默认为None
+            
+        Returns:
+            新步骤的ID
         """
-        parameters = parameters or {}
-
-        if allow_dedup:
-            sig = _frozen_params(step_type, parameters)
-            hit = self.signature_index.get(sig)
-            if hit is not None and self.steps[hit].status == "success":
-                # 复用节点：只需在 DAG 上把 parents 指向这个已存在节点
-                sid = hit
-                if parents:
-                    for p in parents:
-                        self._assert_step_exists(p)
-                        self._add_edge(p, sid)
-                return sid
-
+        step_id = self.next_step_id
         self.next_step_id += 1
-        sid = self.next_step_id
+        
         step = WorkflowStep(
-            step_id=sid,
-            step_type=step_type,
-            description=description,
-            parameters=parameters,
-            input_data=input_data,
-            status="pending"
+            step_id=step_id,
+            question=question,
+            graph_algorithm=graph_algorithm
         )
-        self.steps[sid] = step
-        if parents:
-            for p in parents:
-                self._assert_step_exists(p)
-                self._add_edge(p, sid)
-
-        # 插入后检查是否形成环
-        self._assert_acyclic()
-
-        # 记录签名索引（即便未完成，也可用于避免重复创建节点；真正复用结果看 status）
-        self.signature_index[_frozen_params(step_type, parameters)] = sid
-        return sid
-
+        
+        self.steps[step_id] = step
+        return step_id
+    
     def add_dependency(self, parent_id: int, child_id: int):
-        """后补一条依赖边。"""
-        self._assert_step_exists(parent_id)
-        self._assert_step_exists(child_id)
-        self._add_edge(parent_id, child_id)
-        self._assert_acyclic()
-
-    def _add_edge(self, parent_id: int, child_id: int):
+        """
+        添加依赖边（从parent到child）
+        
+        Args:
+            parent_id: 父步骤ID
+            child_id: 子步骤ID
+        """
+        if parent_id not in self.steps:
+            raise ValueError(f"父步骤 {parent_id} 不存在")
+        if child_id not in self.steps:
+            raise ValueError(f"子步骤 {child_id} 不存在")
         if parent_id == child_id:
-            raise ValueError("不允许自环依赖")
+            raise ValueError("不允许自环")
+        
         self.out_edges[parent_id].add(child_id)
         self.in_edges[child_id].add(parent_id)
-
-    def _assert_step_exists(self, sid: int):
-        if sid not in self.steps:
-            raise KeyError(f"step_id {sid} 不存在")
-
-    def _assert_acyclic(self):
-        # Kahn 拓扑检测：若剩余节点不为 0 则有环
-        indeg = {v: len(self.in_edges[v]) for v in self.steps.keys()}
-        q = collections.deque([v for v, d in indeg.items() if d == 0])
-        visited = 0
-        while q:
-            u = q.popleft()
-            visited += 1
-            for w in self.out_edges.get(u, []):
-                indeg[w] -= 1
-                if indeg[w] == 0:
-                    q.append(w)
-        if visited != len(self.steps):
-            raise ValueError("检测到循环依赖（DAG 不能有环）")
-
-    # -- 更新状态/写回结果 ----------------------------------------------------
-
-    def set_running(self, step_id: int):
-        self._assert_step_exists(step_id)
-        self.steps[step_id].status = "running"
-
-    def set_success(self, step_id: int, output_data: Any = None):
-        self._assert_step_exists(step_id)
-        s = self.steps[step_id]
-        s.status = "success"
-        s.output_data = output_data
-
-    def set_failed(self, step_id: int, error: str):
-        self._assert_step_exists(step_id)
-        s = self.steps[step_id]
-        s.status = "failed"
-        s.error = error
-
-    def set_skipped(self, step_id: int, reason: str = ""):
-        self._assert_step_exists(step_id)
-        s = self.steps[step_id]
-        s.status = "skipped"
-        s.error = reason or s.error
-
-    # -- 查询/计划 ------------------------------------------------------------
-
+        
+        # 检查是否产生环
+        if self._has_cycle():
+            # 回滚添加的边
+            self.out_edges[parent_id].discard(child_id)
+            self.in_edges[child_id].discard(parent_id)
+            raise ValueError(f"添加边 {parent_id} -> {child_id} 会产生环")
+    
+    def parents_of(self, step_id: int) -> List[int]:
+        """获取步骤的所有父步骤（入边）"""
+        if step_id not in self.steps:
+            raise ValueError(f"步骤 {step_id} 不存在")
+        return list(self.in_edges[step_id])
+    
+    def children_of(self, step_id: int) -> List[int]:
+        """获取步骤的所有子步骤（出边）"""
+        if step_id not in self.steps:
+            raise ValueError(f"步骤 {step_id} 不存在")
+        return list(self.out_edges[step_id])
+    
     def topological_order(self) -> List[int]:
-        """返回 DAG 的一个拓扑序。"""
-        indeg = {v: len(self.in_edges[v]) for v in self.steps.keys()}
-        q = collections.deque([v for v, d in indeg.items() if d == 0])
-        order = []
-        while q:
-            u = q.popleft()
-            order.append(u)
-            for w in self.out_edges.get(u, []):
-                indeg[w] -= 1
-                if indeg[w] == 0:
-                    q.append(w)
-        if len(order) != len(self.steps):
-            raise ValueError("检测到循环依赖（无法拓扑排序）")
-        return order
-
+        """
+        返回DAG的拓扑序
+        
+        Returns:
+            拓扑排序后的步骤ID列表
+            
+        Raises:
+            ValueError: 如果图中存在环
+        """
+        # Kahn算法进行拓扑排序
+        in_degree = {step_id: len(self.in_edges[step_id]) for step_id in self.steps}
+        queue = collections.deque([step_id for step_id, degree in in_degree.items() if degree == 0])
+        result = []
+        
+        while queue:
+            step_id = queue.popleft()
+            result.append(step_id)
+            
+            # 处理当前步骤的所有子步骤
+            for child_id in self.out_edges[step_id]:
+                in_degree[child_id] -= 1
+                if in_degree[child_id] == 0:
+                    queue.append(child_id)
+        
+        # 检查是否所有步骤都被访问（即是否存在环）
+        if len(result) != len(self.steps):
+            raise ValueError("图中存在环，无法进行拓扑排序")
+        
+        return result
+    
+    def _has_cycle(self) -> bool:
+        """检查图中是否存在环"""
+        try:
+            self.topological_order()
+            return False
+        except ValueError:
+            return True
+    
     def ready_steps(self) -> List[int]:
         """
-        返回“就绪步骤”：自身 pending 且 所有父节点 status 为 success。
-        可用于调度器按批执行。
+        获取当前可以执行的步骤（所有父步骤都已完成）
+        
+        Returns:
+            可执行步骤ID列表
         """
         ready = []
-        for sid, step in self.steps.items():
+        for step_id, step in self.steps.items():
             if step.status != "pending":
                 continue
-            parents = self.in_edges.get(sid, set())
-            if all(self.steps[p].status == "success" for p in parents):
-                ready.append(sid)
+            
+            # 检查所有父步骤是否都已完成
+            parents = self.in_edges[step_id]
+            if all(self.steps[parent_id].status == "success" for parent_id in parents):
+                ready.append(step_id)
+        
         return ready
-
-    def parents_of(self, step_id: int) -> List[int]:
-        self._assert_step_exists(step_id)
-        return list(self.in_edges.get(step_id, set()))
-
-    def children_of(self, step_id: int) -> List[int]:
-        self._assert_step_exists(step_id)
-        return list(self.out_edges.get(step_id, set()))
-
-    def ancestors_of(self, step_id: int) -> Set[int]:
-        self._assert_step_exists(step_id)
-        seen, stack = set(), list(self.in_edges.get(step_id, set()))
-        while stack:
-            u = stack.pop()
-            if u in seen: 
-                continue
-            seen.add(u)
-            stack.extend(self.in_edges.get(u, set()))
-        return seen
-
-    def descendants_of(self, step_id: int) -> Set[int]:
-        self._assert_step_exists(step_id)
-        seen, stack = set(), list(self.out_edges.get(step_id, set()))
-        while stack:
-            u = stack.pop()
-            if u in seen:
-                continue
-            seen.add(u)
-            stack.extend(self.out_edges.get(u, set()))
-        return seen
-
-    # -- 回滚 ---------------------------------------------------------------
-
-    def rollback_to(self, keep_upto_step_id: int):
-        """
-        回滚：只保留 step_id <= keep_upto_step_id 的节点及其边，删除其后的所有后继。
-        """
-        self._assert_step_exists(keep_upto_step_id)
-        # 要保留的集合
-        keep = {sid for sid in self.steps if sid <= keep_upto_step_id}
-        # 同时清理这些节点之间的边之外的其它所有节点
-        remove = [sid for sid in self.steps.keys() if sid not in keep]
-        for sid in remove:
-            # 从图中摘除边
-            for p in self.in_edges.get(sid, set()):
-                self.out_edges[p].discard(sid)
-            for c in self.out_edges.get(sid, set()):
-                self.in_edges[c].discard(sid)
-            self.in_edges.pop(sid, None)
-            self.out_edges.pop(sid, None)
-            # 删除节点
-            self.steps.pop(sid, None)
-        # 修正 next_step_id（不回退编号，以免与历史冲突；也可以选择回退）
-        # self.next_step_id = max(keep) if keep else 0
-
-    # -- 导出/可视化 ---------------------------------------------------------
-
+    
+    def set_success(self, step_id: int, output_data: Any = None):
+        """设置步骤为成功状态"""
+        if step_id not in self.steps:
+            raise ValueError(f"步骤 {step_id} 不存在")
+        
+        self.steps[step_id].status = "success"
+        if output_data is not None:
+            self.steps[step_id].result = output_data
+    
+    def set_running(self, step_id: int):
+        """设置步骤为运行状态"""
+        if step_id not in self.steps:
+            raise ValueError(f"步骤 {step_id} 不存在")
+        
+        self.steps[step_id].status = "running"
+    
+    def set_failed(self, step_id: int, error: str):
+        """设置步骤为失败状态"""
+        if step_id not in self.steps:
+            raise ValueError(f"步骤 {step_id} 不存在")
+        
+        self.steps[step_id].status = "failed"
+        self.steps[step_id].result = error
+    
+    def get_step_info(self, step_id: int) -> Dict[str, Any]:
+        """获取步骤的详细信息"""
+        if step_id not in self.steps:
+            raise ValueError(f"步骤 {step_id} 不存在")
+        
+        step = self.steps[step_id]
+        return {
+            "step_id": step.step_id,
+            "question": step.question,
+            "graph_algorithm": step.graph_algorithm,
+            "status": step.status,
+            "parents": list(self.in_edges[step_id]),
+            "children": list(self.out_edges[step_id]),
+            "result": step.result
+        }
+    
+    def print_dag_info(self):
+        """打印DAG的详细信息"""
+        print(f"DAG包含 {len(self.steps)} 个步骤")
+        print("\n步骤详情:")
+        
+        try:
+            topo_order = self.topological_order()
+            print(f"拓扑序: {topo_order}")
+            
+            for step_id in topo_order:
+                info = self.get_step_info(step_id)
+                print(f"\n步骤 {step_id}:")
+                print(f"  问题: {info['question']}")
+                print(f"  图算法: {info['graph_algorithm']}")
+                print(f"  状态: {info['status']}")
+                print(f"  父步骤: {info['parents']}")
+                print(f"  子步骤: {info['children']}")
+                
+        except ValueError as e:
+            print(f"拓扑排序失败: {e}")
+    
     def export_as_dict(self) -> Dict[str, Any]:
-        """
-        导出 DAG：节点列表 + 边列表
-        """
-        nodes = [self.steps[sid].to_dict() for sid in sorted(self.steps)]
-        edges = []
-        for u, outs in self.out_edges.items():
-            for v in outs:
-                edges.append({"from": u, "to": v})
-        return {"nodes": nodes, "edges": edges}
-
-    def export_as_json(self, filepath: str):
-        obj = self.export_as_dict()
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(obj, f, ensure_ascii=False, indent=2)
-
+        """将DAG转换为字典格式"""
+        steps_info = []
+        for step_id in self.steps:
+            info = self.get_step_info(step_id)
+            steps_info.append(info)
+        
+        edges_info = []
+        for parent_id, children in self.out_edges.items():
+            for child_id in children:
+                edges_info.append({"from": parent_id, "to": child_id})
+        
+        return {
+            "nodes": steps_info,
+            "edges": edges_info,
+            "step_count": len(self.steps),
+            "edge_count": len(edges_info)
+        }
+    
     def to_dot(self) -> str:
         """
-        生成 Graphviz DOT 字符串，便于可视化。
+        生成 Graphviz DOT 字符串，便于可视化
         """
         lines = ["digraph G {"]
-        for sid, s in self.steps.items():
-            label = f"{sid}:{s.step_type}\\n{s.status}"
-            lines.append(f'  {sid} [label="{label}"];')
-        for u, outs in self.out_edges.items():
-            for v in outs:
-                lines.append(f"  {u} -> {v};")
+        for step_id, step in self.steps.items():
+            label = f"{step_id}:{step.question[:20]}...\\n{step.status}"
+            lines.append(f'  {step_id} [label="{label}"];')
+        for parent_id, children in self.out_edges.items():
+            for child_id in children:
+                lines.append(f"  {parent_id} -> {child_id};")
         lines.append("}")
         return "\n".join(lines)

@@ -43,12 +43,91 @@ class Scheduler:
         }
 
     
-    def build_dag_from_subquery_plan(self, subquery: Dict[str, Any]) -> GraphWorkflowDAG:
+    def build_dag_from_subquery_plan(self, subquery_plan: Dict[str, Any]) -> GraphWorkflowDAG:
         """
         根据 JSON 格式的 subquery 构造 DAG。
-        TODO: 实现从 subquery 到 GraphWorkflowDAG 的转换逻辑。
+        
+        Args:
+            subquery_plan: 子查询计划，格式为:
+                {
+                    "subqueries": [
+                        {
+                            "id": "q1",
+                            "query": "问题描述",
+                            "depends_on": ["q0"]  # 依赖的其他子查询ID列表
+                        },
+                        ...
+                    ]
+                }
+        
+        Returns:
+            GraphWorkflowDAG: 构建完成的DAG对象
+            
+        Raises:
+            ValueError: 如果输入格式不正确或存在循环依赖
         """
-        pass
+        # 创建新的DAG实例
+        self.dag = GraphWorkflowDAG()
+        
+        # 提取子查询列表
+        subqueries = subquery_plan.get("subqueries", [])
+        if not subqueries:
+            raise ValueError("子查询计划为空，必须包含至少一个子查询")
+        
+        # 步骤1: 建立查询ID到步骤ID的映射
+        query_id_to_step_id = {}
+        
+        # 步骤2: 为每个子查询创建DAG步骤
+        print(f"正在创建 {len(subqueries)} 个DAG步骤...")
+        for subquery in subqueries:
+            # 验证子查询格式
+            if "id" not in subquery:
+                raise ValueError("子查询缺少必需的'id'字段")
+            if "query" not in subquery:
+                raise ValueError("子查询缺少必需的'query'字段")
+            
+            query_id = subquery["id"]
+            question = subquery["query"]
+            
+            # 创建步骤（图算法设置为None）
+            step_id = self.dag.add_step(
+                question=question,
+                graph_algorithm=None
+            )
+            
+            query_id_to_step_id[query_id] = step_id
+            print(f"  创建步骤 {step_id} for 查询 '{query_id}': {question[:50]}...")
+        
+        # 步骤3: 建立依赖关系
+        print("正在建立依赖关系...")
+        for subquery in subqueries:
+            query_id = subquery["id"]
+            depends_on = subquery.get("depends_on", [])
+            
+            current_step_id = query_id_to_step_id[query_id]
+            
+            # 为每个依赖关系添加边
+            for parent_query_id in depends_on:
+                if parent_query_id not in query_id_to_step_id:
+                    raise ValueError(f"依赖的查询ID '{parent_query_id}' 在子查询列表中不存在")
+                
+                parent_step_id = query_id_to_step_id[parent_query_id]
+                print(f"  添加依赖: {parent_step_id}({parent_query_id}) -> {current_step_id}({query_id})")
+                
+                # 添加边，如果产生环会自动抛出异常
+                self.dag.add_dependency(parent_step_id, current_step_id)
+        
+        # 步骤4: 验证DAG并获取拓扑序
+        try:
+            topological_order = self.dag.topological_order()
+            print(f"✓ DAG构建成功！拓扑序: {topological_order}")
+        except ValueError as e:
+            raise ValueError(f"DAG构建失败，检测到循环依赖: {e}")
+        
+        # 步骤5: 存储查询ID映射（用于后续查询）
+        self.query_id_mapping = query_id_to_step_id
+        
+        return self.dag
 
     # ----------------- 外部入口 -----------------
 
