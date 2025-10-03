@@ -1,6 +1,6 @@
 from typing import List, Tuple, Dict, Any, Optional, Union
-from graphllm.database.datatype import *
-from graphllm.database.nebulagraph import *
+from database.datatype import *
+from database.nebulagraph import *
 
 class GraphProcessor:
     def __init__(self):

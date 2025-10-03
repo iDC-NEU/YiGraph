@@ -1,0 +1,20 @@
+# MCP图计算系统依赖
+
+# MCP核心依赖
+mcp[cli]>=1.0.0
+
+# 图计算依赖
+networkx>=3.0
+python-louvain>=0.16
+
+# 数据处理依赖
+pydantic>=2.0.0
+
+# 类型提示支持
+typing-extensions>=4.0.0
+
+# 可选：用于更好的JSON处理
+ujson>=5.0.0
+
+# 可选：用于更好的日志格式
+colorlog>=6.0.0

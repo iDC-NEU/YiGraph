@@ -1,4 +1,10 @@
 import os
+
+os.environ['TRANSFORMERS_OFFLINE'] = '1'
+os.environ['HF_DATASETS_OFFLINE'] = '1'
+
+
+
 # from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from typing import Any, Dict, List, Optional, Tuple
 from llama_index.core import StorageContext
@@ -21,9 +27,9 @@ import json
 # sys.path.append('.')
 # sys.path.append('..')
 
-from graphllm.utils.FormatResp import print_resp
-from graphllm.utils.file_operation import *
-from graphllm.database.datatype import *
+from utils.FormatResp import print_resp
+from utils.file_operation import *
+from database.datatype import *
 import time
 # from database.utils import *
 
@@ -44,11 +50,13 @@ from llama_index.core.retrievers import (
     KnowledgeGraphRAGRetriever, )
 
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from graphllm.utils.extract_subgraph import filter_pr_rels
-from graphllm.utils.pruning import simple_pruning
+from utils.extract_subgraph import filter_pr_rels
+from utils.pruning import simple_pruning
 
 fmt = "\n=== {:30} ===\n"
-embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+#embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+# 使用本地模型路径
+embed_model = HuggingFaceEmbedding(model_name="/home/gaojq/AAG/bge-small-en-v1.5")
 
 
 class NebulaClient:

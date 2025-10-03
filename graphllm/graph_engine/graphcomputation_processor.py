@@ -2,9 +2,9 @@ import networkx as nx
 import logging
 import community 
 from typing import List, Tuple, Dict, Any, Optional, Union
-from graphllm.database.datatype import *
-from graphllm.database.nebulagraph import *
-from graphllm.graph_engine.graph_processor import GraphProcessor
+from database.datatype import *
+from database.nebulagraph import *
+from graph_engine.graph_processor import GraphProcessor
 
 logger = logging.getLogger(__name__)
 
