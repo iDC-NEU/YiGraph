@@ -1,0 +1,3152 @@
+{
+  "run_betweenness_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_betweenness_centrality_subset": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_closeness_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_current_flow_betweenness_centrality_subset": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_current_flow_closeness_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_degree_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_dispersion": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_edge_betweenness_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_edge_betweenness_centrality_subset": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_edge_current_flow_betweenness_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_edge_current_flow_betweenness_centrality_subset": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_edge_load_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_eigenvector_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_eigenvector_centrality_numpy": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_estrada_index": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_global_reaching_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_group_betweenness_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_group_closeness_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_group_degree_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_group_in_degree_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_group_out_degree_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_harmonic_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_in_degree_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_incremental_closeness_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_information_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_katz_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_katz_centrality_numpy": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_laplacian_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_load_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_local_reaching_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_out_degree_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_percolation_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_prominent_group": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_second_order_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_subgraph_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_subgraph_centrality_exp": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_trophic_differences": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_trophic_incoherence_parameter": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_trophic_levels": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_voterank": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_asyn_fluidc": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_asyn_lpa_communities": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_edge_betweenness_partition": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_edge_current_flow_betweenness_partition": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_fast_label_propagation_communities": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_girvan_newman": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_greedy_modularity_communities": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_greedy_source_expansion": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_is_partition": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_k_clique_communities": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_kernighan_lin_bisection": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_label_propagation_communities": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_leiden_communities": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_leiden_partitions": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_louvain_communities": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_louvain_partitions": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_lukes_partitioning": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_modularity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_naive_greedy_modularity_communities": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_partition_quality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_google_matrix": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_pagerank": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_hits": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_articulation_points": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_attracting_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_biconnected_component_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_biconnected_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_condensation": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_connected_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_is_attracting_component": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_biconnected": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_connected": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_semiconnected": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_strongly_connected": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "boolean",
+        "description": "Boolean result"
+      }
+    }
+  },
+  "run_is_weakly_connected": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "boolean",
+        "description": "Boolean result"
+      }
+    }
+  },
+  "run_kosaraju_strongly_connected_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_node_connected_component": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_number_attracting_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_number_connected_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_number_strongly_connected_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_number_weakly_connected_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_strongly_connected_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_weakly_connected_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_all_node_cuts": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_all_pairs_node_connectivity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_average_node_connectivity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_bridge_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_build_auxiliary_edge_connectivity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_build_auxiliary_node_connectivity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_edge_connectivity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_edge_disjoint_paths": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_k_edge_connected": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "boolean",
+        "description": "Boolean result"
+      }
+    }
+  },
+  "run_is_locally_k_edge_connected": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "boolean",
+        "description": "Boolean result"
+      }
+    }
+  },
+  "run_k_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_k_edge_augmentation": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_k_edge_components": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_k_edge_subgraphs": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_local_edge_connectivity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_local_node_connectivity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_minimum_edge_cut": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_minimum_node_cut": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_minimum_st_edge_cut": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_minimum_st_node_cut": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_node_connectivity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_node_disjoint_paths": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_all_pairs_all_shortest_paths": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_average_shortest_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_has_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_shortest_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_single_source_all_shortest_paths": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_all_pairs_bellman_ford_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_all_pairs_bellman_ford_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_all_pairs_dijkstra": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_all_pairs_dijkstra_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_all_pairs_dijkstra_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_bellman_ford_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_bellman_ford_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_bellman_ford_predecessor_and_distance": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_bidirectional_dijkstra": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_dijkstra_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_dijkstra_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_dijkstra_predecessor_and_distance": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_find_negative_cycle": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_goldberg_radzik": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_johnson": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_multi_source_dijkstra": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_multi_source_dijkstra_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_multi_source_dijkstra_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_negative_edge_cycle": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_single_source_bellman_ford": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_single_source_bellman_ford_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_single_source_bellman_ford_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_single_source_dijkstra": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_single_source_dijkstra_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_single_source_dijkstra_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_all_pairs_shortest_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_all_pairs_shortest_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_bidirectional_shortest_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_predecessor": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_single_source_shortest_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_single_source_shortest_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_single_target_shortest_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_single_target_shortest_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_floyd_warshall": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_floyd_warshall_numpy": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_floyd_warshall_predecessor_and_distance": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_is_simple_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_shortest_simple_paths": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_average_clustering": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_clustering": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_generalized_degree": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_square_clustering": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_transitivity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_triangles": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_enumerate_all_cliques": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_find_cliques": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_find_cliques_recursive": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_make_clique_bipartite": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_make_max_clique_graph": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_max_weight_clique": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_node_clique_number": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_number_of_cliques": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_core_number": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_k_core": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_k_corona": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_k_crust": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_k_shell": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_k_truss": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_onion_layers": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_barycenter": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_center": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_diameter": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_eccentricity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_effective_graph_resistance": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_harmonic_diameter": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_kemeny_constant": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_periphery": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_radius": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_resistance_distance": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_matching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_is_maximal_matching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_is_perfect_matching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_max_weight_matching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_maximal_matching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_min_weight_matching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_boykov_kolmogorov": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_build_flow_dict": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_build_residual_network": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_cost_of_flow": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_dinitz": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_edmonds_karp": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_gomory_hu_tree": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_max_flow_min_cost": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_min_cost_flow": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_min_cost_flow_cost": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_network_simplex": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_preflow_push": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_shortest_augmenting_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_arborescence": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_branching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_forest": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_tree": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_boruvka_mst_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_kruskal_mst_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_maximum_spanning_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_maximum_spanning_tree": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_minimum_spanning_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_minimum_spanning_tree": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_number_of_spanning_trees": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_partition_spanning_tree": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_prim_mst_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_random_spanning_tree": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_all_topological_sorts": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_ancestors": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_antichains": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_colliders": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_compute_v_structures": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_dag_longest_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_dag_longest_path_length": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_dag_to_branching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_descendants": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_has_cycle": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_is_aperiodic": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_directed_acyclic_graph": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_lexicographical_topological_sort": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_root_to_leaf_paths": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_topological_generations": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_topological_sort": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_transitive_closure": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_transitive_closure_dag": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_transitive_reduction": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_v_structures": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_chordless_cycles": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_cycle_basis": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_find_cycle": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_girth": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_minimum_cycle_basis": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_recursive_simple_cycles": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_simple_cycles": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_orig_func": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_equitable_color": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_greedy_color": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_strategy_connected_sequential": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_strategy_connected_sequential_bfs": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_strategy_connected_sequential_dfs": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_strategy_independent_set": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_strategy_largest_first": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_strategy_random_sequential": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_strategy_saturation_largest_first": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_strategy_smallest_last": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_generate_random_paths": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_panther_similarity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_simrank_similarity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_adamic_adar_index": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_cn_soundarajan_hopcroft": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_common_neighbor_centrality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_jaccard_coefficient": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_preferential_attachment": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_ra_index_soundarajan_hopcroft": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_resource_allocation_index": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_within_inter_cluster": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_biadjacency_matrix": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_birank": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_color": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_eppstein_matching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_generate_edgelist": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_hopcroft_karp_matching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_bipartite": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_bipartite_node_set": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_latapy_clustering": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_maximal_extendability": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_maximum_matching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_min_edge_cover": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_minimum_weight_full_matching": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_node_redundancy": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary keyed by node with values"
+      }
+    }
+  },
+  "run_robins_alexander_clustering": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_sets": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_spectral_bipartivity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_to_vertex_cover": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_write_edgelist": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_bfs_beam_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_bfs_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_bfs_labeled_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_bfs_layers": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_bfs_predecessors": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_bfs_successors": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_bfs_tree": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_descendants_at_distance": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_dfs_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_dfs_labeled_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_dfs_postorder_nodes": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_dfs_predecessors": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_dfs_preorder_nodes": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_dfs_successors": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_dfs_tree": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_edge_bfs": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_edge_dfs": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_generic_bfs_edges": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_hamiltonian_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_reachable": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "boolean",
+        "description": "Boolean result"
+      }
+    }
+  },
+  "run_is_tournament": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_score_sequence": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_tournament_matrix": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_cartesian_product": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_complement": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_compose": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_corona_product": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_difference": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_disjoint_union": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_full_join": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_intersection": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_lexicographic_product": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_modular_product": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_power": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_reverse": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_rooted_product": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_strong_product": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_symmetric_difference": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_tensor_product": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_union": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_connected_dominating_set": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_dominating_set": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_is_connected_dominating_set": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_is_dominating_set": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_efficiency": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_global_efficiency": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_local_efficiency": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_eulerian_circuit": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "array",
+        "description": "List or collection of results"
+      }
+    }
+  },
+  "run_eulerian_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_eulerize": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_has_eulerian_path": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_eulerian": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_is_semieulerian": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_attribute_assortativity_coefficient": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_attribute_mixing_dict": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_attribute_mixing_matrix": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_average_degree_connectivity": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_average_neighbor_degree": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_degree_assortativity_coefficient": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_degree_mixing_dict": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "object",
+        "description": "Dictionary result"
+      }
+    }
+  },
+  "run_degree_mixing_matrix": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_degree_pearson_correlation_coefficient": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_node_attribute_xy": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_node_degree_xy": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "算法执行结果"
+      }
+    }
+  },
+  "run_numeric_assortativity_coefficient": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "number",
+        "description": "Numeric result"
+      }
+    }
+  },
+  "run_closeness_vitality": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_gutman_index": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_schultz_index": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  },
+  "run_wiener_index": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "any",
+        "description": "Algorithm execution result"
+      }
+    }
+  }
+}

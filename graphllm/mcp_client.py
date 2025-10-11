@@ -1,5 +1,9 @@
 """
-MCP Client - 仅负责与MCP Server通信
+MCP Client - 修复版
+关键修复:
+1. 移除不必要的 G 参数过滤
+2. 简化参数验证逻辑
+3. 增强 CSV 数据加载时的类型处理
 """
 import os
 os.environ['TRANSFORMERS_OFFLINE'] = '1'
@@ -20,13 +24,13 @@ logger = logging.getLogger(__name__)
 
 
 class GraphMCPClient:
-    """图计算MCP客户端 - 仅负责MCP通信"""
+    """图计算MCP客户端"""
     
     def __init__(self, server_command: str = "python", server_args: List[str] = None):
         self.server_command = server_command
-        self.server_args = server_args or ["graphllm/mcp_server.py"] # 默认MCP服务器脚本路径
+        self.server_args = server_args or ["graphllm/mcp_server.py"]
         self.session = None
-        self.available_tools = {}  # 缓存工具定义
+        self.available_tools = {}
         
     async def connect(self):
         """连接到MCP服务器"""
@@ -39,10 +43,10 @@ class GraphMCPClient:
             self.stdio_client = stdio_client(server_params)
             self.read_stream, self.write_stream = await self.stdio_client.__aenter__()
             self.session = ClientSession(self.read_stream, self.write_stream)
+            self.output_schemas_cache = self._load_output_schemas()
             await self.session.__aenter__()
             await self.session.initialize()
             
-            # 连接后自动获取工具列表
             await self._load_available_tools()
             
             logger.info("✅ 成功连接到MCP服务器")
@@ -63,17 +67,47 @@ class GraphMCPClient:
         except Exception as e:
             logger.error(f"❌ 断开连接时发生错误: {e}")
     
+    def _load_output_schemas(self) -> Dict[str, Dict[str, Any]]:
+        """从文件加载预生成的 output schemas"""
+        from pathlib import Path
+        import json
+        
+        # ✅ 修复：使用正确的相对路径
+        # 假设 mcp_client.py 和 dynamic_tools_registrar.py 在同一目录
+        schema_file = Path(__file__).parent / "generated_output_schemas.json"
+        
+        if schema_file.exists():
+            try:
+                with open(schema_file, 'r', encoding='utf-8') as f:
+                    schemas = json.load(f)
+                logger.info(f"✅ 已加载 {len(schemas)} 个工具的 output schemas")
+                logger.info(f"   文件位置: {schema_file.absolute()}")
+                return schemas
+            except Exception as e:
+                logger.warning(f"⚠️ 加载 output schemas 失败: {e}")
+        else:
+            logger.warning(f"⚠️ 未找到 output schemas 文件: {schema_file}")
+            logger.info("   提示：先运行 MCP Server 以生成 schemas")
+        
+        return {}
     async def _load_available_tools(self):
         """加载并缓存可用工具列表"""
         try:
             tools_response = await self.session.list_tools()
             for tool in tools_response.tools:
-                self.available_tools[tool.name] = {
-                    'name': tool.name,
+                tool_name = tool.name
+                
+                # ✅ 从预生成的文件中获取 output_schema
+                output_schema = self.output_schemas_cache.get(tool_name)
+                
+                self.available_tools[tool_name] = {
+                    'name': tool_name,
                     'description': tool.description,
-                    'input_schema': tool.inputSchema
+                    'input_schema': tool.inputSchema,
+                    'output_schema': output_schema  # ✅ 使用预加载的 schema
                 }
-            logger.info(f"📋 加载了 {len(self.available_tools)} 个可用工具")
+            
+            logger.info(f"✅ 已加载 {len(self.available_tools)} 个可用工具")
         except Exception as e:
             logger.error(f"❌ 加载工具列表失败: {e}")
     
@@ -83,12 +117,39 @@ class GraphMCPClient:
             await self._load_available_tools()
         return list(self.available_tools.values())
     
-    def get_tool_schema(self, tool_name: str) -> Optional[Dict[str, Any]]:
-        """获取指定工具的 input_schema"""
+    def get_tool_schema(self, tool_name: str, schema_type: str = 'input') -> Optional[Dict[str, Any]]:
+        """获取指定工具的 schema"""
         tool = self.available_tools.get(tool_name)
-        if tool:
-            return tool.get('input_schema')
-        return None
+        if not tool:
+            return None
+        
+        if schema_type == 'output':
+            output_schema = tool.get('output_schema')
+            
+            # ✅ 如果没有预加载的 schema，返回默认结构
+            if not output_schema:
+                logger.debug(f"⚠️ 工具 '{tool_name}' 没有预定义的 output_schema,使用默认")
+                return self._get_default_output_schema()
+            
+            return output_schema
+        
+        return tool.get('input_schema')
+    
+    def _get_default_output_schema(self) -> Dict[str, Any]:
+        """返回默认的 output schema"""
+        return {
+            "type": "object",
+            "properties": {
+                "algorithm": {"type": "string"},
+                "success": {"type": "boolean"},
+                "result": {
+                    "description": "Algorithm result (type varies)"
+                },
+                "error": {"type": ["string", "null"]},
+                "summary": {"type": ["string", "null"]}
+            },
+            "required": ["algorithm", "success"]
+        }
     
     def validate_arguments(self, tool_name: str, arguments: Dict[str, Any]) -> tuple[bool, Optional[str]]:
         """验证工具参数是否符合 schema 定义
@@ -108,60 +169,21 @@ class GraphMCPClient:
             if req_param not in arguments:
                 return False, f"缺少必需参数: {req_param}"
         
-        # 检查参数类型（基础验证）
-        for param_name, param_value in arguments.items():
-            if param_name not in properties:
-                # 忽略我们自定义的内部参数
-                if param_name == "__post_processing_code__":
-                    continue
-                logger.warning(f"⚠️ 参数 '{param_name}' 不在 schema 定义中")
-                continue
-            
-            expected_type = properties[param_name].get('type')
-            if expected_type:
-                actual_type = self._get_json_type(param_value)
-                if actual_type != expected_type:
-                    return False, f"参数 '{param_name}' 类型错误: 期望 {expected_type}, 实际 {actual_type}"
+        # 检查额外参数（允许 __post_processing_code__）
+        for param_name in arguments.keys():
+            if param_name not in properties and param_name != "__post_processing_code__":
+                logger.warning(f"⚠️ 参数 '{param_name}' 不在 schema 定义中，但将尝试传递")
         
         return True, None
-    
-    def _get_json_type(self, value: Any) -> str:
-        """获取 Python 值对应的 JSON Schema 类型"""
-        if isinstance(value, bool):
-            return "boolean"
-        elif isinstance(value, int):
-            return "integer"
-        elif isinstance(value, float):
-            return "number"
-        elif isinstance(value, str):
-            return "string"
-        elif isinstance(value, list):
-            return "array"
-        elif isinstance(value, dict):
-            return "object"
-        elif value is None:
-            return "null"
-        else:
-            return "unknown"
     
     async def call_tool(self, tool_name: str, arguments: Dict[str, Any], 
                         post_processing_code: Optional[str] = None,
                         validate: bool = True) -> Dict[str, Any]:
-        """调用MCP工具
-        
-        Args:
-            tool_name: 工具名称
-            arguments: 工具参数
-            post_processing_code: (新增) 在服务端执行的后处理代码
-            validate: 是否在调用前验证参数
-        """
+        """调用MCP工具"""
         try:
-            # ⭐ 新增逻辑：将后处理代码添加到参数中
             if post_processing_code:
-                # 使用特殊名称以避免与工具参数冲突
                 arguments["__post_processing_code__"] = post_processing_code
 
-            # 可选的参数验证
             if validate:
                 is_valid, error_msg = self.validate_arguments(tool_name, arguments)
                 if not is_valid:
@@ -172,14 +194,21 @@ class GraphMCPClient:
                         "summary": "参数格式不正确"
                     }
             
-            # 调用工具
             result = await self.session.call_tool(tool_name, arguments=arguments)
             
-            # 解析结果
             if result.content and len(result.content) > 0:
                 content = result.content[0]
                 if hasattr(content, 'text'):
-                    return json.loads(content.text)
+                    try:
+                        return json.loads(content.text)
+                    except json.JSONDecodeError as e:
+                        raw_content = content.text if content.text else "Empty response"
+                        logger.error(f"❌ JSON 解析失败: {e} - 原始响应: {raw_content}")
+                        return {
+                            "success": False,
+                            "error": raw_content,
+                            "summary": "服务器返回非 JSON 响应"
+                        }
             
             return {"error": "无法解析工具调用结果"}
             
@@ -192,7 +221,7 @@ class GraphMCPClient:
             }
     
     def print_tool_info(self, tool_name: str):
-        """打印工具的详细信息（包括 schema）"""
+        """打印工具的详细信息"""
         tool = self.available_tools.get(tool_name)
         if not tool:
             print(f"❌ 工具 '{tool_name}' 不存在")
@@ -200,13 +229,22 @@ class GraphMCPClient:
         
         print(f"\n{'='*60}")
         print(f"工具名称: {tool['name']}")
-        print(f"描述: {tool['description'][:100]}...")
-        print(f"\n输入参数 Schema:")
-        print(json.dumps(tool['input_schema'], indent=2, ensure_ascii=False))
+        print(f"描述: {tool['description']}")
+        
+        print(f"\n--- 输入参数 Schema ---")
+        input_schema = tool.get('input_schema', {})
+        print(json.dumps(input_schema, indent=2, ensure_ascii=False))
+        
+        print(f"\n--- 返回结构 Schema ---")
+        if tool.get('output_schema'):
+            print(json.dumps(tool.get('output_schema'), indent=2, ensure_ascii=False))
+        else:
+            print("未提供 Output Schema。")
+            
         print(f"{'='*60}\n")
     
     def load_data_from_csv(self, accounts_file: str, transactions_file: str) -> tuple:
-        """从CSV文件加载图数据"""
+        """⭐ 从CSV文件加载图数据（增强类型处理）"""
         vertices = []
         edges = []
         
@@ -225,12 +263,23 @@ class GraphMCPClient:
             with open(transactions_file, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
+                    properties = {}
+                    for k, v in row.items():
+                        if k not in ['orig_acct', 'bene_acct']:
+                            # ⭐ 尝试转换数值类型
+                            try:
+                                if '.' in v:
+                                    properties[k] = float(v)
+                                else:
+                                    properties[k] = int(v)
+                            except (ValueError, TypeError):
+                                properties[k] = v
+                    
                     edge = {
                         'src': row['orig_acct'],
                         'dst': row['bene_acct'],
                         'rank': 0,
-                        'properties': {k: v for k, v in row.items() 
-                                     if k not in ['orig_acct', 'bene_acct']}
+                        'properties': properties
                     }
                     edges.append(edge)
             
@@ -251,52 +300,5 @@ async def create_client_and_connect() -> GraphMCPClient:
     return client
 
 
-# 使用示例
-async def example_usage():
-    """使用示例"""
-    client = await create_client_and_connect()
-    
-    try:
-        # 1. 查看所有工具
-        tools = await client.list_tools()
-        print(f"可用工具数量: {len(tools)}")
-        
-        # 2. 查看特定工具的 schema
-        client.print_tool_info("initialize_graph")
-        
-        # 3. 验证参数（不调用）
-        test_args = {
-            "vertices": [{"vid": "A", "properties": {}}],
-            "edges": [{"src": "A", "dst": "B"}]
-        }
-        is_valid, error = client.validate_arguments("initialize_graph", test_args)
-        print(f"参数验证: {'✅ 通过' if is_valid else f'❌ 失败 - {error}'}")
-        
-        # 4. 调用工具（不带后处理）
-        result = await client.call_tool("get_graph_info", {}, validate=True)
-        print(f"无后处理结果: {result}")
-
-        # 5. 调用工具（带后处理代码）
-        # 假设我们已经初始化了图，现在调用pagerank并要求返回Top 3
-        pagerank_args = {"alpha": 0.85}
-        post_process_code = "def process(data):\n    return dict(sorted(data.items(), key=lambda item: item[1], reverse=True)[:3])"
-        
-        # 注意：此示例直接调用，可能因未初始化图而出错，仅为演示方法调用
-        print("\n演示带后处理代码的调用（可能因图未初始化而失败）:")
-        processed_result = await client.call_tool(
-            "run_pagerank", 
-            pagerank_args,
-            post_processing_code=post_process_code
-        )
-        print(f"带后处理结果: {processed_result}")
-
-    finally:
-        await client.disconnect()
-
-
 if __name__ == "__main__":
-    # 提示：直接运行此文件中的 example_usage 可能会因为找不到 mcp_server.py 或依赖的图引擎而出错
-    # 此文件主要作为模块被 SmartQA 系统导入使用
-    # asyncio.run(example_usage())
-    print("GraphMCPClient (客户端) 代码已更新。")
-
+    print("GraphMCPClient (修复版本) - 已修复类型转换问题")

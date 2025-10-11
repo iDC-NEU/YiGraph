@@ -5,6 +5,10 @@ from typing import List, Tuple, Dict, Any, Optional, Union
 from database.datatype import *
 from database.nebulagraph import *
 from graph_engine.graph_processor import GraphProcessor
+#修改
+import inspect
+from typing import Callable, Any
+
 
 logger = logging.getLogger(__name__)
 
@@ -226,7 +230,7 @@ class GraphComputationProcessor(GraphProcessor):
             - 'community_count': 社区数量
         """
         if self.graph is None:
-            raise ValueError("图未初始化，请先调用create_graph_from_edges方法")
+            raise ValueError("图未初始化,请先调用create_graph_from_edges方法")
         
         try:
             # 将图转换为无向图（Louvain算法通常用于无向图）
@@ -574,6 +578,44 @@ class GraphComputationProcessor(GraphProcessor):
         将 self.vertices 转换为以 vid 为键、VertexData 为值的字典。
         """
         self.vertices =  {vertex.vid: vertex for vertex in vertices}
+    def run_generic_algorithm(self, algorithm_func: Callable, **kwargs) -> Any:
+        """
+        一个通用的方法，用于运行任何以图 'G' 作为首个参数的NetworkX算法。
+
+        Args:
+            algorithm_func: 要调用的实际NetworkX函数 (例如, nx.pagerank)。
+            **kwargs: 要传递给该算法函数的参数。
+
+        Returns:
+            来自NetworkX算法的原始结果。
+        """
+        # ▼▼▼ FIX #1: 使用 self.graph 进行检查 ▼▼▼
+        # (同时也优化了检查方式，使其更Pythonic)
+        if self.graph is None:
+            # 返回一个错误字典，而不是抛出异常，这样更安全
+            return {"error": "图尚未初始化，请先调用 initialize_graph。"}
+            
+        if self.graph.number_of_nodes() == 0:
+            logger.warning("尝试在空图上运行算法，返回空结果。")
+            return {} # 对空图返回一个安全的结果
+
+        try:
+            # ▼▼▼ FIX #2: 将 self.graph 传递给算法 ▼▼▼
+            # 核心调用：将存储的图对象 self.graph 和其他参数传递给指定的算法函数
+            # 例如: result = nx.pagerank(self.graph, alpha=0.85, max_iter=100)
+            result = algorithm_func(self.graph, **kwargs)
+            
+            # 特殊处理：NetworkX的连通分量等函数返回的是生成器，需转换为列表才能被JSON序列化
+            if inspect.isgenerator(result):
+                # 将集合(set)也转换为列表，确保JSON兼容性
+                return [list(c) for c in result]
+                
+            return result
+        except Exception as e:
+            logger.error(f"在执行通用算法 '{algorithm_func.__name__}' 时发生错误: {e}", exc_info=True)
+            # 在算法执行层也返回一个错误字典，增加系统的健壮性
+            return {"error": f"算法执行失败: {str(e)}"}
+
 
 
 if __name__ == '__main__':
