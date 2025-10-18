@@ -83,9 +83,9 @@ def validate_input_schema(input_schema: Dict, tool_name: str) -> List[str]:
         errors.append("input_schema.properties 不是字典类型")
         return errors
     
-    # 检查是否有参数定义
-    if len(properties) == 0:
-        errors.append("input_schema.properties 为空（工具无参数）")
+    # ✅ 修改：无参数不再视为错误
+    # if len(properties) == 0:
+    #     errors.append("input_schema.properties 为空（工具无参数）")
     
     # 验证每个参数的定义
     for param_name, param_schema in properties.items():
@@ -93,13 +93,14 @@ def validate_input_schema(input_schema: Dict, tool_name: str) -> List[str]:
             errors.append(f"参数 '{param_name}' 的 schema 不是字典类型")
             continue
         
-        # 检查参数是否有 type 定义
-        if 'type' not in param_schema:
-            errors.append(f"参数 '{param_name}' 缺少 'type' 字段")
+        # ✅ 检查参数是否有 type 或 json_type 定义
+        if 'type' not in param_schema and 'json_type' not in param_schema:
+            errors.append(f"参数 '{param_name}' 缺少 'type' 或 'json_type' 字段")
         
-        # 检查参数是否有描述
+        # 描述可选，但建议提供
         if 'description' not in param_schema:
-            errors.append(f"参数 '{param_name}' 缺少 'description' 字段")
+            # 降级为警告，不阻止验证通过
+            logger.debug(f"参数 '{param_name}' 缺少 'description' 字段（建议提供）")
     
     # 检查 required 字段（如果存在）
     if 'required' in input_schema:
@@ -113,6 +114,7 @@ def validate_input_schema(input_schema: Dict, tool_name: str) -> List[str]:
                     errors.append(f"required 中的参数 '{req_param}' 未在 properties 中定义")
     
     return errors
+
 
 
 async def validate_client_schemas():

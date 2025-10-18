@@ -95,6 +95,7 @@ class GraphComputationProcessor(GraphProcessor):
                 tol=tol
             )
             logger.info(f"PageRank算法完成，计算了 {len(pagerank_scores)} 个节点的分数")
+            print("我运行了哈哈哈")
             return pagerank_scores
             
         except Exception as e:
@@ -120,6 +121,7 @@ class GraphComputationProcessor(GraphProcessor):
                 # 对于无向图，使用连通分量
                 components = list(nx.connected_components(self.graph))
                 logger.info(f"找到 {len(components)} 个连通分量")
+                print("我运行了哈哈哈")
             
             return components
             
@@ -609,7 +611,7 @@ class GraphComputationProcessor(GraphProcessor):
             if inspect.isgenerator(result):
                 # 将集合(set)也转换为列表，确保JSON兼容性
                 return [list(c) for c in result]
-                
+            print("我运行了哈哈哈")
             return result
         except Exception as e:
             logger.error(f"在执行通用算法 '{algorithm_func.__name__}' 时发生错误: {e}", exc_info=True)

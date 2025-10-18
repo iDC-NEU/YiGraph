@@ -1,3152 +1,1410 @@
 {
   "run_betweenness_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary keyed by node with bipartite betweenness centrality as the value."
   },
   "run_betweenness_centrality_subset": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with betweenness centrality as the value."
   },
   "run_closeness_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary keyed by node with bipartite closeness centrality as the value."
   },
   "run_current_flow_betweenness_centrality_subset": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with betweenness centrality as the value."
   },
   "run_current_flow_closeness_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with current flow closeness centrality as the value."
   },
   "run_degree_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary keyed by node with bipartite degree centrality as the value."
   },
   "run_dispersion": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "If u (v) is specified, returns a dictionary of nodes with dispersion score for all \"target\" (\"source\") nodes. If neither u nor v is specified, returns a dictionary of dictionaries for all nodes 'u' in the graph with a dispersion score for each node 'v'."
   },
   "run_edge_betweenness_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of edges with betweenness centrality as the value."
   },
   "run_edge_betweenness_centrality_subset": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of edges with Betweenness centrality as the value."
   },
   "run_edge_current_flow_betweenness_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of edge tuples with betweenness centrality as the value."
   },
   "run_edge_current_flow_betweenness_centrality_subset": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dict",
+    "description": "Dictionary of edge tuples with betweenness centrality as the value."
   },
   "run_edge_load_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "any",
+    "description": "A dict keyed by edge 2-tuple to the number of shortest paths which use that edge. Where more than one path is shortest the count is divided equally among paths."
   },
   "run_eigenvector_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with eigenvector centrality as the value. The associated vector has unit Euclidean norm and the values are nonegative."
   },
   "run_eigenvector_centrality_numpy": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dict of nodes",
+    "description": "Dictionary of nodes with eigenvector centrality as the value. The associated vector has unit Euclidean norm and the values are nonnegative."
   },
   "run_estrada_index": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "estrada index: float"
   },
   "run_global_reaching_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "float",
+    "description": "The global reaching centrality of the graph."
   },
   "run_group_betweenness_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "list of floats or float",
+    "description": "If C is a single group then return a float. If C is a list with several groups then return a list of group betweenness centralities."
   },
   "run_group_closeness_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "float",
+    "description": "Group closeness centrality of the group S."
   },
   "run_group_degree_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "float",
+    "description": "Group degree centrality of the group S."
   },
   "run_group_in_degree_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "float",
+    "description": "Group in-degree centrality of the group S."
   },
   "run_group_out_degree_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "float",
+    "description": "Group out-degree centrality of the group S."
   },
   "run_harmonic_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with harmonic centrality as the value."
   },
   "run_in_degree_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with in-degree centrality as values."
   },
   "run_incremental_closeness_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with closeness centrality as the value."
   },
   "run_information_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with current flow closeness centrality as the value."
   },
   "run_katz_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with Katz centrality as the value."
   },
   "run_katz_centrality_numpy": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with Katz centrality as the value."
   },
   "run_laplacian_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with Laplacian centrality as the value."
   },
   "run_load_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with centrality as the value."
   },
   "run_local_reaching_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "float",
+    "description": "The local reaching centrality of the node ``v`` in the graph ``G``."
   },
   "run_out_degree_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with out-degree centrality as values."
   },
   "run_percolation_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with percolation centrality as the value."
   },
   "run_prominent_group": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "float",
+    "description": "The group betweenness centrality of the prominent group. max_group : list The list of nodes in the prominent group."
   },
   "run_second_order_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary keyed by node with second order centrality as the value."
   },
   "run_subgraph_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with subgraph centrality as the value."
   },
   "run_subgraph_centrality_exp": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "nodes:dictionary Dictionary of nodes with subgraph centrality as the value."
   },
   "run_trophic_differences": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dict",
+    "description": "Dictionary of edges with trophic differences as the value."
   },
   "run_trophic_incoherence_parameter": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "float",
+    "description": "The trophic coherence of a graph"
   },
   "run_trophic_levels": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dict",
+    "description": "Dictionary of nodes with trophic level as the value."
   },
   "run_voterank": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "list",
+    "description": "Ordered list of computed seeds. Only nodes with positive number of votes are returned."
   },
   "run_asyn_fluidc": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "iterable",
+    "description": "Iterable of communities given as sets of nodes."
   },
   "run_asyn_lpa_communities": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "iterable",
+    "description": "Iterable of communities given as sets of nodes."
   },
   "run_edge_betweenness_partition": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "list of sets",
+    "description": "Partition of the nodes of G"
   },
   "run_edge_current_flow_betweenness_partition": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "list of sets",
+    "description": "Partition of G"
   },
   "run_fast_label_propagation_communities": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "iterable",
+    "description": "Iterable of communities given as sets of nodes."
   },
   "run_girvan_newman": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "iterator Iterator over tuples of sets of nodes in `G`. Each set of node is a community, each tuple is a sequence of communities at a particular level of the algorithm."
   },
   "run_greedy_modularity_communities": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "communities: list A list of frozensets of nodes, one for each community. Sorted by length with largest communities first."
   },
   "run_greedy_source_expansion": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "set A set of nodes representing the local community around the source node."
   },
   "run_is_partition": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_k_clique_communities": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "Yields sets of nodes, one for each k-clique community."
   },
   "run_kernighan_lin_bisection": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "tuple",
+    "description": "A pair of sets of nodes representing the bipartition."
   },
   "run_label_propagation_communities": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "iterable",
+    "description": "A dict_values object that contains a set of nodes for each community."
   },
   "run_leiden_communities": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "list A list of disjoint sets (partition of `G`). Each set represents one community. All communities together contain all the nodes in `G`."
   },
   "run_leiden_partitions": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_louvain_communities": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "any",
+    "description": "list A list of sets (partition of `G`). Each set represents one community and contains all the nodes that constitute it."
   },
   "run_louvain_partitions": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_lukes_partitioning": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "list",
+    "description": "A list of sets of nodes representing the clusters of the partition."
   },
   "run_modularity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "float",
+    "description": "The modularity of the partition."
   },
   "run_naive_greedy_modularity_communities": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "list A list of sets of nodes, one for each community. Sorted by length with largest communities first."
   },
   "run_partition_quality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "(float, float) The (coverage, performance) tuple of the partition, as defined above."
   },
   "run_google_matrix": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "2D NumPy ndarray",
+    "description": "Google matrix of the graph"
   },
   "run_pagerank": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes with PageRank as value"
   },
   "run_hits": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "two-tuple of dictionaries",
+    "description": "Two dictionaries keyed by node containing the hub and authority values."
   },
   "run_articulation_points": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_attracting_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "generator of sets",
+    "description": "A generator of sets of nodes, one for each attracting component of G."
   },
   "run_biconnected_component_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "generator of lists",
+    "description": "Generator of lists of edges, one list for each bicomponent."
   },
   "run_biconnected_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "generator",
+    "description": "Generator of sets of nodes, one set for each biconnected component."
   },
   "run_condensation": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX DiGraph",
+    "description": "The condensation graph C of G.  The node labels are integers corresponding to the index of the component in the list of strongly connected components of G.  C has a graph attribute named 'mapping' with a dictionary mapping the original nodes to the nodes in C to which they belong.  Each node in C also has a node attribute 'members' with the set of original nodes in G that form the SCC that the node in C represents."
   },
   "run_connected_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "generator of sets",
+    "description": "A generator of sets of nodes, one for each component of G."
   },
   "run_is_attracting_component": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "bool",
+    "description": "True if `G` has a single attracting component. Otherwise, False."
   },
   "run_is_biconnected": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "bool",
+    "description": "True if the graph is biconnected, False otherwise."
   },
   "run_is_connected": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "bool",
+    "description": "True if the graph is connected, false otherwise."
   },
   "run_is_semiconnected": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "bool",
+    "description": "True if the graph is semiconnected, False otherwise."
   },
   "run_is_strongly_connected": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "boolean",
-        "description": "Boolean result"
-      }
-    }
+    "type": "any",
+    "description": "bool Whether the tournament is strongly connected."
   },
   "run_is_weakly_connected": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "boolean",
-        "description": "Boolean result"
-      }
-    }
+    "type": "bool",
+    "description": "True if the graph is weakly connected, False otherwise."
   },
   "run_kosaraju_strongly_connected_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "generator of sets",
+    "description": "A generator of sets of nodes, one for each strongly connected component of G."
   },
   "run_node_connected_component": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "set",
+    "description": "A set of nodes in the component of G containing node n."
   },
   "run_number_attracting_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "int",
+    "description": "The number of attracting components in G."
   },
   "run_number_connected_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "integer",
+    "description": "Number of connected components"
   },
   "run_number_strongly_connected_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "integer",
+    "description": "Number of strongly connected components"
   },
   "run_number_weakly_connected_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "integer",
+    "description": "Number of weakly connected components"
   },
   "run_strongly_connected_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "generator of sets",
+    "description": "A generator of sets of nodes, one for each strongly connected component of G."
   },
   "run_weakly_connected_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "generator of sets",
+    "description": "A generator of sets of nodes, one for each weakly connected component of G."
   },
   "run_all_node_cuts": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "a generator of node cutsets",
+    "description": "Each node cutset has cardinality equal to the node connectivity of the input graph."
   },
   "run_all_pairs_node_connectivity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dict",
+    "description": "A dictionary with node connectivity between all pairs of nodes in G, or in nbunch if provided."
   },
   "run_average_node_connectivity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "float",
+    "description": "Average node connectivity"
   },
   "run_bridge_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "a generator of 2-edge-connected components",
+    "description": "a generator of 2-edge-connected components "
   },
   "run_build_auxiliary_edge_connectivity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_build_auxiliary_node_connectivity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_edge_connectivity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "integer",
+    "description": "Edge connectivity for G, or local edge connectivity if source and target were provided"
   },
   "run_edge_disjoint_paths": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "generator",
+    "description": "A generator of edge independent paths."
   },
   "run_is_k_edge_connected": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "boolean",
-        "description": "Boolean result"
-      }
-    }
+    "type": "any",
+    "description": "boolean True if G is k-edge-connected."
   },
   "run_is_locally_k_edge_connected": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "boolean",
-        "description": "Boolean result"
-      }
-    }
+    "type": "any",
+    "description": "boolean True if s and t are locally k-edge-connected in G."
   },
   "run_k_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dict",
+    "description": "Dictionary with all connectivity levels `k` in the input Graph as keys and a list of sets of nodes that form a k-component of level `k` as values."
   },
   "run_k_edge_augmentation": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_k_edge_components": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "a generator of k-edge-ccs. Each set of returned nodes",
+    "description": "will have k-edge-connectivity in the graph G."
   },
   "run_k_edge_subgraphs": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "a generator of k-edge-subgraphs",
+    "description": "Each k-edge-subgraph is a maximal set of nodes that defines a subgraph of G that is k-edge-connected."
   },
   "run_local_edge_connectivity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "integer",
+    "description": "local edge connectivity for nodes s and t."
   },
   "run_local_node_connectivity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "integer",
+    "description": "local node connectivity for nodes s and t"
   },
   "run_minimum_edge_cut": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "set",
+    "description": "Set of edges that, if removed, would disconnect G. If source and target nodes are provided, the set contains the edges that if removed, would destroy all paths between source and target."
   },
   "run_minimum_node_cut": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "set",
+    "description": "Set of nodes that, if removed, would disconnect G. If source and target nodes are provided, the set contains the nodes that if removed, would destroy all paths between source and target."
   },
   "run_minimum_st_edge_cut": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "set",
+    "description": "Set of edges that, if removed from the graph, will disconnect it."
   },
   "run_minimum_st_node_cut": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "set",
+    "description": "Set of nodes that, if removed, would destroy all paths between source and target in G. Returns an empty set if source and target are either in different components or are directly connected by an edge, as no node removal can destroy the path."
   },
   "run_node_connectivity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "integer",
+    "description": "Node connectivity of G, or local node connectivity if source and target are provided."
   },
   "run_node_disjoint_paths": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "generator",
+    "description": "Generator of node disjoint paths."
+  },
+  "run_stoer_wagner": {
+    "type": "integer or float",
+    "description": "The sum of weights of edges in a minimum cut. partition : pair of node lists A partitioning of the nodes that defines a minimum cut."
   },
   "run_all_pairs_all_shortest_paths": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "generator of dictionary",
+    "description": "Dictionary of arrays, keyed by source and target, of all shortest paths."
   },
   "run_average_shortest_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_has_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_shortest_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "any",
+    "description": "path: list or dictionary or iterator All returned paths include both the source and target in the path. If the source and target are both specified, return a single list of nodes in a shortest path from the source to the target. If only the source is specified, return a dictionary keyed by targets with a list of nodes in a shortest path from the source to one of the targets. If only the target is specified, return a dictionary keyed by sources with a list of nodes in a shortest path from one of the sources to the target. If neither the source nor target are specified, return an iterator over (source, dictionary) where dictionary is keyed by target to list of nodes in a shortest path from the source to the target."
   },
   "run_single_source_all_shortest_paths": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "generator of dictionary",
+    "description": "A generator of all paths between source and all nodes in the graph."
   },
   "run_all_pairs_bellman_ford_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "iterator",
+    "description": "(source, dictionary) iterator with dictionary keyed by target and shortest path as the key value."
   },
   "run_all_pairs_bellman_ford_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "iterator",
+    "description": "(source, dictionary) iterator with dictionary keyed by target and shortest path length as the key value."
   },
   "run_all_pairs_dijkstra": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_all_pairs_dijkstra_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "iterator",
+    "description": "(source, dictionary) iterator with dictionary keyed by target and shortest path as the key value."
   },
   "run_all_pairs_dijkstra_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "iterator",
+    "description": "(source, dictionary) iterator with dictionary keyed by target and shortest path length as the key value."
   },
   "run_bellman_ford_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "list",
+    "description": "List of nodes in a shortest path."
   },
   "run_bellman_ford_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "number",
+    "description": "Shortest path length."
   },
   "run_bellman_ford_predecessor_and_distance": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionaries",
+    "description": "Returns two dictionaries keyed by node to predecessor in the path and to the distance from the source respectively."
   },
   "run_bidirectional_dijkstra": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "number and list",
+    "description": "length is the distance from source to target. path is a list of nodes on a path from source to target."
   },
   "run_dijkstra_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "list",
+    "description": "List of nodes in a shortest path."
   },
   "run_dijkstra_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "number",
+    "description": "Shortest path length."
   },
   "run_dijkstra_predecessor_and_distance": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionaries",
+    "description": "Returns two dictionaries representing a list of predecessors of a node and the distance to each node."
   },
   "run_find_negative_cycle": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "list",
+    "description": "A list of nodes in the order of the cycle found. The last node equals the first to indicate a cycle."
   },
   "run_goldberg_radzik": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionaries",
+    "description": "Returns two dictionaries keyed by node to predecessor in the path and to the distance from the source respectively."
   },
   "run_johnson": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary, keyed by source and target, of shortest paths."
   },
   "run_multi_source_dijkstra": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "pair of dictionaries, or numeric and list",
+    "description": "If target is None, returns a tuple of two dictionaries keyed by node. The first dictionary stores distance from one of the source nodes. The second stores the path from one of the sources to that node. If target is not None, returns a tuple of (distance, path) where distance is the distance from source to target and path is a list representing the path from source to target."
   },
   "run_multi_source_dijkstra_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of shortest paths keyed by target."
   },
   "run_multi_source_dijkstra_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dict",
+    "description": "Dict keyed by node to shortest path length to nearest source."
   },
   "run_negative_edge_cycle": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "bool",
+    "description": "True if a negative edge cycle exists, otherwise False."
   },
   "run_single_source_bellman_ford": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "pair of dictionaries, or numeric and list",
+    "description": "If target is None, returns a tuple of two dictionaries keyed by node. The first dictionary stores distance from one of the source nodes. The second stores the path from one of the sources to that node. If target is not None, returns a tuple of (distance, path) where distance is the distance from source to target and path is a list representing the path from source to target."
   },
   "run_single_source_bellman_ford_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of shortest path lengths keyed by target."
   },
   "run_single_source_bellman_ford_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of shortest path length keyed by target"
   },
   "run_single_source_dijkstra": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "pair of dictionaries, or numeric and list.",
+    "description": "If target is None, paths and lengths to all nodes are computed. The return value is a tuple of two dictionaries keyed by target nodes. The first dictionary stores distance to each target node. The second stores the path to each target node. If target is not None, returns a tuple (distance, path), where distance is the distance from source to target and path is a list representing the path from source to target."
   },
   "run_single_source_dijkstra_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of shortest path lengths keyed by target."
   },
   "run_single_source_dijkstra_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dict",
+    "description": "Dict keyed by node to shortest path length from source."
   },
   "run_all_pairs_shortest_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "iterator",
+    "description": "Dictionary, keyed by source and target, of shortest paths."
   },
   "run_all_pairs_shortest_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "iterator",
+    "description": "(source, dictionary) iterator with dictionary keyed by target and shortest path length as the key value."
   },
   "run_bidirectional_shortest_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "path: list List of nodes in a path from source to target."
   },
   "run_predecessor": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary, keyed by node, of predecessors in the shortest path. (pred, seen): tuple of dictionaries If `return_seen` argument is set to `True`, then a tuple of dictionaries is returned. The first element is the dictionary, keyed by node, of predecessors in the shortest path. The second element is the dictionary, keyed by node, of the level (number of hops) to reach the node (as seen during breadth-first-search)."
   },
   "run_single_source_shortest_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary, keyed by target, of shortest paths."
   },
   "run_single_source_shortest_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dict",
+    "description": "Dict keyed by node to shortest path length to `source`."
   },
   "run_single_target_shortest_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary, keyed by target, of shortest paths."
   },
   "run_single_target_shortest_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary, keyed by source, of shortest path lengths."
   },
   "run_floyd_warshall": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dict",
+    "description": "A dictionary,  keyed by source and target, of shortest paths distances between nodes."
   },
   "run_floyd_warshall_numpy": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "2D numpy.ndarray",
+    "description": "A numpy array of shortest path distances between nodes. If there is no path between two nodes the value is Inf."
   },
   "run_floyd_warshall_predecessor_and_distance": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionaries",
+    "description": "Dictionaries, keyed by source and target, of predecessors and distances in the shortest path."
   },
   "run_is_simple_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "bool Whether the given list of nodes represents a simple path in `G`."
   },
   "run_shortest_simple_paths": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "path_generator: generator A generator that produces lists of simple paths, in order from shortest to longest."
   },
   "run_average_clustering": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "float",
+    "description": "The average bipartite clustering for the given set of nodes or the entire graph if no nodes are specified."
   },
   "run_clustering": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "A dictionary keyed by node with the clustering coefficient value."
   },
   "run_generalized_degree": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "Counter, or dictionary of Counters",
+    "description": "Generalized degree of specified nodes. The Counter is keyed by edge triangle multiplicity."
   },
   "run_square_clustering": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "A dictionary keyed by node with the square clustering coefficient value."
   },
   "run_transitivity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "float",
+    "description": "Transitivity"
   },
   "run_triangles": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dict or int",
+    "description": "If `nodes` is a container of nodes, returns number of triangles keyed by node (dict). If `nodes` is a specific node, returns number of triangles for the node (int)."
   },
   "run_enumerate_all_cliques": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "iterator An iterator over cliques, each of which is a list of nodes in `G`. The cliques are ordered according to size."
   },
   "run_find_cliques": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "iterator An iterator over maximal cliques, each of which is a list of nodes in `G`. If `nodes` is provided, only the maximal cliques containing all the nodes in `nodes` are returned. The order of cliques is arbitrary."
   },
   "run_find_cliques_recursive": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "iterator An iterator over maximal cliques, each of which is a list of nodes in `G`. If `nodes` is provided, only the maximal cliques containing all the nodes in `nodes` are yielded. The order of cliques is arbitrary."
   },
   "run_make_clique_bipartite": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "NetworkX graph A bipartite graph whose \"bottom\" set is the nodes of the graph `G`, whose \"top\" set is the cliques of `G`, and whose edges join nodes of `G` to the cliques that contain them. The nodes of the graph `G` have the node attribute 'bipartite' set to 1 and the nodes representing cliques have the node attribute 'bipartite' set to 0, as is the convention for bipartite graphs in NetworkX."
   },
   "run_make_max_clique_graph": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "NetworkX graph A graph whose nodes are the cliques of `G` and whose edges join two cliques if they are not disjoint."
   },
   "run_max_weight_clique": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "list",
+    "description": "the nodes of a maximum weight clique weight : int the weight of a maximum weight clique"
   },
   "run_node_clique_number": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "int or dict If `nodes` is a single node, returns the size of the largest maximal clique in `G` containing that node. Otherwise return a dict keyed by node to the size of the largest maximal clique containing that node."
   },
   "run_number_of_cliques": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_core_number": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "dictionary",
+    "description": "A dictionary keyed by node to the core number."
   },
   "run_k_core": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX graph",
+    "description": "The k-core subgraph"
   },
   "run_k_corona": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX graph",
+    "description": "The k-corona subgraph"
   },
   "run_k_crust": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX graph",
+    "description": "The k-crust subgraph"
   },
   "run_k_shell": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX graph",
+    "description": "The k-shell subgraph"
   },
   "run_k_truss": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX graph",
+    "description": "The k-truss subgraph"
   },
   "run_onion_layers": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary",
+    "description": "A dictionary keyed by node to the onion layer. The layers are contiguous integers starting at 1."
   },
   "run_barycenter": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "list Nodes of `G` that induce the barycenter of `G`."
   },
   "run_center": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "list",
+    "description": "List of nodes in center"
   },
   "run_diameter": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "integer",
+    "description": "Diameter of graph"
   },
   "run_eccentricity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary",
+    "description": "A dictionary of eccentricity values keyed by node."
   },
   "run_effective_graph_resistance": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "float",
+    "description": "The effective graph resistance of `G`."
   },
   "run_harmonic_diameter": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "float",
+    "description": "Harmonic diameter of graph"
   },
   "run_kemeny_constant": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "float The Kemeny constant of the graph `G`."
   },
   "run_periphery": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "list",
+    "description": "List of nodes in periphery"
   },
   "run_radius": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "integer",
+    "description": "Radius of graph"
   },
   "run_resistance_distance": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dict or float",
+    "description": "If `nodeA` and `nodeB` are given, resistance distance between `nodeA` and `nodeB`. If `nodeA` or `nodeB` is unspecified (the default), a dictionary of nodes with resistance distances as the value."
   },
   "run_is_matching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "any",
+    "description": "bool Whether the given set or dictionary represents a valid matching in the graph."
   },
   "run_is_maximal_matching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "any",
+    "description": "bool Whether the given set or dictionary represents a valid maximal matching in the graph."
   },
   "run_is_perfect_matching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "any",
+    "description": "bool Whether the given set or dictionary represents a valid perfect matching in the graph."
   },
   "run_max_weight_matching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "set",
+    "description": "A maximal matching of the graph."
   },
   "run_maximal_matching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "set",
+    "description": "A maximal matching of the graph."
   },
   "run_min_weight_matching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "set",
+    "description": "A minimal weight matching of the graph."
   },
   "run_boykov_kolmogorov": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX DiGraph",
+    "description": "Residual network after computing the maximum flow."
   },
   "run_build_flow_dict": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_build_residual_network": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
+  },
+  "run_capacity_scaling": {
+    "type": "integer",
+    "description": "Cost of a minimum cost flow satisfying all demands. flowDict : dictionary If G is a digraph, a dict-of-dicts keyed by nodes such that flowDict[u][v] is the flow on edge (u, v). If G is a MultiDiGraph, a dict-of-dicts-of-dicts keyed by nodes so that flowDict[u][v][key] is the flow on edge (u, v, key)."
   },
   "run_cost_of_flow": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "Integer, float",
+    "description": "The total cost of the flow. This is given by the sum over all edges of the product of the edge's flow and the edge's weight."
   },
   "run_dinitz": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX DiGraph",
+    "description": "Residual network after computing the maximum flow."
   },
   "run_edmonds_karp": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX DiGraph",
+    "description": "Residual network after computing the maximum flow."
   },
   "run_gomory_hu_tree": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX graph",
+    "description": "A NetworkX graph representing the Gomory-Hu tree of the input graph."
   },
   "run_max_flow_min_cost": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "flowDict: dictionary Dictionary of dictionaries keyed by nodes such that flowDict[u][v] is the flow edge (u, v)."
   },
   "run_min_cost_flow": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of dictionaries keyed by nodes such that flowDict[u][v] is the flow edge (u, v)."
   },
   "run_min_cost_flow_cost": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "integer, float",
+    "description": "Cost of a minimum cost flow satisfying all demands."
   },
   "run_network_simplex": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "integer, float",
+    "description": "Cost of a minimum cost flow satisfying all demands. flowDict : dictionary Dictionary of dictionaries keyed by nodes such that flowDict[u][v] is the flow edge (u, v)."
   },
   "run_preflow_push": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX DiGraph",
+    "description": "Residual network after computing the maximum flow."
   },
   "run_shortest_augmenting_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX DiGraph",
+    "description": "Residual network after computing the maximum flow."
   },
   "run_is_arborescence": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "bool",
+    "description": "A boolean that is True if `G` is an arborescence."
   },
   "run_is_branching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "bool",
+    "description": "A boolean that is True if `G` is a branching."
   },
   "run_is_forest": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "bool",
+    "description": "A boolean that is True if `G` is a forest."
   },
   "run_is_tree": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "bool",
+    "description": "A boolean that is True if `G` is a tree."
   },
   "run_boruvka_mst_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_kruskal_mst_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_maximum_spanning_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "iterator",
+    "description": "An iterator over edges in a maximum spanning tree of `G`. Edges connecting nodes `u` and `v` are represented as tuples: `(u, v, k, d)` or `(u, v, k)` or `(u, v, d)` or `(u, v)` If `G` is a multigraph, `keys` indicates whether the edge key `k` will be reported in the third position in the edge tuple. `data` indicates whether the edge datadict `d` will appear at the end of the edge tuple. If `G` is not a multigraph, the tuples are `(u, v, d)` if `data` is True or `(u, v)` if `data` is False."
   },
   "run_maximum_spanning_tree": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX Graph",
+    "description": "A maximum spanning tree or forest."
   },
   "run_minimum_spanning_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "iterator",
+    "description": "An iterator over edges in a maximum spanning tree of `G`. Edges connecting nodes `u` and `v` are represented as tuples: `(u, v, k, d)` or `(u, v, k)` or `(u, v, d)` or `(u, v)` If `G` is a multigraph, `keys` indicates whether the edge key `k` will be reported in the third position in the edge tuple. `data` indicates whether the edge datadict `d` will appear at the end of the edge tuple. If `G` is not a multigraph, the tuples are `(u, v, d)` if `data` is True or `(u, v)` if `data` is False."
   },
   "run_minimum_spanning_tree": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX Graph",
+    "description": "A minimum spanning tree or forest."
   },
   "run_number_of_spanning_trees": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "any",
+    "description": "Number Undirected graphs: The number of spanning trees of the graph `G`. Or the sum of all spanning tree weights of the graph `G` where the weight of a tree is the product of its edge weights. Directed graphs: The number of arborescences of `G` rooted at node `root`. Or the sum of all arborescence weights of the graph `G` with specified root where the weight of an arborescence is the product of its edge weights."
   },
   "run_partition_spanning_tree": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX Graph",
+    "description": "A minimum spanning tree using all of the included edges in the graph and none of the excluded edges."
   },
   "run_prim_mst_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_random_spanning_tree": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "nx.Graph A spanning tree using the distribution defined by the weight of the tree."
   },
   "run_all_topological_sorts": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_ancestors": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "set() The ancestors of `source` in `G`"
   },
   "run_antichains": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_colliders": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_compute_v_structures": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_dag_longest_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "list Longest path"
   },
   "run_dag_longest_path_length": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "int Longest path length"
   },
   "run_dag_to_branching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "DiGraph The branching in which there is a bijection between root-to-leaf paths in `G` (in which multiple paths may share the same leaf) and root-to-leaf paths in the branching (in which there is a unique path from a root to a leaf). Each node has an attribute 'source' whose value is the original node to which this node corresponds. No other graph, node, or edge attributes are copied into this new graph."
   },
   "run_descendants": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "set() The descendants of `source` in `G`"
   },
   "run_has_cycle": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_is_aperiodic": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "bool True if the graph is aperiodic False otherwise"
   },
   "run_is_directed_acyclic_graph": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "bool True if `G` is a DAG, False otherwise"
   },
   "run_lexicographical_topological_sort": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_root_to_leaf_paths": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_topological_generations": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_topological_sort": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_transitive_closure": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "NetworkX graph The transitive closure of `G`"
   },
   "run_transitive_closure_dag": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "NetworkX DiGraph The transitive closure of `G`"
   },
   "run_transitive_reduction": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "NetworkX DiGraph The transitive reduction of `G`"
   },
   "run_v_structures": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_chordless_cycles": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_cycle_basis": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "A list of cycle lists.  Each cycle list is a list of nodes which forms a cycle (loop) in G."
   },
   "run_find_cycle": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "directed edges",
+    "description": "A list of directed edges indicating the path taken for the loop. If no cycle is found, then an exception is raised. For graphs, an edge is of the form `(u, v)` where `u` and `v` are the tail and head of the edge as determined by the traversal. For multigraphs, an edge is of the form `(u, v, key)`, where `key` is the key of the edge. When the graph is directed, then `u` and `v` are always in the order of the actual directed edge. If orientation is not None then the edge tuple is extended to include the direction of traversal ('forward' or 'reverse') on that edge."
   },
   "run_girth": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "int or math.inf"
   },
   "run_minimum_cycle_basis": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "A list of cycle lists.  Each cycle list is a list of nodes which forms a cycle (loop) in G. Note that the nodes are not necessarily returned in a order by which they appear in the cycle"
   },
   "run_recursive_simple_cycles": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "A list of cycles, where each cycle is represented by a list of nodes along the cycle. Example: >>> edges = [(0, 0), (0, 1), (0, 2), (1, 2), (2, 0), (2, 1), (2, 2)] >>> G = nx.DiGraph(edges) >>> nx.recursive_simple_cycles(G) [[0], [2], [0, 1, 2], [0, 2], [1, 2]]"
   },
   "run_simple_cycles": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_orig_func": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Reciprocity keyed by node label."
   },
   "run_equitable_color": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "any",
+    "description": "A dictionary with keys representing nodes and values representing corresponding coloring."
   },
   "run_greedy_color": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "any",
+    "description": "A dictionary with keys representing nodes and values representing corresponding coloring."
   },
   "run_strategy_connected_sequential": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_strategy_connected_sequential_bfs": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_strategy_connected_sequential_dfs": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_strategy_independent_set": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_strategy_largest_first": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_strategy_random_sequential": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_strategy_saturation_largest_first": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_strategy_smallest_last": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_generate_random_paths": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "generator of lists",
+    "description": "Generator of `sample_size` paths each with length `path_length`."
   },
   "run_panther_similarity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary of nodes to similarity scores (as floats). Note: the self-similarity (i.e., ``v``) will not be included in the returned dictionary. So, for ``k = 5``, a dictionary of top 4 nodes and their similarity scores will be returned."
   },
   "run_simrank_similarity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary or float",
+    "description": "If ``source`` and ``target`` are both ``None``, this returns a dictionary of dictionaries, where keys are node pairs and value are similarity of the pair of nodes. If ``source`` is not ``None`` but ``target`` is, this returns a dictionary mapping node to the similarity of ``source`` and that node. If neither ``source`` nor ``target`` is ``None``, this returns the similarity value for the given pair of nodes."
   },
   "run_adamic_adar_index": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "iterator",
+    "description": "An iterator of 3-tuples in the form (u, v, p) where (u, v) is a pair of nodes and p is their Adamic-Adar index."
   },
   "run_cn_soundarajan_hopcroft": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "iterator",
+    "description": "An iterator of 3-tuples in the form (u, v, p) where (u, v) is a pair of nodes and p is their score."
   },
   "run_common_neighbor_centrality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "iterator",
+    "description": "An iterator of 3-tuples in the form (u, v, p) where (u, v) is a pair of nodes and p is their Common Neighbor and Centrality based Parameterized Algorithm(CCPA) score."
   },
   "run_jaccard_coefficient": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "iterator",
+    "description": "An iterator of 3-tuples in the form (u, v, p) where (u, v) is a pair of nodes and p is their Jaccard coefficient."
   },
   "run_preferential_attachment": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "iterator",
+    "description": "An iterator of 3-tuples in the form (u, v, p) where (u, v) is a pair of nodes and p is their preferential attachment score."
   },
   "run_ra_index_soundarajan_hopcroft": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "iterator",
+    "description": "An iterator of 3-tuples in the form (u, v, p) where (u, v) is a pair of nodes and p is their score."
   },
   "run_resource_allocation_index": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "iterator",
+    "description": "An iterator of 3-tuples in the form (u, v, p) where (u, v) is a pair of nodes and p is their resource allocation index."
   },
   "run_within_inter_cluster": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "iterator",
+    "description": "An iterator of 3-tuples in the form (u, v, p) where (u, v) is a pair of nodes and p is their WIC measure."
   },
   "run_biadjacency_matrix": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "SciPy sparse array",
+    "description": "Biadjacency matrix representation of the bipartite graph G."
   },
   "run_birank": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "Dictionary keyed by node to that node's BiRank score."
   },
   "run_color": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary",
+    "description": "A dictionary keyed by node with a 1 or 0 as data for each node color."
   },
   "run_eppstein_matching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary",
+    "description": "The matching is returned as a dictionary, `matching`, such that ``matching[v] == w`` if node `v` is matched to node `w`. Unmatched nodes do not occur as a key in `matching`."
   },
   "run_generate_edgelist": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "string",
+    "description": "Lines of data in adjlist format."
   },
   "run_hopcroft_karp_matching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary",
+    "description": "The matching is returned as a dictionary, `matches`, such that ``matches[v] == w`` if node `v` is matched to node `w`. Unmatched nodes do not occur as a key in `matches`."
   },
   "run_is_bipartite": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_is_bipartite_node_set": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_latapy_clustering": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "A dictionary keyed by node with the clustering coefficient value."
   },
   "run_maximal_extendability": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "int",
+    "description": "int "
   },
   "run_maximum_matching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary",
+    "description": "The matching is returned as a dictionary, `matches`, such that ``matches[v] == w`` if node `v` is matched to node `w`. Unmatched nodes do not occur as a key in `matches`."
   },
   "run_min_edge_cover": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "set A set of the edges in a minimum edge cover of the graph, given as pairs of nodes. It contains both the edges `(u, v)` and `(v, u)` for given nodes `u` and `v` among the edges of minimum edge cover."
   },
   "run_minimum_weight_full_matching": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "dictionary",
+    "description": "The matching is returned as a dictionary, `matches`, such that ``matches[v] == w`` if node `v` is matched to node `w`. Unmatched nodes do not occur as a key in `matches`."
   },
   "run_node_redundancy": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary keyed by node with values"
-      }
-    }
+    "type": "dictionary",
+    "description": "A dictionary keyed by node with the node redundancy value."
   },
   "run_robins_alexander_clustering": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "float",
+    "description": "The Robins and Alexander bipartite clustering for the input graph."
   },
   "run_sets": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "set",
+    "description": "Nodes from one side of the bipartite graph. Y : set Nodes from the other side."
   },
   "run_spectral_bipartivity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "float or dict",
+    "description": "A single number if the keyword nodes is not specified, or a dictionary keyed by node with the spectral bipartivity contribution of that node as the value."
   },
   "run_to_vertex_cover": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": ":class:`set`",
+    "description": "The minimum vertex cover in `G`."
   },
   "run_write_edgelist": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_bfs_beam_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_bfs_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_bfs_labeled_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_bfs_layers": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_bfs_predecessors": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "pred: iterator (node, predecessor) iterator where `predecessor` is the predecessor of `node` in a breadth first search starting from `source`."
   },
   "run_bfs_successors": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "succ: iterator (node, successors) iterator where `successors` is the non-empty list of successors of `node` in a breadth first search from `source`. To appear in the iterator, `node` must have successors."
   },
   "run_bfs_tree": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "T: NetworkX DiGraph An oriented tree"
   },
   "run_descendants_at_distance": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "set() The descendants of `source` in `G` at the given `distance` from `source`"
   },
   "run_dfs_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_dfs_labeled_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "edges: generator A generator of triples of the form (*u*, *v*, *d*), where (*u*, *v*) is the edge being explored in the depth-first search and *d* is one of the strings 'forward', 'nontree', 'reverse', or 'reverse-depth_limit'. A 'forward' edge is one in which *u* has been visited but *v* has not. A 'nontree' edge is one in which both *u* and *v* have been visited but the edge is not in the DFS tree. A 'reverse' edge is one in which both *u* and *v* have been visited and the edge is in the DFS tree. When the `depth_limit` is reached via a 'forward' edge, a 'reverse' edge is immediately generated rather than the subtree being explored. To indicate this flavor of 'reverse' edge, the string yielded is 'reverse-depth_limit'."
   },
   "run_dfs_postorder_nodes": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "nodes: generator A generator of nodes in a depth-first-search post-ordering."
   },
   "run_dfs_predecessors": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "any",
+    "description": "pred: dict A dictionary with nodes as keys and predecessor nodes as values."
   },
   "run_dfs_preorder_nodes": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "nodes: generator A generator of nodes in a depth-first-search pre-ordering."
   },
   "run_dfs_successors": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "any",
+    "description": "succ: dict A dictionary with nodes as keys and list of successor nodes as values."
   },
   "run_dfs_tree": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX DiGraph",
+    "description": "An oriented tree"
   },
   "run_edge_bfs": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_edge_dfs": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_generic_bfs_edges": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_hamiltonian_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "list",
+    "description": "A list of nodes which form a Hamiltonian path in `G`."
   },
   "run_is_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "bool Whether the given list of nodes represents a simple path in `G`."
   },
   "run_is_reachable": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "boolean",
-        "description": "Boolean result"
-      }
-    }
+    "type": "any",
+    "description": "bool Whether there is a path from `s` to `t` in `G`."
   },
   "run_is_tournament": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "bool Whether the given graph is a tournament graph."
   },
   "run_score_sequence": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "list A sorted list of the out-degrees of the nodes of `G`."
   },
   "run_tournament_matrix": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "SciPy sparse array The tournament matrix of the tournament graph `G`."
   },
   "run_cartesian_product": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "P: NetworkX graph The Cartesian product of G and H. P will be a multi-graph if either G or H is a multi-graph. Will be a directed if G and H are directed, and undirected if G and H are undirected."
   },
   "run_complement": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "A new graph.",
+    "description": "A new graph. "
   },
   "run_compose": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "C: A new graph with the same type as G"
   },
   "run_corona_product": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "C: NetworkX graph The Corona product of G and H."
   },
   "run_difference": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "A new graph with the same type as G.",
+    "description": "A new graph with the same type as G. "
   },
   "run_disjoint_union": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "A union graph with the same type as G.",
+    "description": "A union graph with the same type as G. "
   },
   "run_full_join": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "The full join graph with the same type as G.",
+    "description": "The full join graph with the same type as G. "
   },
   "run_intersection": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "A new graph with the same type as G.",
+    "description": "A new graph with the same type as G. "
   },
   "run_lexicographic_product": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "P: NetworkX graph The Cartesian product of G and H. P will be a multi-graph if either G or H is a multi-graph. Will be a directed if G and H are directed, and undirected if G and H are undirected."
   },
   "run_modular_product": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "M: NetworkX graph The Modular product of `G` and `H`."
   },
   "run_power": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "NetworkX simple graph `G` to the power `k`."
   },
   "run_reverse": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "directed graph",
+    "description": "The reversed G."
   },
   "run_rooted_product": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "The rooted product of G and H with a specified root in H",
+    "description": "The rooted product of G and H with a specified root in H "
   },
   "run_strong_product": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "P: NetworkX graph The Cartesian product of G and H. P will be a multi-graph if either G or H is a multi-graph. Will be a directed if G and H are directed, and undirected if G and H are undirected."
   },
   "run_symmetric_difference": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "A new graph with the same type as G.",
+    "description": "A new graph with the same type as G. "
   },
   "run_tensor_product": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "P: NetworkX graph The tensor product of G and H. P will be a multi-graph if either G or H is a multi-graph, will be a directed if G and H are directed, and undirected if G and H are undirected."
   },
   "run_union": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "A union graph with the same type as G.",
+    "description": "A union graph with the same type as G. "
   },
   "run_connected_dominating_set": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "set",
+    "description": "A dominating set of nodes which induces a connected subgraph of G."
   },
   "run_dominating_set": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "set",
+    "description": "A dominating set for G."
   },
   "run_is_connected_dominating_set": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "bool",
+    "description": "True if `nbunch` is connected dominating set of `G`, false otherwise."
   },
   "run_is_dominating_set": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "bool",
+    "description": "True if `nbunch` is a dominating set of `G`, false otherwise."
   },
   "run_efficiency": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "float Multiplicative inverse of the shortest path distance between the nodes."
   },
   "run_global_efficiency": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "float The average global efficiency of the graph."
   },
   "run_local_efficiency": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "float The average local efficiency of the graph."
   },
   "run_eulerian_circuit": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "array",
-        "description": "List or collection of results"
-      }
-    }
+    "type": "iterator",
+    "description": "An iterator over edges in the Eulerian circuit."
   },
   "run_eulerian_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_eulerize": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "NetworkX multigraph",
+    "description": "NetworkX multigraph "
   },
   "run_has_eulerian_path": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "True if G has an Eulerian path.",
+    "description": "True if G has an Eulerian path. "
   },
   "run_is_eulerian": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_is_semieulerian": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_attribute_assortativity_coefficient": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "any",
+    "description": "r: float Assortativity of graph for given attribute"
   },
   "run_attribute_mixing_dict": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dictionary",
+    "description": "Counts or joint probability of occurrence of attribute pairs."
   },
   "run_attribute_mixing_matrix": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "m: numpy array Counts or joint probability of occurrence of attribute pairs."
   },
   "run_average_degree_connectivity": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "dict",
+    "description": "A dictionary keyed by degree k with the value of average connectivity."
   },
   "run_average_neighbor_degree": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "d: dict A dictionary keyed by node to the average degree of its neighbors."
   },
   "run_degree_assortativity_coefficient": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "float",
+    "description": "Assortativity of graph by degree."
   },
   "run_degree_mixing_dict": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "object",
-        "description": "Dictionary result"
-      }
-    }
+    "type": "any",
+    "description": "d: dictionary Counts or joint probability of occurrence of degree pairs."
   },
   "run_degree_mixing_matrix": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "m: numpy array Counts, or joint probability, of occurrence of node degree."
   },
   "run_degree_pearson_correlation_coefficient": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "float",
+    "description": "Assortativity of graph by degree."
   },
   "run_node_attribute_xy": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_node_degree_xy": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "算法执行结果"
-      }
-    }
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_numeric_assortativity_coefficient": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "number",
-        "description": "Numeric result"
-      }
-    }
+    "type": "any",
+    "description": "r: float Assortativity of graph for given attribute"
   },
   "run_closeness_vitality": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "dictionary or float If `node` is None, this function returns a dictionary with nodes as keys and closeness vitality as the value. Otherwise, it returns only the closeness vitality for the specified `node`. The closeness vitality of a node may be negative infinity if removing that node would disconnect the graph."
   },
   "run_gutman_index": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "number The Gutman Index of the graph `G`."
   },
   "run_schultz_index": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "number The first kind of Schultz Index of the graph `G`."
   },
   "run_wiener_index": {
-    "type": "object",
-    "properties": {
-      "result": {
-        "type": "any",
-        "description": "Algorithm execution result"
-      }
-    }
+    "type": "any",
+    "description": "number The Wiener index of the graph `G`."
   }
 }

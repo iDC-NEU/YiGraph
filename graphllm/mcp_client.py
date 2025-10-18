@@ -1,9 +1,9 @@
 """
-MCP Client - 修复版
-关键修复:
-1. 移除不必要的 G 参数过滤
-2. 简化参数验证逻辑
-3. 增强 CSV 数据加载时的类型处理
+MCP Client - Schema 文件加载版
+关键改进:
+1. ✅ 从文件加载 input_schema 和 output_schema
+2. ✅ 移除运行时 schema 生成逻辑
+3. ✅ 优化参数验证性能
 """
 import os
 os.environ['TRANSFORMERS_OFFLINE'] = '1'
@@ -24,13 +24,17 @@ logger = logging.getLogger(__name__)
 
 
 class GraphMCPClient:
-    """图计算MCP客户端"""
-    
+    """图计算MCP客户端 - Schema 文件版"""
+
     def __init__(self, server_command: str = "python", server_args: List[str] = None):
         self.server_command = server_command
         self.server_args = server_args or ["graphllm/mcp_server.py"]
         self.session = None
         self.available_tools = {}
+        
+        # ✅ 新增：预加载 schemas
+        self.input_schemas_cache = {}
+        self.output_schemas_cache = {}
         
     async def connect(self):
         """连接到MCP服务器"""
@@ -43,7 +47,11 @@ class GraphMCPClient:
             self.stdio_client = stdio_client(server_params)
             self.read_stream, self.write_stream = await self.stdio_client.__aenter__()
             self.session = ClientSession(self.read_stream, self.write_stream)
-            self.output_schemas_cache = self._load_output_schemas()
+            
+            # ✅ 先加载 schemas 缓存
+            self.input_schemas_cache = self._load_schemas("input")
+            self.output_schemas_cache = self._load_schemas("output")
+            
             await self.session.__aenter__()
             await self.session.initialize()
             
@@ -67,44 +75,54 @@ class GraphMCPClient:
         except Exception as e:
             logger.error(f"❌ 断开连接时发生错误: {e}")
     
-    def _load_output_schemas(self) -> Dict[str, Dict[str, Any]]:
-        """从文件加载预生成的 output schemas"""
-        from pathlib import Path
-        import json
+    def _load_schemas(self, schema_type: str) -> Dict[str, Dict[str, Any]]:
+        """
+        ✅ 统一的 schema 加载函数
         
-        # ✅ 修复：使用正确的相对路径
-        # 假设 mcp_client.py 和 dynamic_tools_registrar.py 在同一目录
-        schema_file = Path(__file__).parent / "generated_output_schemas.json"
+        Args:
+            schema_type: "input" 或 "output"
+            
+        Returns:
+            工具名称到 schema 的映射字典
+        """
+        schema_file = Path(__file__).parent / f"generated_{schema_type}_schemas.json"
         
         if schema_file.exists():
             try:
                 with open(schema_file, 'r', encoding='utf-8') as f:
                     schemas = json.load(f)
-                logger.info(f"✅ 已加载 {len(schemas)} 个工具的 output schemas")
+                logger.info(f"✅ 已加载 {len(schemas)} 个工具的 {schema_type} schemas")
                 logger.info(f"   文件位置: {schema_file.absolute()}")
                 return schemas
             except Exception as e:
-                logger.warning(f"⚠️ 加载 output schemas 失败: {e}")
+                logger.warning(f"⚠️ 加载 {schema_type} schemas 失败: {e}")
         else:
-            logger.warning(f"⚠️ 未找到 output schemas 文件: {schema_file}")
+            logger.warning(f"⚠️ 未找到 {schema_type} schemas 文件: {schema_file}")
             logger.info("   提示：先运行 MCP Server 以生成 schemas")
         
         return {}
+    
     async def _load_available_tools(self):
-        """加载并缓存可用工具列表"""
+        """加载并缓存可用工具列表（使用预加载的 schemas）"""
         try:
             tools_response = await self.session.list_tools()
             for tool in tools_response.tools:
                 tool_name = tool.name
                 
-                # ✅ 从预生成的文件中获取 output_schema
+                # ✅ 优先使用预加载的 schemas
+                input_schema = self.input_schemas_cache.get(tool_name)
                 output_schema = self.output_schemas_cache.get(tool_name)
+                
+                # 如果缓存中没有,使用服务器返回的 schema (兜底)
+                if not input_schema:
+                    input_schema = tool.inputSchema
+                    logger.debug(f"⚠️ 工具 '{tool_name}' 使用服务器返回的 input_schema")
                 
                 self.available_tools[tool_name] = {
                     'name': tool_name,
                     'description': tool.description,
-                    'input_schema': tool.inputSchema,
-                    'output_schema': output_schema  # ✅ 使用预加载的 schema
+                    'input_schema': input_schema,
+                    'output_schema': output_schema
                 }
             
             logger.info(f"✅ 已加载 {len(self.available_tools)} 个可用工具")
@@ -118,22 +136,27 @@ class GraphMCPClient:
         return list(self.available_tools.values())
     
     def get_tool_schema(self, tool_name: str, schema_type: str = 'input') -> Optional[Dict[str, Any]]:
-        """获取指定工具的 schema"""
+        """
+        获取指定工具的 schema
+        
+        Args:
+            tool_name: 工具名称
+            schema_type: "input" 或 "output"
+        """
         tool = self.available_tools.get(tool_name)
         if not tool:
+            logger.warning(f"⚠️ 工具 '{tool_name}' 不存在")
             return None
         
-        if schema_type == 'output':
-            output_schema = tool.get('output_schema')
-            
-            # ✅ 如果没有预加载的 schema，返回默认结构
-            if not output_schema:
-                logger.debug(f"⚠️ 工具 '{tool_name}' 没有预定义的 output_schema,使用默认")
-                return self._get_default_output_schema()
-            
-            return output_schema
+        schema_key = f"{schema_type}_schema"
+        schema = tool.get(schema_key)
         
-        return tool.get('input_schema')
+        if not schema:
+            logger.debug(f"⚠️ 工具 '{tool_name}' 没有 {schema_type}_schema")
+            if schema_type == 'output':
+                return self._get_default_output_schema()
+        
+        return schema
     
     def _get_default_output_schema(self) -> Dict[str, Any]:
         """返回默认的 output schema"""
@@ -142,9 +165,7 @@ class GraphMCPClient:
             "properties": {
                 "algorithm": {"type": "string"},
                 "success": {"type": "boolean"},
-                "result": {
-                    "description": "Algorithm result (type varies)"
-                },
+                "result": {"description": "Algorithm result (type varies)"},
                 "error": {"type": ["string", "null"]},
                 "summary": {"type": ["string", "null"]}
             },
@@ -152,16 +173,12 @@ class GraphMCPClient:
         }
     
     def validate_arguments(self, tool_name: str, arguments: Dict[str, Any]) -> tuple[bool, Optional[str]]:
-        """验证工具参数是否符合 schema 定义
-        
-        Returns:
-            (is_valid, error_message)
-        """
-        schema = self.get_tool_schema(tool_name)
+        """验证工具参数是否符合 schema 定义"""
+        schema = self.get_tool_schema(tool_name, 'input')
         if not schema:
-            return False, f"工具 '{tool_name}' 不存在"
+            return False, f"工具 '{tool_name}' 不存在或缺少 input schema"
         
-        properties = schema.get('properties', {})
+        properties = schema.get('parameters', {})
         required = schema.get('required', [])
         
         # 检查必需参数
@@ -172,18 +189,17 @@ class GraphMCPClient:
         # 检查额外参数（允许 __post_processing_code__）
         for param_name in arguments.keys():
             if param_name not in properties and param_name != "__post_processing_code__":
-                logger.warning(f"⚠️ 参数 '{param_name}' 不在 schema 定义中，但将尝试传递")
+                logger.warning(f"⚠️ 参数 '{param_name}' 不在 schema 定义中")
         
         return True, None
     
-    async def call_tool(self, tool_name: str, arguments: Dict[str, Any], 
-                        post_processing_code: Optional[str] = None,
-                        validate: bool = True) -> Dict[str, Any]:
+    # [其他方法保持不变: call_tool, print_tool_info, load_data_from_csv...]
+    
+    async def call_tool(self, tool_name: str, arguments: Dict[str, Any], post_processing_code: Optional[str] = None, validate: bool = True) -> Dict[str, Any]: 
         """调用MCP工具"""
         try:
             if post_processing_code:
                 arguments["__post_processing_code__"] = post_processing_code
-
             if validate:
                 is_valid, error_msg = self.validate_arguments(tool_name, arguments)
                 if not is_valid:
@@ -193,9 +209,7 @@ class GraphMCPClient:
                         "error": f"参数验证失败: {error_msg}",
                         "summary": "参数格式不正确"
                     }
-            
             result = await self.session.call_tool(tool_name, arguments=arguments)
-            
             if result.content and len(result.content) > 0:
                 content = result.content[0]
                 if hasattr(content, 'text'):
@@ -209,9 +223,7 @@ class GraphMCPClient:
                             "error": raw_content,
                             "summary": "服务器返回非 JSON 响应"
                         }
-            
             return {"error": "无法解析工具调用结果"}
-            
         except Exception as e:
             logger.error(f"❌ 工具调用失败: {e}")
             return {
@@ -219,9 +231,8 @@ class GraphMCPClient:
                 "error": str(e),
                 "summary": "工具调用异常"
             }
-    
     def print_tool_info(self, tool_name: str):
-        """打印工具的详细信息"""
+        """打印工具的详细信息（增强版）"""
         tool = self.available_tools.get(tool_name)
         if not tool:
             print(f"❌ 工具 '{tool_name}' 不存在")
@@ -232,14 +243,18 @@ class GraphMCPClient:
         print(f"描述: {tool['description']}")
         
         print(f"\n--- 输入参数 Schema ---")
-        input_schema = tool.get('input_schema', {})
-        print(json.dumps(input_schema, indent=2, ensure_ascii=False))
+        input_schema = tool.get('input_schema')
+        if input_schema:
+            print(json.dumps(input_schema, indent=2, ensure_ascii=False))
+        else:
+            print("⚠️ 未提供 Input Schema")
         
         print(f"\n--- 返回结构 Schema ---")
-        if tool.get('output_schema'):
-            print(json.dumps(tool.get('output_schema'), indent=2, ensure_ascii=False))
+        output_schema = tool.get('output_schema')
+        if output_schema:
+            print(json.dumps(output_schema, indent=2, ensure_ascii=False))
         else:
-            print("未提供 Output Schema。")
+            print("⚠️ 未提供 Output Schema")
             
         print(f"{'='*60}\n")
     

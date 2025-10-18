@@ -1,0 +1,65 @@
+[
+  {
+    "template_id": "top_n_ranking",
+    "description": "对字典按值排序并返回前N项",
+    "template_type": "requires_processing",
+    "parameters": [
+      "n",
+      "reverse"
+    ],
+    "code_template": "def process(data):\n    n = {n}\n    reverse = {reverse}\n    sorted_items = sorted(data.items(), key=lambda x: x[1], reverse=reverse)\n    return dict(sorted_items[:n])",
+    "usage_examples": [
+      "最重要的5个节点",
+      "Top 10 账户",
+      "排名前3的社区"
+    ]
+  },
+  {
+    "template_id": "threshold_filter",
+    "description": "过滤字典中值大于/小于阈值的项",
+    "template_type": "requires_processing",
+    "parameters": [
+      "threshold",
+      "comparison"
+    ],
+    "code_template": "def process(data):\n    threshold = {threshold}\n    comparison = \"{comparison}\"\n    \n    if not isinstance(data, dict):\n        return data\n    \n    operations = {{\n        \">\": lambda v: v > threshold,\n        \"<\": lambda v: v < threshold,\n        \"==\": lambda v: v == threshold,\n        \">=\": lambda v: v >= threshold,\n        \"<=\": lambda v: v <= threshold\n    }}\n    \n    if comparison not in operations:\n        return data\n    \n    filter_func = operations[comparison]\n    return {{k: v for k, v in data.items() if filter_func(v)}}",
+    "usage_examples": [
+      "PageRank 大于 0.05 的节点",
+      "交易额超过 1000 的边",
+      "度中心性小于 5 的账户"
+    ]
+  },
+  {
+    "template_id": "simple_result",
+    "description": "简单结果返回（如路径、距离等，不需要后处理）",
+    "template_type": "no_processing",
+    "parameters": [],
+    "code_template": null,
+    "usage_examples": [
+      "A 到 B 的最短路径",
+      "两个节点间的距离",
+      "图的统计信息"
+    ]
+  },
+  {
+    "template_id": "default_truncate",
+    "description": "默认处理：字典取前10项，其他原样返回",
+    "template_type": "optional_processing",
+    "parameters": [],
+    "code_template": "def process(data):\n    if isinstance(data, dict) and len(data) > 10:\n        sorted_items = sorted(data.items(), key=lambda x: x[1], reverse=True)\n        return dict(sorted_items[:10])\n    return data",
+    "usage_examples": [
+      "计算 PageRank (无特殊要求)",
+      "查看图信息"
+    ]
+  },
+  {
+    "template_id": "custom_code",
+    "description": "自定义处理代码（回退选项）",
+    "template_type": "requires_processing",
+    "parameters": [
+      "code"
+    ],
+    "code_template": null,
+    "usage_examples": []
+  }
+]

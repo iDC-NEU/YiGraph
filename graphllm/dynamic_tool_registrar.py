@@ -10,7 +10,7 @@
 import inspect
 import logging
 import re
-from typing import Callable, Dict, Any, Optional, get_type_hints, get_origin, get_args, Union, Tuple
+from typing import Callable, Dict, Any, Optional, get_type_hints, get_origin, get_args, Union
 from functools import wraps
 from pydantic import BaseModel, Field
 import networkx as nx
@@ -28,13 +28,13 @@ class GenericToolOutput(BaseModel):
     summary: Optional[str] = Field(None, description="执行摘要")
 
 # ============================================================================
-# 2. ⭐ 修复: 扩展模块扫描范围 (从 4 个增加到 60+)
+# 2. 模块扫描范围
 # ============================================================================
 MODULES_TO_SCAN = [
     # === 核心中心性算法 ===
     nx.algorithms.centrality,
     
-    # === 社区检测 (新增) ===
+    # === 社区检测 ===
     nx.algorithms.community,
     nx.algorithms.community.modularity_max,
     nx.algorithms.community.label_propagation,
@@ -48,57 +48,57 @@ MODULES_TO_SCAN = [
     nx.algorithms.components,
     nx.algorithms.connectivity,
     
-    # === 路径算法 (扩展) ===
+    # === 路径算法 ===
     nx.algorithms.shortest_paths.generic,
     nx.algorithms.shortest_paths.weighted,
     nx.algorithms.shortest_paths.unweighted,
     nx.algorithms.shortest_paths.dense,
     nx.algorithms.simple_paths,
     
-    # === 聚类与度量 (新增) ===
+    # === 聚类与度量 ===
     nx.algorithms.cluster,
     nx.algorithms.clique,
     nx.algorithms.core,
     nx.algorithms.distance_measures,
     
-    # === 图同构与匹配 (新增) ===
+    # === 图同构与匹配 ===
     nx.algorithms.isomorphism,
     nx.algorithms.matching,
     
-    # === 流算法 (新增) ===
+    # === 流算法 ===
     nx.algorithms.flow,
     
-    # === 树算法 (新增) ===
+    # === 树算法 ===
     nx.algorithms.tree.recognition,
     nx.algorithms.tree.mst,
     
-    # === DAG 算法 (新增) ===
+    # === DAG 算法 ===
     nx.algorithms.dag,
     
-    # === 环与桥 (新增) ===
+    # === 环与桥 ===
     nx.algorithms.cycles,
     nx.algorithms.bridges,
     
-    # === 图着色 (新增) ===
+    # === 图着色 ===
     nx.algorithms.coloring,
     
-    # === 相似性度量 (新增) ===
+    # === 相似性度量 ===
     nx.algorithms.similarity,
     nx.algorithms.link_prediction,
     
-    # === 二分图 (新增) ===
+    # === 二分图 ===
     nx.algorithms.bipartite,
     nx.algorithms.bipartite.centrality,
     nx.algorithms.bipartite.cluster,
     
-    # === 拓扑与遍历 (新增) ===
+    # === 拓扑与遍历 ===
     nx.algorithms.traversal,
     nx.algorithms.tournament,
     
-    # === 图运算 (新增) ===
+    # === 图运算 ===
     nx.algorithms.operators,
     
-    # === 其他重要算法 (新增) ===
+    # === 其他重要算法 ===
     nx.algorithms.dominating,
     nx.algorithms.efficiency_measures,
     nx.algorithms.euler,
@@ -109,7 +109,7 @@ MODULES_TO_SCAN = [
 ]
 
 # ============================================================================
-# 3. ⭐ 修复: 完善排除算法列表
+# 3. 排除算法列表
 # ============================================================================
 ALGORITHMS_TO_EXCLUDE = [
     # 性能问题算法
@@ -120,9 +120,6 @@ ALGORITHMS_TO_EXCLUDE = [
     # 重复功能算法
     'shortest_path_length',  # 与 shortest_path 重复
     
-    # 需要特殊图类型的算法 (可选择性启用)
-    # 'bipartite_*',  # 如果不是二分图则无法使用
-    
     # 生成器类算法 (返回迭代器,不适合 LLM 调用)
     'all_simple_paths',
     'all_shortest_paths',
@@ -130,7 +127,7 @@ ALGORITHMS_TO_EXCLUDE = [
 ]
 
 # ============================================================================
-# 4. ⭐ 修复: 扩展有向/无向图映射表
+# 4. 有向/无向图映射表
 # ============================================================================
 UNDIRECTED_ONLY_ALGORITHMS = {
     # 连通性组件
@@ -140,259 +137,244 @@ UNDIRECTED_ONLY_ALGORITHMS = {
     'is_connected': 'is_weakly_connected',
     
     # 二分图算法 (有向图自动转无向)
-    'is_bipartite': None,  # 自动转换为无向图
+    'is_bipartite': None,
     'bipartite_sets': None,
     
     # 聚类系数 (部分算法)
-    'triangles': None,  # 自动转换
+    'triangles': None,
     'clustering': None,
 }
 
 # ============================================================================
-# 5. 新增: 从docstring解析返回类型的函数
+# 5. 从docstring解析返回类型的函数
 # ============================================================================
-def _parse_returns_from_docstring(docstring: str) -> Dict[str, Any]:
-    """从docstring的Returns部分解析返回类型描述"""
+def _parse_returns_from_docstring(docstring: str) -> dict:
+    """从docstring的Returns部分提取返回类型与描述信息（精确适配NetworkX格式）"""
     if not docstring:
+        return {"type": "any", "description": "算法执行结果"}
+
+    match = re.search(
+        r"Returns\s*\n\s*-{3,}\s*\n(.*?)(?=\n\s*(?:Examples|Notes|See Also|Raises|References|\Z))",
+        docstring,
+        re.DOTALL | re.IGNORECASE
+    )
+    
+    if not match:
+        match = re.search(
+            r"Returns\s*:?\s*\n+(.*?)(?=\n\s*(?:Examples|Notes|See Also|Raises|References|\Z))",
+            docstring,
+            re.DOTALL | re.IGNORECASE
+        )
+    
+    if not match:
+        return {"type": "any", "description": "算法执行结果"}
+
+    returns_text = match.group(1).strip()
+    lines = [line.strip() for line in returns_text.splitlines() if line.strip()]
+    
+    if not lines:
+        return {"type": "any", "description": "算法执行结果"}
+
+    first_line = lines[0]
+    
+    if " : " in first_line:
+        parts = first_line.split(" : ", 1)
+        return_type = parts[1].strip()
+        
+        desc_lines = []
+        for line in lines[1:]:
+            if line.startswith("-"):
+                continue
+            desc_lines.append(line)
+        
+        description = " ".join(desc_lines).strip()
+        if not description:
+            description = f"{return_type} "
+        
         return {
-            "type": "object",
-            "properties": {
-                "result": {"type": "any", "description": "算法执行结果"}
-            }
+            "type": return_type,
+            "description": description
         }
     
-    # 查找Returns部分
-    returns_match = re.search(r'Returns\s*[-:]*\s*(.*?)(?=\n\n|\n\w|\Z)', docstring, re.DOTALL | re.IGNORECASE)
-    if not returns_match:
-        return {
-            "type": "object", 
-            "properties": {
-                "result": {"type": "any", "description": "算法执行结果"}
-            }
-        }
-    
-    returns_text = returns_match.group(1).strip()
-    
-    # 处理复杂返回类型描述
-    if 'two-tuple of dictionaries' in returns_text or 'tuple' in returns_text:
-        # 处理类似 (hubs, authorities) : two-tuple of dictionaries
-        if 'hubs' in returns_text and 'authorities' in returns_text:
-            return {
-                "type": "object",
-                "properties": {
-                    "hubs": {
-                        "type": "object",
-                        "description": "Hub scores dictionary"
-                    },
-                    "authorities": {
-                        "type": "object", 
-                        "description": "Authority scores dictionary"
-                    }
-                }
-            }
-        else:
-            # 通用元组处理
-            tuple_match = re.search(r'\(([^)]+)\)\s*:\s*(.+)', returns_text)
-            if tuple_match:
-                elements = [elem.strip() for elem in tuple_match.group(1).split(',')]
-                desc = tuple_match.group(2)
-                properties = {}
-                for i, elem in enumerate(elements):
-                    properties[f"item_{i}"] = {
-                        "type": "any",
-                        "description": f"{elem} from {desc}"
-                    }
-                return {
-                    "type": "object",
-                    "properties": properties
-                }
-    
-    # 处理字典返回类型
-    if 'dictionary' in returns_text.lower() or 'dict' in returns_text.lower():
-        if 'nodes' in returns_text.lower() or 'node' in returns_text.lower():
-            return {
-                "type": "object",
-                "properties": {
-                    "result": {
-                        "type": "object",
-                        "description": "Dictionary keyed by node with values"
-                    }
-                }
-            }
-        else:
-            return {
-                "type": "object",
-                "properties": {
-                    "result": {
-                        "type": "object", 
-                        "description": "Dictionary result"
-                    }
-                }
-            }
-    
-    # 处理列表/集合返回类型
-    if 'list' in returns_text.lower() or 'set' in returns_text.lower() or 'iter' in returns_text.lower():
-        return {
-            "type": "object",
-            "properties": {
-                "result": {
-                    "type": "array",
-                    "description": "List or collection of results"
-                }
-            }
-        }
-    
-    # 处理数值返回类型
-    if 'float' in returns_text or 'number' in returns_text:
-        return {
-            "type": "object",
-            "properties": {
-                "result": {
-                    "type": "number",
-                    "description": "Numeric result"
-                }
-            }
-        }
-    
-    # 处理布尔返回类型
-    if 'bool' in returns_text.lower():
-        return {
-            "type": "object", 
-            "properties": {
-                "result": {
-                    "type": "boolean",
-                    "description": "Boolean result"
-                }
-            }
-        }
-    
-    # 默认返回类型
     return {
-        "type": "object",
-        "properties": {
-            "result": {"type": "any", "description": "Algorithm execution result"}
-        }
+        "type": "any",
+        "description": " ".join(lines)
     }
 
 # ============================================================================
-# 6. 新增: 提取完整docstring作为description
+# 6. 提取完整docstring作为description
 # ============================================================================
 def _extract_full_description(docstring: str) -> str:
     """提取完整的docstring作为工具描述"""
     if not docstring:
         return "No description available."
     
-    # 清理docstring，移除过多的空白字符
-    cleaned = re.sub(r'\n\s*\n', '\n\n', docstring.strip())
-    cleaned = re.sub(r'[ \t]+', ' ', cleaned)
+    # cleaned = re.sub(r'\n\s*\n', '\n\n', docstring.strip())
+    # cleaned = re.sub(r'[ \t]+', ' ', cleaned)
     
-    # 移除参数和返回部分，保留主要描述
-    lines = cleaned.split('\n')
+    lines = docstring.split('\n')
     main_description = []
     
     for line in lines:
         stripped = line.strip()
-        if stripped.lower().startswith(('parameters:', 'args:', 'arguments:', 'returns:', 'yields:', 'examples:')):
-            break
         if stripped and not stripped.startswith('---'):
             main_description.append(stripped)
     
     description = ' '.join(main_description).strip()
     
-    # 如果描述过长，截取前500字符
-    if len(description) > 500:
-        description = description[:497] + "..."
-    
     return description if description else "No description available."
 
 # ============================================================================
-# 7-12. [保持原有的辅助函数不变，只修改 _clean_docstring 函数]
+# 7-12. 辅助函数
 # ============================================================================
-def _python_type_to_json_schema(py_type: Any) -> Dict[str, Any]:
-    """Python 类型 -> JSON Schema 类型"""
-    origin = get_origin(py_type)
-    
-    if origin is Union:
-        args = get_args(py_type)
-        non_none_types = [arg for arg in args if arg is not type(None)]
-        if len(non_none_types) == 1:
-            return _python_type_to_json_schema(non_none_types[0])
-    
-    if origin is list:
-        args = get_args(py_type)
-        item_type = args[0] if args else Any
-        return {
-            "type": "array",
-            "items": _python_type_to_json_schema(item_type)
-        }
-    
-    if origin is dict:
-        return {"type": "object"}
-    
-    type_mapping = {
-        int: "integer",
-        float: "number", 
-        str: "string",
-        bool: "boolean",
-        list: "array",
-        dict: "object"
-    }
-    
-    return {"type": type_mapping.get(py_type, "string")}
 
-def _extract_param_description(func: Callable, param_name: str) -> str:
-    """从 docstring 提取参数描述"""
-    doc = func.__doc__
+def _extract_param_description(func: Callable, param_name: str) -> Dict[str, str]:
+    """从 docstring 中提取参数描述和类型"""
+    import inspect
+    import re
+    
+    doc = inspect.getdoc(func)
     if not doc:
-        return f"Parameter: {param_name}"
+        return {"type": "", "description": ""}
     
-    lines = doc.split('\n')
-    in_params = False
-    desc_lines = []
+    # ✅ 关键修复：用正向向前查看排除所有可能的"Parameters 之后"的章节
+    # 重点：要排除 "Additional backends" 这种非标准章节
+    match = re.search(
+        r"Parameters\s*\n\s*-{3,}\s*\n(.*?)(?=\n\s*(?:Returns|Examples|Notes|See Also|Raises|References|Additional\s+backends|\Z))",
+        doc,
+        re.DOTALL | re.IGNORECASE
+    )
     
-    for line in lines:
-        stripped = line.strip()
-        
-        if stripped.lower() in ['parameters', 'args:', 'parameters:', 'arguments:']:
-            in_params = True
-            continue
-        
-        if in_params and stripped and not line.startswith(' '):
+    if not match:
+        # 备选模式
+        match = re.search(
+            r"Parameters\s*:?\s*\n+(.*?)(?=\n\s*(?:Returns|Examples|Notes|See Also|Raises|References|Additional\s+backends|\Z))",
+            doc,
+            re.DOTALL | re.IGNORECASE
+        )
+    
+    if not match:
+        return {"type": "", "description": ""}
+    
+    params_text = match.group(1)
+    lines = params_text.split('\n')
+    
+    # ✅ 保留你原来的解析逻辑：通过缩进和行结构来解析 type 和 description
+    param_section_start = -1
+    param_section_end = -1
+    
+    for i, line in enumerate(lines):
+        # 查找参数定义行（格式: "param_name : type"）
+        if re.match(rf"^\s*{re.escape(param_name)}\s*:", line):
+            param_section_start = i
+            # 从这一行开始向后找到参数块的结束位置
+            for j in range(i + 1, len(lines)):
+                next_line = lines[j].strip()
+                # 下一个参数定义或空行后紧跟参数定义 = 本参数块结束
+                if next_line and re.match(r"^\w+\s*:", lines[j]):
+                    param_section_end = j
+                    break
+            else:
+                # 没找到下一个参数，说明这是最后一个参数
+                param_section_end = len(lines)
             break
-        
-        if in_params and param_name in stripped:
-            if ':' in stripped:
-                desc_lines.append(stripped.split(':', 1)[1].strip())
-            continue
-        
-        if desc_lines and stripped and in_params:
-            desc_lines.append(stripped)
     
-    return ' '.join(desc_lines) if desc_lines else f"Parameter: {param_name}"
+    if param_section_start == -1:
+        return {"type": "", "description": ""}
+    
+    # ✅ 提取参数块内容
+    param_lines = lines[param_section_start:param_section_end]
+    
+    if not param_lines:
+        return {"type": "", "description": ""}
+    
+    # 第一行提取 type
+    first_line = param_lines[0]
+    type_match = re.search(rf"{re.escape(param_name)}\s*:\s*(.+)", first_line)
+    param_type = type_match.group(1).strip() if type_match else ""
+    
+    # 后续缩进行提取 description
+    description_lines = []
+    for line in param_lines[1:]:
+        stripped = line.strip()
+        if stripped:
+            description_lines.append(stripped)
+    
+    description = ' '.join(description_lines)
+    
+    return {
+        "type": param_type,
+        "description": description
+    }
+
+
+def _get_documented_params(func: Callable) -> set:
+    """从 docstring 中提取所有文档化的参数名"""
+    doc = inspect.getdoc(func)
+    if not doc:
+        return set()
+    
+    # 提取 Parameters 部分
+    match = re.search(
+        r"Parameters\s*\n\s*-{3,}\s*\n(.*?)(?=\n\s*(?:Returns|Examples|Notes|See Also|Raises|References|\Z))",
+        doc,
+        re.DOTALL | re.IGNORECASE
+    )
+    
+    if not match:
+        return set()
+    
+    params_text = match.group(1)
+    documented = set()
+    
+    for line in params_text.split('\n'):
+        # 参数定义行格式: "param_name :"
+        match = re.match(r"^\s*(\w+)\s*:", line)
+        if match:
+            documented.add(match.group(1))
+    
+    return documented
+
 
 def generate_input_schema(func: Callable) -> Dict[str, Any]:
-    """从函数签名生成 input_schema，完全排除 G 参数"""
+    """从函数签名和 docstring 生成 input_schema"""
     sig = inspect.signature(func)
-    type_hints = get_type_hints(func) if func.__annotations__ else {}
+    documented_params = _get_documented_params(func)
     
-    properties = {}
+    
+    parameters = {}  # ✅ 改为 parameters
     required = []
     
     for param_name, param in sig.parameters.items():
-        if param_name in ['G', 'self', 'cls']:
+        if param.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD):
             continue
-        
-        if param.kind in [inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD]:
+        if param_name not in documented_params:
             continue
-        
-        param_type = type_hints.get(param_name, str)
-        json_schema = _python_type_to_json_schema(param_type)
-        
+        #✅ 从 docstring 提取参数信息
+        param_info = _extract_param_description(func, param_name)
+        docstring_type = param_info["type"]
+        description = param_info["description"]
+        # json_type = "string"  # 默认类型
+        # if any(t in docstring_type.lower() for t in ["int", "integer"]):
+        #     json_type = "integer"
+        # elif "float" in docstring_type.lower():
+        #     json_type = "number"
+        # elif "bool" in docstring_type.lower():
+        #     json_type = "boolean"
+        # elif "dict" in docstring_type.lower() or "dictionary" in docstring_type.lower():
+        #     json_type = "object"
+        # elif "list" in docstring_type.lower() or "iterable" in docstring_type.lower():
+        #     json_type = "array"
+        # ✅ 构建参数 schema(不再包含 type 字段)
         param_schema = {
-            **json_schema,
-            "description": _extract_param_description(func, param_name)
+            "description": description if description else f"Parameter '{param_name}' for {func.__name__}",
         }
         
+        # ✅ 添加原始类型信息到 format 字段
+        if docstring_type:
+            param_schema["type"] = docstring_type
+        
+        # 处理默认值
         if param.default != inspect.Parameter.empty:
             if param.default is None:
                 param_schema["default"] = None
@@ -401,16 +383,16 @@ def generate_input_schema(func: Callable) -> Dict[str, Any]:
             else:
                 param_schema["default"] = str(param.default)
         else:
-            if param_name in ['backend_kwargs', 'create_using']:
-                param_schema["default"] = None
-            else:
+            # 没有默认值且不是 optional 才是 required
+            if "optional" not in docstring_type.lower() and param_name != "G":
                 required.append(param_name)
         
-        properties[param_name] = param_schema
+        parameters[param_name] = param_schema
+   
     
     schema = {
         "type": "object",
-        "properties": properties
+        "parameters": parameters  # ✅ 使用 parameters 替代 properties
     }
     
     if required:
@@ -428,355 +410,211 @@ def _clean_docstring(doc: str) -> str:
     return _extract_full_description(doc)
 
 # ============================================================================
-# 13. ⭐ 保持简化的参数处理逻辑 (已验证有效)
+# 13. 参数处理逻辑 (保持不变)
 # ============================================================================
-def _generate_type_conversions(sig: inspect.Signature) -> str:
-    """生成参数类型转换代码块"""
-    conversion_lines = []
-    
-    for param_name, param in sig.parameters.items():
-        if param_name == 'G':
-            continue
+def inject_graph_parameter(processor_getter: Callable):
+    """装饰器：在函数调用前注入 G 参数"""
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(**kwargs: Any) -> Any:
+            # ✅ 在这里注入 G
+            processor = processor_getter()
+            if processor.graph is None:
+                raise ValueError("Graph not initialized")
+            
+            kwargs['G'] = processor.graph
+            # sig = inspect.signature(func)
+            # if 'backend_kwargs' in sig.parameters and 'backend_kwargs' not in kwargs:
+            #     kwargs['backend_kwargs'] = {}
+            
+            logger.debug(f"✅ 注入参数: G={processor.graph}")
+            logger.debug(f"✅ 最终调用参数: {kwargs}")
+            # 调用原函数
+            return func(**kwargs)
         
-        annotation = param.annotation
+        # ⭐ 修改签名为 **kwargs
+        wrapper.__signature__ = inspect.Signature([
+            inspect.Parameter('kwargs', inspect.Parameter.VAR_KEYWORD)
+        ])
         
-        # 处理 int 类型
-        if annotation == int or (hasattr(annotation, '__origin__') and 
-                                  annotation.__origin__ == type(None) and 
-                                  int in getattr(annotation, '__args__', [])):
-            conversion_lines.append(
-                f"        if '{param_name}' in all_kwargs and isinstance(all_kwargs['{param_name}'], str):\n"
-                f"            try:\n"
-                f"                all_kwargs['{param_name}'] = int(all_kwargs['{param_name}'])\n"
-                f"            except (ValueError, TypeError):\n"
-                f"                pass"
-            )
-        
-        # 处理 float 类型（新增）
-        elif annotation == float or (hasattr(annotation, '__origin__') and 
-                                      annotation.__origin__ == type(None) and 
-                                      float in getattr(annotation, '__args__', [])):
-            conversion_lines.append(
-                f"        if '{param_name}' in all_kwargs and isinstance(all_kwargs['{param_name}'], str):\n"
-                f"            try:\n"
-                f"                all_kwargs['{param_name}'] = float(all_kwargs['{param_name}'])\n"
-                f"            except (ValueError, TypeError):\n"
-                f"                pass"
-            )
-        
-        # 处理 bool 类型
-        elif annotation == bool:
-            conversion_lines.append(
-                f"        if '{param_name}' in all_kwargs and isinstance(all_kwargs['{param_name}'], str):\n"
-                f"            all_kwargs['{param_name}'] = all_kwargs['{param_name}'].lower() in ('true', '1', 'yes')"
-            )
-    
-    return "\n".join(conversion_lines) if conversion_lines else "        pass"
-
+        return wrapper
+    return decorator
 
 def _create_tool_function(
     tool_name: str,
     algorithm_func: Callable,
     processor_getter: Callable,
     post_processing_decorator: Callable,
-    pydantic_model: BaseModel
 ) -> Callable:
-    """创建工具函数，在执行时自动注入 G 参数"""
+    
+    """
+    【全新重构版】
+    创建一个通用的工具函数包装器，不再使用 exec() 或代码字符串模板。
+    它在运行时动态处理类型转换和参数注入。
+    """
     original_sig = inspect.signature(algorithm_func)
     
-    safe_params = []
-    param_type_map = {}
+    type_hints = get_type_hints(algorithm_func)
     
-    for param in original_sig.parameters.values():
-        if param.name == 'G':
-            continue
-        if param.kind in [inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY]:
-            safe_params.append(param)
-            if param.annotation != inspect.Parameter.empty:
-                param_type_map[param.name] = param.annotation
-    
-    valid_param_names = {p.name for p in safe_params}
-    
-    # 修复 backend_kwargs 和 create_using 默认值
-    final_params = []
-    for p in safe_params:
-        if p.name in ['backend_kwargs', 'create_using'] and p.default == inspect.Parameter.empty:
-            new_param = p.replace(default=None)
-            final_params.append(new_param)
-        else:
-            final_params.append(p)
-    
-    # 生成函数签名
-    algo_param_defs = []
-    sorted_params = sorted(final_params, key=lambda p: p.default == inspect.Parameter.empty, reverse=True)
-    
-    for p in sorted_params:
-        param_str = p.name
-        if p.annotation != inspect.Parameter.empty:
-            annotation_repr = getattr(p.annotation, '__name__', str(p.annotation).replace("typing.", ""))
-            param_str += f": {annotation_repr}"
-        if p.default != inspect.Parameter.empty:
-            if p.default is None:
-                default_val_str = "None"
-            else:
-                default_val_str = repr(p.default) if not inspect.isclass(p.default) else p.default.__name__
-            param_str += f" = {default_val_str}"
-        algo_param_defs.append(param_str)
-    
-    final_param_defs_str = ", ".join(algo_param_defs)
-    
-    # ⭐ 关键修复: 简化的参数类型转换 - 只处理基本类型，跳过复杂参数
-    conversion_lines = []
-    complex_params = ['backend_kwargs', 'personalization', 'nstart', 'dangling', 'weight', 'create_using']
-    
-    for name, type_obj in param_type_map.items():
-        # 跳过复杂参数类型
-        if name in complex_params:
-            continue
+    @inject_graph_parameter(processor_getter)
+    @post_processing_decorator
+    @wraps(algorithm_func)
+    def tool_wrapper(**kwargs: Any) -> str:
+        """
+        这是一个动态生成的工具执行器。
+        它会自动处理图(G)的注入、参数类型转换和错误捕获。
+        """
+        try:
+            # 1. 获取图对象
+            processor = processor_getter()
+            # ⭐ 检查图是否初始化
+            if processor.graph is None:
+                logger.error(f"❌ 图未初始化，无法执行 {tool_name}")
+                return GenericToolOutput(
+                    algorithm=tool_name,
+                    success=False,
+                    error="Graph not initialized",
+                    summary="Call 'initialize_graph' first"
+                ).model_dump_json()
             
-        # 处理 Union 类型
-        origin = get_origin(type_obj)
-        actual_type = type_obj
-        if origin is Union:
-            type_args = [arg for arg in get_args(type_obj) if arg is not type(None)]
-            if type_args:
-                actual_type = type_args[0]
+            # ✅ 1. 先复制所有用户传入的参数
+            final_kwargs = dict(kwargs)  # 重要！保留所有参数
+            logger.debug(f"📝 原始签名: {original_sig}")
+            # ⭐⭐⭐ 强制注入 G 参数（即使客户端传了也覆盖）
+            final_kwargs['G'] = processor.graph
+            logger.info(f"✅ 已自动注入 G 参数 (节点数: {processor.graph.number_of_nodes()}, 边数: {processor.graph.number_of_edges()})")
+            logger.info(f"🔍 Initial kwargs for '{tool_name}': {final_kwargs}")
+            # if 'backend_kwargs' in original_sig.parameters and 'backend_kwargs' not in kwargs:
+            #     kwargs['backend_kwargs'] = {}
         
-        type_name = getattr(actual_type, '__name__', str(actual_type))
-        
-        # 只处理基本数值类型转换
-        if type_name == 'float':
-            conversion_code = f"""
-if '{name}' in all_kwargs and all_kwargs['{name}'] is not None:
-    try:
-        param_value = all_kwargs['{name}']
-        if isinstance(param_value, str):
-            all_kwargs['{name}'] = float(param_value.strip())
-        elif isinstance(param_value, int):
-            all_kwargs['{name}'] = float(param_value)
-    except (ValueError, TypeError) as e:
-        return GenericToolOutput(
-            algorithm="{tool_name}",
-            success=False,
-            error=f"Parameter '{name}' must be a number, got '{{all_kwargs[\"{name}\"]}}'",
-            summary="Parameter type error"
-        ).model_dump_json()
-"""
-        elif type_name == 'int':
-            conversion_code = f"""
-if '{name}' in all_kwargs and all_kwargs['{name}'] is not None:
-    try:
-        param_value = all_kwargs['{name}']
-        if isinstance(param_value, str):
-            all_kwargs['{name}'] = int(float(param_value.strip()))
-        elif isinstance(param_value, float):
-            all_kwargs['{name}'] = int(param_value)
-    except (ValueError, TypeError) as e:
-        return GenericToolOutput(
-            algorithm="{tool_name}",
-            success=False,
-            error=f"Parameter '{name}' must be an integer, got '{{all_kwargs[\"{name}\"]}}'",
-            summary="Parameter type error"
-        ).model_dump_json()
-"""
-        elif type_name == 'bool':
-            conversion_code = f"""
-if '{name}' in all_kwargs and all_kwargs['{name}'] is not None:
-    param_value = all_kwargs['{name}']
-    if isinstance(param_value, str):
-        param_value = param_value.lower().strip()
-        all_kwargs['{name}'] = param_value in ['true', '1', 't', 'yes', 'y', 'on']
-    elif isinstance(param_value, (int, float)):
-        all_kwargs['{name}'] = bool(param_value)
-"""
-        else:
-            conversion_code = ""
-        
-        if conversion_code:
-            conversion_lines.append(conversion_code)
-    
-    type_conversion_block = "\n".join("        " + line for line in "\n".join(conversion_lines).splitlines())
-    
-    algo_name = tool_name.replace('run_', '')
-    
-    # 生成函数体
-    cleaned_doc = _clean_docstring(algorithm_func.__doc__)
-    func_template = f'''
-@post_processing_decorator
-@wraps(algorithm_func)
-def {tool_name}({final_param_defs_str}) -> str:
-    """{cleaned_doc}
-    
-    🔩 Graph Parameter: Automatically injected (no need to provide 'G').
-    📋 Prerequisites: Graph must be initialized first.
-    """
-    try:
-        all_kwargs = locals()
-        
-        # Step 1: 获取 processor 并验证图
-        processor = processor_getter()
-        if processor.graph is None:
-            return GenericToolOutput(
-                algorithm="{tool_name}",
-                success=False,
-                error="Graph not initialized",
-                summary="Call 'initialize_graph' first"
-            ).model_dump_json()
-        
-        # Step 2: 参数类型转换（仅基本类型）
-        {type_conversion_block}
-        
-        # Step 3: 过滤参数并注入 G
-        filtered_kwargs = {{k: v for k, v in all_kwargs.items() if k in {valid_param_names}}}
-        filtered_kwargs['G'] = processor.graph
-        
-        # Step 4: 有向/无向图自动切换
-        algo_name = '{algo_name}'
-        actual_func = algorithm_func
-        
-        if algo_name in UNDIRECTED_ONLY_ALGORITHMS and processor.graph.is_directed():
-            alternative_name = UNDIRECTED_ONLY_ALGORITHMS[algo_name]
+            if processor.graph is None:
+                return GenericToolOutput(
+                    algorithm=tool_name,
+                    success=False,
+                    error="Graph not initialized",
+                    summary="Call 'initialize_graph' first"
+                ).model_dump_json()
+            algo_name = tool_name.replace('run_', '')
+            actual_func = algorithm_func
+
+            # (这部分逻辑保持不变)
+            if algo_name in UNDIRECTED_ONLY_ALGORITHMS and processor.graph.is_directed():
+                alternative_name = UNDIRECTED_ONLY_ALGORITHMS.get(algo_name)
+                if alternative_name:
+                    actual_func = getattr(nx.algorithms.components, alternative_name, algorithm_func)
+                    logger.info(f"🔄 Auto-switching: {algo_name} -> {alternative_name}")
+                else:
+                    logger.info(f"🔄 Converting to undirected graph for {algo_name}")
+                    final_kwargs['G'] = processor.graph.to_undirected()
+
+            # 4. 执行算法
+            logger.info(f"🚀 Executing '{tool_name}' with params: {list(kwargs.keys())}")
             
-            if alternative_name:
-                # 尝试查找替代算法
-                try:
-                    actual_func = getattr(nx, alternative_name, None)
-                    if actual_func is None:
-                        actual_func = getattr(nx.algorithms.components, alternative_name, None)
-                    if actual_func is None:
-                        import networkx.algorithms.components as comp
-                        actual_func = getattr(comp, alternative_name, None)
-                    
-                    if actual_func:
-                        logger.info(f"🔄 Auto-switching: {{algo_name}} -> {{alternative_name}}")
-                    else:
-                        logger.info(f"🔄 Converting to undirected graph for {{algo_name}}")
-                        filtered_kwargs['G'] = processor.graph.to_undirected()
-                        actual_func = algorithm_func
-                except Exception as e:
-                    logger.warning(f"⚠️  Fallback to original algorithm: {{e}}")
-                    actual_func = algorithm_func
-            else:
-                # 直接转换为无向图
-                logger.info(f"🔄 Converting to undirected graph for {{algo_name}}")
-                filtered_kwargs['G'] = processor.graph.to_undirected()
-        
-        logger.info(f"🚀 Executing '{tool_name}' with params: {{list(filtered_kwargs.keys())}}")
-        
-        # Step 5: 调用算法
-        result = actual_func(**filtered_kwargs)
-        
-        if result is None:
-            logger.warning(f"⚠️  '{tool_name}' returned None")
-            return GenericToolOutput(
-                algorithm="{tool_name}",
-                success=False,
-                summary="Algorithm returned None",
-                error="Check graph structure"
-            ).model_dump_json()
-        
-        logger.info(f"✅ '{tool_name}' completed successfully")
-        return GenericToolOutput(
-            algorithm="{tool_name}",
-            success=True,
-            result=result,
-            summary=f"'{tool_name}' executed successfully"
-        ).model_dump_json()
+            # 过滤掉原始函数不接受的参数 (例如 __post_processing_code__)
+            valid_param_names = set(original_sig.parameters.keys())
+            execution_kwargs = {k: v for k, v in final_kwargs.items() if k in valid_param_names}
+            logger.info(f"✅ 这里是检查，最终传递给算法的参数: {list(execution_kwargs.keys())}")
+            
+            # 在 tool_wrapper 函数开始处添加：
+            logger.info(f"🔍 tool_wrapper 收到的原始参数: {kwargs}")
+            logger.info(f"🔍 final_kwargs 准备完成: {final_kwargs}")
+            logger.info(f"🔍 execution_kwargs 过滤后: {execution_kwargs}")
+
+            
+            
+            result = actual_func(**execution_kwargs)
+            
+            # 5. 返回结果
+            #from .models import GenericToolOutput
+            logger.info(f"✅ '{tool_name}' completed successfully")
+            return GenericToolOutput(algorithm=tool_name, success=True, result=result, summary=f"'{tool_name}' executed successfully").model_dump_json()
+
+        except Exception as e:
+            #from .models import GenericToolOutput
+            logger.error(f"❌ '{tool_name}' unexpected error: {e}", exc_info=True)
+            return GenericToolOutput(algorithm=tool_name, success=False, error=str(e), summary=f"'{tool_name}' execution failed").model_dump_json()
+
+    # 设置文档字符串，以便在帮助信息中显示修改过
+    params_without_G = [
+        param for name, param in original_sig.parameters.items() 
+        if name not in ['G', 'backend_kwargs']
+    ]
     
-    except TypeError as e:
-        logger.error(f"❌ '{tool_name}' parameter error: {{e}}")
-        return GenericToolOutput(
-            algorithm="{tool_name}",
-            success=False,
-            error=str(e),
-            summary="Invalid parameters"
-        ).model_dump_json()
+    tool_wrapper.__signature__ = inspect.Signature(parameters=params_without_G)
+    tool_wrapper.__doc__ = _clean_docstring(algorithm_func.__doc__)
     
-    except Exception as e:
-        logger.error(f"❌ '{tool_name}' unexpected error: {{e}}", exc_info=True)
-        return GenericToolOutput(
-            algorithm="{tool_name}",
-            success=False,
-            error=str(e),
-            summary=f"'{tool_name}' execution failed"
-        ).model_dump_json()
-'''
-    
-    exec_globals = {
-        'processor_getter': processor_getter,
-        'algorithm_func': algorithm_func,
-        'post_processing_decorator': post_processing_decorator,
-        'wraps': wraps,
-        'logger': logger,
-        'GenericToolOutput': GenericToolOutput,
-        'inspect': inspect,
-        'UNDIRECTED_ONLY_ALGORITHMS': UNDIRECTED_ONLY_ALGORITHMS,
-        'nx': nx,
-        'get_origin': get_origin,
-        'get_args': get_args,
-    }
-    
-    exec_locals = {}
-    exec(func_template, exec_globals, exec_locals)
-    generated_func = exec_locals[tool_name]
-    
-    generated_func.__signature__ = inspect.Signature(final_params)
-    
-    return generated_func
+    logger.debug(f"📝 修改后的签名: {tool_wrapper.__signature__}")
+    return tool_wrapper
+
 
 # ============================================================================
-# 14. 主注册函数 - 修改工具注册部分
+# 14. 主注册函数 (现在依赖于新的 _create_tool_function)
 # ============================================================================
 def register_discovered_tools(
     mcp,
     processor_getter: Callable,
     post_processing_decorator: Callable
 ):
-    """扫描并注册 NetworkX 算法"""
-    logger.info("🚀 开始动态注册 NetworkX 算法 (扩展版)...")
-    logger.info(f"📦 将扫描 {len(MODULES_TO_SCAN)} 个模块")
-    logger.info("\n" + "="*60)
-    
+    """扫描并注册 NetworkX 算法，同时导出 schemas"""
+    logger.info("🚀 开始动态注册 NetworkX 算法 (Schema 导出版)...")
     registered_count = 0
     failed_count = 0
     
-    # ✅ 新增：存储生成的 output schemas
+    # ✅ 新增：同时收集 input 和 output schemas
+    input_schemas_map = {}
     output_schemas_map = {}
     
     for module in MODULES_TO_SCAN:
         for name, func in inspect.getmembers(module, inspect.isfunction):
-            if name.startswith('_') or name in ALGORITHMS_TO_EXCLUDE:
+            if name.startswith('_') or name in ALGORITHMS_TO_EXCLUDE: 
                 continue
             
             try:
                 sig = inspect.signature(func)
-                if list(sig.parameters.keys())[0] != 'G':
+                if not sig.parameters or 'G' not in sig.parameters: 
                     continue
-            except:
+            except (ValueError, TypeError): 
                 continue
             
             tool_name = f"run_{name}"
             
             try:
-                tool_func = _create_tool_function(
-                    tool_name, func, processor_getter, 
-                    post_processing_decorator, None
-                )
-                
+                # 1. 生成完整的 Schema
                 input_schema = generate_input_schema(func)
                 output_schema = generate_output_schema(func)
-                description = _extract_full_description(func.__doc__)
+                description = _clean_docstring(func.__doc__)
                 
-                # 注册工具（不带 outputSchema）
-                decorated_func = mcp.tool(
-                    name=tool_name,
-                    description=description
-                )(tool_func)
+                # 2. 创建工具函数
+                tool_func = _create_tool_function(
+                    tool_name, func, processor_getter, 
+                    post_processing_decorator
+                )
                 
-                # ✅ 保存生成的 output schema
+                # 3. 注册到 MCP
+                if hasattr(mcp, 'tool'):
+                    try:
+                        decorated_func = mcp.tool(
+                            name=tool_name,
+                            description=description,
+                            input_schema=input_schema
+                        )(tool_func)
+                    except TypeError:
+                        decorated_func = mcp.tool(
+                            name=tool_name,
+                            description=description
+                        )(tool_func)
+                        if hasattr(decorated_func, '__mcp_tool__'):
+                            decorated_func.__mcp_tool__['input_schema'] = input_schema
+                else:
+                    logger.error("MCP 对象没有 'tool' 方法")
+                    continue
+                
+                # ✅ 4. 同时保存两种 schema
+                input_schemas_map[tool_name] = input_schema
                 output_schemas_map[tool_name] = output_schema
                 
                 registered_count += 1
+                logger.info(f"✅ 已注册: {tool_name}")
                 
             except Exception as e:
                 failed_count += 1
@@ -784,34 +622,34 @@ def register_discovered_tools(
     
     logger.info(f"📊 注册统计: ✅ {registered_count} 成功, ❌ {failed_count} 失败")
     
-    # ✅ 导出 schemas 到文件
+    # ✅ 5. 导出两种 schemas 到文件
+    if input_schemas_map:
+        _export_schemas(input_schemas_map, "input")
     if output_schemas_map:
-        _export_output_schemas(output_schemas_map)
+        _export_schemas(output_schemas_map, "output")
     
     return registered_count
 
 
-def _export_output_schemas(schemas_map: Dict[str, Dict[str, Any]]):
-    """导出 output schemas 到 JSON 文件"""
-    # ✅ 修复：使用正确的文件路径
+def _export_schemas(schemas_map: Dict[str, Dict[str, Any]], schema_type: str):
+    """
+    ✅ 统一的 schema 导出函数
+    
+    Args:
+        schemas_map: 工具名称到 schema 的映射
+        schema_type: "input" 或 "output"
+    """
     from pathlib import Path
     import json
     
-    output_file = Path(__file__).parent / "generated_output_schemas.json"
-    
     try:
+        output_file = Path(__file__).parent / f"generated_{schema_type}_schemas.json"
+        
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(schemas_map, f, indent=2, ensure_ascii=False)
-        logger.info(f"📄 已导出 {len(schemas_map)} 个工具的 output schemas")
+        
+        logger.info(f"📄 已导出 {len(schemas_map)} 个工具的 {schema_type} schemas")
         logger.info(f"   文件位置: {output_file.absolute()}")
+        
     except Exception as e:
-        logger.warning(f"⚠️ 无法导出 output schemas: {e}")
-
-    """导出 output schemas 到 JSON 文件"""
-    output_file = Path(__file__).parent / "generated_output_schemas.json"
-    try:
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(schemas_map, f, indent=2, ensure_ascii=False)
-        logger.info(f"📄 已导出 {len(schemas_map)} 个工具的 output schemas 到 {output_file}")
-    except Exception as e:
-        logger.warning(f"⚠️ 无法导出 output schemas: {e}")
+        logger.warning(f"⚠️ 无法导出 {schema_type} schemas: {e}")
