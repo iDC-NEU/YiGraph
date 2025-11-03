@@ -274,8 +274,6 @@ def main():
     args = parser.parse_args()
 
     # 配置日志
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
 
     # 如果指定运行示例，则运行示例函数

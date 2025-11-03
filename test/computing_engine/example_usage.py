@@ -8,7 +8,7 @@ import logging
 from aag.computing_engine.graphcomputation_processor import GraphProcessor
 
 # 设置日志
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 def example_basic_usage():
