@@ -1,0 +1,30 @@
+servers:
+  networkx:
+    command: "python"
+    args: ["-m", "aag.computing_engine.networkx_server.mcp_server"]
+
+
+engine_supported_algorithms:
+  networkx:
+    initialize_graph:
+      - tool: initialize_graph
+    get_graph_info:
+      - tool: get_graph_info
+    pagerank:
+      - tool: pagerank
+    bfs:
+      - tool: bfs_edges
+    dfs:
+      - tool: dfs_edges
+    dijkstra:
+      - tool: dijkstra_path
+    a_star:
+      - tool: astar_path
+    louvain:
+      - tool: louvain_communities
+    leiden:
+      - tool: leiden_communities
+    degree_centrality:
+      - tool: degree_centrality
+    betweenness_centrality:
+      - tool: betweenness_centrality

@@ -1,17 +1,45 @@
-python 3.11
-networkx 3.5.1
+# Requires Python >=3.11
+
+# Core dependencies
+numpy
+pandas
+pyyaml
+pydantic
+requests>=2.31.0
+lxml>=4.9.0
+
+# Graph processing
+networkx==3.5
+python-louvain==0.16
+torch-geometric==2.6.1
+
+# Deep learning
+torch
+
+# NLP and embeddings
 spacy
+
+# Vector and graph databases
 pymilvus
+nebula3-python
+
+# LLM framework
+llama-index-core
 llama-index
 llama-index-vector-stores-milvus
 llama-index-llms-huggingface
 llama-index-llms-ollama
 llama-index-embeddings-huggingface
 llama-index-legacy
-nebula3-python
-requests>=2.31.0
-lxml>=4.9.0
-PyPDF2>=3.0.0
-python-louvain-0.16
-torch-geometric-2.6.1
+
+# LLM APIs
+openai
+
+# Machine learning
 scikit-learn==1.7.0
+
+# Document processing
+PyPDF2>=3.0.0
+
+# MCP (Model Context Protocol)
+mcp[cli]>=1.0.0

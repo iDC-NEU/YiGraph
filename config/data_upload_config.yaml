@@ -1,0 +1,27 @@
+# 用户上传数据配置
+datasets:
+  - name: AMLSim1K
+    type: graph   # graph / table / text
+    description: AMLSim 1K synthetic transaction graph."
+    schema:
+      # 节点层定义
+      vertex:
+        - type: account
+          path: "/home/chency/GraphLLM/aag/datasets/graphs/transaction_amlsim/1K/accounts.csv"
+          format: csv  # yaml / json / csv / gml
+          id_field: acct_id              # 节点唯一标识字段
+          label_field: prior_sar_count           # 节点标签（可选）
+      # 边层定义
+      edge:
+        - type: transfer
+          path: "/home/chency/GraphLLM/aag/datasets/graphs/transaction_amlsim/1K/transactions.csv"
+          format: csv  # yaml / json / csv / gml
+          source_field: orig_acct
+          target_field: bene_acct
+          label_field: is_sar
+      # 图级别元信息
+      graph:
+        directed: true
+        multigraph: true
+        weighted: false
+        heterogeneous: false

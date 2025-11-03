@@ -1,0 +1,62 @@
+# AAG 配置文件
+version: 1.0   # 版本号
+
+# 运行模式： interactive / batch
+mode: interactive
+
+# 推理模块（Reasoner）配置
+reasoner:
+  llm:
+    provider: "openai" # ollama 或 openai
+    ollama:
+      model_name: "llama3.1:70b"
+      device: "cuda:2"
+      timeout: 150000
+      port: 11434
+    openai:
+      base_url: "https://gitaigc.com/v1/"
+      api_key: "sk-G30rFStBigqXtuyIOkOo7Zh4QNxO8ZAjfZQ5DYPCgMXbPv8q"
+      model: "gpt-4o-mini"
+
+# 检索模块（Expert Search Engine / Retrieval）配置
+retrieval:
+  database:
+    graph:
+      space_name: "AMLSim1K"
+      server_ip: "127.0.0.1"
+      server_port: "9669"
+      create: true
+      verbose: false
+    vector:
+      collection_name: "graphllm_collection"
+      host: "localhost"
+      port: 19530
+
+  embedding:
+    model_name: "BAAI/bge-large-en-v1.5"
+    batch_size: 20
+    chunk_size: 100000
+    chunk_overlap: 20
+    device: "cuda:2"
+
+  rag:
+    graph:
+      k_hop: 2
+      pruning: 30
+      data_type: "qa"
+      pruning_mode: "embedding_for_perentity"
+    vector:
+      k_similarity: 5
+
+# 性能监控配置
+monitoring:
+  enable_metrics: true
+  log_level: "INFO"
+  save_metrics: true
+  metrics_file: "engine_metrics.json"
+
+# 输出配置
+output:
+  save_intermediate_results: true
+  output_dir: "./output"
+  log_file: "./engine.log"

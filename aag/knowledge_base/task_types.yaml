@@ -1,0 +1,28 @@
+- id: traversal
+  task_type: "Traversal"
+  description: "Visit all nodes or edges in a graph sequentially, usually for exploring graph structures or serving as the foundation for other algorithms."
+  algorithm:
+    - bfs
+    - dfs
+
+- id: search
+  task_type: "Search"
+  description: "Find target nodes or paths in a graph, usually goal-oriented, such as shortest path or heuristic search."
+  algorithm:
+    - dijkstra
+    - a_star
+
+- id: community_detection
+  task_type: "Community Detection"
+  description: "Identify clusters or community structures in a graph, used to analyze aggregation patterns and network partitioning."
+  algorithm:
+    - louvain
+    - leiden
+
+- id: centrality_importance
+  task_type: "Centrality and Importance Measures"
+  description: "Evaluate the importance or influence of nodes in a graph, used for ranking, identifying key nodes, and network analysis."
+  algorithm:
+    - degree_centrality
+    - betweenness_centrality
+    - pagerank

@@ -1,0 +1,19 @@
+knowledge:
+  - id: K1
+    title: "The PageRank Citation Ranking"
+    algorithm_id: pagerank
+    type: paper
+    url: "http://ilpubs.stanford.edu:8090/422/"
+    content: "PageRank was introduced by Brin and Page in 1998..."
+  - id: K2
+    title: "NetworkX Documentation - PageRank"
+    algorithm_id: pagerank
+    type: doc
+    url: "https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.link_analysis.pagerank_alg.pagerank.html"
+    content: "This function returns the PageRank of the nodes in the graph..."
+  - id: K3
+    title: "Wikipedia: Degree Centrality"
+    algorithm_id: degree_centrality
+    type: wiki
+    url: "https://en.wikipedia.org/wiki/Centrality#Degree_centrality"
+    content: "In graph theory, degree centrality is the number of links incident upon a node..."

@@ -1,0 +1,308 @@
+- id: bfs
+  task_type_id: traversal
+  description:
+    principle: "Breadth-First Search (BFS) explores the graph level by level. Starting from a source node, it first visits all immediate neighbors, then expands to nodes at the next depth, continuing until all reachable nodes are visited."
+    meaning: "BFS is fundamental for exploring graph connectivity, finding shortest paths in unweighted graphs, and producing traversal orders that support higher-level tasks such as community detection and flow analysis."
+  support_engines: networkx
+  inputSchema:
+    parameters:
+      graph:
+        type: graph
+        description: "A NetworkX graph. BFS can run on directed or undirected graphs."
+        required: true
+      source:
+        type: node
+        description: "Starting node for BFS traversal."
+        required: true
+      reverse:
+        type: bool
+        description: "If true, traverse directed graph in the reverse direction."
+        required: false
+      depth_limit:
+        type: int
+        description: "Maximum depth of traversal. Default = number of nodes in the graph."
+        required: false
+      sort_neighbors:
+        type: function
+        description: "Optional function to control the ordering of neighbors (e.g., sorted)."
+        required: false
+    required: ["graph", "source"]
+  output:
+    type: list
+    description: "List of edges (u, v) visited during BFS traversal, representing the traversal order."
+
+
+- id: dfs
+  task_type_id: traversal
+  description:
+    principle: "Depth-First Search (DFS) explores a graph by following a path from the source node as deep as possible before backtracking. It uses a stack-based strategy, either explicit or implicit via recursion."
+    meaning: "DFS is used for path exploration, connectivity analysis, cycle detection, and serves as a foundation for many graph algorithms such as topological sorting and finding strongly connected components."
+  support_engines: networkx
+  inputSchema:
+    parameters:
+      graph:
+        type: graph, digraph multigraph multidigraph
+        description: "A NetworkX graph. DFS can run on directed or undirected graphs."
+        required: true
+      source:
+        type: node
+        description: "Optional starting node for DFS traversal. If not specified, DFS runs from an arbitrary node."
+        required: false
+      depth_limit:
+        type: int
+        description: "Maximum search depth. Default = number of nodes in the graph."
+        required: false
+      sort_neighbors:
+        type: function
+        description: "Optional function to control neighbor visiting order (e.g., sorted)."
+        required: false
+    required: ["graph"]
+  output:
+    type: list
+    description: "List of edges (u, v) visited during DFS traversal, representing the exploration order."
+
+- id: dijkstra
+  task_type_id: search
+  description:
+    principle: "Dijkstra’s algorithm finds the shortest weighted path between nodes by progressively exploring paths with the smallest cumulative cost, using a priority queue to ensure efficiency. It guarantees optimality when all edge weights are non-negative."
+    meaning: "Dijkstra’s algorithm identifies the shortest path in a weighted graph. It is widely used in routing, navigation, and network optimization, where minimizing cost, distance, or time is required."
+  support_engines: networkx
+  inputSchema:
+    parameters:
+      graph:
+        type: graph
+        description: "A NetworkX graph with weighted edges. If no weight attribute is specified, all edges are assumed to have weight=1."
+        required: true
+      source:
+        type: node
+        description: "Starting node for the shortest path."
+        required: true
+      target:
+        type: node
+        description: "Ending node for the shortest path."
+        required: true
+      weight:
+        type: string_or_function
+        description: "If this is a string, then edge weights will be accessed via the edge attribute with this key (that is, the weight of the edge joining u to v will be G.edges[u, v][weight]). If no such edge attribute exists, the weight of the edge is assumed to be one. If this is a function, the weight of an edge is the value returned by the function. The function must accept exactly three positional arguments: the two endpoints of an edge and the dictionary of edge attributes for that edge. The function must return a number or None to indicate a hidden edge."
+        default: "weight"
+    required: ["graph", "source", "target"]
+  output:
+    type: list
+    description: "List of nodes in a shortest path."
+
+
+- id: a_star
+  task_type_id: search
+  description:
+    principle: "A* (A-star) is a best-first search algorithm that finds the shortest path by combining the actual cost from the source to a node (g(n)) with a heuristic estimate of the cost from that node to the target (h(n)). It prioritizes nodes with the lowest f(n) = g(n) + h(n), ensuring efficient search towards the target. If the heuristic is admissible and consistent, A* guarantees the optimal solution."
+    meaning: "A* provides an efficient way to compute shortest paths in weighted graphs, especially when a good heuristic is available. It balances accuracy with performance, making it widely used in routing, pathfinding in games, and robotic navigation."
+  support_engines: networkx
+  inputSchema:
+    parameters:
+      graph:
+        type: graph
+        description: "A NetworkX graph with weighted edges."
+        required: true
+      source:
+        type: node
+        description: "Starting node for the path."
+        required: true
+      target:
+        type: node
+        description: "Ending node for the path."
+        required: true
+      heuristic:
+        type: function
+        description: "A function to evaluate the estimate of the distance from the a node to the target. The function takes two nodes arguments and must return a number. If the heuristic is inadmissible (if it might overestimate the cost of reaching the goal from a node), the result may not be a shortest path. The algorithm does not support updating heuristic values for the same node due to caching the first heuristic calculation per node."
+        required: false
+      weight:
+        type: string_or_function
+        description: "If this is a string, then edge weights will be accessed via the edge attribute with this key (that is, the weight of the edge joining u to v will be G.edges[u, v][weight]). If no such edge attribute exists, the weight of the edge is assumed to be one. If this is a function, the weight of an edge is the value returned by the function. The function must accept exactly three positional arguments: the two endpoints of an edge and the dictionary of edge attributes for that edge. The function must return a number or None to indicate a hidden edge."
+        default: "weight"
+      cutoff:
+        type: float
+        description: "If this is provided, the search will be bounded to this value. I.e. if the evaluation function surpasses this value for a node n, the node will not be expanded further and will be ignored. More formally, let h’(n) be the heuristic function, and g(n) be the cost of reaching n from the source node. Then, if g(n) + h’(n) > cutoff, the node will not be explored further. Note that if the heuristic is inadmissible, it is possible that paths are ignored even though they satisfy the cutoff."
+        required: false
+    required: ["graph", "source", "target"]
+  output:
+    type: list
+    description: "List of nodes in the shortest path found by A*."
+
+
+- id: louvain
+  task_type_id: community_detection
+  description:
+    principle: "The Louvain algorithm is a heuristic method for community detection based on modularity optimization. It works iteratively in two phases: first, each node is assigned to its own community and moved to the community of its neighbor that yields the maximum positive modularity gain. Second, a new graph is built where communities become super-nodes, and the process repeats until no improvement in modularity can be achieved."
+    meaning: "Louvain identifies clusters or communities in networks by maximizing modularity. This helps analyze the structural organization of networks, such as detecting social groups, functional modules in biology, or communities in information networks."
+  support_engines: networkx
+  inputSchema:
+    parameters:
+      graph:
+        type: graph
+        description: "A NetworkX graph."
+        required: true
+      weight:
+        type: string
+        description: "Edge attribute key to use as weight. If None, all edges have weight=1."
+        default: "weight"
+      resolution:
+        type: float
+        description: "Resolution parameter. Values <1 favor larger communities; values >1 favor smaller communities."
+        default: 1.0
+      threshold:
+        type: float
+        description: "Modularity gain threshold for each level. If the gain of modularity between 2 levels of the algorithm is less than the given threshold then the algorithm stops and returns the resulting communities."
+        default: 0.0000001
+      max_level:
+        type: int
+        description: "Maximum number of hierarchical levels (steps) to execute. Must be a positive integer or None. If None, then there is no max level and the threshold parameter determines the stopping condition."
+        default: null
+      seed:
+        type: int
+        description: "Seed for random number generator, ensures reproducibility."
+        required: false
+    required: ["graph"]
+  output:
+    type: list
+    description: "List of sets, each representing one detected community (nodes in the same set belong to the same community)."
+
+
+- id: leiden
+  task_type_id: search
+  description:
+    principle: "Leiden is a community detection algorithm based on modularity optimization. It improves upon the Louvain algorithm by refining partitions through three phases: (1) moving nodes between communities to maximize modularity, (2) refining the resulting partition by splitting communities if they are not sufficiently well-connected, and (3) aggregating the refined communities into super-nodes for the next iteration. This guarantees better-connected communities and avoids disconnected groups."
+    meaning: "Leiden is used to uncover communities or clusters within a graph. Compared to Louvain, it ensures communities are internally well-connected, improves robustness, and often leads to more meaningful partitions of the network."
+  support_engines: networkx (requires backend such as cuGraph)
+  inputSchema:
+    parameters:
+      graph:
+        type: graph
+        description: "A NetworkX graph. Must be executed with a supported backend (e.g., cuGraph)."
+        required: true
+      weight:
+        type: string
+        description: "Edge attribute key for edge weights. If None, all edges have weight=1."
+        default: "weight"
+      resolution:
+        type: float
+        description: "Resolution parameter for modularity optimization. Values < 1 favor larger communities; values > 1 favor smaller communities."
+        default: 1.0
+      max_level:
+        type: int
+        description: "Maximum number of refinement levels (steps of the algorithm).  Must be a positive integer or None. If None, then there is no max level and the algorithm will run until converged."
+        required: false
+        default: null
+      seed:
+        type: int
+        description: "Random seed or state for reproducibility. If None, randomness is uncontrolled."
+        required: false
+        default: null
+    required: ["graph"]
+  output:
+    type: list
+    description: "A list of disjoint sets, each set representing one community. Together, all sets cover all nodes in the graph."
+
+
+- id: pagerank
+  task_type_id: centrality_importance
+  description:
+    principle: "PageRank is based on the random surfer model. A random walker traverses the graph by following outgoing edges with probability alpha, or jumps to a random node with probability (1 - alpha). The score of a node is accumulated through its incoming edges: each source node distributes its PageRank score equally across its outgoing edges, and the target node sums up these contributions."
+    meaning: "PageRank measures the relative importance or influence of nodes in a network. Higher scores indicate nodes that are more likely to be visited during random walks, making it useful for ranking, identifying key nodes, and analyzing information flow."
+  support_engines: networkx
+  inputSchema:
+    parameters:
+      graph:
+        type: graph
+        description: "A NetworkX graph. Undirected graphs will be converted to a directed graph with two directed edges for each undirected edge."
+        required: true
+      alpha:
+        type: float
+        description: "Damping parameter for PageRank (probability of following a link)."
+        default: 0.85
+      max_iter:
+        type: int
+        description: "Maximum number of iterations in the power method eigenvalue solver."
+        default: 100
+      tol:
+        type: float
+        description: "Error tolerance used to check convergence in the power method. Iteration stops when len(G) * tol is reached."
+        default: 0.000001
+      personalization:
+        type: dict
+        description: "Optional dict with a subset of nodes as keys and personalization values as values. Used to bias the random walk. The “personalization vector” consisting of a dictionary with a key some subset of graph nodes and personalization value each of those. At least one personalization value must be non-zero. If not specified, a nodes personalization value will be zero. By default, a uniform distribution is used."
+        required: false
+      nstart:
+        type: dict
+        description: "Optional dict with starting value of PageRank iteration for each node."
+        required: false
+      weight:
+        type: string
+        description: "Edge attribute key to use as weight. If None, all edges are assumed to have weight=1."
+        default: "weight"
+      dangling:
+        type: dict
+        description: "Optional dict assigning outedges to 'dangling' nodes (nodes without outlinks)."
+        required: false
+    required: ["graph"]
+  output:
+    type: dict
+    description: "Dictionary of nodes with PageRank score as value."
+
+
+- id: degree_centrality
+  task_type_id: centrality_importance
+  description:
+    principle: "Degree centrality measures the importance of a node based on its degree, i.e., the number of connections it has. The value is normalized by dividing the degree of the node by the maximum possible degree (n-1), where n is the number of nodes in the graph."
+    meaning: "Degree centrality reflects the direct influence of a node within the network. Nodes with higher degree centrality are more connected, indicating stronger ability to spread information or interact with other nodes."
+  support_engines: networkx
+  inputSchema:
+    parameters:
+      graph:
+        type: graph
+        description: "A NetworkX graph. The input graph can be directed or undirected."
+        required: true
+    required: ["graph"]
+  output:
+    type: dict
+    description: "Dictionary mapping each node to its degree centrality value (a float). Values are normalized by the maximum possible degree."
+
+
+- id: betweenness_centrality
+  task_type_id: centrality_importance
+  description:
+    principle: "Betweenness centrality is based on shortest paths. For a given node v, it is calculated as the fraction of all-pairs shortest paths in the graph that pass through v. Nodes that frequently occur on many shortest paths between other nodes will have high betweenness scores."
+    meaning: "Betweenness centrality measures a node’s role as a bridge or intermediary in the network. High scores indicate nodes that control information flow, making them critical for communication, influence, or vulnerability in the graph."
+  support_engines: networkx
+  inputSchema:
+    parameters:
+      graph:
+        type: graph
+        description: "A NetworkX graph."
+        required: true
+      k:
+        type: int
+        description: "If k is not None use k node samples to estimate betweenness. The value of k <= n where n is the number of nodes in the graph. Higher values give better approximation."
+        required: false
+        default: null
+      normalized:
+        type: bool
+        description: "Whether to normalize betweenness values. Default = True. If True the betweenness values are normalized by 2/((n-1)(n-2)) for graphs, and 1/((n-1)(n-2)) for directed graphs where n is the number of nodes in G."
+        default: true
+      weight:
+        type: string
+        description: "Edge attribute key used as weight. If None, all edge weights are considered equal. Otherwise holds the name of the edge attribute used as weight. Weights are used to calculate weighted shortest paths, so they are interpreted as distances."
+        required: false
+        default: null
+      endpoints:
+        type: bool
+        description: "If True, include the endpoints of paths in betweenness counts."
+        default: false
+      seed:
+        type: int
+        description: "Random state seed for reproducibility (used when k is not None)."
+        required: false
+        default: null
+    required: ["graph"]
+  output:
+    type: dict
+    description: "Dictionary of nodes with betweenness centrality as values."

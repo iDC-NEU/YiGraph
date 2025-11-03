@@ -1,0 +1,15 @@
+graph_types:
+  - id: HomoGraph
+    description: "Homogeneous graph: all nodes/edges share the same type. 
+                  In NetworkX, represented as Graph/DiGraph without distinguishing attributes. 
+                  In PyG/DGL, stored as Data."
+    dimensions:
+      directed: [true, false]
+      multiedge: [true, false]
+
+  - id: HeteroGraph
+    description: "Heterogeneous graph: multiple node/edge types. 
+                  In NetworkX, represented via node/edge attributes. 
+                  In PyG/DGL, stored as HeteroData/heterograph."
+    dimensions:
+      directed: [true, false]
