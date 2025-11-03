@@ -24,6 +24,8 @@ from aag.reasoner.prompt_template.prompt import (
     gemma_synonym_expand_prompt_template,
 )
 
+from aag.utils.parse_json import extract_json_from_response
+
 
 def extract_json_str(text: str) -> str:
     """Extract JSON string from text."""
@@ -307,12 +309,8 @@ Output:{{
   ]
 }} Now, based on the instructions and example above, decompose the new complex query provided by the user. Your output must be the valid JSON object only.The query is : {query}.Note: Your response must be a valid JSON object without any additional text or explanation."""
         response = self.llm.complete(prompt)
-        cleaned_response = str(response.text).strip()
-        if cleaned_response.startswith("```"):
-            cleaned_response = cleaned_response[3:]
-        if cleaned_response.endswith("```"):
-            cleaned_response = cleaned_response[:-3]
-        return json.loads(cleaned_response)
+        return extract_json_from_response(response.text)
+
 
     def select_task_type(self, question: str, task_type_list: list) -> dict:
         prompt = f""" You are a graph algorithm expert skilled at identifying the most appropriate graph task type based on a natural language question and a provided task type list.You will be given an input question and a task type list.
@@ -342,12 +340,8 @@ Output:{{
         Now, based on the instructions and example above, determine the most appropriate task type.Your output must be a valid JSON object only — no additional text or explanation.The query is: {question}. The task type list is: {task_type_list}
         """
         response = self.llm.complete(prompt)
-        cleaned_response = str(response.text).strip()
-        if cleaned_response.startswith("```"):
-            cleaned_response = cleaned_response[3:]
-        if cleaned_response.endswith("```"):
-            cleaned_response = cleaned_response[:-3]
-        return json.loads(cleaned_response)
+        return extract_json_from_response(response.text)
+
 
     def select_algorithm(self, question: str, algorithm_list: list) -> dict:
         prompt = f"""
@@ -387,12 +381,8 @@ Output:{{
         Now, based on the instructions and example above, determine the most appropriate algorithm. Your output must be a valid JSON object only — no additional text or explanation. The query is: {question}. The algorithm list is: {algorithm_list}
         """
         response = self.llm.complete(prompt)
-        cleaned_response = str(response.text).strip()
-        if cleaned_response.startswith("```"):
-            cleaned_response = cleaned_response[3:]
-        if cleaned_response.endswith("```"):
-            cleaned_response = cleaned_response[:-3]
-        return json.loads(cleaned_response)
+        return extract_json_from_response(response.text)
+        
     
     def extract_parameters_with_postprocess(self, question: str, tool_description: str) -> dict:
         prompt = f"""
@@ -464,17 +454,8 @@ Output:{{
         """
 
         response = self.llm.complete(prompt)
-        response_text = str(response.text).strip()
-        result_text = re.sub(r'^```(?:json)?\s*', '', response_text, flags=re.MULTILINE)
-        result_text = re.sub(r'\s*```$', '', result_text, flags=re.MULTILINE)
-        result_text = result_text.strip()    
-        try:
-            result_json = json.loads(result_text)
-            return result_json
-        except json.JSONDecodeError as e:
-            print(f"Error parsing JSON in extract_parameters_with_postprocess: {e}")
-            print(f"Response text: {result_text}")
-            return {"error": "JSONDecodeError", "message": str(e), "raw_response": result_text}
+        return extract_json_from_response(response.text)
+        
 
     def generate_answer_from_algorithm_result(self, question: str, tool_description: str, tool_result: Dict[str, Any]) -> str:
         prompt = f"""
