@@ -50,23 +50,6 @@ python3 --version
 pip install -r requirements.txt
 ```
 
-**设置 PYTHONPATH**
-
-```bash
-# Linux/Mac - 永久设置（推荐）
-# 替换 /path/to/AAG 为你的项目实际路径
-echo 'export PYTHONPATH="${PYTHONPATH}:/path/to/AAG"' >> ~/.bashrc
-source ~/.bashrc
-
-# Linux/Mac - 临时设置（仅当前终端会话有效）
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-```
-
-**验证安装**：
-
-```bash
-python -c "import aag; print('✅ AAG 模块导入成功')"
-```
 
 #### 启动必要服务
 
@@ -154,10 +137,10 @@ datasets:
 
 ```bash
 # 进入项目目录
-cd aag
+cd AAG
 
 # 启动交互模式
-python main.py
+python aag/main.py
 ```
 
 ### 5. 使用示例
@@ -348,38 +331,7 @@ GraphLLM/
 ## 故障排除
 
 ### 常见问题
-
-#### 1. ModuleNotFoundError: No module named 'aag' ⚠️ 最常见
-
-**错误信息**：
-```
-ERROR: Error while finding module specification for 'aag.computing_engine.networkx_server.mcp_server' 
-(ModuleNotFoundError: No module named 'aag')
-ERROR: 连接MCP服务器失败: Connection closed
-WARNING: Engine 'networkx' failed to connect
-```
-
-**原因**：项目没有被正确安装，Python 无法找到 `aag` 模块。
-
-**✅ 解决方案**：手动设置 PYTHONPATH
-
-```bash
-# Linux/Mac - 永久设置（推荐）
-# 替换 /path/to/AAG 为你的项目实际路径
-echo 'export PYTHONPATH="${PYTHONPATH}:/path/to/AAG"' >> ~/.bashrc
-source ~/.bashrc
-
-# Linux/Mac - 临时设置（仅当前终端会话有效）
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-```
-
-**验证安装**：
-
-```bash
-python -c "import aag; print('✅ AAG 模块导入成功')"
-```
-
-#### 2. 数据库连接失败
+#### 1. 数据库连接失败
 
 **原因**：NebulaGraph 或 Milvus 服务未启动。
 
