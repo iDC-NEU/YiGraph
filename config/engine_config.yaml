@@ -7,10 +7,10 @@ mode: interactive
 # 推理模块（Reasoner）配置
 reasoner:
   llm:
-    provider: "openai" # ollama 或 openai
+    provider: "ollama" # ollama 或 openai
     ollama:
       model_name: "llama3.1:70b"
-      device: "cuda:2"
+      device: "cuda:0"
       timeout: 150000
       port: 11434
     openai:

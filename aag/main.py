@@ -162,7 +162,7 @@ async def interactive_mode(engine: AAGEngine):
             print("\n\n⛔ 用户中断，系统退出")
             break
         except Exception as e:
-            print(f"⚠️ 处理查询时出错: {e}")
+            print(f"⚠️ 处理分析时出错: {e}")
 
     # while True:
     #     try:

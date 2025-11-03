@@ -341,7 +341,7 @@ Output:{{
         }}
         Now, based on the instructions and example above, determine the most appropriate task type.Your output must be a valid JSON object only — no additional text or explanation.The query is: {question}. The task type list is: {task_type_list}
         """
-        response = self.complete(prompt)
+        response = self.llm.complete(prompt)
         cleaned_response = str(response.text).strip()
         if cleaned_response.startswith("```"):
             cleaned_response = cleaned_response[3:]
@@ -386,7 +386,7 @@ Output:{{
         }}
         Now, based on the instructions and example above, determine the most appropriate algorithm. Your output must be a valid JSON object only — no additional text or explanation. The query is: {question}. The algorithm list is: {algorithm_list}
         """
-        response = self.complete(prompt)
+        response = self.llm.complete(prompt)
         cleaned_response = str(response.text).strip()
         if cleaned_response.startswith("```"):
             cleaned_response = cleaned_response[3:]
@@ -444,7 +444,7 @@ Output:{{
         User question: “How many connected components are there?”
         ```python
         def process(data):
-            return {'component_count': len(data)}
+            return {{'component_count': len(data)}}
         ```
 
         ###Rule 4: If the user does not specify any special post-processing requirements, simply return the data as-is:
@@ -453,7 +453,7 @@ Output:{{
             return data
         ``` 
 
-        ##Input:
+        ##Inputs:
         ###User question:
         {question}
         ###Tool Description:
@@ -463,7 +463,7 @@ Output:{{
         Follow all rules and examples above strictly. Your output must be a valid JSON object only — no additional text, markdown, or explanation.
         """
 
-        response = self.complete(prompt)
+        response = self.llm.complete(prompt)
         response_text = str(response.text).strip()
         result_text = re.sub(r'^```(?:json)?\s*', '', response_text, flags=re.MULTILINE)
         result_text = re.sub(r'\s*```$', '', result_text, flags=re.MULTILINE)
@@ -508,7 +508,7 @@ Output:{{
         Provide a clear and concise written explanation in plain English that directly addresses the user’s question.
         Do NOT return JSON or code — only natural language.
         """
-        response = self.complete(prompt)
+        response = self.llm.complete(prompt)
         response_text = str(response.text).strip()
         if not response_text:
             return "Unable to generate answer from the algorithm result."
