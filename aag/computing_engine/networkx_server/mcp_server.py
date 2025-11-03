@@ -11,7 +11,6 @@ from aag.computing_engine.networkx_server.graph_computation_processor import Gra
 from aag.expert_search_engine.database.datatype import VertexData, EdgeData
 from aag.config.data_upload_config import DatasetConfig
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 mcp = FastMCP("Graph Computation Server")

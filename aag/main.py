@@ -6,6 +6,7 @@ import time
 import platform
 import datetime
 import asyncio
+import logging
 
 # 添加项目根目录到路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -13,6 +14,15 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from aag.config.engine_config import create_engine_config, load_config_from_yaml
 from aag.engine.aag_engine import AAGEngine
 from aag.utils.path_utils import DEFAULT_CONFIG_PATH
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d - %(funcName)s(): %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
 
 
 RESET = "\033[0m"

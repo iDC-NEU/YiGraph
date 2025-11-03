@@ -9,7 +9,7 @@ import logging
 from aag.computing_engine.graphcomputation_processor import GraphProcessor
 
 # 设置日志
-logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 
 class TestGraphProcessor(unittest.TestCase):

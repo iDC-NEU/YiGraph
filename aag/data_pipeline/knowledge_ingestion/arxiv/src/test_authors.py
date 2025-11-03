@@ -11,7 +11,6 @@ import logging
 from download_graph_papers import ArxivPaperDownloader
 
 # 配置日志
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def test_grobid_service():
