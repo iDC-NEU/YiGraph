@@ -221,7 +221,6 @@ class Text2Graph:
         entities_csv_path = os.path.join(dir_path, f"{base_name}_accounts.csv")
         triplets_csv_path = os.path.join(dir_path, f"{base_name}_transactions.csv")
         
-        # 1️⃣ 过滤合法三元组
         valid_triplets = []
         for t in triplets:
             if len(t) != 3:
@@ -237,7 +236,6 @@ class Text2Graph:
             print("⚠️ 没有合法三元组，退出。")
             return
 
-        # 2️⃣ 生成实体字典
         entities = {}
         next_id = 1
         for head, rel, tail in valid_triplets:
@@ -246,14 +244,12 @@ class Text2Graph:
                     entities[ent] = next_id
                     next_id += 1
 
-        # 3️⃣ 写入实体 CSV
         with open(entities_csv_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(["acct_id", "dsply_nm"])
             for ent, eid in entities.items():
                 writer.writerow([eid, ent])
 
-        # 4️⃣ 写入边 CSV
         with open(triplets_csv_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(["tran_id", "orig_acct", "bene_acct"])
@@ -263,11 +259,67 @@ class Text2Graph:
         print(f"✅ 实体 CSV 保存到: {entities_csv_path}")
         print(f"✅ 边 CSV 保存到: {triplets_csv_path}")
 
+        schema_path = os.path.join(dir_path, f"{base_name}_graph_schemas.yaml")
+        graph_name = f"{base_name}_Graph"
+
+        schema_dict = {
+            "datasets": [
+                {
+                    "name": graph_name,
+                    "description": f"{graph_name} graph generated from {self.text_file}",
+                    "type": "graph",
+                    "schema": {
+                        "vertex": [
+                            {
+                                "attribute_fields": [],
+                                "format": "csv",
+                                "id_field": "acct_id",
+                                "label_field": "dsply_nm",
+                                "path": entities_csv_path,
+                                "type": "account"
+                            }
+                        ],
+                        "edge": [
+                            {
+                                "attribute_fields": [],
+                                "format": "csv",
+                                "label_field": "bene_acct",
+                                "path": triplets_csv_path,
+                                "source_field": "tran_id",
+                                "target_field": "orig_acct",
+                                "type": "transfer",
+                                "weight_field": None
+                            }
+                        ],
+                        "graph": {
+                            "directed": "true",
+                            "heterogeneous": "false",
+                            "multigraph": "false",
+                            "weighted": "false"
+                        },
+                        "graph_store_info": {
+                            "backend": "nebula_graph",
+                            "edge_count": len(valid_triplets),
+                            "space_name": graph_name,
+                            "status": "success",
+                            "version": "null",
+                            "vertex_count": len(entities)
+                        }
+                    }
+                }
+            ]
+        }
+        import yaml
+        with open(schema_path, "w", encoding="utf-8") as f:
+            yaml.dump(schema_dict, f, sort_keys=False, allow_unicode=True)
+
+        print(f"✅ Graph schema YAML: {schema_path}")
+
 
 
 if __name__ == '__main__':
     text_2_graph = Text2Graph(
-        text_file='/home/fuzb/BigModel/AAG/aag/data_pipeline/data_transformer/text_2_graph/example.txt',
+        text_file='./aag/data_pipeline/data_transformer/text_2_graph/example.txt',
         llm_name='llama3:8b',
         chunk_size=512
     )

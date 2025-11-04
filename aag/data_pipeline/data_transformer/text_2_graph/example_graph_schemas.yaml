@@ -1,0 +1,33 @@
+datasets:
+- name: example_Graph
+  description: example_Graph graph generated from ./aag/data_pipeline/data_transformer/text_2_graph/example.txt
+  type: graph
+  schema:
+    vertex:
+    - attribute_fields: []
+      format: csv
+      id_field: acct_id
+      label_field: dsply_nm
+      path: ./aag/data_pipeline/data_transformer/text_2_graph/example_accounts.csv
+      type: account
+    edge:
+    - attribute_fields: []
+      format: csv
+      label_field: bene_acct
+      path: ./aag/data_pipeline/data_transformer/text_2_graph/example_transactions.csv
+      source_field: tran_id
+      target_field: orig_acct
+      type: transfer
+      weight_field: null
+    graph:
+      directed: 'true'
+      heterogeneous: 'false'
+      multigraph: 'false'
+      weighted: 'false'
+    graph_store_info:
+      backend: nebula_graph
+      edge_count: 33
+      space_name: example_Graph
+      status: success
+      version: 'null'
+      vertex_count: 42
