@@ -105,7 +105,6 @@ Your task is to perform Named Entity Recognition (NER) and knowledge graph tripl
 **Output:**
 """
 
-
 prompt_entity_type = """
 #### Task
 You are asked to determine the type of a given entity. Only provide the entity type as the output. Do not include any extra information or explanations.
@@ -133,22 +132,20 @@ OTHER
 **Output:**
 """
 
-
 class Text2Graph:
-    def __init__(self, text_file: str, llm_name: str, chunk_size: int = 512):
+    def __init__(self, file_path: str, llm_name: str, chunk_size: int = 512):
         """
         初始化文本到图转换器
         
         Args:
-            text_file: 输入的文本文件路径
+            file_path: 输入的文本文件路径
         """
-        self.text_file = text_file
+        self.file_path = file_path
 
-        if not file_exist(self.text_file):
-            raise FileNotFoundError(f"文本文件未找到: {self.text_file}")
+        if not file_exist(self.file_path):
+            raise FileNotFoundError(f"文本文件未找到: {self.file_path}")
         
-        with open(self.text_file, 'r', encoding='utf-8') as f:
-            sentences = re.split(r'(?<=[。！？\n])', f.read().strip())  # 按句子切分
+        sentences = re.split(r'(?<=[。！？\n])', self.read_file_path().strip())  # 按句子切分
         self.text_chunks = []
         current_chunk = ''
 
@@ -166,6 +163,49 @@ class Text2Graph:
 
         self.llm = OllamaEnv(llm_mode_name = llm_name)
 
+    def read_file_path(self) -> str:
+        import os
+        ext = os.path.splitext(self.file_path)[1].lower()
+        text = ""
+
+        if ext == ".txt":
+            with open(self.file_path, 'r', encoding='utf-8') as f:
+                text = f.read()
+        
+        elif ext == ".docx":
+            from docx import Document
+            doc = Document(self.file_path)
+            text = "\n".join([p.text for p in doc.paragraphs])
+        
+        elif ext == ".doc":
+            import mammoth
+            with open(self.file_path, "rb") as f:
+                result = mammoth.extract_raw_text(f)
+                text = result.value
+        
+        elif ext == ".pdf":
+            import fitz  # PyMuPDF
+            # 打开 PDF
+            doc = fitz.open(self.file_path)
+            # 提取每页文本
+            text_list = []
+            for page in doc:
+                page_text = page.get_text("text")  # 按文本顺序提取
+                if page_text:  # 有文字才保留
+                    text_list.append(page_text)
+            # 拼接所有页
+            text = "\n".join(text_list)
+            # 清理多余空白和换行，保证句子连续
+            text = re.sub(r'\r\n|\r', '\n', text)          # 统一换行
+            text = re.sub(r'\n+', '\n', text)             # 多个换行合并为一个
+            text = re.sub(r'[ \t]+', ' ', text)           # 多空格缩成一个空格
+            text = text.strip()                            # 去掉首尾空白
+        
+        else:
+            raise ValueError(f"不支持的文件类型: {ext}")
+
+        return text
+        
     def extract_graph(self, MAX_RETRIES = 5):
         """
         从文本数据中提取知识图谱
@@ -244,8 +284,8 @@ class Text2Graph:
 
     def save_triplet(self, triplets: List[List[str]]):
         import os, csv
-        dir_path = os.path.dirname(self.text_file)
-        base_name = os.path.splitext(os.path.basename(self.text_file))[0]
+        dir_path = os.path.dirname(self.file_path)
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
         entities_csv_path = os.path.join(dir_path, f"{base_name}_accounts.csv")
         triplets_csv_path = os.path.join(dir_path, f"{base_name}_transactions.csv")
         
@@ -294,7 +334,7 @@ class Text2Graph:
             "datasets": [
                 {
                     "name": graph_name,
-                    "description": f"{graph_name} graph generated from {self.text_file}",
+                    "description": f"{graph_name} graph generated from {self.file_path}",
                     "type": "graph",
                     "schema": {
                         "vertex": [
@@ -476,8 +516,8 @@ class Text2Graph:
     def save_graph_with_entity(self, triplets: List[List[str]], entity2id: Dict[str, int], entity2type: Dict[str, str]):
         import os, csv, yaml
 
-        dir_path = os.path.dirname(self.text_file)
-        base_name = os.path.splitext(os.path.basename(self.text_file))[0]
+        dir_path = os.path.dirname(self.file_path)
+        base_name = os.path.splitext(os.path.basename(self.file_path))[0]
 
         entities_csv_path = os.path.join(dir_path, f"{base_name}_accounts.csv")
         triplets_csv_path = os.path.join(dir_path, f"{base_name}_transactions.csv")
@@ -512,7 +552,7 @@ class Text2Graph:
             "datasets": [
                 {
                     "name": graph_name,
-                    "description": f"{graph_name} graph generated from {self.text_file}",
+                    "description": f"{graph_name} graph generated from {self.file_path}",
                     "type": "graph",
                     "schema": {
                         "vertex": [
@@ -563,7 +603,9 @@ class Text2Graph:
 
 if __name__ == '__main__':
     text_2_graph = Text2Graph(
-        text_file='./aag/data_pipeline/data_transformer/text_2_graph/example.txt',
+        # file_path='./aag/data_pipeline/data_transformer/text_2_graph/debug_file/example.txt',
+        file_path='./aag/data_pipeline/data_transformer/text_2_graph/debug_file/example.docx',
+        # file_path='./aag/data_pipeline/data_transformer/text_2_graph/debug_file/example.pdf',
         llm_name='llama3:8b',
         chunk_size=512
     )
@@ -574,6 +616,10 @@ if __name__ == '__main__':
 
 
 """
+pip install python-docx
+pip install mammoth
+pip install PyMuPDF
+
 执行代码：python -m aag.data_pipeline.data_transformer.text_2_graph.text_2_graph
 
 

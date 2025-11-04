@@ -126,8 +126,7 @@ docs/_build
 
 # personnal
 *.csv
-!/aag/data_pipeline/data_transformer/text_2_graph/example_accounts.csv
-!/aag/data_pipeline/data_transformer/text_2_graph/example_transactions.csv
+/aag/data_pipeline/data_transformer/text_2_graph/debug_file/
 
 # Compiled Object files
 *.slo
