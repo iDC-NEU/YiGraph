@@ -481,7 +481,7 @@ class Text2Graph:
 
         entities_csv_path = os.path.join(dir_path, f"{base_name}_accounts.csv")
         triplets_csv_path = os.path.join(dir_path, f"{base_name}_transactions.csv")
-        schema_path = os.path.join(dir_path, f"{base_name}_graph_schemas.yaml")
+        schema_path = os.path.join(dir_path, f"{base_name}_graph_schema.yaml")
         graph_name = f"{base_name}_Graph"
 
         # -------------------------
