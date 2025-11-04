@@ -184,7 +184,7 @@ class OllamaEnv:
     def complete(self, prompt, info=""):
         response = self.llm.complete(prompt)
         # print_text(f'{prompt}\n', color='yellow')
-        print_text(f'{response.text}\n', color='green')
+        # print_text(f'{response.text}\n', color='green')
 
         generate_time, load_time, prefill_time, decode_time, prompt_len, generate_len = self.parse_response_time(
             response)

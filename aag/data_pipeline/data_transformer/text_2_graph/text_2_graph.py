@@ -106,6 +106,34 @@ Your task is to perform Named Entity Recognition (NER) and knowledge graph tripl
 """
 
 
+prompt_entity_type = """
+#### Task
+You are asked to determine the type of a given entity. Only provide the entity type as the output. Do not include any extra information or explanations.
+
+**Entity Types:**
+ORGANIZATION
+COMPANY
+CITY
+STATE
+COUNTRY
+PERSON
+YEAR
+MONTH
+DAY
+EVENT
+QUANTITY
+OTHER
+
+**Reference Text:**
+{text_context}
+
+**Input:**
+{entity}
+
+**Output:**
+"""
+
+
 class Text2Graph:
     def __init__(self, text_file: str, llm_name: str, chunk_size: int = 512):
         """
@@ -315,6 +343,222 @@ class Text2Graph:
 
         print(f"✅ Graph schema YAML: {schema_path}")
 
+    def extract_graph_by_openie(self):
+        print("开始使用OpenIE从文本中提取知识图谱...")
+        try:
+            from openie import StanfordOpenIE
+        except ImportError:
+            import subprocess, sys
+            package_name = "stanford-openie"
+            print(f"⚙️ 检测到未安装依赖 '{package_name}'，正在自动安装...")
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+                print(f"✅ 成功安装 {package_name}")
+                from openie import StanfordOpenIE  # 再次导入
+            except subprocess.CalledProcessError as e:
+                print(f"❌ 安装 {package_name} 失败，请手动安装：pip install {package_name}")
+                raise e
+        
+        triplets = []
+        for idx, chunk in enumerate(tqdm(self.text_chunks)):
+            properties = {
+                'openie.affinity_probability_cap': 2 / 3,
+            }
+            with StanfordOpenIE(properties=properties) as client:
+                for triple in client.annotate(chunk):
+                    head = triple['subject'].strip().capitalize()
+                    relation = triple['relation'].strip().capitalize()
+                    tail = triple['object'].strip().capitalize()
+                    triplet = [head, relation, tail]
+                    triplets.append(triplet)
+        print(f"提取完成，共获得 {len(triplets)} 个三元组。")
+        print(triplets)
+        assert False, "stop here"
+        return triplets
+
+    def extract_graph_and_entity_by_LLM(self, MAX_RETRIES = 5):
+        """
+        从文本数据中提取三元组与实体类型
+
+        Returns:
+            triplets: 合法三元组列表
+            entity2id: 实体 -> ID
+            entity2type: 实体 -> 类型
+        """
+        print(f"开始使用 LLM 从文本中提取知识图谱...")
+        triplets: List[List[str]] = []
+        entity2type: Dict[str, str] = {}
+
+        for idx, chunk in enumerate(tqdm(self.text_chunks)):
+            for attempt in range(1, MAX_RETRIES + 1):
+                response = self.llm.complete(prompt=prompt_template_str.format(context=chunk))
+                if not response:
+                    print(f"⚠️ 块 {idx} 第 {attempt} 次无响应")
+                    continue
+
+                response_parsed = extract_json_from_response(response)
+                if not isinstance(response_parsed, dict):
+                    print(f"⚠️ 块 {idx} 第 {attempt} 次 JSON 解析失败")
+                    continue
+                response = response_parsed
+                break
+            else:
+                print(f"❌ 块 {idx} 超过 {MAX_RETRIES} 次尝试失败，跳过")
+                continue
+
+            # ======================
+            # 1️⃣ 解析 entities 部分
+            # ======================
+            entities_from_response = {}
+            if isinstance(response.get("entities"), dict):
+                for entity_type, names in response["entities"].items():
+                    for name in names:
+                        if isinstance(name, str) and name.strip():
+                            entities_from_response[name.strip()] = entity_type.strip().capitalize()
+
+            # ======================
+            # 2️⃣ 解析 triplets 部分
+            # ======================
+            new_triplets = []
+            for triplet in response.get("triplets", []):
+                if not isinstance(triplet, (list, tuple)) or len(triplet) != 3:
+                    print(f"⚠️ 无效三元组，跳过: {triplet}")
+                    continue
+                # 去掉空字符串，只保留非空字符串和数字/其他类型
+                clean_triplet = []
+                for x in triplet:
+                    if isinstance(x, str):
+                        x_clean = x.strip()
+                        if x_clean:  # 非空字符串才保留
+                            clean_triplet.append(x_clean.capitalize())
+                    else:
+                        clean_triplet.append(x)  # 数字或其他类型保留原样
+
+                # 长度必须为3才保留
+                if len(clean_triplet) == 3:
+                    new_triplets.append(clean_triplet)
+                else:
+                    print(f"⚠️ 三元组长度不足3，跳过: {triplet}")
+
+            triplets.extend(new_triplets)
+
+            # ======================
+            # 3️⃣ 更新实体类型映射
+            # ======================
+            for head, rel, tail in new_triplets:
+                for ent in [head, tail]:
+                    if ent not in entity2type:
+                        if ent in entities_from_response:
+                            entity2type[ent] = entities_from_response[ent]
+                        else:
+                            # 调用大模型补全实体类型
+                            entity_type = self._ask_entity_type(ent, chunk, MAX_RETRIES)
+                            entity2type[ent] = entity_type
+
+        # ======================
+        # 4️⃣ 生成实体-ID 映射
+        # ======================
+        entity2id = {ent: i + 1 for i, ent in enumerate(entity2type.keys())}
+
+        print(f"✅ 提取完成，共 {len(triplets)} 个三元组，{len(entity2id)} 个实体")
+        return triplets, entity2id, entity2type
+
+    def _ask_entity_type(self, entity: str, chunk: str, MAX_RETRIES = 5) -> str:
+        """向 LLM 查询实体类型"""
+        prompt = prompt_entity_type.format(entity=entity, text_context=chunk)
+        for attempt in range(1, MAX_RETRIES + 1):
+            response = self.llm.complete(prompt=prompt)
+            if response and isinstance(response, str):
+                return response.strip().capitalize()
+        print(f"⚠️ 无法确定实体类型：{entity}，默认设为 Unknown")
+        return "Unknown"
+    
+    def save_graph_with_entity(self, triplets: List[List[str]], entity2id: Dict[str, int], entity2type: Dict[str, str]):
+        import os, csv, yaml
+
+        dir_path = os.path.dirname(self.text_file)
+        base_name = os.path.splitext(os.path.basename(self.text_file))[0]
+
+        entities_csv_path = os.path.join(dir_path, f"{base_name}_accounts.csv")
+        triplets_csv_path = os.path.join(dir_path, f"{base_name}_transactions.csv")
+        schema_path = os.path.join(dir_path, f"{base_name}_graph_schemas.yaml")
+        graph_name = f"{base_name}_Graph"
+
+        # -------------------------
+        # 1️⃣ 保存实体 CSV（增加 type 列）
+        # -------------------------
+        with open(entities_csv_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["acct_id", "dsply_nm", "type"])
+            for ent, eid in entity2id.items():
+                ent_type = entity2type.get(ent, "OTHER")
+                writer.writerow([eid, ent, ent_type])
+        print(f"✅ 实体 CSV 保存到: {entities_csv_path}")
+
+        # -------------------------
+        # 2️⃣ 保存三元组 CSV
+        # -------------------------
+        with open(triplets_csv_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["tran_id", "orig_acct", "bene_acct"])
+            for head, rel, tail in triplets:
+                writer.writerow([entity2id[head], entity2id[tail], rel])
+        print(f"✅ 边 CSV 保存到: {triplets_csv_path}")
+
+        # -------------------------
+        # 3️⃣ 保存 Graph schema YAML
+        # -------------------------
+        schema_dict = {
+            "datasets": [
+                {
+                    "name": graph_name,
+                    "description": f"{graph_name} graph generated from {self.text_file}",
+                    "type": "graph",
+                    "schema": {
+                        "vertex": [
+                            {
+                                "attribute_fields": ["type"],
+                                "format": "csv",
+                                "id_field": "acct_id",
+                                "label_field": "dsply_nm",
+                                "path": entities_csv_path,
+                                "type": "account"
+                            }
+                        ],
+                        "edge": [
+                            {
+                                "attribute_fields": ["bene_acct"],
+                                "format": "csv",
+                                "label_field": "bene_acct",
+                                "path": triplets_csv_path,
+                                "source_field": "tran_id",
+                                "target_field": "orig_acct",
+                                "type": "transfer",
+                                "weight_field": None
+                            }
+                        ],
+                        "graph": {
+                            "directed": "true",
+                            "heterogeneous": "false",
+                            "multigraph": "false",
+                            "weighted": "false"
+                        },
+                        "graph_store_info": {
+                            "backend": "nebula_graph",
+                            "edge_count": len(triplets),
+                            "space_name": graph_name,
+                            "status": "success",
+                            "version": "null",
+                            "vertex_count": len(entity2id)
+                        }
+                    }
+                }
+            ]
+        }
+
+        with open(schema_path, "w", encoding="utf-8") as f:
+            yaml.dump(schema_dict, f, sort_keys=False, allow_unicode=True)
+        print(f"✅ Graph schema YAML: {schema_path}")
 
 
 if __name__ == '__main__':
@@ -323,7 +567,9 @@ if __name__ == '__main__':
         llm_name='llama3:8b',
         chunk_size=512
     )
-    text_2_graph.save_triplet(text_2_graph.extract_graph())
+    # text_2_graph.save_triplet(text_2_graph.extract_graph())
+    triplets, entity2id, entity2type =  text_2_graph.extract_graph_and_entity_by_LLM()
+    text_2_graph.save_graph_with_entity(triplets, entity2id, entity2type)
 
 
 

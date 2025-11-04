@@ -4,14 +4,16 @@ datasets:
   type: graph
   schema:
     vertex:
-    - attribute_fields: []
+    - attribute_fields:
+      - type
       format: csv
       id_field: acct_id
       label_field: dsply_nm
       path: ./aag/data_pipeline/data_transformer/text_2_graph/example_accounts.csv
       type: account
     edge:
-    - attribute_fields: []
+    - attribute_fields:
+      - bene_acct
       format: csv
       label_field: bene_acct
       path: ./aag/data_pipeline/data_transformer/text_2_graph/example_transactions.csv
@@ -26,8 +28,8 @@ datasets:
       weighted: 'false'
     graph_store_info:
       backend: nebula_graph
-      edge_count: 33
+      edge_count: 27
       space_name: example_Graph
       status: success
       version: 'null'
-      vertex_count: 42
+      vertex_count: 37
