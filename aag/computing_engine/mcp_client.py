@@ -217,10 +217,19 @@ class GraphMCPClient:
     # [其他方法保持不变: call_tool, print_tool_info, load_data_from_csv...]
     
     async def call_tool(self, tool_name: str, arguments: Dict[str, Any], post_processing_code: Optional[str] = None, validate: bool = True) -> Dict[str, Any]: 
-        """调用MCP工具"""
+        """
+        调用MCP工具（支持可选的后处理代码）
+        
+        Args:
+            tool_name: 工具名称
+            arguments: 工具参数
+            post_processing_code: 可选的后处理代码
+            validate: 是否验证参数
+        
+        Returns:
+            工具执行结果字典
+        """
         try:
-            if post_processing_code:
-                arguments["__post_processing_code__"] = post_processing_code
             if validate:
                 is_valid, error_msg = self.validate_arguments(tool_name, arguments)
                 if not is_valid:
@@ -230,12 +239,16 @@ class GraphMCPClient:
                         "error": f"参数验证失败: {error_msg}",
                         "summary": "参数格式不正确"
                     }
+            
+            # ========== 步骤1: 调用原始工具 ==========
+            logger.info(f"📤 调用工具 {tool_name}...")
             result = await self.session.call_tool(tool_name, arguments=arguments)
             if result.content and len(result.content) > 0:
                 content = result.content[0]
                 if hasattr(content, 'text'):
                     try:
-                        return json.loads(content.text)
+                        original_response = json.loads(content.text)
+                        logger.info(f"✅ 工具执行完成: {original_response.get('summary', '')}")
                     except json.JSONDecodeError as e:
                         raw_content = content.text if content.text else "Empty response"
                         logger.error(f"❌ JSON 解析失败: {e} - 原始响应: {raw_content}")
@@ -244,7 +257,48 @@ class GraphMCPClient:
                             "error": raw_content,
                             "summary": "服务器返回非 JSON 响应"
                         }
-            return {"error": "无法解析工具调用结果"}
+                else:
+                    return {"error": "❌ 工具调用失败: 无法解析工具调用结果"}
+            else:
+                return {"error": "❌ 工具调用失败: 无法解析工具调用结果"}
+
+            # ========== 步骤2: 如果有后处理代码，调用后处理工具 ==========
+            if post_processing_code:
+                logger.info(f"📤 应用后处理代码...")
+                try:
+                    post_result = await self.session.call_tool(
+                        "apply_post_processing",
+                        arguments={
+                            "original_response": original_response,
+                            "post_processing_code": post_processing_code
+                        }
+                    )
+                    
+                    # 解析后处理结果
+                    if post_result.content and len(post_result.content) > 0:
+                        post_content = post_result.content[0]
+                        if hasattr(post_content, 'text'):
+                            try:
+                                final_response = json.loads(post_content.text)
+                                logger.info(f"✅ 后处理执行完成{final_response}")
+                                return final_response
+                            except json.JSONDecodeError as e:
+                                logger.error(f"❌ 后处理结果 JSON 解析失败: {e}")
+                                # 后处理失败时返回原始结果
+                                logger.warning("⚠️ 后处理失败，返回原始结果")
+                                return original_response
+                    else:
+                        logger.warning("⚠️ 后处理无返回内容，返回原始结果")
+                        return original_response
+                        
+                except Exception as post_error:
+                    logger.error(f"❌ 后处理执行失败: {post_error}")
+                    logger.warning("⚠️ 后处理失败，返回原始结果")
+                    return original_response
+            
+            # 没有后处理代码时，直接返回原始结果
+            return original_response
+        
         except Exception as e:
             logger.error(f"❌ 工具调用失败: {e}")
             return {

@@ -31,40 +31,146 @@ def get_datatype_classes():
     return VertexData, EdgeData
 
 # --- 后处理逻辑 (完全不变) ---
-
-def _execute_dynamic_code(code_string: str, data: Any) -> Any:
-    # (此函数的代码与你提供的完全相同，此处为简洁省略)
-    if not isinstance(code_string, str) or "def process(data):" not in code_string:
-        raise ValueError("后处理代码格式无效")
+@mcp.tool()
+def apply_post_processing(
+    original_response: Dict[str, Any],
+    post_processing_code: str
+) -> Dict[str, Any]:
+    """
+    ✅ 独立的后处理工具
+    
+    Args:
+        original_response: 原始工具的返回结果
+        post_processing_code: 后处理代码字符串
+    
+    Returns:
+        处理后的结果
+    """
+    # if not original_response.get("success"):
+    #     logger.warning("原始执行失败，跳过后处理")
+    #     return original_response
+    
     try:
-        execution_scope = {}
-        exec(code_string, {"__builtins__": {}}, execution_scope)
-        process_func = execution_scope.get('process')
-        if callable(process_func):
-            return process_func(data)
-        else:
-            raise ValueError("未找到可调用的 'process' 函数")
+        logger.info("🔄 开始执行后处理代码...")
+        processed_result = _execute_dynamic_code(
+            post_processing_code, 
+            original_response.get("result")
+        )
+        
+        original_response["result"] = processed_result
+        original_response["summary"] += " (已应用动态后处理)"
+        logger.info("✅ 后处理执行成功")
+        return original_response
+        
     except Exception as e:
+        logger.error(f"❌ 后处理失败: {e}")
+        return {
+            "success": False,
+            "error": f"后处理失败: {str(e)}",
+            "summary": "后处理脚本执行失败",
+            "original_response": original_response
+        }
+
+
+def _execute_dynamic_code(code: str, data: Any) -> Any:
+    """在受限的沙箱中执行后处理代码"""
+    
+    # ✅ 定义允许使用的内置函数（白名单）
+    safe_builtins = {
+        # 基本函数
+        "len": len,
+        "sorted": sorted,
+        "reversed": reversed,
+        "enumerate": enumerate,
+        "zip": zip,
+        "map": map,
+        "filter": filter,
+        "sum": sum,
+        "min": min,
+        "max": max,
+        "abs": abs,
+        "round": round,
+        
+        # 类型转换
+        "int": int,
+        "float": float,
+        "str": str,
+        "bool": bool,
+        "list": list,
+        "dict": dict,
+        "set": set,
+        "tuple": tuple,
+        
+        # 其他常用
+        "range": range,
+        "any": any,
+        "all": all,
+        "isinstance": isinstance,
+        "type": type,
+        
+        # ❌ 禁止危险函数
+        # "eval": eval,    # 禁止
+        # "exec": exec,    # 禁止
+        # "open": open,    # 禁止
+        # "__import__": __import__,  # 禁止
+    }
+    
+    # ✅ 创建安全的全局作用域
+    global_namespace = {
+        "__builtins__": safe_builtins,
+        
+        # 可选：提供常用模块（只读）
+        "json": __import__("json"),
+        "math": __import__("math"),
+        "statistics": __import__("statistics"),
+    }
+    
+    local_namespace = {"data": data}
+    
+    try:
+        # 执行代码
+        exec(code, global_namespace, local_namespace)
+        
+        # 检查 process 函数
+        if "process" not in local_namespace:
+            raise ValueError("后处理代码必须定义 'process(data)' 函数")
+        
+        process_func = local_namespace["process"]
+        
+        if not callable(process_func):
+            raise ValueError("'process' 必须是一个函数")
+        
+        # 执行
+        result = process_func(data)
+        logger.info(f"✅ 后处理执行成功")
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ 后处理失败: {e}", exc_info=True)
         raise RuntimeError(f"后处理代码执行错误: {e}")
 
-def apply_post_processing(func):
+
+
+def apply_processing(func):
     """通用后处理装饰器 (完全不变)"""
     @wraps(func)
     def wrapper(*args, **kwargs):
-        post_processing_code = kwargs.pop("__post_processing_code__", None)
+        #post_processing_code = kwargs.pop("__post_processing_code__", None)
         original_response = func(*args, **kwargs)
-        if not post_processing_code or not original_response.get("success"):
-            return original_response
-        try:
-            processed_result = _execute_dynamic_code(post_processing_code, original_response.get("result"))
-            original_response["result"] = processed_result
-            original_response["summary"] += " (已应用动态后处理)"
-            return original_response
-        except Exception as e:
-            original_response['success'] = False
-            original_response['error'] = f"后处理失败: {str(e)}"
-            original_response['summary'] = "算法执行成功，但后处理脚本执行失败。"
-            return original_response
+        
+        # if not post_processing_code or not original_response.get("success"):
+        return original_response
+        # try:
+        #     processed_result = _execute_dynamic_code(post_processing_code, original_response.get("result"))
+        #     original_response["result"] = processed_result
+        #     original_response["summary"] += " (已应用动态后处理)"
+        #     return original_response
+        # except Exception as e:
+        #     original_response['success'] = False
+        #     original_response['error'] = f"后处理失败: {str(e)}"
+        #     original_response['summary'] = "算法执行成功，但后处理脚本执行失败。"
+        #     return original_response
     return wrapper
 
 # --- 保留的手动定义的核心工具 ---
@@ -117,7 +223,7 @@ def run_get_graph_info() -> Dict[str, Any]:
 register_discovered_tools(
     mcp=mcp, 
     processor_getter=get_processor, 
-    post_processing_decorator=apply_post_processing
+    post_processing_decorator=apply_processing
 )
 
 if __name__ == "__main__":
