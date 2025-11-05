@@ -304,7 +304,7 @@ class NebulaGraphClient:
         if vertex_resp.is_succeeded():
             for row in vertex_resp.rows():
                 v_val = row.values[0].get_vVal()
-                vid = int(v_val.vid.get_iVal())  # 假设 vid 是 int 类型
+                vid = str(v_val.vid.get_iVal())  #
                 for tag in v_val.tags:
                     tag_name = tag.name.decode("utf-8")
                     props = {}
@@ -339,8 +339,8 @@ class NebulaGraphClient:
         if edge_resp.is_succeeded():
             for row in edge_resp.rows():
                 e_val = row.values[0].get_eVal()
-                src = int(e_val.src.get_iVal())   # 假设 src 是 int
-                dst = int(e_val.dst.get_iVal())   # 假设 dst 是 int
+                src = str(e_val.src.get_iVal())   # 
+                dst = str(e_val.dst.get_iVal())   # 
                 edge_type = e_val.name.decode("utf-8")
                 rank = e_val.ranking
                 props = {}

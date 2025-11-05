@@ -5,14 +5,22 @@ MCP Client - Schema 文件加载版
 2. ✅ 移除运行时 schema 生成逻辑
 3. ✅ 优化参数验证性能
 """
-import os
-os.environ['TRANSFORMERS_OFFLINE'] = '1'
-os.environ['HF_DATASETS_OFFLINE'] = '1'
 
-import asyncio
-import json
+# os.environ['TRANSFORMERS_OFFLINE'] = '1'
+# os.environ['HF_DATASETS_OFFLINE'] = '1'
+
 import logging
 import csv
+import importlib
+import os
+import subprocess
+import sys
+import asyncio
+import json
+import torch,re
+import torch_geometric as pyg
+from torch_geometric.nn import conv
+from typing import Literal
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
@@ -20,6 +28,132 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 logger = logging.getLogger(__name__)
+
+
+#修改的后处理代码：
+class DynamicCodeExecutor:
+    """支持自动安装依赖的动态代码执行器"""
+    
+    def __init__(self, timeout: int = 120, auto_install: bool = True):
+        self.timeout = timeout
+        self.auto_install = auto_install
+        self.installed_packages = set()
+    
+    def extract_imports(self, code: str) -> list:
+        """提取代码中的 import 语句"""
+        imports = []
+        pattern1 = r'^\s*import\s+([a-zA-Z0-9_]+)'
+        pattern2 = r'^\s*from\s+([a-zA-Z0-9_]+)\s+import'
+        
+        for line in code.split('\n'):
+            match1 = re.match(pattern1, line)
+            match2 = re.match(pattern2, line)
+            if match1:
+                imports.append(match1.group(1))
+            elif match2:
+                imports.append(match2.group(1))
+        
+        return imports
+    
+    def install_package(self, package_name: str) -> bool:
+        """安装 Python 包"""
+        if package_name in self.installed_packages:
+            logger.info(f"📦 {package_name} 已安装，跳过")
+            return True
+        
+        # 包名映射
+        package_mapping = {
+            'cv2': 'opencv-python',
+            'sklearn': 'scikit-learn',
+            'PIL': 'Pillow',
+            'yaml': 'pyyaml',
+        }
+        
+        install_name = package_mapping.get(package_name, package_name)
+        
+        try:
+            logger.info(f"📥 正在安装 {install_name}...")
+            result = subprocess.run(
+                [sys.executable, '-m', 'pip', 'install', install_name],
+                capture_output=True,
+                text=True,
+                timeout=self.timeout
+            )
+            
+            if result.returncode == 0:
+                logger.info(f"✅ {install_name} 安装成功")
+                self.installed_packages.add(package_name)
+                return True
+            else:
+                logger.error(f"❌ {install_name} 安装失败: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ 安装 {install_name} 时出错: {e}")
+            return False
+    
+    def check_and_install_dependencies(self, code: str) -> bool:
+        """检查并安装代码依赖"""
+        if not self.auto_install:
+            return True
+        
+        imports = self.extract_imports(code)
+        logger.info(f"🔍 检测到导入: {imports}")
+        
+        # 标准库列表（无需安装）
+        stdlib = {'os', 'sys', 're', 'json', 'math', 'datetime', 
+                  'time', 'random', 'itertools', 'functools', 
+                  'collections', 'typing', 'pathlib', 'copy', 
+                  'statistics', 'decimal', 'fractions'}
+        
+        for package in imports:
+            if package in stdlib:
+                continue
+            
+            try:
+                importlib.import_module(package)
+                logger.info(f"✅ {package} 已存在")
+            except ImportError:
+                logger.warning(f"⚠️  {package} 未安装，尝试安装...")
+                if not self.install_package(package):
+                    return False
+        
+        return True
+    
+    def execute(self, code: str, data: Any) -> Any:
+        """在独立命名空间中执行代码"""
+        # 检查并安装依赖
+        if not self.check_and_install_dependencies(code):
+            raise RuntimeError("依赖安装失败")
+        
+        # 创建独立命名空间
+        namespace = {
+        "data": data,
+        "__builtins__": __builtins__,  # 保留内置函数
+    }
+        
+        try:
+            # 执行代码
+            exec(code, namespace)
+            
+            # 检查 process 函数
+            if "process" not in namespace:
+                raise ValueError("后处理代码必须定义 'process(data)' 函数")
+            
+            process_func = namespace["process"]
+            
+            if not callable(process_func):
+                raise ValueError("'process' 必须是一个函数")
+            
+            # 执行处理函数
+            result = process_func(data)
+            logger.info(f"✅ 后处理执行成功")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"❌ 后处理失败: {e}", exc_info=True)
+            raise RuntimeError(f"后处理代码执行错误: {e}")
 
 
 
@@ -36,6 +170,10 @@ class GraphMCPClient:
         # ✅ 新增：预加载 schemas
         self.input_schemas_cache = {}
         self.output_schemas_cache = {}
+        self.code_executor = DynamicCodeExecutor(
+                timeout=120,
+                auto_install=True
+            )
         
     async def connect(self):
         """连接到MCP服务器"""
@@ -48,14 +186,10 @@ class GraphMCPClient:
             self.stdio_client = stdio_client(server_params)
             self.read_stream, self.write_stream = await self.stdio_client.__aenter__()
             self.session = ClientSession(self.read_stream, self.write_stream)
-            
-            # ✅ 先加载 schemas 缓存
-            self.input_schemas_cache = self._load_schemas("input")
-            self.output_schemas_cache = self._load_schemas("output")
+        
             
             await self.session.__aenter__()
-            await self.session.initialize()
-            
+            await self.session.initialize()            
             await self._load_available_tools()
             
             logger.info("✅ 成功连接到MCP服务器")
@@ -126,6 +260,10 @@ class GraphMCPClient:
         """加载并缓存可用工具列表（使用预加载的 schemas）"""
         try:
             tools_response = await self.session.list_tools()
+            # ✅ 先加载 schemas 缓存
+            self.input_schemas_cache = self._load_schemas("input")
+            self.output_schemas_cache = self._load_schemas("output")
+            
             for tool in tools_response.tools:
                 tool_name = tool.name
                 
@@ -230,6 +368,16 @@ class GraphMCPClient:
             工具执行结果字典
         """
         try:
+            # ========== 新增：参数清理 ==========
+            cleaned_arguments = {}
+            for key, value in arguments.items():
+                # 将空容器转为 None（避免 NetworkX 等库的空容器陷阱）
+                if isinstance(value, (dict, list)) and len(value) == 0:
+                    cleaned_arguments[key] = None
+                    logger.warning(f"⚠️  参数 '{key}' 是空容器，已转为 None")
+                else:
+                    cleaned_arguments[key] = value
+            # ========== 参数验证  ==========
             if validate:
                 is_valid, error_msg = self.validate_arguments(tool_name, arguments)
                 if not is_valid:
@@ -266,31 +414,19 @@ class GraphMCPClient:
             if post_processing_code:
                 logger.info(f"📤 应用后处理代码...")
                 try:
-                    post_result = await self.session.call_tool(
-                        "apply_post_processing",
-                        arguments={
-                            "original_response": original_response,
-                            "post_processing_code": post_processing_code
-                        }
+                    # ✅ 关键改动：使用本地执行器处理
+                    processed_data = self.code_executor.execute(
+                        post_processing_code, 
+                        original_response.get("result")  # 只传递 result 部分
                     )
                     
-                    # 解析后处理结果
-                    if post_result.content and len(post_result.content) > 0:
-                        post_content = post_result.content[0]
-                        if hasattr(post_content, 'text'):
-                            try:
-                                final_response = json.loads(post_content.text)
-                                logger.info(f"✅ 后处理执行完成{final_response}")
-                                return final_response
-                            except json.JSONDecodeError as e:
-                                logger.error(f"❌ 后处理结果 JSON 解析失败: {e}")
-                                # 后处理失败时返回原始结果
-                                logger.warning("⚠️ 后处理失败，返回原始结果")
-                                return original_response
-                    else:
-                        logger.warning("⚠️ 后处理无返回内容，返回原始结果")
-                        return original_response
-                        
+                    # 更新返回结果
+                    original_response["result"] = processed_data
+                    original_response["summary"] = original_response.get("summary", "") + " (已应用本地后处理)"
+                    
+                    logger.info(f"✅ 后处理执行完成")
+                    return original_response
+                    
                 except Exception as post_error:
                     logger.error(f"❌ 后处理执行失败: {post_error}")
                     logger.warning("⚠️ 后处理失败，返回原始结果")

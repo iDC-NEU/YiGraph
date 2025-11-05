@@ -1,7 +1,7 @@
 {
   "run_betweenness_centrality": {
     "type": "dictionary",
-    "description": "Dictionary keyed by node with bipartite betweenness centrality as the value."
+    "description": "Dictionary of nodes with betweenness centrality as the value."
   },
   "run_betweenness_centrality_subset": {
     "type": "dictionary",
@@ -9,7 +9,7 @@
   },
   "run_closeness_centrality": {
     "type": "dictionary",
-    "description": "Dictionary keyed by node with bipartite closeness centrality as the value."
+    "description": "Dictionary of nodes with closeness centrality as the value."
   },
   "run_current_flow_betweenness_centrality_subset": {
     "type": "dictionary",
@@ -21,7 +21,7 @@
   },
   "run_degree_centrality": {
     "type": "dictionary",
-    "description": "Dictionary keyed by node with bipartite degree centrality as the value."
+    "description": "Dictionary of nodes with degree centrality as the value."
   },
   "run_dispersion": {
     "type": "dictionary",
@@ -292,8 +292,8 @@
     "description": "True if the graph is semiconnected, False otherwise."
   },
   "run_is_strongly_connected": {
-    "type": "any",
-    "description": "bool Whether the tournament is strongly connected."
+    "type": "bool",
+    "description": "True if the graph is strongly connected, False otherwise."
   },
   "run_is_weakly_connected": {
     "type": "bool",
@@ -597,11 +597,11 @@
   },
   "run_average_clustering": {
     "type": "float",
-    "description": "The average bipartite clustering for the given set of nodes or the entire graph if no nodes are specified."
+    "description": "Average clustering"
   },
   "run_clustering": {
-    "type": "dictionary",
-    "description": "A dictionary keyed by node with the clustering coefficient value."
+    "type": "float, or dictionary",
+    "description": "Clustering coefficient at specified nodes"
   },
   "run_generalized_degree": {
     "type": "Counter, or dictionary of Counters",
@@ -964,8 +964,8 @@
     "description": "算法执行结果"
   },
   "run_orig_func": {
-    "type": "dictionary",
-    "description": "Reciprocity keyed by node label."
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_equitable_color": {
     "type": "any",

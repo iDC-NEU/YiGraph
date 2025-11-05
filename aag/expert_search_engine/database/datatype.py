@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 @dataclass
 class VertexData:
-    vid: int
+    vid: str
     properties: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -27,8 +27,8 @@ class VertexData:
 
 @dataclass
 class EdgeData:
-    src: int
-    dst: int
+    src: str
+    dst: str
     rank: Optional[int] = None  # 可选的 rank 值
     properties: Dict[str, Any] = field(default_factory=dict)
 

@@ -559,6 +559,7 @@ def register_discovered_tools(
     logger.info("🚀 开始动态注册 NetworkX 算法 (Schema 导出版)...")
     registered_count = 0
     failed_count = 0
+    skipped_count = 0 
     
     # ✅ 新增：同时收集 input 和 output schemas
     input_schemas_map = {}
@@ -578,6 +579,16 @@ def register_discovered_tools(
             
             tool_name = f"run_{name}"
             
+            # TODO(chaoyi): 对于有重名的函数，暂时先跳过处理，后期需要解决这个问题。 因为重名的函数可能是对不同属性的图进行数据分析
+            if tool_name in input_schemas_map:
+                logger.warning(
+                    f"⚠️ 工具名称冲突: {tool_name} 已存在，跳过注册\n"
+                    f"   当前来源: {module.__name__}\n"
+                    f"   已保留来源: {input_schemas_map[tool_name].get('_source_module', 'unknown')}"
+                )
+                skipped_count += 1
+                continue  # ✅ 跳过后续同名工具
+            
             try:
                 # 1. 生成完整的 Schema
                 input_schema = generate_input_schema(func)
@@ -588,7 +599,7 @@ def register_discovered_tools(
                 tool_func = _create_tool_function(
                     tool_name, func, processor_getter, 
                     post_processing_decorator
-                )
+                )                               
                 
                 # 3. 注册到 MCP
                 if hasattr(mcp, 'tool'):
@@ -605,16 +616,20 @@ def register_discovered_tools(
                         )(tool_func)
                         if hasattr(decorated_func, '__mcp_tool__'):
                             decorated_func.__mcp_tool__['input_schema'] = input_schema
+                    input_schemas_map[tool_name] = input_schema
+                    output_schemas_map[tool_name] = output_schema
+                    registered_count += 1
+                    logger.info(f"✅ 已注册: {tool_name}")
                 else:
                     logger.error("MCP 对象没有 'tool' 方法")
                     continue
                 
                 # ✅ 4. 同时保存两种 schema
-                input_schemas_map[tool_name] = input_schema
-                output_schemas_map[tool_name] = output_schema
+                # input_schemas_map[tool_name] = input_schema
+                # output_schemas_map[tool_name] = output_schema
                 
-                registered_count += 1
-                logger.info(f"✅ 已注册: {tool_name}")
+                # registered_count += 1
+                # logger.info(f"✅ 已注册: {tool_name}")
                 
             except Exception as e:
                 failed_count += 1

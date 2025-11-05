@@ -31,124 +31,124 @@ def get_datatype_classes():
     return VertexData, EdgeData
 
 # --- 后处理逻辑 (完全不变) ---
-@mcp.tool()
-def apply_post_processing(
-    original_response: Dict[str, Any],
-    post_processing_code: str
-) -> Dict[str, Any]:
-    """
-    ✅ 独立的后处理工具
+# @mcp.tool()
+# def apply_post_processing(
+#     original_response: Dict[str, Any],
+#     post_processing_code: str
+# ) -> Dict[str, Any]:
+#     """
+#     ✅ 独立的后处理工具
     
-    Args:
-        original_response: 原始工具的返回结果
-        post_processing_code: 后处理代码字符串
+#     Args:
+#         original_response: 原始工具的返回结果
+#         post_processing_code: 后处理代码字符串
     
-    Returns:
-        处理后的结果
-    """
-    # if not original_response.get("success"):
-    #     logger.warning("原始执行失败，跳过后处理")
-    #     return original_response
+#     Returns:
+#         处理后的结果
+#     """
+#     # if not original_response.get("success"):
+#     #     logger.warning("原始执行失败，跳过后处理")
+#     #     return original_response
     
-    try:
-        logger.info("🔄 开始执行后处理代码...")
-        processed_result = _execute_dynamic_code(
-            post_processing_code, 
-            original_response.get("result")
-        )
+#     try:
+#         logger.info("🔄 开始执行后处理代码...")
+#         processed_result = _execute_dynamic_code(
+#             post_processing_code, 
+#             original_response.get("result")
+#         )
         
-        original_response["result"] = processed_result
-        original_response["summary"] += " (已应用动态后处理)"
-        logger.info("✅ 后处理执行成功")
-        return original_response
+#         original_response["result"] = processed_result
+#         original_response["summary"] += " (已应用动态后处理)"
+#         logger.info("✅ 后处理执行成功")
+#         return original_response
         
-    except Exception as e:
-        logger.error(f"❌ 后处理失败: {e}")
-        return {
-            "success": False,
-            "error": f"后处理失败: {str(e)}",
-            "summary": "后处理脚本执行失败",
-            "original_response": original_response
-        }
+#     except Exception as e:
+#         logger.error(f"❌ 后处理失败: {e}")
+#         return {
+#             "success": False,
+#             "error": f"后处理失败: {str(e)}",
+#             "summary": "后处理脚本执行失败",
+#             "original_response": original_response
+#         }
 
 
-def _execute_dynamic_code(code: str, data: Any) -> Any:
-    """在受限的沙箱中执行后处理代码"""
+# def _execute_dynamic_code(code: str, data: Any) -> Any:
+#     """在受限的沙箱中执行后处理代码"""
     
-    # ✅ 定义允许使用的内置函数（白名单）
-    safe_builtins = {
-        # 基本函数
-        "len": len,
-        "sorted": sorted,
-        "reversed": reversed,
-        "enumerate": enumerate,
-        "zip": zip,
-        "map": map,
-        "filter": filter,
-        "sum": sum,
-        "min": min,
-        "max": max,
-        "abs": abs,
-        "round": round,
+#     # ✅ 定义允许使用的内置函数（白名单）
+#     safe_builtins = {
+#         # 基本函数
+#         "len": len,
+#         "sorted": sorted,
+#         "reversed": reversed,
+#         "enumerate": enumerate,
+#         "zip": zip,
+#         "map": map,
+#         "filter": filter,
+#         "sum": sum,
+#         "min": min,
+#         "max": max,
+#         "abs": abs,
+#         "round": round,
         
-        # 类型转换
-        "int": int,
-        "float": float,
-        "str": str,
-        "bool": bool,
-        "list": list,
-        "dict": dict,
-        "set": set,
-        "tuple": tuple,
+#         # 类型转换
+#         "int": int,
+#         "float": float,
+#         "str": str,
+#         "bool": bool,
+#         "list": list,
+#         "dict": dict,
+#         "set": set,
+#         "tuple": tuple,
         
-        # 其他常用
-        "range": range,
-        "any": any,
-        "all": all,
-        "isinstance": isinstance,
-        "type": type,
+#         # 其他常用
+#         "range": range,
+#         "any": any,
+#         "all": all,
+#         "isinstance": isinstance,
+#         "type": type,
         
-        # ❌ 禁止危险函数
-        # "eval": eval,    # 禁止
-        # "exec": exec,    # 禁止
-        # "open": open,    # 禁止
-        # "__import__": __import__,  # 禁止
-    }
+#         # ❌ 禁止危险函数
+#         # "eval": eval,    # 禁止
+#         # "exec": exec,    # 禁止
+#         # "open": open,    # 禁止
+#         # "__import__": __import__,  # 禁止
+#     }
     
-    # ✅ 创建安全的全局作用域
-    global_namespace = {
-        "__builtins__": safe_builtins,
+#     # ✅ 创建安全的全局作用域
+#     global_namespace = {
+#         "__builtins__": safe_builtins,
         
-        # 可选：提供常用模块（只读）
-        "json": __import__("json"),
-        "math": __import__("math"),
-        "statistics": __import__("statistics"),
-    }
+#         # 可选：提供常用模块（只读）
+#         "json": __import__("json"),
+#         "math": __import__("math"),
+#         "statistics": __import__("statistics"),
+#     }
     
-    local_namespace = {"data": data}
+#     local_namespace = {"data": data}
     
-    try:
-        # 执行代码
-        exec(code, global_namespace, local_namespace)
+#     try:
+#         # 执行代码
+#         exec(code, global_namespace, local_namespace)
         
-        # 检查 process 函数
-        if "process" not in local_namespace:
-            raise ValueError("后处理代码必须定义 'process(data)' 函数")
+#         # 检查 process 函数
+#         if "process" not in local_namespace:
+#             raise ValueError("后处理代码必须定义 'process(data)' 函数")
         
-        process_func = local_namespace["process"]
+#         process_func = local_namespace["process"]
         
-        if not callable(process_func):
-            raise ValueError("'process' 必须是一个函数")
+#         if not callable(process_func):
+#             raise ValueError("'process' 必须是一个函数")
         
-        # 执行
-        result = process_func(data)
-        logger.info(f"✅ 后处理执行成功")
+#         # 执行
+#         result = process_func(data)
+#         logger.info(f"✅ 后处理执行成功")
         
-        return result
+#         return result
         
-    except Exception as e:
-        logger.error(f"❌ 后处理失败: {e}", exc_info=True)
-        raise RuntimeError(f"后处理代码执行错误: {e}")
+#     except Exception as e:
+#         logger.error(f"❌ 后处理失败: {e}", exc_info=True)
+#         raise RuntimeError(f"后处理代码执行错误: {e}")
 
 
 
@@ -158,7 +158,6 @@ def apply_processing(func):
     def wrapper(*args, **kwargs):
         #post_processing_code = kwargs.pop("__post_processing_code__", None)
         original_response = func(*args, **kwargs)
-        
         # if not post_processing_code or not original_response.get("success"):
         return original_response
         # try:

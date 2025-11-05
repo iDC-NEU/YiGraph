@@ -81,9 +81,9 @@ def normalize_parameters(
         if expected_type:
             # 解析 expected_type（处理 "dict, optional" 这种格式）
             base_type = expected_type.split(',')[0].strip()
-            
+
             original_type = type(param_value).__name__
-            converted_value = _smart_convert(param_value, base_type, param_name)
+            converted_value = _smart_convert(param_value, base_type, param_name, log = log)
             
             if type(converted_value).__name__ != original_type:
                 logger.info(
@@ -107,14 +107,14 @@ def normalize_parameters(
             original_value = param_value
             original_type = type(param_value).__name__
             normalized[param_name] = str(param_value)
-            logger.info(
+            log.info(
                 f"🔄 参数类型转换: {param_name} = {original_value} "
                 f"({original_type}) → '{normalized[param_name]}' (str)"
             )
         elif is_node_param and isinstance(param_value, list):
             # 列表中的元素转字符串
             normalized[param_name] = [str(v) if not isinstance(v, str) else v for v in param_value]
-            logger.info(f"🔄 参数类型转换: {param_name} (list) 中的元素转换为字符串")
+            log.info(f"🔄 参数类型转换: {param_name} (list) 中的元素转换为字符串")
         else:
             # 保持原值
             normalized[param_name] = param_value
@@ -157,7 +157,7 @@ def _smart_convert(
                 log.warning("⚠️ 无法将 '%s' 转换为 float，保持原值", value)
                 return value
         return value
-
+ 
     if target_type in {"bool", "boolean"}:
         if isinstance(value, bool):
             return value
