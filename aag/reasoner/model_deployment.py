@@ -280,34 +280,35 @@ class OllamaEnv:
                         "depends_on": []
                     }]}  
         prompt = f"""You are an AI assistant specialized in decomposing complex queries. Your task is to break down a complex question into multiple sub-queries that have logical dependencies.
-         Each sub-query must have a unique ID (e.g., "q1", "q2"), the query text itself, and a depends_on list specifying which other sub-query IDs must be resolved before this one can be answered. 
-         Infer dependencies based on logical necessity. If answering a sub-query requires the answer from another sub-query, specify that ID in the depends_on field. Dependencies should be based on prerequisites and the flow of information.
-         Example for Guidance:Input Query:
-"Recently I discovered that Anna's transaction behavior is anomalous and she might be a potential fraud user. I want to find the potential fraud community around her, suggest possible suspicious transaction paths, and determine how much cash has likely been illegally transferred out."
-Output:{{
-  "subqueries": [
-    {{
-      "id": "q1",
-      "query": "Is Anna a fraud user based on her anomalous transaction behavior?",
-      "depends_on": []
-    }},
-    {{
-      "id": "q2",
-      "query": "Find the potential fraud community centered around Anna.",
-      "depends_on": ["q1"]  
-    }},
-    {{
-      "id": "q3",
-      "query": "What are the possible suspicious transaction paths associated with Anna?",
-      "depends_on": ["q1"] 
-    }},
-    {{
-      "id": "q4",
-      "query": "Determine how much cash has likely been illegally transferred out.",
-      "depends_on": ["q1", "q2", "q3"]  
-    }}
-  ]
-}} Now, based on the instructions and example above, decompose the new complex query provided by the user. Your output must be the valid JSON object only.The query is : {query}.Note: Your response must be a valid JSON object without any additional text or explanation."""
+        Each sub-query must have a unique ID (e.g., "q1", "q2"), the query text itself, and a depends_on list specifying which other sub-query IDs must be resolved before this one can be answered.
+        Infer dependencies based on logical necessity. If answering a sub-query requires the answer from another sub-query, specify that ID in the depends_on field. Dependencies should be based on prerequisites and the flow of information.
+        Example for Guidance:Input Query:
+        "A customer has made several high-value purchases in the last month but has also initiated an unusually high number of returns. I need to determine if this is a case 
+        of 'wardrobing' or fraudulent returns, identify other accounts potentially linked to this behavior, and estimate the total financial loss to the company."
+        Output:{{
+        "subqueries": [
+            {{
+                "id": "q1",
+                "query": "What are the specific patterns of the customer's high-value purchases and returns in the last month?",
+                "depends_on": []
+            }},
+            {{
+                "id": "q2",
+                "query": "Based on the purchase and return patterns, is this behavior indicative of 'wardrobing' or fraudulent activity?",
+                "depends_on": ["q1"]
+            }},
+            {{
+                "id": "q3",
+                "query": "Can we find other user accounts that are linked to this customer (e.g., by shipping address, payment method, IP address) and exhibit similar behavior?",
+                "depends_on": ["q1", "q2"]
+            }},
+            {{
+                "id": "q4",
+                "query": "What is the total estimated financial loss from the confirmed fraudulent returns, including from the original customer and any linked accounts?",
+                "depends_on": ["q2", "q3"]
+            }}
+        ]
+        }}Now, based on the instructions and example above, decompose the new complex query provided by the user. Your output must be the valid JSON object only.The query is : {query}"""
         response = self.llm.complete(prompt)
         return extract_json_from_response(response.text)
 
