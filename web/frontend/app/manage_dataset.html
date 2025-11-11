@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="zxx" id="pageroot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="tongzhewang">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A powerful and conceptual apps base dashboard template that especially build for developers and programmers.">
+    <!-- Fav Icon  -->
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <title>Dataset Editor - Scribbler.AI - AI Content Generator Dashboard and User App HTML Template</title>
+    <link rel="stylesheet" href="/static/assets/css/app.css">
+    <style>
+        .knowledge-base-item {
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+        }
+        .knowledge-base-item:hover {
+            border-left-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+        .knowledge-base-item.active {
+            border-left-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .file-item {
+            border-left: 4px solid #3b82f6;
+        }
+        .file-item.processing {
+            border-left-color: #f59e0b;
+        }
+        .file-item.error {
+            border-left-color: #ef4444;
+        }
+        .file-item.completed {
+            border-left-color: #10b981;
+        }
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+        .upload-area input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        /* Custom layout adjustments */
+        .left-panel {
+            flex: 0 0 300px;
+            max-width: 300px;
+            height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        .right-panel {
+            flex: 1;
+            min-width: 0;
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .file-list-section {
+            flex: 0 0 50%;
+            overflow-y: auto;
+            min-height: 300px;
+        }
+        .graph-section {
+            flex: 1;
+            border-top: 1px solid #e2e8f0;
+            overflow: hidden;
+            min-height: 400px;
+        }
+        @media (max-width: 1024px) {
+            .responsive-container {
+                flex-direction: column;
+            }
+            .left-panel, .right-panel {
+                flex: none;
+                max-width: 100%;
+                height: auto;
+            }
+        }
+        
+        /* Graph visualization styles */
+        #graph-container {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            background-color: #f8fafc;
+            position: relative;
+            user-select: none;
+            touch-action: none;
+        }
+        
+        /* 全屏图谱样式 */
+        #fullscreen-graph-container {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background-color: white !important;
+            z-index: 9999 !important;
+            display: none;
+            flex-direction: column;
+        }
+        
+        #fullscreen-graph-container.active {
+            display: flex !important;
+        }
+        
+        #fullscreen-graph-container .graph-content {
+            flex: 1;
+            height: calc(100vh - 60px);
+            width: 100%;
+        }
+        
+        .graph-controls-toolbar {
+            padding: 10px;
+            background-color: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* 缩放控制按钮样式 */
+        .zoom-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        
+        .zoom-controls button, .graph-controls button {
+            padding: 5px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .zoom-controls button:hover, .graph-controls button:hover {
+            background: #f1f5f9;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1e293b;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .close-modal:hover {
+            color: #475569;
+        }
+        .upload-progress {
+            margin-top: 1rem;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .upload-status {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        .selected-files {
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .file-item-small {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .file-name {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+        .file-size {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        .remove-file {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+        
+        /* 文件预览样式 */
+        .preview-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .preview-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8fafc;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        
+        .preview-content-container {
+            flex: 1;
+            overflow: auto;
+            padding: 1rem;
+            background-color: white;
+        }
+        
+        .preview-text-content {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            background-color: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            overflow: auto;
+            max-height: 70vh;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .preview-pdf-content, .preview-word-content {
+            height: 70vh;
+            width: 100%;
+        }
+        
+        .preview-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 70vh;
+            text-align: center;
+            color: #64748b;
+            background-color: #f8fafc;
+            border-radius: 0.25rem;
+            padding: 2rem;
+        }
+        
+        .preview-placeholder svg {
+            width: 4rem;
+            height: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .preview-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin: 1rem 0;
+        }
+        
+        /* 按钮样式 */
+        .preview-toolbar {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            background-color: #f8fafc;
+            border-radius: 0 0 0.5rem 0.5rem;
+        }
+        
+        .preview-btn {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .preview-btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            border: 1px solid #3b82f6;
+        }
+        
+        .preview-btn-primary:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        
+        .preview-btn-secondary {
+            background-color: #e2e8f0;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+        
+        .preview-btn-secondary:hover {
+            background-color: #cbd5e1;
+            border-color: #94a3b8;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+        }
+    </style>
+</head>
+
+<body class="min-w-[320px] bg-slate-100 dark:bg-slate-900">
+    <div id="root">
+        <!-- Settings Button (same as original) -->
+        <button data-target="#demoSettings" class="class-toggle fixed end-0 top-1/4 z-[1000] flex h-10 w-10 items-center justify-center rounded-s-lg border border-e-0 border-slate-200 bg-white text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5">
+                <path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" clip-rule="evenodd" />
+            </svg>
+        </button>
+        
+        <!-- Settings Panel (same as original) -->
+        <div id="demoSettings" class="fixed z-[5001] hidden h-full w-full [&.active]:block">
+            <!-- ... Settings content same as original ... -->
+        </div>
+        
+        <!-- Header (same as original) -->
+        <div class="flex min-h-screen max-w-full flex-col overflow-x-hidden pt-[calc(theme(space.16)+theme(space.1))]" id="#pagecontent">
+            <div class="fixed start-0 top-0 isolate z-[1020] w-full border-b border-slate-200 bg-white px-3 py-4 dark:border-slate-800 dark:bg-slate-950 xl:py-3">
+                <!-- ... Header content same as original ... -->
+            </div>
+            
+            <!-- Main Content -->
+            <div class="relative px-3 py-10">
+                <div class="container px-3">
+                    <!-- Breadcrumb and Title -->
+                    <div class="-mx-3 mb-7 flex items-center justify-between">
+                        <div class="px-3">
+                            <h2 class="mb-2 text-xl font-bold text-slate-700 dark:text-white">Knowledge Base Editor</h2>
+                            <ul class="inline-flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-300">
+                                <li>
+                                    <a href="overview.html" class="text-blue-500 hover:text-blue-700"> Home </a>
+                                </li>
+                                <li class="mt-0.5 inline-flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="h-2 w-2">
+                                        <path fill="currentColor" d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z" />
+                                    </svg>
+                                </li>
+                                <li>
+                                    <a href="datasets.html" class="text-blue-500 hover:text-blue-700"> Documents </a>
+                                </li>
+                                <li class="mt-0.5 inline-flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="h-2 w-2">
+                                        <path fill="currentColor" d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z" />
+                                    </svg>
+                                </li>
+                                <li>Dataset Editor</li>
+                            </ul>
+                        </div>
+                        <div class="px-3 flex gap-2">
+                            <button class="inline-flex items-center justify-center gap-3 rounded-md border border-slate-200 px-5 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">Back</button>
+                            <button class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">Save Changes</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Content - Flex Layout -->
+                    <div class="responsive-container flex gap-6">
+                        <!-- Left Column - Knowledge Base List -->
+                        <div class="left-panel">
+                            <div class="rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 h-full">
+                                <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+                                    <h3 class="text-lg font-bold text-slate-700 dark:text-white">Knowledge Bases</h3>
+                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Select a knowledge base to edit</p>
+                                </div>
+                                
+                                <!-- Knowledge Base List -->
+                                <div class="p-4">
+                                    <ul class="space-y-2">
+                                        <li class="knowledge-base-item active p-3 rounded-md cursor-pointer" data-kb="react">
+                                            <div class="flex items-center">
+                                                <span class="block h-6 w-6"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                                        <path class="fill-blue-300" d="M13.7087 3.30729C12.6049 2.90591 11.395 2.90591 10.2913 3.30729L3.24266 5.87042C1.48732 6.50872 1.4873 8.99128 3.24266 9.62959L10.2913 12.1927C11.395 12.5941 12.6049 12.5941 13.7087 12.1927L20.7573 9.62959C22.5126 8.99128 22.5126 6.50873 20.7573 5.87042L13.7087 3.30729Z" />
+                                                        <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 12.395C2.24283 11.8746 2.81467 11.6028 3.33504 11.7878L11.33 14.6304C11.7634 14.7845 12.2367 14.7845 12.67 14.6304L20.665 11.7878C21.1854 11.6028 21.7572 11.8746 21.9422 12.395C22.1273 12.9154 21.8554 13.4872 21.335 13.6722L13.3401 16.5149C12.4733 16.8231 11.5268 16.8231 10.66 16.5149L2.66502 13.6722C2.14465 13.4872 1.87279 12.9154 2.05781 12.395Z" />
+                                                        <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 16.645C2.24283 16.1246 2.81467 15.8528 3.33504 16.0378L11.33 18.8804C11.7634 19.0345 12.2367 19.0345 12.67 18.8804L20.665 16.0378C21.1854 15.8528 21.7572 16.1246 21.9422 16.645C22.1273 17.1654 21.8554 17.7372 21.335 17.9222L13.3401 20.7649C12.4733 21.0731 11.5268 21.0731 10.66 20.7649L2.66502 17.9222C2.14465 17.7372 1.87279 17.1654 2.05781 16.645Z" />
+                                                    </svg></span>
+                                                <div class="ms-3">
+                                                    <div class="text-sm font-bold text-slate-600 dark:text-slate-200">10 React Best practices</div>
+                                                    <div class="block text-xs text-slate-500 dark:text-slate-400">8 files</div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <!-- ... 其他知识库项目保持不变 ... -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column - File List and Graph -->
+                        <div class="right-panel">
+                            <!-- File List Section -->
+                            <div class="file-list-section">
+                                <div class="rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 h-full flex flex-col">
+                                    <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h3 class="text-lg font-bold text-slate-700 dark:text-white">Files in "10 React Best practices"</h3>
+                                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage documents in this knowledge base</p>
+                                            </div>
+                                            <button id="add-files-btn" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                </svg>
+                                                Add Files
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- File List -->
+                                    <div class="p-5 flex-1 overflow-auto">
+                                        <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
+                                            <table class="w-full table-auto border-collapse text-sm">
+                                                <thead class="bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-200">
+                                                    <tr>
+                                                        <th class="py-3 px-4 text-start">Document</th>
+                                                        <th class="py-3 px-4 text-start">Status</th>
+                                                        <th class="py-3 px-4 text-start">Size</th>
+                                                        <th class="py-3 px-4 text-start">Uploaded</th>
+                                                        <th class="py-3 px-4 text-start"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="file-list-body">
+                                                    <!-- 文件列表将通过JavaScript动态生成 -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Graph Section -->
+                            <div class="graph-section">
+                                <div class="rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 h-full flex flex-col">
+                                    <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h3 class="text-lg font-bold text-slate-700 dark:text-white">Document Relationship Graph</h3>
+                                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Visual representation of relationships between .txt files</p>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" onclick="generateGraph()">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                                    </svg>
+                                                    Regenerate
+                                                </button>
+                                                <button id="zoom-in-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                    </svg>
+                                                </button>
+                                                <button id="zoom-out-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+                                                    </svg>
+                                                </button>
+                                                <button id="fit-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" title="适合屏幕">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                                                    </svg>
+                                                </button>
+                                                <button id="fullscreen-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" title="全屏显示">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                                                    </svg>
+                                                    全屏显示
+                                                </button>
+                                                <button class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-all hover:bg-blue-800">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                                    </svg>
+                                                    Export
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Graph Visualization -->
+                                    <div id="graph-container">
+                                        <!-- 图内容将通过JavaScript生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer (same as original) -->
+            <div class="relative isolate mt-auto border-t border-slate-200 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-950">
+                <div class="container px-3">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-medium text-slate-600 dark:text-white"> &copy; 2024. Crafted By&nbsp; <a class="text-slate-700 transition-all hover:text-blue-600 dark:text-white hover:dark:text-blue-600" href="https://www.tongzhewang.com" target="_blank"> 童哲网 </a>
+                        </p>
+                        <ul class="-mx-3 flex flex-wrap">
+                            <li>
+                                <a href="#" class="px-3 text-sm font-medium text-slate-600 transition-all hover:text-blue-600 dark:text-slate-100 hover:dark:text-blue-600"> Terms </a>
+                            </li>
+                            <li>
+                                <a target="_blank" href="../about.html" class="px-3 text-sm font-medium text-slate-600 transition-all hover:text-blue-600 dark:text-slate-100 hover:dark:text-blue-600"> About </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全屏图谱容器 -->
+    <div id="fullscreen-graph-container">
+        <div class="graph-controls-toolbar">
+            <h3 class="text-lg font-bold text-slate-700 dark:text-white">Document Relationship Graph (Fullscreen)</h3>
+            <div class="zoom-controls">
+                <button id="fullscreen-zoom-in">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                </button>
+                <button id="fullscreen-zoom-out">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+                    </svg>
+                </button>
+                <button id="fullscreen-fit">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                    </svg>
+                </button>
+                <button id="exit-fullscreen">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    退出全屏
+                </button>
+            </div>
+        </div>
+        <div class="graph-content" id="fullscreen-graph-content">
+            <!-- 全屏图谱内容 -->
+        </div>
+    </div>
+
+    <!-- 文件上传模态框 -->
+    <div id="upload-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Upload Files to Knowledge Base</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="upload-area p-8 text-center cursor-pointer" id="drop-zone">
+                <div class="mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-12 w-12 mx-auto text-slate-400">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                </div>
+                <p class="text-lg font-medium text-slate-700">Drag and drop files here</p>
+                <p class="text-sm text-slate-500 mt-2">or</p>
+                <button class="mt-4 inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">
+                    Browse Files
+                </button>
+                <input type="file" id="file-input" multiple accept=".txt,.pdf,.doc,.docx,.md">
+            </div>
+            
+            <div class="selected-files" id="selected-files">
+                <!-- 选中的文件将在这里显示 -->
+            </div>
+            
+            <div class="upload-progress" id="upload-progress" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="upload-status" id="upload-status">Uploading...</div>
+            </div>
+            
+            <div class="mt-6 flex justify-end gap-3">
+                <button class="inline-flex items-center justify-center gap-3 rounded-md border border-slate-200 px-5 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" id="cancel-upload">Cancel</button>
+                <button class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800" id="start-upload">Upload Files</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 文件预览模态框 -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content" style="max-width: 90%; width: 90%; height: 90%;">
+            <div class="preview-container">
+                <div class="preview-header">
+                    <h3 class="modal-title" id="preview-title">File Preview</h3>
+                    <button class="close-modal text-2xl" id="close-preview-modal">&times;</button>
+                </div>
+                <div class="preview-content-container">
+                    <div id="preview-content">
+                        <!-- 预览内容将在这里显示 -->
+                    </div>
+                </div>
+                <div class="preview-toolbar">
+                    <button class="preview-btn preview-btn-secondary" id="download-btn">下载</button>
+                    <button class="preview-btn preview-btn-primary" id="close-preview-btn">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cytoscape.js库 -->
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    
+    <!-- JavaScript -->
+    <script src="../assets/js/bundle-app.js"></script>
+    <script src="../assets/js/scripts.js"></script>
+    <script>
+        // 当前选中的知识库
+        let currentKnowledgeBase = 'react';
+        let selectedFiles = [];
+        
+        // 文件上传模态框控制
+        let uploadModal, addFilesBtn, closeModal, cancelUpload, fileInput, dropZone;
+        let selectedFilesContainer, startUploadBtn, uploadProgress, progressFill, uploadStatus;
+
+        // 当DOM加载完成后初始化元素引用和事件监听器
+        function initApp() {
+            // 初始化元素引用
+            uploadModal = document.getElementById('upload-modal');
+            addFilesBtn = document.getElementById('add-files-btn');
+            closeModal = document.querySelector('.close-modal');
+            cancelUpload = document.getElementById('cancel-upload');
+            fileInput = document.getElementById('file-input');
+            dropZone = document.getElementById('drop-zone');
+            selectedFilesContainer = document.getElementById('selected-files');
+            startUploadBtn = document.getElementById('start-upload');
+            uploadProgress = document.getElementById('upload-progress');
+            progressFill = document.getElementById('progress-fill');
+            uploadStatus = document.getElementById('upload-status');
+
+            // 知识库选择
+            document.querySelectorAll('.knowledge-base-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.knowledge-base-item').forEach(kb => {
+                        kb.classList.remove('active');
+                    });
+                    item.classList.add('active');
+                    
+                    // 更新当前选中的知识库
+                    currentKnowledgeBase = item.getAttribute('data-kb');
+                    const kbName = item.querySelector('.text-sm.font-bold').textContent;
+                    document.querySelector('h3.text-lg').textContent = `Files in "${kbName}"`;
+                    
+                    // 重新加载文件列表
+                    loadFiles();
+                    // 重新生成图谱
+                    generateGraph();
+                });
+            });
+
+            // 打开模态框
+            if (addFilesBtn) {
+                addFilesBtn.addEventListener('click', () => {
+                    if (uploadModal) {
+                        uploadModal.style.display = 'flex';
+                        selectedFiles = [];
+                        updateSelectedFilesDisplay();
+                    }
+                });
+            }
+
+            // 关闭模态框
+            if (closeModal) {
+                closeModal.addEventListener('click', () => {
+                    if (uploadModal) {
+                        uploadModal.style.display = 'none';
+                    }
+                });
+            }
+
+            if (cancelUpload) {
+                cancelUpload.addEventListener('click', () => {
+                    if (uploadModal) {
+                        uploadModal.style.display = 'none';
+                    }
+                });
+            }
+
+            // 点击模态框外部关闭 (修复上传模态框)
+            if (uploadModal) {
+                uploadModal.addEventListener('click', (e) => {
+                    if (e.target.id === 'upload-modal') {
+                        uploadModal.style.display = 'none';
+                    }
+                });
+            }
+
+            // 文件选择处理
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    handleFiles(e.target.files);
+                });
+            }
+
+            // 拖放功能
+            if (dropZone) {
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('drag-over');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+                    handleFiles(e.dataTransfer.files);
+                });
+            }
+
+            // 开始上传
+            if (startUploadBtn) {
+                startUploadBtn.addEventListener('click', async () => {
+                    if (selectedFiles.length === 0) return;
+                    
+                    // 显示上传进度
+                    if (uploadProgress) uploadProgress.style.display = 'block';
+                    if (startUploadBtn) startUploadBtn.disabled = true;
+                    
+                    let uploadedCount = 0;
+                    
+                    for (let i = 0; i < selectedFiles.length; i++) {
+                        const file = selectedFiles[i];
+                        
+                        try {
+                            // 模拟上传过程
+                            if (uploadStatus) uploadStatus.textContent = `Uploading ${file.name}...`;
+                            
+                            // 模拟上传进度
+                            for (let progress = 0; progress <= 100; progress += 10) {
+                                await new Promise(resolve => setTimeout(resolve, 100));
+                                if (progressFill) progressFill.style.width = `${((uploadedCount * 100) + progress) / selectedFiles.length}%`;
+                            }
+                            
+                            // 保存文件到本地（模拟）
+                            await saveFileLocally(file);
+                            
+                            uploadedCount++;
+                            if (uploadStatus) uploadStatus.textContent = `Uploaded ${uploadedCount} of ${selectedFiles.length} files`;
+                            
+                        } catch (error) {
+                            console.error(`Error uploading ${file.name}:`, error);
+                            if (uploadStatus) uploadStatus.textContent = `Error uploading ${file.name}`;
+                        }
+                    }
+                    
+                    // 上传完成
+                    if (uploadStatus) uploadStatus.textContent = `Successfully uploaded ${uploadedCount} files`;
+                    if (progressFill) progressFill.style.width = '100%';
+                    
+                    // 重置并关闭模态框
+                    setTimeout(() => {
+                        if (uploadModal) uploadModal.style.display = 'none';
+                        if (uploadProgress) uploadProgress.style.display = 'none';
+                        if (progressFill) progressFill.style.width = '0%';
+                        if (startUploadBtn) startUploadBtn.disabled = false;
+                        
+                        // 重新加载文件列表
+                        loadFiles();
+                        // 重新生成图谱
+                        generateGraph();
+                    }, 1500);
+                });
+            }
+            
+            // 初始化全屏功能
+            initFullscreen();
+        }
+
+        // 当DOM加载完成后初始化应用
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+            loadFiles();
+            generateGraph();
+            // 等待DOM更新后再添加缩放控制
+            setTimeout(() => {
+                addZoomControls();
+            }, 100);
+        });
+
+        // 处理选择的文件
+        function handleFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                // 检查是否已存在同名文件
+                if (!selectedFiles.some(f => f.name === file.name)) {
+                    selectedFiles.push(file);
+                }
+            }
+            updateSelectedFilesDisplay();
+        }
+
+        // 更新选中的文件显示
+        function updateSelectedFilesDisplay() {
+            selectedFilesContainer.innerHTML = '';
+            
+            if (selectedFiles.length === 0) {
+                selectedFilesContainer.innerHTML = '<p class="text-slate-500 text-sm text-center py-4">No files selected</p>';
+                startUploadBtn.disabled = true;
+                return;
+            }
+            
+            startUploadBtn.disabled = false;
+            
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item-small';
+                fileItem.innerHTML = `
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${formatFileSize(file.size)}</div>
+                    <button class="remove-file" data-index="${index}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                `;
+                selectedFilesContainer.appendChild(fileItem);
+            });
+            
+            // 添加删除文件事件
+            document.querySelectorAll('.remove-file').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                    selectedFiles.splice(index, 1);
+                    updateSelectedFilesDisplay();
+                });
+            });
+        }
+
+        // 保存文件到本地（模拟）
+        async function saveFileLocally(file) {
+            return new Promise((resolve, reject) => {
+                // 在实际应用中，这里应该发送到服务器
+                // 这里我们模拟保存到本地存储
+                
+                // 创建知识库文件夹路径
+                const kbFolder = `dataset/${currentKnowledgeBase}`;
+                
+                // 模拟保存文件
+                setTimeout(() => {
+                    console.log(`File ${file.name} saved to ${kbFolder}/`);
+                    
+                    // 将文件信息保存到本地存储
+                    const fileInfo = {
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        uploadDate: new Date().toISOString(),
+                        status: 'completed',
+                        path: `${kbFolder}/${file.name}`
+                    };
+                    
+                    // 获取现有文件列表
+                    const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+                    existingFiles.push(fileInfo);
+                    localStorage.setItem(`kb-files-${currentKnowledgeBase}`, JSON.stringify(existingFiles));
+                    
+                    resolve(fileInfo);
+                }, 500);
+            });
+        }
+
+        // 加载文件列表
+        function loadFiles() {
+            const fileListBody = document.getElementById('file-list-body');
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            
+            // 如果有保存的文件，显示它们
+            if (existingFiles.length > 0) {
+                fileListBody.innerHTML = existingFiles.map(file => `
+                    <tr class="file-item completed border-t border-slate-200 dark:border-slate-800">
+                        <td class="py-3 px-4">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-blue-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                </svg>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-slate-700 dark:text-slate-200">${file.name}</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">${getFileType(file.name)}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
+                                <svg class="mr-1 h-2 w-2" fill="currentColor" viewBox="0 0 8 8">
+                                    <circle cx="4" cy="4" r="3" />
+                                </svg>
+                                Processed
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">${formatFileSize(file.size)}</td>
+                        <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">${formatDate(file.uploadDate)}</td>
+                        <td class="py-3 px-4">
+                            <div class="flex justify-end gap-2">
+                                <button class="rounded-full bg-slate-200 p-2 text-slate-600 transition-all hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:text-slate-200 hover:dark:bg-blue-600 hover:dark:text-white preview-btn" data-filename="${file.name}" data-filepath="${file.path}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                </button>
+                                <button class="rounded-full bg-rose-100 p-2 text-rose-600 transition-all hover:bg-rose-600 hover:text-white dark:bg-rose-950 dark:text-rose-200 hover:dark:bg-rose-600 hover:dark:text-white" onclick="deleteFile('${file.name}')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                // 显示默认文件（仅用于演示）
+                fileListBody.innerHTML = `
+                    <tr class="file-item completed border-t border-slate-200 dark:border-slate-800">
+                        <td class="py-3 px-4">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-blue-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                </svg>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-slate-700 dark:text-slate-200">react-best-practices.pdf</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">Article</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
+                                <svg class="mr-1 h-2 w-2" fill="currentColor" viewBox="0 0 8 8">
+                                    <circle cx="4" cy="4" r="3" />
+                                </svg>
+                                Processed
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">2.4 MB</td>
+                        <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">Apr 3, 2023</td>
+                        <td class="py-3 px-4">
+                            <div class="flex justify-end gap-2">
+                                <button class="rounded-full bg-slate-200 p-2 text-slate-600 transition-all hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:text-slate-200 hover:dark:bg-blue-600 hover:dark:text-white preview-btn" data-filename="react-best-practices.pdf" data-filepath="dataset/react/react-best-practices.pdf">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                </button>
+                                <button class="rounded-full bg-rose-100 p-2 text-rose-600 transition-all hover:bg-rose-600 hover:text-white dark:bg-rose-950 dark:text-rose-200 hover:dark:bg-rose-600 hover:dark:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            // 添加预览按钮事件监听器
+            document.querySelectorAll('.preview-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const filename = e.currentTarget.getAttribute('data-filename');
+                    const filepath = e.currentTarget.getAttribute('data-filepath');
+                    previewFile(filename, filepath);
+                });
+            });
+        }
+
+        // 文件预览功能
+        function previewFile(filename, filepath) {
+            const previewModal = document.getElementById('preview-modal');
+            const previewTitle = document.getElementById('preview-title');
+            const previewContent = document.getElementById('preview-content');
+            const downloadBtn = document.getElementById('download-btn');
+            
+            previewTitle.textContent = `预览文件: ${filename}`;
+            previewContent.innerHTML = '<div class="preview-placeholder"><div class="loading loading-spinner"></div><p>正在加载文件...</p></div>';
+            
+            // 显示模态框
+            previewModal.style.display = 'flex';
+            
+            // 设置下载按钮事件
+            downloadBtn.onclick = () => downloadFile(filename, filepath);
+            
+            // 获取文件扩展名
+            const fileExtension = filename.split('.').pop().toLowerCase();
+            
+            // 根据文件类型进行预览
+            switch (fileExtension) {
+                case 'txt':
+                case 'md':
+                    previewTextFile(filename, filepath);
+                    break;
+                case 'pdf':
+                    previewPdfFile(filename, filepath);
+                    break;
+                case 'doc':
+                case 'docx':
+                    previewWordFile(filename, filepath);
+                    break;
+                default:
+                    previewContent.innerHTML = `
+                        <div class="preview-placeholder">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <h4 class="text-lg font-medium mb-2">${filename}</h4>
+                            <p>该文件类型无法在浏览器中预览</p>
+                            <p class="text-sm mt-2">文件路径: ${filepath}</p>
+                        </div>
+                    `;
+            }
+        }
+        
+        // 预览文本文件
+        function previewTextFile(filename, filepath) {
+            const previewContent = document.getElementById('preview-content');
+            
+            // 模拟从服务器获取文件内容
+            setTimeout(() => {
+                // 模拟文本内容
+                const sampleText = `这是文件 "${filename}" 的内容预览。
+
+在实际应用中，这里会显示真实的文件内容。
+
+文件信息:
+- 文件名: ${filename}
+- 文件路径: ${filepath}
+- 文件类型: ${getFileType(filename)}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+
+Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
+                `;
+                
+                previewContent.innerHTML = `<pre class="preview-text-content">${escapeHtml(sampleText)}</pre>`;
+            }, 800);
+        }
+        
+        // 辅助函数：转义HTML特殊字符
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+        
+        // 预览PDF文件
+        function previewPdfFile(filename, filepath) {
+            const previewContent = document.getElementById('preview-content');
+            
+            previewContent.innerHTML = `
+                <div class="preview-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h4 class="text-lg font-medium mb-2">${filename}</h4>
+                    <p>PDF 文件预览</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        <p>在实际应用中，这里会使用 PDF.js 显示真实的 PDF 内容</p>
+                        <p class="mt-2">文件路径: ${filepath}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 预览Word文档
+        function previewWordFile(filename, filepath) {
+            const previewContent = document.getElementById('preview-content');
+            
+            previewContent.innerHTML = `
+                <div class="preview-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h4 class="text-lg font-medium mb-2">${filename}</h4>
+                    <p>Word 文档预览</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        <p>在实际应用中，Word文档需要服务器端转换为PDF或HTML格式</p>
+                        <p class="mt-2">文件路径: ${filepath}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 下载文件功能
+        function downloadFile(filename, filepath) {
+            // 在实际应用中，这里应该实现真实的文件下载逻辑
+            alert(`在实际应用中，这将下载文件: ${filename}\n文件路径: ${filepath}`);
+        }
+        
+        // 关闭预览模态框
+        document.getElementById('close-preview-btn').addEventListener('click', () => {
+            document.getElementById('preview-modal').style.display = 'none';
+        });
+        
+        // 关闭预览模态框 (X按钮)
+        document.getElementById('close-preview-modal').addEventListener('click', () => {
+            document.getElementById('preview-modal').style.display = 'none';
+        });
+
+        // 点击预览模态框外部关闭
+        const previewModal = document.getElementById('preview-modal');
+        if (previewModal) {
+            previewModal.addEventListener('click', (e) => {
+                if (e.target === previewModal) {
+                    previewModal.style.display = 'none';
+                }
+            });
+        }
+
+        // 点击上传模态框外部关闭
+        window.addEventListener('click', (e) => {
+            if (uploadModal && e.target === uploadModal) {
+                uploadModal.style.display = 'none';
+            }
+            
+            if (previewModal && e.target === previewModal) {
+                previewModal.style.display = 'none';
+            }
+        });
+
+        // 删除文件
+        function deleteFile(fileName) {
+            if (confirm(`Are you sure you want to delete ${fileName}?`)) {
+                const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+                const updatedFiles = existingFiles.filter(file => file.name !== fileName);
+                localStorage.setItem(`kb-files-${currentKnowledgeBase}`, JSON.stringify(updatedFiles));
+                loadFiles();
+                generateGraph();
+            }
+        }
+
+        // 全屏显示图谱功能
+        let isGraphFullscreen = false;
+        let originalGraphContent = null;
+        let fullscreenGraphContainer = null;
+        
+        function initFullscreen() {
+            // 获取全屏按钮和容器
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            fullscreenGraphContainer = document.getElementById('fullscreen-graph-container');
+            
+            // 全屏按钮事件
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', toggleGraphFullscreen);
+            }
+            
+            // 退出全屏按钮事件
+            const exitFullscreenBtn = document.getElementById('exit-fullscreen');
+            if (exitFullscreenBtn) {
+                exitFullscreenBtn.addEventListener('click', toggleGraphFullscreen);
+            }
+            
+            // 全屏模式下的缩放控制
+            const fullscreenZoomIn = document.getElementById('fullscreen-zoom-in');
+            const fullscreenZoomOut = document.getElementById('fullscreen-zoom-out');
+            const fullscreenFit = document.getElementById('fullscreen-fit');
+            
+            if (fullscreenZoomIn) {
+                fullscreenZoomIn.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.zoom(window.currentCytoscapeInstance.zoom() * 1.2);
+                    }
+                });
+            }
+            
+            if (fullscreenZoomOut) {
+                fullscreenZoomOut.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.zoom(window.currentCytoscapeInstance.zoom() * 0.8);
+                    }
+                });
+            }
+            
+            if (fullscreenFit) {
+                fullscreenFit.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.fit();
+                    }
+                });
+            }
+        }
+        
+        function toggleGraphFullscreen() {
+            const graphContainer = document.getElementById('graph-container');
+            const fullscreenGraphContent = document.getElementById('fullscreen-graph-content');
+            
+            if (!isGraphFullscreen) {
+                // 进入全屏模式
+                enterFullscreen(graphContainer, fullscreenGraphContent);
+            } else {
+                // 退出全屏模式
+                exitFullscreen(graphContainer, fullscreenGraphContent);
+            }
+        }
+        
+        function enterFullscreen(graphContainer, fullscreenGraphContent) {
+            // 保存原始内容
+            originalGraphContent = graphContainer.innerHTML;
+            
+            // 将图谱内容复制到全屏容器
+            fullscreenGraphContent.innerHTML = originalGraphContent;
+            
+            // 显示全屏容器
+            fullscreenGraphContainer.classList.add('active');
+            
+            // 更新状态
+            isGraphFullscreen = true;
+            
+            // 重新渲染图谱以适应新尺寸
+            setTimeout(() => {
+                if (window.currentCytoscapeInstance) {
+                    // 重新创建图谱实例在全屏容器中
+                    recreateGraphInFullscreen();
+                }
+            }, 100);
+        }
+        
+        function exitFullscreen(graphContainer, fullscreenGraphContent) {
+            // 恢复原始内容
+            graphContainer.innerHTML = originalGraphContent;
+            
+            // 隐藏全屏容器
+            fullscreenGraphContainer.classList.remove('active');
+            
+            // 清空全屏内容
+            fullscreenGraphContent.innerHTML = '';
+            
+            // 更新状态
+            isGraphFullscreen = false;
+            
+            // 重新渲染图谱以适应原始尺寸
+            setTimeout(() => {
+                if (window.currentCytoscapeInstance) {
+                    // 重新创建图谱实例在原始容器中
+                    recreateGraphInOriginal();
+                }
+            }, 100);
+        }
+        
+        function recreateGraphInFullscreen() {
+            const fullscreenGraphContent = document.getElementById('fullscreen-graph-content');
+            
+            // 重新创建图谱实例
+            if (window.currentGraphData) {
+                renderKnowledgeGraph(window.currentGraphData, fullscreenGraphContent);
+            }
+        }
+        
+        function recreateGraphInOriginal() {
+            const graphContainer = document.getElementById('graph-container');
+            
+            // 重新创建图谱实例
+            if (window.currentGraphData) {
+                renderKnowledgeGraph(window.currentGraphData, graphContainer);
+            }
+        }
+
+        // 添加缩放控制功能
+        function addZoomControls() {
+            // 常规视图缩放控制
+            const zoomInBtn = document.getElementById('zoom-in-btn');
+            const zoomOutBtn = document.getElementById('zoom-out-btn');
+            const fitBtn = document.getElementById('fit-btn');
+            
+            if (zoomInBtn) {
+                zoomInBtn.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.zoom(window.currentCytoscapeInstance.zoom() * 1.2);
+                    }
+                });
+            }
+            
+            if (zoomOutBtn) {
+                zoomOutBtn.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.zoom(window.currentCytoscapeInstance.zoom() * 0.8);
+                    }
+                });
+            }
+            
+            if (fitBtn) {
+                fitBtn.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.fit();
+                    }
+                });
+            }
+        }
+
+        // 工具函数
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function getFileType(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const types = {
+                'txt': 'Text',
+                'pdf': 'PDF',
+                'doc': 'Word',
+                'docx': 'Word',
+                'md': 'Markdown',
+                'json': 'JSON',
+                'csv': 'CSV'
+            };
+            return types[ext] || 'File';
+        }
+
+        // 图谱生成函数
+        function generateGraph() {
+            const graphContainer = document.getElementById('graph-container');
+            graphContainer.innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-lg text-gray-500">正在生成知识图谱...</div></div>';
+            
+            // 模拟从后端获取数据
+            setTimeout(() => {
+                // 使用你提供的三元组数据
+                const triplets = [
+                    ['2022 citrus bowl', 'Played_on', 'January 1, 2022'], 
+                    ['2022 citrus bowl', 'Telecast_by', 'Abc'], 
+                    ['Vrbo', 'Sponsored', 'Citrus bowl'], 
+                    ['Homeaway', 'Owns', 'Vrbo'], 
+                    ['Expedia', 'Parent_company_of', 'Homeaway'], 
+                    ['Kentucky wildcats', 'Played_against', 'Iowa hawkeyes'], 
+                    ['Kentucky wildcats', 'Entered_citrus_bowl_with_record', '9-3'], 
+                    ['Kentucky wildcats', 'Entered_citrus_bowl_ranking', 'No. 22'], 
+                    ['Kentucky wildcats', 'Made_second_citrus_bowl_appearance', '2019'], 
+                    ['The hawkeyes', 'Entered', 'Citrus bowl'], 
+                    ['The hawkeyes', 'Had_record', '10-3'], 
+                    ['The hawkeyes', 'Ranked', 'No. 15'], 
+                    ['Iowa', 'Made_appearance', 'Citrus bowl'], 
+                    ['Iowa', 'Played_at', 'Camping world stadium'], 
+                    ['2023 citrus bowl', 'Played_on', 'January 2, 2023'], 
+                    ['2023 citrus bowl', 'Played_at', 'Camping world stadium'], 
+                    ['Lsu tigers', 'Played_against', 'Purdue boilermakers'], 
+                    ['Lsu tigers', 'Won', '63-7'], 
+                    ['Lsu tigers', 'Tied', '56 point margin'], 
+                    ['2022 fbs football season', 'Concluded_with', '2022-23 bowl games'], 
+                    ['Citrus bowl', 'Held', '77th annual'], 
+                    ["Kellogg's", 'Purchased_sponsorship_rights_to', 'Cheez-it citrus bowl'], 
+                    ["Kellogg's", 'Sponsors', 'Cheez-it bowl'], 
+                    ['Georgia', 'Mauled', 'Tcu'], 
+                    ['Georgia', 'Played_in', 'Cfp national championship game'], 
+                    ['Lsu', 'Played_against', 'Purdue'], 
+                    ['Quad wilson', 'Picked_off', 'Jack albers'], 
+                    ['Quad wilson', 'Returned_int', '99'], 
+                    ['Lsu', 'Won_game', '63-7']
+                ];
+                
+                // 将三元组转换为图数据
+                const graphData = convertTripletsToGraphData(triplets);
+                
+                // 保存图数据供全屏使用
+                window.currentGraphData = graphData;
+                
+                // 渲染图谱
+                renderKnowledgeGraph(graphData, graphContainer);
+            }, 1000);
+        }
+        
+        // 将三元组转换为图数据
+        function convertTripletsToGraphData(triplets) {
+            const nodes = [];
+            const edges = [];
+            const nodeIds = new Set();
+            
+            // 为不同的关系类型定义颜色
+            const relationColors = {
+                'Played_on': '#FF6B6B',
+                'Telecast_by': '#4ECDC4',
+                'Sponsored': '#45B7D1',
+                'Owns': '#96CEB4',
+                'Parent_company_of': '#FFEAA7',
+                'Played_against': '#DDA0DD',
+                'Entered_citrus_bowl_with_record': '#98D8C8',
+                'Entered_citrus_bowl_ranking': '#F7DC6F',
+                'Made_second_citrus_bowl_appearance': '#BB8FCE',
+                'Entered': '#85C1E9',
+                'Had_record': '#F8C471',
+                'Ranked': '#D7BDE2',
+                'Made_appearance': '#82E0AA',
+                'Played_at': '#F1948A',
+                'Concluded_with': '#85C1E9',
+                'Held': '#F8C471',
+                'Purchased_sponsorship_rights_to': '#D7BDE2',
+                'Sponsors': '#82E0AA',
+                'Mauled': '#F1948A',
+                'Played_in': '#FF6B6B',
+                'Won': '#4ECDC4',
+                'Tied': '#45B7D1',
+                'Picked_off': '#96CEB4',
+                'Returned_int': '#FFEAA7',
+                'Won_game': '#DDA0DD',
+                'default': '#95A5A6'
+            };
+            
+            triplets.forEach((triplet, index) => {
+                const [source, relation, target] = triplet;
+                
+                // 添加节点
+                
+                if (!nodeIds.has(source)) {
+                    nodes.push({
+                        data: {
+                            id: source,
+                            label: source
+                        }
+                    });
+                    nodeIds.add(source);
+                }
+                
+                if (!nodeIds.has(target)) {
+                    nodes.push({
+                        data: {
+                            id: target,
+                            label: target
+                        }
+                    });
+                    nodeIds.add(target);
+                }
+                
+                // 添加边
+                edges.push({
+                    data: {
+                        id: `e${index}`,
+                        source: source,
+                        target: target,
+                        label: relation,
+                        color: relationColors[relation] || relationColors['default']
+                    }
+                });
+            });
+            
+            return { nodes, edges };
+        }
+        
+        // 渲染知识图谱
+        function renderKnowledgeGraph(graphData, container) {
+            if (!container) {
+                container = document.getElementById('graph-container');
+            }
+            
+            container.innerHTML = '';
+            
+            // 创建图谱实例
+            const cy = cytoscape({
+                container: container,
+                elements: {
+                    nodes: graphData.nodes,
+                    edges: graphData.edges
+                },
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#3b82f6',
+                            'label': 'data(label)',
+                            'color': '#000',
+                            'text-valign': 'center',
+                            'text-halign': 'center',
+                            'text-outline-color': '#fff',
+                            'text-outline-width': 1,
+                            'font-size': 14,
+                            'width': 80,
+                            'height': 80
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'line-color': 'data(color)',
+                            'target-arrow-color': 'data(color)',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier',
+                            'label': 'data(label)',
+                            'font-size': 12,
+                            'text-background-color': '#fff',
+                            'text-background-opacity': 1,
+                            'text-background-padding': '4px',
+                            'text-rotation': 'autorotate',
+                            'width': 2
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'cose',
+                    animate: true,
+                    fit: true,
+                    padding: 30,
+                    nodeRepulsion: 400000,
+                    idealEdgeLength: 100,
+                    nodeOverlap: 20
+                }
+            });
+            
+            // 保存实例到全局变量，供全屏功能使用
+            window.currentCytoscapeInstance = cy;
+            
+            // 添加交互功能
+            cy.on('tap', 'node', function(evt){
+                const node = evt.target;
+                console.log('点击了节点:', node.data('label'));
+            });
+            
+            cy.on('tap', 'edge', function(evt){
+                const edge = evt.target;
+                console.log('点击了边:', edge.data('label'));
+            });
+            
+            // 添加鼠标滚轮缩放支持
+            if (container) {
+                container.addEventListener('wheel', (e) => {
+                    if (e.ctrlKey && window.currentCytoscapeInstance) {
+                        e.preventDefault();
+                        const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+                        window.currentCytoscapeInstance.zoom(window.currentCytoscapeInstance.zoom() * zoomFactor);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

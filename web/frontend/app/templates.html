@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zxx" id="pageroot">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="tongzhewang">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A powerful and conceptual apps base dashboard template that especially build for developers and programmers.">
+    <!-- Fav Icon  -->
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <title>Template List - Scribbler.AI - AI Content Generator Dashboard and User App HTML Template </title>
+    <link rel="stylesheet" href="../assets/css/app.css">
+</head>
+
+<body class="min-w-[320px] bg-slate-100 dark:bg-slate-900">
+    <div id="root">
+        <button data-target="#demoSettings" class="class-toggle fixed end-0 top-1/4 z-[1000] flex h-10 w-10 items-center justify-center rounded-s-lg border border-e-0 border-slate-200 bg-white text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5">
+                <path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" clip-rule="evenodd" />
+            </svg>
+        </button>
+        <div id="demoSettings" class="fixed z-[5001] hidden h-full w-full [&.active]:block">
+            <div class="fixed bottom-4 end-4 z-20 flex max-h-[calc(100%-theme(space.8))] w-72 flex-col rounded-xl border border-slate-200 bg-white pt-4 dark:border-slate-800 dark:bg-slate-950 md:w-[600px]">
+                <div class="border-b border-slate-200 px-5 pb-5 dark:border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <h6 class="font-bold text-slate-700 dark:text-white">Mode</h6>
+                        <button class="theme-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all *:pointer-events-none hover:bg-slate-200 hover:text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hidden h-4 dark:block">
+                                <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z" clip-rule="evenodd" />
+                            </svg><!-- moon - solid - heroicons  -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 dark:hidden">
+                                <path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z" />
+                            </svg><!-- sun - solid - heroicons  -->
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between pt-3">
+                        <h6 class="font-bold text-slate-700 dark:text-white">Direction</h6>
+                        <button class="direction-toggle rounded border border-slate-200 px-2 py-1 text-xs font-bold text-slate-600 transition-all *:pointer-events-none hover:bg-slate-200 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">
+                            <span class="hidden rtl:block">LTR</span>
+                            <span class="rtl:hidden">RTL</span>
+                        </button>
+                    </div>
+                    <div class="mt-4 rounded-md bg-sky-50 px-4 py-3 text-sm text-sky-600 dark:bg-sky-950 dark:text-sky-400"> This is a HTML template so you might see a flicker on load after switching to dark or RTL mode. </div>
+                </div>
+                <div class="overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-600">
+                    <div class="grid grid-flow-dense grid-cols-1 gap-4 p-5 md:grid-cols-2">
+                        <a href="overview.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                            <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-blue-100 group-hover:dark:shadow-blue-950" src="../images/preview/user/dashboard.png" alt="" />
+                            <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> User App </h6>
+                        </a>
+                        <a href="../admin/dashboard.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                            <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/admin/dashboard.png" alt="" />
+                            <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Admin Dashboard </h6>
+                        </a>
+                        <a href="../landing-text-image.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                            <div class="absolute start-3 top-3 mb-2 inline-flex rounded-full bg-gradient-to-r from-green-600 to-pink-500 px-2 py-0.5 text-[11px] font-medium text-white"> Landing </div>
+                            <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/landing/image-gen-1.png" alt="" />
+                            <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Image Generator </h6>
+                        </a>
+                        <a href="../landing-text-code.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                            <div class="absolute start-3 top-3 mb-2 inline-flex rounded-full bg-gradient-to-r from-green-600 to-pink-500 px-2 py-0.5 text-[11px] font-medium text-white"> Landing </div>
+                            <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/landing/code-gen-1.png" alt="" />
+                            <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Code Generator </h6>
+                        </a>
+                        <a href="../landing-prompt-text.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                            <div class="absolute start-3 top-3 mb-2 inline-flex rounded-full bg-gradient-to-r from-green-600 to-pink-500 px-2 py-0.5 text-[11px] font-medium text-white"> Landing </div>
+                            <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/landing/text-gen-1.png" alt="" />
+                            <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Text Generator </h6>
+                        </a>
+                        <a href="../index.html" class="group relative flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-center text-slate-600 transition-all hover:bg-blue-600 hover:text-white dark:border-slate-800 dark:bg-slate-950 dark:text-white hover:dark:bg-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                <path fill-rule="evenodd" d="M10.72 11.47a.75.75 0 0 0 0 1.06l7.5 7.5a.75.75 0 1 0 1.06-1.06L12.31 12l6.97-6.97a.75.75 0 0 0-1.06-1.06l-7.5 7.5Z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd" d="M4.72 11.47a.75.75 0 0 0 0 1.06l7.5 7.5a.75.75 0 1 0 1.06-1.06L6.31 12l6.97-6.97a.75.75 0 0 0-1.06-1.06l-7.5 7.5Z" clip-rule="evenodd" />
+                            </svg>
+                            <div class="relative mt-6 text-base font-bold">Back to Intro</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div data-target="#demoSettings" class="class-toggle fixed inset-0 z-10 bg-slate-950 bg-opacity-50"></div>
+        </div>
+        <div class="flex min-h-screen max-w-full flex-col overflow-x-hidden pt-[calc(theme(space.16)+theme(space.1))]" id="#pagecontent">
+            <div class="fixed start-0 top-0 isolate z-[1020] w-full border-b border-slate-200 bg-white px-3 py-4 dark:border-slate-800 dark:bg-slate-950 xl:py-3">
+                <div class="container px-3">
+                    <div class="w-100 flex items-center justify-between">
+                        <div class="flex items-center gap-x-2">
+                            <div class="-ms-1.5 xl:hidden">
+                                <button class="header-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all hover:bg-slate-200 hover:text-slate-600 hover:dark:bg-slate-800 hover:dark:text-slate-200 [&.active]:bg-slate-200 [&.active]:text-slate-600 [&.active]:dark:bg-slate-800 [&.active]:dark:text-slate-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                                    </svg><!-- bars-3 - outline - heroicons -->
+                                </button>
+                            </div>
+                            <a href="overview.html" class="flex-shrink-0">
+                                <div class="flex items-center">
+                                    <img class="h-6 dark:hidden" src="../images/logo.png" alt="logo" />
+                                    <img class="hidden h-6 dark:block" src="../images/logo-white.png" alt="logo" />
+                                </div>
+                            </a><!-- logo -->
+                        </div>
+                        <!-- header-brand -->
+                        <div class="main-header peer fixed start-0 top-0 z-[1020] flex h-screen w-64 flex-shrink-0 -translate-x-full flex-col border-e border-slate-200 bg-white py-4 dark:border-slate-800 dark:bg-slate-950 max-xl:overflow-auto max-xl:transition-all xl:static xl:h-auto xl:w-auto xl:!translate-x-0 xl:border-e-0 xl:py-0 xl:transition-none rtl:translate-x-full [&.header-visible]:translate-x-0">
+                            <ul class="menu-head flex flex-col gap-x-6 px-4 xl:flex-row xl:items-center">
+                                <li class="menu-item group relative">
+                                    <a href="overview.html" class="menu-link flex items-center py-2 text-sm font-medium text-slate-700 group-hover:text-blue-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-100 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600 xl:py-3">
+                                        <span>Home</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item has-sub group relative xl:[&:hover>*.sub-menu]:visible xl:[&:hover>*.sub-menu]:translate-y-0 xl:[&:hover>*.sub-menu]:opacity-100">
+                                    <a href="#" class="has-toggle menu-link flex items-center py-2 text-sm font-medium text-slate-700 group-hover:text-blue-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-100 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600 xl:py-3">
+                                        <span>Templates</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="ms-2 h-2 fill-current">
+                                            <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
+                                        </svg>
+                                    </a>
+                                    <div class="sub-menu hidden rounded-lg border border-slate-200 bg-white transition-all dark:border-slate-800 dark:bg-slate-950 xl:invisible xl:absolute xl:!block xl:w-40 xl:-translate-y-2 xl:transition-all">
+                                        <ul class="relative py-2">
+                                            <li class="menu-item has-sub group relative xl:[&:hover>*.sub-menu]:visible xl:[&:hover>*.sub-menu]:translate-y-0 xl:[&:hover>*.sub-menu]:opacity-100">
+                                                <a href="#" class="has-toggle menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Ai Writer</span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="ms-auto h-2 origin-center -rotate-90 fill-current rtl:rotate-90">
+                                                        <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
+                                                    </svg>
+                                                </a>
+                                                <div class="sub-menu mx-3 hidden rounded-lg border border-slate-200 bg-white transition-all dark:border-slate-800 dark:bg-slate-950 xl:invisible xl:absolute xl:-top-2 xl:start-full xl:mx-0 xl:!block xl:w-40 xl:-translate-y-2 xl:transition-all">
+                                                    <ul class="relative py-2">
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-writer.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>Article Generator</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-writer.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>Rewrite Article</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-writer.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>Tags Generator</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-writer.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>Ads Content</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-writer.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>Write Title</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-writer.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>Write Description</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-writer.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>Video Script</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-writer.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>Grammar Checker</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-writer.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>Name Generator</span>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li class="menu-item has-sub group relative xl:[&:hover>*.sub-menu]:visible xl:[&:hover>*.sub-menu]:translate-y-0 xl:[&:hover>*.sub-menu]:opacity-100">
+                                                <a href="#" class="has-toggle menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Ai Image</span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="ms-auto h-2 origin-center -rotate-90 fill-current rtl:rotate-90">
+                                                        <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
+                                                    </svg>
+                                                </a>
+                                                <div class="sub-menu mx-3 hidden rounded-lg border border-slate-200 bg-white transition-all dark:border-slate-800 dark:bg-slate-950 xl:invisible xl:absolute xl:-top-2 xl:start-full xl:mx-0 xl:!block xl:w-40 xl:-translate-y-2 xl:transition-all">
+                                                    <ul class="relative py-2">
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-image.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>Image Generator</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-image-s2.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>Image Generator S2</span>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li class="menu-item has-sub group relative xl:[&:hover>*.sub-menu]:visible xl:[&:hover>*.sub-menu]:translate-y-0 xl:[&:hover>*.sub-menu]:opacity-100">
+                                                <a href="#" class="has-toggle menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Ai ChatBot</span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="ms-auto h-2 origin-center -rotate-90 fill-current rtl:rotate-90">
+                                                        <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
+                                                    </svg>
+                                                </a>
+                                                <div class="sub-menu mx-3 hidden rounded-lg border border-slate-200 bg-white transition-all dark:border-slate-800 dark:bg-slate-950 xl:invisible xl:absolute xl:-top-2 xl:start-full xl:mx-0 xl:!block xl:w-40 xl:-translate-y-2 xl:transition-all">
+                                                    <ul class="relative py-2">
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-chatbot.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>ChatBot S1</span>
+                                                            </a>
+                                                        </li>
+                                                        <li class="menu-item group relative">
+                                                            <a href="template-chatbot-s2.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                                <span>ChatBot S2</span>
+                                                                <span class="ms-1 text-[10px] leading-3 px-2 py-1 text-slate-600 dark:text-slate-200 bg-slate-200 dark:bg-slate-800 rounded-sm">New</span>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li class="menu-item group relative">
+                                                <a href="template-code.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Ai Code</span>
+                                                </a>
+                                            </li>
+                                            <li class="menu-item group relative">
+                                                <a href="template-speech-to-text.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Ai Speech Text</span>
+                                                </a>
+                                            </li>
+                                            <li class="my-2 border-t border-slate-200 dark:border-slate-800"></li>
+                                            <li class="menu-item group relative">
+                                                <a href="templates.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>All 14 Templates</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="menu-item group relative">
+                                    <a href="documents.html" class="menu-link flex items-center py-2 text-sm font-medium text-slate-700 group-hover:text-blue-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-100 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600 xl:py-3">
+                                        <span>Documents</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item has-sub group relative xl:[&:hover>*.sub-menu]:visible xl:[&:hover>*.sub-menu]:translate-y-0 xl:[&:hover>*.sub-menu]:opacity-100">
+                                    <a href="#" class="has-toggle menu-link flex items-center py-2 text-sm font-medium text-slate-700 group-hover:text-blue-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-100 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600 xl:py-3">
+                                        <span>Pages</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="ms-2 h-2 fill-current">
+                                            <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
+                                        </svg>
+                                    </a>
+                                    <div class="sub-menu hidden rounded-lg border border-slate-200 bg-white transition-all dark:border-slate-800 dark:bg-slate-950 xl:invisible xl:absolute xl:!block xl:w-40 xl:-translate-y-2 xl:transition-all">
+                                        <ul class="relative py-2">
+                                            <li class="menu-item group relative">
+                                                <a href="profile.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Profile</span>
+                                                </a>
+                                            </li>
+                                            <li class="menu-item group relative">
+                                                <a href="packages.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Packages</span>
+                                                </a>
+                                            </li>
+                                            <li class="menu-item group relative">
+                                                <a href="faq.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Faq</span>
+                                                </a>
+                                            </li>
+                                            <li class="menu-item group relative">
+                                                <a href="../login.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Login</span>
+                                                </a>
+                                            </li>
+                                            <li class="menu-item group relative">
+                                                <a href="../create-account.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Create Account</span>
+                                                </a>
+                                            </li>
+                                            <li class="menu-item group relative">
+                                                <a href="../two-step.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Two Step Verify</span>
+                                                </a>
+                                            </li>
+                                            <li class="menu-item group relative">
+                                                <a href="../404.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>404 Error</span>
+                                                </a>
+                                            </li>
+                                            <li class="my-2 border-t border-slate-200 dark:border-slate-800"></li>
+                                            <li class="menu-item group relative">
+                                                <a href="../ui-components.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Components</span>
+                                                    <span class="ms-1 text-[10px] leading-3 px-2 py-1 text-slate-600 dark:text-slate-200 bg-slate-200 dark:bg-slate-800 rounded-sm">New</span>
+                                                </a>
+                                            </li>
+                                            <li class="my-2 border-t border-slate-200 dark:border-slate-800"></li>
+                                            <li class="menu-item group relative">
+                                                <a href="../index.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Website</span>
+                                                </a>
+                                            </li>
+                                            <li class="menu-item group relative">
+                                                <a href="../admin/dashboard.html" class="menu-link flex items-center px-4 py-2 text-xs font-medium text-slate-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-200 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600">
+                                                    <span>Dashboard</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- header-main -->
+                        <div class="header-toggle pointer-events-none fixed inset-0 z-[1019] bg-slate-950 bg-opacity-50 opacity-0 peer-[.header-visible]:pointer-events-auto peer-[.header-visible]:opacity-100 xl:!opacity-0"></div>
+                        <!-- overlay -->
+                        <ul class="flex items-center gap-x-3 lg:gap-x-5">
+                            <li class="relative inline-flex">
+                                <button class="theme-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all *:pointer-events-none hover:bg-slate-200 hover:text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hidden h-4 dark:block">
+                                        <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z" clip-rule="evenodd" />
+                                    </svg><!-- moon - solid - heroicons  -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 dark:hidden">
+                                        <path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z" />
+                                    </svg><!-- sun - solid - heroicons  -->
+                                </button>
+                            </li>
+                            <!-- mode-switch -->
+                            <li class="relative inline-flex">
+                                <button data-offset="0,8" data-placement="bottom-end" data-rtl-placement="bottom-start" class="dropdown-toggle peer inline-flex h-9 w-9 overflow-hidden rounded-full outline outline-2 outline-offset-2 outline-slate-300 *:pointer-events-none dark:outline-slate-700">
+                                    <img src="../images/avatar/a.jpg" alt="" />
+                                </button>
+                                <div class="dropdown-menu invisible absolute end-0 top-10 w-48 opacity-0 transition-all duration-100 ease-out peer-[.show]:visible peer-[.show_.dropdown-wrap]:scale-100 peer-[.show]:opacity-100">
+                                    <div class="dropdown-wrap ransition-all origin-top-right scale-90 rounded-lg border border-slate-200 bg-white shadow-sm duration-100 ease-out dark:border-slate-800 dark:bg-slate-950">
+                                        <div class="flex items-center p-4">
+                                            <div class="inline-flex h-10 w-10 flex-shrink-0 overflow-hidden rounded-full outline outline-2 outline-offset-2 outline-slate-300 dark:outline-slate-700">
+                                                <img src="../images/avatar/a.jpg" alt="" />
+                                            </div>
+                                            <div class="ms-4">
+                                                <h6 class="-mt-0.5 text-xs font-bold text-slate-700 dark:text-white"> Phillip Burke </h6>
+                                                <span class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-500 dark:bg-blue-950"> Balance $18.89 </span>
+                                            </div>
+                                        </div>
+                                        <ul class="border-t border-slate-200 py-2 dark:border-slate-800">
+                                            <li>
+                                                <a href="../admin/dashboard.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 0 0 2.25-2.25V6a2.25 2.25 0 0 0-2.25-2.25H6A2.25 2.25 0 0 0 3.75 6v2.25A2.25 2.25 0 0 0 6 10.5Zm0 9.75h2.25A2.25 2.25 0 0 0 10.5 18v-2.25a2.25 2.25 0 0 0-2.25-2.25H6a2.25 2.25 0 0 0-2.25 2.25V18A2.25 2.25 0 0 0 6 20.25Zm9.75-9.75H18a2.25 2.25 0 0 0 2.25-2.25V6A2.25 2.25 0 0 0 18 3.75h-2.25A2.25 2.25 0 0 0 13.5 6v2.25a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                                    </svg><!-- squares-plus - outline - heroicons  -->
+                                                    <span>Admin</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="profile.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                                    </svg><!-- user - outline - heroicons  -->
+                                                    <span>Profile</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="packages.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
+                                                    </svg><!-- rocket-launch - outline - heroicons  -->
+                                                    <span>Upgrade</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="../login.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
+                                                    </svg><!-- power - outline - heroicons  -->
+                                                    <span>Logout</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
+                            <!-- user-dropdown -->
+                        </ul>
+                        <!-- header-tools -->
+                    </div>
+                </div>
+                <!-- container -->
+            </div>
+            <!-- header -->
+            <div class="relative px-3 py-10">
+                <div class="container px-3">
+                    <div class="mb-7 flex flex-col items-center">
+                        <h2 class="mb-2 text-xl font-bold text-slate-700 dark:text-white"> Available Templates </h2>
+                        <ul class="inline-flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-300">
+                            <li>
+                                <a href="overview.html" class="text-blue-500 hover:text-blue-700"> Home </a>
+                            </li>
+                            <li class="mt-0.5 inline-flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="h-2 w-2">
+                                    <path fill="currentColor" d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z" />
+                                </svg>
+                            </li>
+                            <li>Templates</li>
+                        </ul>
+                    </div>
+                    <div class="grid gap-6 xs:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                        <a href="template-writer.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-300" d="M13.7087 3.30729C12.6049 2.90591 11.395 2.90591 10.2913 3.30729L3.24266 5.87042C1.48732 6.50872 1.4873 8.99128 3.24266 9.62959L10.2913 12.1927C11.395 12.5941 12.6049 12.5941 13.7087 12.1927L20.7573 9.62959C22.5126 8.99128 22.5126 6.50873 20.7573 5.87042L13.7087 3.30729Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 12.395C2.24283 11.8746 2.81467 11.6028 3.33504 11.7878L11.33 14.6304C11.7634 14.7845 12.2367 14.7845 12.67 14.6304L20.665 11.7878C21.1854 11.6028 21.7572 11.8746 21.9422 12.395C22.1273 12.9154 21.8554 13.4872 21.335 13.6722L13.3401 16.5149C12.4733 16.8231 11.5268 16.8231 10.66 16.5149L2.66502 13.6722C2.14465 13.4872 1.87279 12.9154 2.05781 12.395Z" />
+                                    <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 16.645C2.24283 16.1246 2.81467 15.8528 3.33504 16.0378L11.33 18.8804C11.7634 19.0345 12.2367 19.0345 12.67 18.8804L20.665 16.0378C21.1854 15.8528 21.7572 16.1246 21.9422 16.645C22.1273 17.1654 21.8554 17.7372 21.335 17.9222L13.3401 20.7649C12.4733 21.0731 11.5268 21.0731 10.66 20.7649L2.66502 17.9222C2.14465 17.7372 1.87279 17.1654 2.05781 16.645Z" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Article Generator </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> Article Generator uses advanced algorithms to automatically create articles, saving effort for writers and marketers. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-writer.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-300" d="M12.9227 14.118C13.3783 15.2569 14.4814 16.0038 15.7081 16.0038H18.5867L17.7929 15.21C17.4024 14.8195 17.4024 14.1863 17.7929 13.7958C18.1834 13.4053 18.8166 13.4053 19.2071 13.7958L21.352 15.9407C21.9378 16.5265 21.9378 17.4762 21.352 18.062L19.2071 20.207C18.8166 20.5975 18.1834 20.5975 17.7929 20.207C17.4024 19.8165 17.4024 19.1833 17.7929 18.7928L18.5819 18.0038H15.7081C13.6636 18.0038 11.8251 16.759 11.0657 14.8607L9.0773 9.88961C8.62171 8.75064 7.51858 8.00378 6.29187 8.00378H3C2.44772 8.00378 2 7.55607 2 7.00378C2 6.4515 2.44772 6.00378 3 6.00378H6.29187C8.33639 6.00378 10.1749 7.24854 10.9343 9.14683L12.9227 14.118Z" />
+                                    <path class="fill-blue-600" d="M19.2071 3.79302C18.8166 3.40249 18.1834 3.40249 17.7929 3.79301C17.4024 4.18353 17.4024 4.8167 17.7929 5.20722L18.5819 5.99622H15.7081C13.6636 5.99622 11.8251 7.24097 11.0657 9.13926L9.0773 14.1104C8.62171 15.2494 7.51858 15.9962 6.29187 15.9962H3C2.44772 15.9962 2 16.4439 2 16.9962C2 17.5485 2.44772 17.9962 3 17.9962H6.29187C8.33639 17.9962 10.1749 16.7515 10.9343 14.8532L12.9227 9.88204C13.3783 8.74307 14.4814 7.99622 15.7081 7.99622H18.5867L17.7929 8.79005C17.4024 9.18057 17.4024 9.81374 17.7929 10.2043C18.1834 10.5948 18.8166 10.5948 19.2071 10.2042L21.352 8.05928C21.9378 7.47349 21.9378 6.52376 21.352 5.93797L19.2071 3.79302Z" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Rewrite Article </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> Instructions to paraphrase an article while preserving its meaning, structure, and tone without infringing on plagiarism. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-writer.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-300" d="M20.6811 13.2434C21.3004 12.6241 21.6181 11.7652 21.5509 10.892L21.1469 5.63919C21.0334 4.16385 19.8611 2.99161 18.3858 2.87812L13.133 2.47406C12.2598 2.40689 11.4009 2.72463 10.7816 3.3439L3.27199 10.8535C2.10042 12.0251 2.10042 13.9246 3.27199 15.0962L8.92884 20.753C10.1004 21.9246 11.9999 21.9246 13.1715 20.753L20.6811 13.2434Z" />
+                                    <path class="fill-blue-600" d="M14.5857 7.318C13.9999 7.90379 13.9999 8.85354 14.5857 9.43932C15.1715 10.0251 16.1212 10.0251 16.707 9.43932C17.2928 8.85354 17.2928 7.90379 16.707 7.318C16.1212 6.73222 15.1715 6.73222 14.5857 7.318Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M7.51469 13.682L10.3431 16.5104C10.7336 16.9009 11.3668 16.9009 11.7573 16.5104C12.1479 16.1199 12.1479 15.4867 11.7573 15.0962L8.92891 12.2677C8.53838 11.8772 7.90522 11.8772 7.5147 12.2677C7.12417 12.6583 7.12417 13.2914 7.51469 13.682Z" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Tags Generator </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> A tool that generates relevant and popular tags for online content, such as blog posts, videos, and social media. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-writer.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-300" d="M11 4.99999C11 4.4477 10.5509 3.99424 10.002 4.05548C8.57508 4.21469 7.20175 4.7137 5.99987 5.51676C4.51983 6.50569 3.36628 7.9113 2.68509 9.55584C2.0039 11.2004 1.82567 13.01 2.17294 14.7558C2.5202 16.5016 3.37737 18.1053 4.63604 19.3639C5.89472 20.6226 7.49836 21.4798 9.24419 21.8271C10.99 22.1743 12.7996 21.9961 14.4442 21.3149C16.0887 20.6337 17.4943 19.4802 18.4832 18.0001C19.2863 16.7982 19.7853 15.4249 19.9445 13.9979C20.0057 13.4491 19.5523 13 19 13H15.0079C14.4556 13 14.0234 13.4596 13.8432 13.9817C13.7596 14.2239 13.6449 14.4557 13.501 14.6711C13.1705 15.1657 12.7007 15.5513 12.1511 15.7789C11.6015 16.0066 10.9967 16.0661 10.4132 15.9501C9.82972 15.834 9.29376 15.5476 8.8731 15.1269C8.45244 14.7062 8.16597 14.1703 8.04991 13.5868C7.93385 13.0033 7.99341 12.3985 8.22107 11.8489C8.44873 11.2993 8.83426 10.8295 9.32891 10.499C9.54426 10.3551 9.77608 10.2404 10.0183 10.1568C10.5404 9.97655 11 9.54438 11 8.99209V4.99999Z" />
+                                    <path class="fill-blue-600" d="M21 11C21.5523 11 22.0057 10.5509 21.9445 10.002C21.8509 9.16274 21.6394 8.33912 21.3149 7.55583C20.8626 6.4639 20.1997 5.47175 19.364 4.63602C18.5282 3.8003 17.5361 3.13736 16.4442 2.68507C15.6609 2.36062 14.8372 2.14912 13.9979 2.05548C13.4491 1.99424 13 2.4477 13 2.99998V6.99209C13 7.54438 13.4596 7.97655 13.9817 8.1568C14.0387 8.17648 14.0952 8.19791 14.1511 8.22105C14.516 8.37221 14.8476 8.59377 15.1269 8.87308C15.4062 9.15239 15.6278 9.48398 15.7789 9.84891C15.8021 9.90479 15.8235 9.96128 15.8432 10.0183C16.0234 10.5403 16.4556 11 17.0079 11H21Z" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Ads Content </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> Automatically creates advertising copy any platforms, such as Google, Facebook, and Instagram, to attract customers. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-image.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M19.7866 14C20.9581 14 22 13.1714 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C13.1714 22 14 20.9581 14 19.7866V18C14 15.7909 15.7909 14 18 14H19.7866Z" />
+                                    <circle class="fill-blue-600" cx="11.5" cy="6" r="1.5" />
+                                    <circle class="fill-blue-600" cx="17.5" cy="9.5" r="1.5" />
+                                    <circle class="fill-blue-600" cx="6.5" cy="10" r="1.5" />
+                                    <circle class="fill-blue-600" cx="8" cy="16.5" r="1.5" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Image Generator </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> Generates images using algorithms, machine learning, or other techniques, often used for creative or practical purposes. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-chatbot.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-300" d="M2 6C2 4.34315 3.34315 3 5 3H19C20.6569 3 22 4.34315 22 6V16C22 17.6569 20.6569 19 19 19H8L5.28037 21.2664C3.97771 22.3519 2 21.4256 2 19.7299V6Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M7 9C7 8.44772 7.44772 8 8 8H16C16.5523 8 17 8.44772 17 9C17 9.55228 16.5523 10 16 10H8C7.44772 10 7 9.55228 7 9Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M7 13C7 12.4477 7.44772 12 8 12H12C12.5523 12 13 12.4477 13 13C13 13.5523 12.5523 14 12 14H8C7.44772 14 7 13.5523 7 13Z" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> AI Chat Bot </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> An AI Simulates human conversation through text or voice interfaces, often used for customer service or information retrieval. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-writer.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M4 6C4 5.44772 4.44772 5 5 5H20C20.5523 5 21 5.44772 21 6C21 6.55228 20.5523 7 20 7H5C4.44772 7 4 6.55228 4 6Z" />
+                                    <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M4 12C4 11.4477 4.44772 11 5 11H15C15.5523 11 16 11.4477 16 12C16 12.5523 15.5523 13 15 13H5C4.44772 13 4 12.5523 4 12Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M4 18C4 17.4477 4.44772 17 5 17H11C11.5523 17 12 17.4477 12 18C12 18.5523 11.5523 19 11 19H5C4.44772 19 4 18.5523 4 18Z" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Write Title </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> Creates compelling written content that accurately and creatively describes AI products, highlighting their unique features and benefits. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-writer.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M3 6C3 5.44772 3.44772 5 4 5H20C20.5523 5 21 5.44772 21 6C21 6.55228 20.5523 7 20 7H4C3.44772 7 3 6.55228 3 6Z" />
+                                    <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M3 10C3 9.44772 3.44772 9 4 9H14C14.5523 9 15 9.44772 15 10C15 10.5523 14.5523 11 14 11H4C3.44772 11 3 10.5523 3 10Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M3 14C3 13.4477 3.44772 13 4 13H20C20.5523 13 21 13.4477 21 14C21 14.5523 20.5523 15 20 15H4C3.44772 15 3 14.5523 3 14Z" />
+                                    <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M3 18C3 17.4477 3.44772 17 4 17H14C14.5523 17 15 17.4477 15 18C15 18.5523 14.5523 19 14 19H4C3.44772 19 3 18.5523 3 18Z" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Write Description </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> Description Writer is a tool that generates concise, informative summaries on various topics, providing key details efficiently and effectively. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-writer.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M13 5H16V7H13V5ZM18 7V5H19C19.5523 5 20 5.44771 20 6V7H18ZM13 9H17H20V15H17H13V9ZM16 17H13V19H16V17ZM18 19V17H20V18C20 18.5523 19.5523 19 19 19H18ZM11 5H8V7H11V5ZM11 9H7H4V15H7H11V9ZM11 17H8V19H11V17ZM12 21H19C20.6569 21 22 19.6569 22 18V16V8V6C22 4.34315 20.6569 3 19 3H5C3.34315 3 2 4.34315 2 6V8V16V18C2 19.6569 3.34315 21 5 21H12ZM6 5H5C4.44772 5 4 5.44772 4 6V7H6V5ZM4 18V17H6V19H5C4.44772 19 4 18.5523 4 18Z" />
+                                    <rect class="fill-blue-600" x="4" y="9" width="7" height="6" />
+                                    <rect class="fill-blue-600" x="13" y="9" width="7" height="6" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Video Script </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> Video Script Writer is a tool that creates engaging and effective scripts for videos, ensuring clear and compelling storytelling. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-writer.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M11.9999 22C14.0502 22 15.8123 19.5318 16.5839 16H21.1678C21.4453 15.365 21.6587 14.6956 21.7999 14H16.8999C16.9655 13.3538 16.9999 12.6849 16.9999 12C16.9999 11.3151 16.9655 10.6462 16.8999 10H21.7999C21.6587 9.30439 21.4453 8.635 21.1678 8H16.5839C15.8123 4.46819 14.0502 2 11.9999 2C9.9496 2 8.18752 4.46819 7.41596 8H2.832C2.55456 8.635 2.34115 9.30439 2.19995 10H7.09993C7.03435 10.6462 6.99992 11.3151 6.99992 12C6.99992 12.6849 7.03435 13.3538 7.09993 14H2.19995C2.34115 14.6956 2.55456 15.365 2.832 16H7.41596C8.18752 19.5318 9.9496 22 11.9999 22ZM14.5297 16C14.3211 16.8293 14.0531 17.5635 13.7466 18.1766C12.9481 19.7737 12.215 20 11.9999 20C11.7849 20 11.0518 19.7737 10.2532 18.1766C9.94668 17.5635 9.67872 16.8293 9.47011 16H14.5297ZM13.7466 5.82336C14.0531 6.43647 14.3211 7.17074 14.5297 8H9.47011C9.67872 7.17074 9.94668 6.43647 10.2532 5.82336C11.0518 4.22632 11.7849 4 11.9999 4C12.215 4 12.9481 4.22632 13.7466 5.82336ZM14.9999 12C14.9999 11.3051 14.9607 10.6359 14.8885 10H9.11137C9.0391 10.6359 8.99992 11.3051 8.99992 12C8.99992 12.6949 9.0391 13.3641 9.11137 14H14.8885C14.9607 13.3641 14.9999 12.6949 14.9999 12Z" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Grammar Checker </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> AI Grammar Checker: Instantly corrects grammar, spelling, and punctuation errors for more accurate and polished written content. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-writer.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <rect class="fill-blue-300" x="3" y="3" width="18" height="19" rx="3" />
+                                    <path class="fill-blue-600" d="M14 3C14 1.89543 13.1046 1 12 1C10.8954 1 10 1.89543 10 3H8V5C8 5.55228 8.44772 6 9 6H15C15.5523 6 16 5.55228 16 5V3H14Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M7 11C7 10.4477 7.44772 10 8 10L16 10C16.5523 10 17 10.4477 17 11C17 11.5523 16.5523 12 16 12L8 12C7.44772 12 7 11.5523 7 11Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M7 15C7 14.4477 7.44772 14 8 14L12 14C12.5523 14 13 14.4477 13 15C13 15.5523 12.5523 16 12 16L8 16C7.44772 16 7 15.5523 7 15Z" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Name Generator </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> Name Generator is a tool that generates creative and unique names for individuals, businesses, products, or any other naming needs. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-code.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M16.2929 16.7071C15.9024 16.3166 15.9024 15.6834 16.2929 15.2929L19.5858 12L16.2929 8.7071C15.9024 8.31657 15.9024 7.68341 16.2929 7.29289C16.6834 6.90236 17.3166 6.90236 17.7071 7.29289L21.7071 11.2929C22.0976 11.6834 22.0976 12.3166 21.7071 12.7071L17.7071 16.7071C17.3166 17.0976 16.6834 17.0976 16.2929 16.7071Z" />
+                                    <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M7.70711 16.7071C8.09763 16.3166 8.09763 15.6834 7.70711 15.2929L4.41421 12L7.70711 8.7071C8.09763 8.31657 8.09763 7.68341 7.70711 7.29289C7.31658 6.90236 6.68342 6.90236 6.29289 7.29289L2.29289 11.2929C1.90237 11.6834 1.90237 12.3166 2.29289 12.7071L6.29289 16.7071C6.68342 17.0976 7.31658 17.0976 7.70711 16.7071Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M14.2747 4.03849C13.7437 3.88677 13.1902 4.19426 13.0385 4.72529L9.03846 18.7253C8.88674 19.2563 9.19423 19.8098 9.72527 19.9615C10.2563 20.1133 10.8098 19.8058 10.9615 19.2747L14.9615 5.27473C15.1132 4.7437 14.8057 4.19021 14.2747 4.03849Z" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Code Generator </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> Code Generator automates the process of generating code snippets or complete programs, streamlining development tasks and improving productivity. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-image-s2.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M19.7866 14C20.9581 14 22 13.1714 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C13.1714 22 14 20.9581 14 19.7866V18C14 15.7909 15.7909 14 18 14H19.7866Z" />
+                                    <circle class="fill-blue-600" cx="11.5" cy="6" r="1.5" />
+                                    <circle class="fill-blue-600" cx="17.5" cy="9.5" r="1.5" />
+                                    <circle class="fill-blue-600" cx="6.5" cy="10" r="1.5" />
+                                    <circle class="fill-blue-600" cx="8" cy="16.5" r="1.5" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> Image Generator S2 </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> A new design for using algorithms, machine learning, or other techniques, often used for creative or practical purposes. </p>
+                        </a><!-- grid-item -->
+                        <a href="template-chatbot-s2.html" class="rounded-lg border border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 dark:border-slate-800 dark:bg-slate-950">
+                            <div class="mb-2 h-10">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                    <path class="fill-blue-300" d="M2 6C2 4.34315 3.34315 3 5 3H19C20.6569 3 22 4.34315 22 6V16C22 17.6569 20.6569 19 19 19H8L5.28037 21.2664C3.97771 22.3519 2 21.4256 2 19.7299V6Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M7 9C7 8.44772 7.44772 8 8 8H16C16.5523 8 17 8.44772 17 9C17 9.55228 16.5523 10 16 10H8C7.44772 10 7 9.55228 7 9Z" />
+                                    <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M7 13C7 12.4477 7.44772 12 8 12H12C12.5523 12 13 12.4477 13 13C13 13.5523 12.5523 14 12 14H8C7.44772 14 7 13.5523 7 13Z" />
+                                </svg>
+                            </div>
+                            <h6 class="mb-2 text-lg font-bold text-slate-700 dark:text-white"> AI Chat Bot S2 </h6>
+                            <p class="text-sm text-slate-500 dark:text-slate-400"> A multimodal chatbot UI offers versatile interaction through text, and images providing intuitive communication. </p>
+                        </a><!-- grid-item -->
+                    </div><!-- grid -->
+                </div><!-- container -->
+            </div>
+            <div class="relative isolate mt-auto border-t border-slate-200 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-950">
+                <div class="container px-3">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-medium text-slate-600 dark:text-white"> &copy; 2024. Crafted By&nbsp; <a class="text-slate-700 transition-all hover:text-blue-600 dark:text-white hover:dark:text-blue-600" href="https://www.tongzhewang.com" target="_blank"> 童哲网 </a>
+                        </p>
+                        <ul class="-mx-3 flex flex-wrap">
+                            <li>
+                                <a href="#" class="px-3 text-sm font-medium text-slate-600 transition-all hover:text-blue-600 dark:text-slate-100 hover:dark:text-blue-600"> Terms </a>
+                            </li>
+                            <li>
+                                <a target="_blank" href="../about.html" class="px-3 text-sm font-medium text-slate-600 transition-all hover:text-blue-600 dark:text-slate-100 hover:dark:text-blue-600"> About </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- footer -->
+        </div><!-- page-content -->
+    </div><!-- root -->
+    <!-- JavaScript -->
+    <script src="../assets/js/bundle-app.js"></script>
+    <script src="../assets/js/scripts.js"></script>
+</body>
+
+</html>
