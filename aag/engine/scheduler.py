@@ -106,7 +106,7 @@ class Scheduler:
         self.current_dataset  = self.dataset_manager.get_dataset_info(name, dtype)
         return self.current_dataset
 
-    async def execute(self, query: str, decompose: bool = False) -> str:
+    async def execute(self, query: str, decompose: bool = True) -> str:
         if not self.computing_engine._initialized:
             await self.computing_engine.initialize()
 
@@ -134,14 +134,19 @@ class Scheduler:
         # step1. 根据 query 解析 生成 dag
         self._build_dag_from_query(query, decompose)
 
+        
         # step2. 遍历每个 dag 的节点，确定算法
         self._find_algorithm()
+        self.dag.print_dag_info()
+        # step3. 根据每个节点问题内容和图算法得到数据依赖
+        self.dag.refresh_data_dependency(self.reasoner)
+        self.dag.print_data_dependency()
+        print("✅ DAG 构建与算法选择完成，准备执行计算流程")
 
-        # step3. 根据每个问题确定的算法，调度算法执行
+        # step4. 根据每个问题确定的算法，调度算法执行
         return await self._run_algorithm_pipeline()
 
-        
-      # step4. 整理计算结果，输出报告
+      # step5. 整理计算结果，输出报告
 
 
         # dag = self.reasoner.parse_query(query)
