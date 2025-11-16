@@ -10,6 +10,7 @@
     <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
     <title>Chat Bot - Scribbler.AI - AI Content Generator Dashboard and User App HTML Template </title>
     <link rel="stylesheet" href="/static/assets/css/app.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
 </head>
 
 <body class="min-w-[320px] bg-slate-100 dark:bg-slate-900">
@@ -93,8 +94,8 @@
                             </div>
                             <a href="overview.html" class="flex-shrink-0">
                                 <div class="flex items-center">
-                                    <img class="h-6 dark:hidden" src="/static/images/IDC-NEU.jpg" alt="logo" />
-                                    <img class="hidden h-6 dark:block" src="/static/images/IDC-NEU.jpg" alt="logo" />
+                                    <img class="h-16 dark:hidden" src="/static/images/IDC-NEU.jpg" alt="logo" />
+                                    <img class="hidden h-16 dark:block" src="/static/images/IDC-NEU.jpg" alt="logo" />
                                 </div>
                             </a><!-- logo -->
                         </div>
@@ -736,18 +737,6 @@
                                         </li>
                                     </ul>
                                 </div>
-                                <div class="p-4 sm:p-7">
-                                    <a href="packages.html" class="flex justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-blue-200 hover:dark:border-blue-950 transition-all">
-                                        <div class="">
-                                            <span class="text-[11px] font-medium text-blue-500 bg-gradient-to-r from-blue-100 dark:from-blue-950 to-pink-100 dark:to-pink-950 px-2 py-1 rounded"> Upgrade </span>
-                                            <h3 class="mt-2 font-bold text-sm text-slate-600 dark:text-slate-100">Scribbler Pro</h3>
-                                        </div>
-                                        <div class="text-end">
-                                            <del class="font-medium text-xs text-slate-400 dark:text-slate-300">$24.88</del>
-                                            <div class="font-bold text-lg bg-gradient-to-r from-blue-600 to-pink-500 text-transparent bg-clip-text "> $19.88 </div>
-                                        </div>
-                                    </a>
-                                </div>
                             </div>
                         </div>
                         <div data-target="#chatAside" class="class-toggle fixed inset-0 bg-slate-950 bg-opacity-50 z-[1019] xl:hidden hidden peer-[.active]:block"></div>
@@ -760,65 +749,6 @@
                             <div class="flex flex-col justify-stretch h-full">
                                 <div data-simplebar class="h-full overflow-auto flex-grow rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                                     <div id="chat-container" class="flex flex-col justify-end h-full p-4 sm:p-6 -my-2.5">
-                                        <div class="flex flex-col py-2.5">
-                                            <div class="flex items-center gap-x-2">
-                                                <div class="inline-flex flex-shrink-0 h-8 w-8 rounded-full overflow-hidden border-2 border-white dark:border-slate-700">
-                                                    <img src="../images/avatar/a.jpg" alt="" />
-                                                </div>
-                                                <h6 class="font-bold text-sm capitalize text-slate-600 dark:text-slate-100">you</h6>
-                                            </div>
-                                            <div class="ps-10 w-full">
-                                                <div class="max-w-full text-slate-500 dark:text-slate-300 prose-strong:dark:text-white text-sm prose prose-code:![text-shadow:none] *:max-w-xl prose-pre:!max-w-full prose-pre:!w-full prose-pre:p-0">
-                                                    <p> write me short joke for web development tutorial starting </p>
-                                                </div>
-                                            </div>
-                                        </div><!-- reply-item human -->
-                                        <div class="flex flex-col py-2.5">
-                                            <div class="flex items-center gap-x-2">
-                                                <div class="inline-flex flex-shrink-0 h-8 w-8 rounded-full overflow-hidden border-2 border-white dark:border-slate-700">
-                                                    <img src="../images/avatar/bots/1.jpg" alt="" />
-                                                </div>
-                                                <h6 class="font-bold text-sm capitalize text-slate-600 dark:text-slate-100">Scribbler.Ai</h6>
-                                            </div>
-                                            <div class="ps-10 w-full">
-                                                <div class="max-w-full text-slate-500 dark:text-slate-300 prose-strong:dark:text-white text-sm prose prose-code:![text-shadow:none] *:max-w-xl prose-pre:!max-w-full prose-pre:!w-full prose-pre:p-0">
-                                                    <p>Sure, here's a short joke for a web development tutorial starting:</p>
-                                                    <p>Why was the web developer always cold?<br />Because he left his Windows open!</p>
-                                                </div>
-                                                <ul class="pt-4 flex gap-x-2">
-                                                    <li class="tooltip-toggle" data-placement="top" data-title="Regenerate">
-                                                        <button class="inline-flex justify-center items-center transition-all p-1 rounded-md bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-100 border border-slate-200 dark:border-slate-800 hover:border-blue-500 hover:bg-blue-500 hover:dark:border-blue-500 hover:dark:bg-blue-500 hover:text-white hover:dark:text-white">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
-                                                            </svg><!-- arrow-path-rounded-square - outline - heroicons  -->
-                                                        </button>
-                                                    </li>
-                                                    <li class="tooltip-toggle" data-placement="top" data-title="Bad Response">
-                                                        <button class="inline-flex justify-center items-center transition-all p-1 rounded-md bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-100 border border-slate-200 dark:border-slate-800 hover:border-blue-500 hover:bg-blue-500 hover:dark:border-blue-500 hover:dark:bg-blue-500 hover:text-white hover:dark:text-white">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.498 15.25H4.372c-1.026 0-1.945-.694-2.054-1.715a12.137 12.137 0 0 1-.068-1.285c0-2.848.992-5.464 2.649-7.521C5.287 4.247 5.886 4 6.504 4h4.016a4.5 4.5 0 0 1 1.423.23l3.114 1.04a4.5 4.5 0 0 0 1.423.23h1.294M7.498 15.25c.618 0 .991.724.725 1.282A7.471 7.471 0 0 0 7.5 19.75 2.25 2.25 0 0 0 9.75 22a.75.75 0 0 0 .75-.75v-.633c0-.573.11-1.14.322-1.672.304-.76.93-1.33 1.653-1.715a9.04 9.04 0 0 0 2.86-2.4c.498-.634 1.226-1.08 2.032-1.08h.384m-10.253 1.5H9.7m8.075-9.75c.01.05.027.1.05.148.593 1.2.925 2.55.925 3.977 0 1.487-.36 2.89-.999 4.125m.023-8.25c-.076-.365.183-.75.575-.75h.908c.889 0 1.713.518 1.972 1.368.339 1.11.521 2.287.521 3.507 0 1.553-.295 3.036-.831 4.398-.306.774-1.086 1.227-1.918 1.227h-1.053c-.472 0-.745-.556-.5-.96a8.95 8.95 0 0 0 .303-.54" />
-                                                            </svg><!-- hand-thumb-down - outline - heroicons  -->
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <button class="inline-flex justify-center items-center font-medium transition-all text-xs px-2 py-1 gap-2 rounded-md bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-100 border border-slate-200 dark:border-slate-800 hover:border-green-500 hover:bg-green-500 hover:dark:border-green-500 hover:dark:bg-green-500 hover:text-white hover:dark:text-white">Share</button>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div><!-- reply-item bot -->
-                                        <div class="flex flex-col py-2.5">
-                                            <div class="flex items-center gap-x-2">
-                                                <div class="inline-flex flex-shrink-0 h-8 w-8 rounded-full overflow-hidden border-2 border-white dark:border-slate-700">
-                                                    <img src="../images/avatar/a.jpg" alt="" />
-                                                </div>
-                                                <h6 class="font-bold text-sm capitalize text-slate-600 dark:text-slate-100">you</h6>
-                                            </div>
-                                            <div class="ps-10 w-full">
-                                                <div class="max-w-full text-slate-500 dark:text-slate-300 prose-strong:dark:text-white text-sm prose prose-code:![text-shadow:none] *:max-w-xl prose-pre:!max-w-full prose-pre:!w-full prose-pre:p-0">
-                                                    <p>Display a Random Quote on Your Webpage with JavaScript</p>
-                                                </div>
-                                            </div>
-                                        </div><!-- reply-item human -->
                                         <div class="flex flex-col py-2.5">
                                             <div class="flex items-center gap-x-2">
                                                 <div class="inline-flex flex-shrink-0 h-8 w-8 rounded-full overflow-hidden border-2 border-white dark:border-slate-700">
@@ -977,149 +907,49 @@ newQuoteButton.addEventListener("click", displayRandomQuote);
                                                 </ul>
                                             </div>
                                         </div><!-- reply-item bot -->
-                                        <div class="flex flex-col py-2.5">
-                                            <div class="flex items-center gap-x-2">
-                                                <div class="inline-flex flex-shrink-0 h-8 w-8 rounded-full overflow-hidden border-2 border-white dark:border-slate-700">
-                                                    <img src="../images/avatar/a.jpg" alt="" />
-                                                </div>
-                                                <h6 class="font-bold text-sm capitalize text-slate-600 dark:text-slate-100">you</h6>
-                                            </div>
-                                            <div class="ps-10 w-full">
-                                                <div class="max-w-full text-slate-500 dark:text-slate-300 prose-strong:dark:text-white text-sm prose prose-code:![text-shadow:none] *:max-w-xl prose-pre:!max-w-full prose-pre:!w-full prose-pre:p-0">
-                                                    <p><strong>/imagine</strong> Surprise me with random cute awesome photo</p>
-                                                </div>
-                                            </div>
-                                        </div><!-- reply-item human -->
-                                        <div class="flex flex-col py-2.5">
-                                            <div class="flex items-center gap-x-2">
-                                                <div class="inline-flex flex-shrink-0 h-8 w-8 rounded-full overflow-hidden border-2 border-white dark:border-slate-700">
-                                                    <img src="../images/avatar/bots/1.jpg" alt="" />
-                                                </div>
-                                                <h6 class="font-bold text-sm capitalize text-slate-600 dark:text-slate-100">Scribbler.Ai</h6>
-                                            </div>
-                                            <div class="ps-10 w-full">
-                                                <div class="max-w-sm mt-2 border border-l-slate-200 dark:border-slate-700 p-3 rounded-lg">
-                                                    <div class="js-lightbox-gallery grid grid-flow-dense grid-cols-2 gap-2">
-                                                        <div class="relative group">
-                                                            <img class="rounded-lg" src="../images/generated/a-modern-and-innovative-commercial-booth-in-the-middle-of-the-desert.jpg" alt="">
-                                                            <div class="absolute bottom-4 end-4 translate-x-2 translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0 flex flex-col gap-px rounded-md bg-slate-200 dark:bg-slate-700 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                                                <a href="../images/generated/a-modern-and-innovative-commercial-booth-in-the-middle-of-the-desert.jpg" data-pswp-width="1000" data-pswp-height="1000" class="js-lightbox-toggle h-8 w-8 flex items-center justify-center first:rounded-t-md last:rounded-b-md bg-white dark:bg-slate-900 hover:dark:bg-green-600 hover:bg-green-500 text-slate-600 dark:text-white hover:text-white transition-all">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                                    </svg> <!-- eye - outline - heroicons  -->
-                                                                    </button>
-                                                                    <a class="h-8 w-8 flex items-center justify-center first:rounded-t-md last:rounded-b-md bg-white dark:bg-slate-900 hover:dark:bg-green-600 hover:bg-green-500 text-slate-600 dark:text-white hover:text-white transition-all" href="../images/generated/a-modern-and-innovative-commercial-booth-in-the-middle-of-the-desert.jpg" download>
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                                                        </svg> <!-- arrow-down-tray - outline - heroicons  -->
-                                                                    </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="relative group">
-                                                            <img class="rounded-lg" src="../images/generated/a-teeny-tiny-cute-redheaded-gremlin-girl-reaching-her-hands-into-the-air-saying-because-I-love-you.jpg" alt="">
-                                                            <div class="absolute bottom-4 end-4 translate-x-2 translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0 flex flex-col gap-px rounded-md bg-slate-200 dark:bg-slate-700 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                                                <a href="../images/generated/a-teeny-tiny-cute-redheaded-gremlin-girl-reaching-her-hands-into-the-air-saying-because-I-love-you.jpg" data-pswp-width="1000" data-pswp-height="1000" class="js-lightbox-toggle h-8 w-8 flex items-center justify-center first:rounded-t-md last:rounded-b-md bg-white dark:bg-slate-900 hover:dark:bg-green-600 hover:bg-green-500 text-slate-600 dark:text-white hover:text-white transition-all">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                                    </svg> <!-- eye - outline - heroicons  -->
-                                                                    </button>
-                                                                    <a class="h-8 w-8 flex items-center justify-center first:rounded-t-md last:rounded-b-md bg-white dark:bg-slate-900 hover:dark:bg-green-600 hover:bg-green-500 text-slate-600 dark:text-white hover:text-white transition-all" href="../images/generated/a-teeny-tiny-cute-redheaded-gremlin-girl-reaching-her-hands-into-the-air-saying-because-I-love-you.jpg" download>
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                                                        </svg> <!-- arrow-down-tray - outline - heroicons  -->
-                                                                    </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="relative group">
-                                                            <img class="rounded-lg" src="../images/generated/cute-cat-as-calculator-macaroon-as-the-buttons-of-the-calculator-ribbon-happy-colors2.jpg" alt="">
-                                                            <div class="absolute bottom-4 end-4 translate-x-2 translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0 flex flex-col gap-px rounded-md bg-slate-200 dark:bg-slate-700 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                                                <a href="../images/generated/cute-cat-as-calculator-macaroon-as-the-buttons-of-the-calculator-ribbon-happy-colors2.jpg" data-pswp-width="1000" data-pswp-height="1000" class="js-lightbox-toggle h-8 w-8 flex items-center justify-center first:rounded-t-md last:rounded-b-md bg-white dark:bg-slate-900 hover:dark:bg-green-600 hover:bg-green-500 text-slate-600 dark:text-white hover:text-white transition-all">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                                    </svg> <!-- eye - outline - heroicons  -->
-                                                                    </button>
-                                                                    <a class="h-8 w-8 flex items-center justify-center first:rounded-t-md last:rounded-b-md bg-white dark:bg-slate-900 hover:dark:bg-green-600 hover:bg-green-500 text-slate-600 dark:text-white hover:text-white transition-all" href="../images/generated/cute-cat-as-calculator-macaroon-as-the-buttons-of-the-calculator-ribbon-happy-colors2.jpg" download>
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                                                        </svg> <!-- arrow-down-tray - outline - heroicons  -->
-                                                                    </a>
-                                                            </div>
-                                                        </div>
-                                                        <div class="relative group">
-                                                            <img class="rounded-lg" src="../images/generated/cute-cat-as-calculator-macaroon-as-the-buttons-of-the-calculator-ribbon-happy-colors.jpg" alt="">
-                                                            <div class="absolute bottom-4 end-4 translate-x-2 translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0 flex flex-col gap-px rounded-md bg-slate-200 dark:bg-slate-700 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                                                <a href="../images/generated/cute-cat-as-calculator-macaroon-as-the-buttons-of-the-calculator-ribbon-happy-colors.jpg" data-pswp-width="1000" data-pswp-height="1000" class="js-lightbox-toggle h-8 w-8 flex items-center justify-center first:rounded-t-md last:rounded-b-md bg-white dark:bg-slate-900 hover:dark:bg-green-600 hover:bg-green-500 text-slate-600 dark:text-white hover:text-white transition-all">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                                    </svg> <!-- eye - outline - heroicons  -->
-                                                                    </button>
-                                                                    <a class="h-8 w-8 flex items-center justify-center first:rounded-t-md last:rounded-b-md bg-white dark:bg-slate-900 hover:dark:bg-green-600 hover:bg-green-500 text-slate-600 dark:text-white hover:text-white transition-all" href="../images/generated/cute-cat-as-calculator-macaroon-as-the-buttons-of-the-calculator-ribbon-happy-colors.jpg" download>
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                                                        </svg> <!-- arrow-down-tray - outline - heroicons  -->
-                                                                    </a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <ul class="pt-3 flex gap-x-2">
-                                                        <li class="tooltip-toggle" data-placement="top" data-title="Regenerate">
-                                                            <button class="inline-flex justify-center items-center transition-all p-1 rounded-md bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-100 border border-slate-200 dark:border-slate-800 hover:border-blue-500 hover:bg-blue-500 hover:dark:border-blue-500 hover:dark:bg-blue-500 hover:text-white hover:dark:text-white">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
-                                                                </svg><!-- arrow-path-rounded-square - outline - heroicons  -->
-                                                            </button>
-                                                        </li>
-                                                        <li class="tooltip-toggle" data-placement="top" data-title="Bad Response">
-                                                            <button class="inline-flex justify-center items-center transition-all p-1 rounded-md bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-100 border border-slate-200 dark:border-slate-800 hover:border-blue-500 hover:bg-blue-500 hover:dark:border-blue-500 hover:dark:bg-blue-500 hover:text-white hover:dark:text-white">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.498 15.25H4.372c-1.026 0-1.945-.694-2.054-1.715a12.137 12.137 0 0 1-.068-1.285c0-2.848.992-5.464 2.649-7.521C5.287 4.247 5.886 4 6.504 4h4.016a4.5 4.5 0 0 1 1.423.23l3.114 1.04a4.5 4.5 0 0 0 1.423.23h1.294M7.498 15.25c.618 0 .991.724.725 1.282A7.471 7.471 0 0 0 7.5 19.75 2.25 2.25 0 0 0 9.75 22a.75.75 0 0 0 .75-.75v-.633c0-.573.11-1.14.322-1.672.304-.76.93-1.33 1.653-1.715a9.04 9.04 0 0 0 2.86-2.4c.498-.634 1.226-1.08 2.032-1.08h.384m-10.253 1.5H9.7m8.075-9.75c.01.05.027.1.05.148.593 1.2.925 2.55.925 3.977 0 1.487-.36 2.89-.999 4.125m.023-8.25c-.076-.365.183-.75.575-.75h.908c.889 0 1.713.518 1.972 1.368.339 1.11.521 2.287.521 3.507 0 1.553-.295 3.036-.831 4.398-.306.774-1.086 1.227-1.918 1.227h-1.053c-.472 0-.745-.556-.5-.96a8.95 8.95 0 0 0 .303-.54" />
-                                                                </svg><!-- hand-thumb-down - outline - heroicons  -->
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <button class="inline-flex justify-center items-center font-medium transition-all text-xs px-2 py-1 gap-2 rounded-md bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-100 border border-slate-200 dark:border-slate-800 hover:border-blue-500 hover:bg-blue-500 hover:dark:border-blue-500 hover:dark:bg-blue-500 hover:text-white hover:dark:text-white">Edit</button>
-                                                        </li>
-                                                        <li class="ms-auto">
-                                                            <button class="inline-flex justify-center items-center font-medium transition-all text-xs px-2 py-1 gap-2 rounded-md bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-100 border border-slate-200 dark:border-slate-800 hover:border-green-500 hover:bg-green-500 hover:dark:border-green-500 hover:dark:bg-green-500 hover:text-white hover:dark:text-white">Share</button>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div><!-- reply-item bot -->
                                     </div>
                                 </div>
                                 <div class="pt-3">
-                                    <ul class="flex gap-x-3">
-                                        <li>
-                                            <div class="flex">
-                                                <input class="appearance-none h-0 w-0 opacity-0 peer" type="radio" id="gpt-4" name="language-model" value="GPT 4" checked />
-                                                <label class="bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1 cursor-pointer peer-checked:cursor-default peer-checked:text-blue-600 peer-checked:border-blue-300 peer-checked:dark:border-blue-900 transition-all" for="gpt-4">GPT 4</label>
+                                    <div class="flex gap-x-3 mb-3">
+                                        <!-- 模型选择下拉框 -->
+                                        <div class="relative">
+                                            <button id="model-select-btn" class="bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1 flex items-center justify-between w-32">
+                                                <span id="model-display-text">Model</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 ml-1">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            </button>
+                                            <div id="model-dropdown" class="hidden absolute z-20 mt-1 w-48 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                                <!-- 模型选项将通过JS动态填充 -->
                                             </div>
-                                        </li>
-                                        <li>
-                                            <div class="flex">
-                                                <input class="appearance-none h-0 w-0 opacity-0 peer" type="radio" id="Gemini" name="language-model" value="Gemini" />
-                                                <label class="bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1 cursor-pointer peer-checked:cursor-default peer-checked:text-blue-600 peer-checked:border-blue-300 peer-checked:dark:border-blue-900 transition-all" for="Gemini">Gemini</label>
+                                        </div>
+                                        
+                                        <!-- 数据集选择下拉框 -->
+                                        <div class="relative">
+                                            <button id="dataset-select-btn" class="bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1 flex items-center justify-between w-32">
+                                                <span id="dataset-display-text">Dataset</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 ml-1">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                </svg>
+                                            </button>
+                                            <div id="dataset-dropdown" class="hidden absolute z-20 mt-1 w-48 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                                <!-- 数据集选项将通过JS动态填充 -->
                                             </div>
-                                        </li>
-                                        <li>
-                                            <div class="flex">
-                                                <input class="appearance-none h-0 w-0 opacity-0 peer" type="radio" id="Llama-3" name="language-model" value="Llama 3" />
-                                                <label class="bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1 cursor-pointer peer-checked:cursor-default peer-checked:text-blue-600 peer-checked:border-blue-300 peer-checked:dark:border-blue-900 transition-all" for="Llama-3">Llama 3</label>
-                                            </div>
-                                        </li>
-                                    </ul>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="flex items-start gap-4 mt-3">
-                                        <div id="chat-input" contentEditable class="py-2.5 px-4 z-10 w-full rounded-md text-sm/[1.125rem] bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-200 placeholder:text-slate-400 placeholder:dark:text-slate-500 border border-slate-200 dark:border-slate-800 disabled:bg-slate-100 disabled:text-slate-400 focus:border-blue-200 focus:shadow-none focus:outline-none"></div>
+                                        <div class="relative w-full">
+                                            <div id="chat-input" contentEditable class="py-2.5 px-4 z-10 w-full rounded-md text-sm/[1.125rem] bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-200 placeholder:text-slate-400 placeholder:dark:text-slate-500 border border-slate-200 dark:border-slate-800 disabled:bg-slate-100 disabled:text-slate-400 focus:border-blue-200 focus:shadow-none focus:outline-none"></div>
+                                            <div class="absolute bottom-2 left-3 flex items-center gap-x-2 z-20">
+                                                <input type="checkbox" id="dag-mode-toggle" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+                                                <label for="dag-mode-toggle" class="text-xm text-slate-500 dark:text-slate-400">Expert Mode</label>
+                                            </div>
+                                        </div>
                                         <button id="send-btn" class="inline-flex justify-center items-center transition-all p-3 rounded-md bg-blue-600 text-white hover:bg-blue-800">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
                                             </svg>
-                                            <!-- paper-airplane - outline - heroicons  -->
                                         </button>
                                     </div>
                                 </div>
@@ -1132,7 +962,6 @@ newQuoteButton.addEventListener("click", displayRandomQuote);
             <div class="relative isolate mt-auto border-t border-slate-200 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-950">
                 <div class="container px-3">
                     <div class="flex items-center justify-between">
-                        <p class="text-xs font-medium text-slate-600 dark:text-white"> &copy; 2024. Crafted By&nbsp; <a class="text-slate-700 transition-all hover:text-blue-600 dark:text-white hover:dark:text-blue-600" href="https://www.tongzhewang.com" target="_blank"> 童哲网 </a>
                         </p>
                         <ul class="-mx-3 flex flex-wrap">
                             <li>
