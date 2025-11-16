@@ -3,6 +3,7 @@ from typing import Dict, Optional
 from aag.config.data_upload_config import *
 from aag.expert_search_engine.database.datatype import VertexData, EdgeData
 from aag.expert_search_engine.database.nebulagraph import  NebulaGraphClient
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +86,106 @@ class GraphDataLoader:
         except Exception as e:
             raise RuntimeError(f"[ERROR] Failed to load dataset schemas from {self.schema_path}: {e}")
 
+
+
+    def df_to_vertexdata(self, df: pd.DataFrame, id_field: str) -> List[Dict[str, Any]]:
+        vertices = []
+        for _, row in df.iterrows():
+            vid = str(row[id_field])                      
+            props = row.drop(id_field).to_dict()          
+
+            vertices.append(VertexData(vid=vid, properties=props))
+
+        return vertices
+
+
+    def df_to_edgedata(self, df: pd.DataFrame, src_field: str, dst_field: str, rank_field: Optional[str] = None) -> List[Dict[str, Any]]:
+        edges = []
+        for _, row in df.iterrows():
+            src = str(row[src_field])
+            dst = str(row[dst_field])
+
+            rank = int(row[rank_field]) if rank_field and rank_field in df.columns else None
+
+            props = row.drop([src_field, dst_field] + ([rank_field] if rank_field else [])).to_dict()
+
+            edges.append(EdgeData(src=src, dst=dst, rank=rank, properties=props))
+        return edges
+
+
+    def merge_add_missing_cols(self, dfs, keys):
+        merged = dfs[0].copy()  
+
+        for df in dfs[1:]:
+            new_cols = [c for c in df.columns if c not in keys and c not in merged.columns]
+
+            df_reduced = df[keys + new_cols]
+
+            merged = merged.merge(df_reduced, on=keys, how="outer")
+
+        return merged
+    
+    
+    def load_data_from_raw(self, data_config: List[VertexSchemaConfig]):
+
+        all_data = []
+        all_id_field = set()
+
+        for config in data_config:
+            if isinstance(config, VertexSchemaConfig):
+                all_id_field.add(config.id_field)
+
+                all_files = config.attribute_fields + [config.id_field]
+                if config.label_field:
+                    all_files.append(config.label_field)
+
+            elif isinstance(config, EdgeSchemaConfig):
+                all_files = [config.source_field, config.target_field] + config.attribute_fields
+                all_id_field.add(config.source_field)
+                all_id_field.add(config.target_field)
+
+                if config.label_field:
+                    all_files.append(config.label_field)
+
+                if config.weight_field:
+                    all_files.append(config.weight_field)
+
+            print(f"{all_files=}")
+
+            df = pd.read_csv(config.path, usecols=all_files)
+
+            all_data.append(df)
+
+            print(df.head())
+            print(f"{len(df)=}")
+
+
+            if isinstance(config, VertexSchemaConfig):
+                assert len(all_id_field) == 1, f"Multiple id fields found: {all_id_field}"
+            elif isinstance(config, EdgeSchemaConfig):
+                assert len(all_id_field) == 2, f"Multiple id fields found: {all_id_field}"
+
+        merged_df = self.merge_add_missing_cols(all_data, list(all_id_field))
+
+        return merged_df
+        
+
+    
+    def get_graph_content_from_raw(self, dataset_config: DatasetConfig):
+
+        vertex_config = dataset_config.schema.vertex
+        edge_config = dataset_config.schema.edge
+
+        vertex_df = self.load_data_from_raw(vertex_config)
+        edge_df = self.load_data_from_raw(edge_config)
+
+        vertices = self.df_to_vertexdata(vertex_df, vertex_config[0].id_field)
+        edges = self.df_to_edgedata(edge_df, edge_config[0].source_field, edge_config[0].target_field)
+
+        return vertices, edges
+    
+    
+    
     def get_graph_content(self, dataset_config: DatasetConfig):
         """
         从图数据库中加载指定数据集的完整图结构。

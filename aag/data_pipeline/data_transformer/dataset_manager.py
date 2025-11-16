@@ -95,7 +95,8 @@ class DatasetManager:
         dtype = dataset_config.type.lower()
         
         if dtype == "graph":
-            return self.graph_loader.get_graph_content(dataset_config)
+            # return self.graph_loader.get_graph_content(dataset_config)
+            return self.graph_loader.get_graph_content_from_raw(dataset_config)
         
         elif dtype == "table":
             # ===== 表格数据逻辑 =====
