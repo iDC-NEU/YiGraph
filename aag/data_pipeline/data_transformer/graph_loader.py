@@ -105,7 +105,8 @@ class GraphDataLoader:
             src = str(row[src_field])
             dst = str(row[dst_field])
 
-            rank = int(row[rank_field]) if rank_field and rank_field in df.columns else None
+            # rank = int(row[rank_field]) if rank_field and rank_field in df.columns else None
+            rank = _
 
             props = row.drop([src_field, dst_field] + ([rank_field] if rank_field else [])).to_dict()
 
@@ -150,15 +151,11 @@ class GraphDataLoader:
                 if config.weight_field:
                     all_files.append(config.weight_field)
 
-            print(f"{all_files=}")
+            logger.info(f"Reading ({all_files}) files from raw file")
 
             df = pd.read_csv(config.path, usecols=all_files)
 
             all_data.append(df)
-
-            print(df.head())
-            print(f"{len(df)=}")
-
 
             if isinstance(config, VertexSchemaConfig):
                 assert len(all_id_field) == 1, f"Multiple id fields found: {all_id_field}"
