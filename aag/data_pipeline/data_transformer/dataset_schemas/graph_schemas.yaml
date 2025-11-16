@@ -26,6 +26,8 @@ datasets:
     vertex:
     - attribute_fields: []
       format: csv
+      # query_field: acct_id
+      query_field: [last_name, first_name]
       id_field: acct_id
       label_field: prior_sar_count
       path: /home/chency/GraphLLM/aag/datasets/graphs/transaction_amlsim/1K/accounts.csv

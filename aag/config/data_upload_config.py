@@ -10,6 +10,7 @@ class VertexSchemaConfig:
     type: str
     path: str
     format: str
+    query_field: str
     id_field: str
     label_field: Optional[str] = None
     attribute_fields: List[str] = field(default_factory=list)  # 节点属性字段列表
@@ -221,6 +222,7 @@ def load_data_upload_config(yaml_path: str) -> DataUploadConfig:
                         path=v.get("path", ""),
                         format=v.get("format", ""),
                         id_field=v.get("id_field", ""),
+                        query_field=v.get("query_field", ""),
                         label_field=v.get("label_field"),
                         attribute_fields=v.get("attribute_fields", [])
                     ) for v in vertex_items
