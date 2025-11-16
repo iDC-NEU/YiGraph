@@ -428,7 +428,7 @@
                             </ul>
                         </div>
                         <div class="px-3 flex gap-2">
-                            <button class="inline-flex items-center justify-center gap-3 rounded-md border border-slate-200 px-5 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">Back</button>
+                            <a href="/documents" class="inline-flex items-center justify-center gap-3 rounded-md border border-slate-200 px-5 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">Back</a>
                             <button class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">Save Changes</button>
                         </div>
                     </div>
@@ -443,25 +443,18 @@
                                     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Select a knowledge base to edit</p>
                                 </div>
                                 
-                                <!-- Knowledge Base List -->
-                                <div class="p-4">
-                                    <ul class="space-y-2">
-                                        <li class="knowledge-base-item active p-3 rounded-md cursor-pointer" data-kb="react">
-                                            <div class="flex items-center">
-                                                <span class="block h-6 w-6"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
-                                                        <path class="fill-blue-300" d="M13.7087 3.30729C12.6049 2.90591 11.395 2.90591 10.2913 3.30729L3.24266 5.87042C1.48732 6.50872 1.4873 8.99128 3.24266 9.62959L10.2913 12.1927C11.395 12.5941 12.6049 12.5941 13.7087 12.1927L20.7573 9.62959C22.5126 8.99128 22.5126 6.50873 20.7573 5.87042L13.7087 3.30729Z" />
-                                                        <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 12.395C2.24283 11.8746 2.81467 11.6028 3.33504 11.7878L11.33 14.6304C11.7634 14.7845 12.2367 14.7845 12.67 14.6304L20.665 11.7878C21.1854 11.6028 21.7572 11.8746 21.9422 12.395C22.1273 12.9154 21.8554 13.4872 21.335 13.6722L13.3401 16.5149C12.4733 16.8231 11.5268 16.8231 10.66 16.5149L2.66502 13.6722C2.14465 13.4872 1.87279 12.9154 2.05781 12.395Z" />
-                                                        <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 16.645C2.24283 16.1246 2.81467 15.8528 3.33504 16.0378L11.33 18.8804C11.7634 19.0345 12.2367 19.0345 12.67 18.8804L20.665 16.0378C21.1854 15.8528 21.7572 16.1246 21.9422 16.645C22.1273 17.1654 21.8554 17.7372 21.335 17.9222L13.3401 20.7649C12.4733 21.0731 11.5268 21.0731 10.66 20.7649L2.66502 17.9222C2.14465 17.7372 1.87279 17.1654 2.05781 16.645Z" />
-                                                    </svg></span>
-                                                <div class="ms-3">
-                                                    <div class="text-sm font-bold text-slate-600 dark:text-slate-200">10 React Best practices</div>
-                                                    <div class="block text-xs text-slate-500 dark:text-slate-400">8 files</div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <!-- ... 其他知识库项目保持不变 ... -->
-                                    </ul>
-                                </div>
+
+                                     <div class="p-4">
+    <ul class="space-y-2" id="knowledgeBaseList">
+        <!-- 知识库列表将通过JavaScript动态生成 -->
+    </ul>
+</div>
+
+                               
+
+
+
+
                             </div>
                         </div>
                         
@@ -692,9 +685,124 @@
         // 文件上传模态框控制
         let uploadModal, addFilesBtn, closeModal, cancelUpload, fileInput, dropZone;
         let selectedFilesContainer, startUploadBtn, uploadProgress, progressFill, uploadStatus;
+        
+
+        // 从后端获取知识库列表
+async function loadKnowledgeBases() {
+    try {
+        const response = await fetch('/api/knowledge_bases');
+        const result = await response.json();
+        if (result.success) {
+            return result.data;
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Failed to load knowledge bases:', error);
+        // 返回模拟数据作为备选
+        return [
+            {
+                "id": 1,
+                "名称": "人工智能知识库",
+                "文档个数": 128,
+                "创建时间": "2024-09-12 10:30:00",
+            },
+            {
+                "id": 2,
+                "名称": "前端开发文档库",
+                "文档个数": 86,
+                "创建时间": "2023-06-05 14:15:00",
+            },
+            {
+                "id": 3,
+                "名称": "公司政策与规章",
+                "文档个数": 54,
+                "创建时间": "2022-11-20 09:00:00",
+            },
+        ];
+    }
+}
+
+// 渲染知识库列表
+async function renderKnowledgeBaseList() {
+    const kbList = await loadKnowledgeBases();
+    const kbListContainer = document.getElementById('knowledgeBaseList');
+    if (!kbListContainer) return;
+
+    kbListContainer.innerHTML = '';
+
+    if (kbList.length === 0) {
+        kbListContainer.innerHTML = `
+            <li class="p-3 text-center text-slate-500 text-sm">
+                暂无知识库，请先创建
+            </li>
+        `;
+        return;
+    }
+
+    kbList.forEach(kb => {
+        const li = document.createElement('li');
+        li.className = 'knowledge-base-item p-3 rounded-md cursor-pointer';
+        li.setAttribute('data-kb', kb.id);
+        li.innerHTML = `
+            <div class="flex items-center">
+                <span class="block h-6 w-6">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                        <path class="fill-blue-300" d="M13.7087 3.30729C12.6049 2.90591 11.395 2.90591 10.2913 3.30729L3.24266 5.87042C1.48732 6.50872 1.4873 8.99128 3.24266 9.62959L10.2913 12.1927C11.395 12.5941 12.6049 12.5941 13.7087 12.1927L20.7573 9.62959C22.5126 8.99128 22.5126 6.50873 20.7573 5.87042L13.7087 3.30729Z" />
+                        <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 12.395C2.24283 11.8746 2.81467 11.6028 3.33504 11.7878L11.33 14.6304C11.7634 14.7845 12.2367 14.7845 12.67 14.6304L20.665 11.7878C21.1854 11.6028 21.7572 11.8746 21.9422 12.395C22.1273 12.9154 21.8554 13.4872 21.335 13.6722L13.3401 16.5149C12.4733 16.8231 11.5268 16.8231 10.66 16.5149L2.66502 13.6722C2.14465 13.4872 1.87279 12.9154 2.05781 12.395Z" />
+                        <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 16.645C2.24283 16.1246 2.81467 15.8528 3.33504 16.0378L11.33 18.8804C11.7634 19.0345 12.2367 19.0345 12.67 18.8804L20.665 16.0378C21.1854 15.8528 21.7572 16.1246 21.9422 16.645C22.1273 17.1654 21.8554 17.7372 21.335 17.9222L13.3401 20.7649C12.4733 21.0731 11.5268 21.0731 10.66 20.7649L2.66502 17.9222C2.14465 17.7372 1.87279 17.1654 2.05781 16.645Z" />
+                    </svg>
+                </span>
+                <div class="ms-3">
+                    <div class="text-sm font-bold text-slate-600 dark:text-slate-200">${kb.名称}</div>
+                    <div class="block text-xs text-slate-500 dark:text-slate-400">${kb.文档个数} files</div>
+                </div>
+            </div>
+        `;
+        kbListContainer.appendChild(li);
+    });
+
+    // 添加点击事件
+    document.querySelectorAll('.knowledge-base-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.knowledge-base-item').forEach(kb => {
+                kb.classList.remove('active');
+            });
+            item.classList.add('active');
+            
+            // 更新当前选中的知识库
+            currentKnowledgeBase = item.getAttribute('data-kb');
+            const kbName = item.querySelector('.text-sm.font-bold').textContent;
+            document.querySelector('h3.text-lg').textContent = `Files in "${kbName}"`;
+            
+            // 重新加载文件列表
+            loadFiles();
+            // 重新生成图谱
+            generateGraph();
+        });
+    });
+
+    // 检查URL参数，如果有kb_id则选中对应的知识库
+    const urlParams = new URLSearchParams(window.location.search);
+    const kbId = urlParams.get('kb_id');
+    if (kbId) {
+        const targetKb = document.querySelector(`.knowledge-base-item[data-kb="${kbId}"]`);
+        if (targetKb) {
+            targetKb.click();
+        }
+    } else if (kbList.length > 0) {
+        // 默认选中第一个
+        const firstKb = document.querySelector('.knowledge-base-item');
+        if (firstKb) {
+            firstKb.click();
+        }
+    }
+}
+
 
         // 当DOM加载完成后初始化元素引用和事件监听器
         function initApp() {
+            renderKnowledgeBaseList();
             // 初始化元素引用
             uploadModal = document.getElementById('upload-modal');
             addFilesBtn = document.getElementById('add-files-btn');

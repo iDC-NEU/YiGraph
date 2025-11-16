@@ -42,19 +42,19 @@ MODEL_MAPPING = {
 knowledge_bases = [
     {
         "id": 1,
-        "名称": "人工智能知识库",
+        "名称": "AI Knowledge Base",
         "文档个数": 128,
         "创建时间": datetime(2024, 9, 12, 10, 30).strftime("%Y-%m-%d %H:%M:%S"),
     },
     {
         "id": 2,
-        "名称": "前端开发文档库",
+        "名称": "Frontend Development Docs",
         "文档个数": 86,
         "创建时间": datetime(2023, 6, 5, 14, 15).strftime("%Y-%m-%d %H:%M:%S"),
     },
     {
         "id": 3,
-        "名称": "公司政策与规章",
+        "名称": "Company Policies & Regulations",
         "文档个数": 54,
         "创建时间": datetime(2022, 11, 20, 9, 0).strftime("%Y-%m-%d %H:%M:%S"),
     },
@@ -179,7 +179,7 @@ def documents():
     return render_template('documents.html')
 
 @app.route('/manage_dataset')
-def manage_dataset():
+def manage_dataset_page():
     return render_template('manage_dataset.html')
 
 
@@ -260,6 +260,9 @@ def test_qwen_api():
         print("将使用模拟数据进行测试")
 
 ########################API路由#################################
+
+
+
 @app.route("/api/knowledge_bases", methods=["GET"])
 def get_knowledge_bases():
     """获取知识库列表 - 简化版本"""
