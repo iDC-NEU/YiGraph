@@ -22,18 +22,29 @@
             border-left-color: #3b82f6;
             background-color: #eff6ff;
         }
-        .file-item {
-            border-left: 4px solid #3b82f6;
+        
+        /* 文件行状态颜色 */
+        .file-item.uploaded {
+            border-left: 4px solid #9ca3af; /* 灰色 - 刚上传 */
         }
-        .file-item.processing {
-            border-left-color: #f59e0b;
-        }
-        .file-item.error {
-            border-left-color: #ef4444;
+        .file-item.parsing {
+            border-left: 4px solid #f59e0b; /* 黄色 - 解析中 */
         }
         .file-item.completed {
-            border-left-color: #10b981;
+            border-left: 4px solid #10b981; /* 绿色 - 解析完成 */
         }
+        
+        /* 文件行悬停和选中效果 */
+        .file-item:hover {
+            background-color: #f1f5f9;
+        }
+        .file-item.selected {
+            background-color: #d1e7fd;
+        }
+        .file-item.selected:hover {
+            background-color: #c2dfff;
+        }
+        
         .upload-area {
             border: 2px dashed #cbd5e1;
             border-radius: 0.5rem;
@@ -377,6 +388,160 @@
             height: 40px;
             animation: spin 2s linear infinite;
         }
+        
+        /* 解析按钮和进度条样式 */
+        .parse-control-btn {
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            background-color: transparent;
+            color: #3b82f6;
+            border: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+        
+        .parse-control-btn:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .parse-control-btn:disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .parse-progress-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        
+        .parse-progress-bar {
+            flex: 1;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .parse-progress-fill {
+            height: 100%;
+            background-color: #10b981;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .parse-progress-text {
+            font-size: 0.75rem;
+            color: #64748b;
+            min-width: 35px;
+        }
+        
+        .proceed-text {
+            font-size: 0.75rem;
+            color: #10b981;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        
+        .parsing-text {
+            font-size: 0.75rem;
+            color: #f59e0b;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        
+        .pending-text {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        
+        /* 生成图谱按钮样式 */
+        .generate-btn {
+            background-color: #3b82f6;
+            color: white;
+            border: 1px solid #3b82f6;
+        }
+        
+        .generate-btn:disabled {
+            background-color: #cbd5e1;
+            border-color: #cbd5e1;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+        
+        .generate-btn:disabled:hover {
+            background-color: #cbd5e1;
+            border-color: #cbd5e1;
+        }
+        
+        /* 图谱生成进度条样式 */
+        .graph-progress-container {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .graph-progress-bar {
+            flex: 1;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .graph-progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .graph-progress-text {
+            font-size: 0.75rem;
+            color: #64748b;
+            min-width: 35px;
+        }
+        
+        /* 空状态样式优化 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            text-align: center;
+            color: #64748b;
+        }
+        
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            color: #cbd5e1;
+        }
+        
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #475569;
+        }
+        
+        .empty-state-description {
+            font-size: 0.875rem;
+            max-width: 300px;
+            line-height: 1.5;
+        }
     </style>
 </head>
 
@@ -384,21 +549,187 @@
     <div id="root">
         <!-- Settings Button (same as original) -->
         <button data-target="#demoSettings" class="class-toggle fixed end-0 top-1/4 z-[1000] flex h-10 w-10 items-center justify-center rounded-s-lg border border-e-0 border-slate-200 bg-white text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5">
-                <path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" clip-rule="evenodd" />
-            </svg>
-        </button>
-        
-        <!-- Settings Panel (same as original) -->
-        <div id="demoSettings" class="fixed z-[5001] hidden h-full w-full [&.active]:block">
-            <!-- ... Settings content same as original ... -->
-        </div>
-        
-        <!-- Header (same as original) -->
-        <div class="flex min-h-screen max-w-full flex-col overflow-x-hidden pt-[calc(theme(space.16)+theme(space.1))]" id="#pagecontent">
-            <div class="fixed start-0 top-0 isolate z-[1020] w-full border-b border-slate-200 bg-white px-3 py-4 dark:border-slate-800 dark:bg-slate-950 xl:py-3">
-                <!-- ... Header content same as original ... -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5">
+        <path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" clip-rule="evenodd" />
+    </svg>
+</button>
+<div id="demoSettings" class="fixed z-[5001] hidden h-full w-full [&.active]:block">
+    <div class="fixed bottom-4 end-4 z-20 flex max-h-[calc(100%-theme(space.8))] w-72 flex-col rounded-xl border border-slate-200 bg-white pt-4 dark:border-slate-800 dark:bg-slate-950 md:w-[600px]">
+        <div class="border-b border-slate-200 px-5 pb-5 dark:border-slate-800">
+            <div class="flex items-center justify-between">
+                <h6 class="font-bold text-slate-700 dark:text-white">Mode</h6>
+                <button class="theme-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all *:pointer-events-none hover:bg-slate-200 hover:text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hidden h-4 dark:block">
+                        <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z" clip-rule="evenodd" />
+                    </svg><!-- moon - solid - heroicons  -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 dark:hidden">
+                        <path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z" />
+                    </svg><!-- sun - solid - heroicons  -->
+                </button>
             </div>
+            <div class="flex items-center justify-between pt-3">
+                <h6 class="font-bold text-slate-700 dark:text-white">Direction</h6>
+                <button class="direction-toggle rounded border border-slate-200 px-2 py-1 text-xs font-bold text-slate-600 transition-all *:pointer-events-none hover:bg-slate-200 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">
+                    <span class="hidden rtl:block">LTR</span>
+                    <span class="rtl:hidden">RTL</span>
+                </button>
+            </div>
+            <div class="mt-4 rounded-md bg-sky-50 px-4 py-3 text-sm text-sky-600 dark:bg-sky-950 dark:text-sky-400"> This is a HTML template so you might see a flicker on load after switching to dark or RTL mode. </div>
+        </div>
+        <div class="overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-600">
+            <div class="grid grid-flow-dense grid-cols-1 gap-4 p-5 md:grid-cols-2">
+                <a href="{{ url_for('overview') }}" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                    <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-blue-100 group-hover:dark:shadow-blue-950" src="../images/preview/user/dashboard.png" alt="" />
+                    <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> User App </h6>
+                </a>
+                <a href="../admin/dashboard.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                    <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/admin/dashboard.png" alt="" />
+                    <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Admin Dashboard </h6>
+                </a>
+                <a href="../landing-text-image.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                    <div class="absolute start-3 top-3 mb-2 inline-flex rounded-full bg-gradient-to-r from-green-600 to-pink-500 px-2 py-0.5 text-[11px] font-medium text-white"> Landing </div>
+                    <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/landing/image-gen-1.png" alt="" />
+                    <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Image Generator </h6>
+                </a>
+                <a href="../landing-text-code.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                    <div class="absolute start-3 top-3 mb-2 inline-flex rounded-full bg-gradient-to-r from-green-600 to-pink-500 px-2 py-0.5 text-[11px] font-medium text-white"> Landing </div>
+                    <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/landing/code-gen-1.png" alt="" />
+                    <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Code Generator </h6>
+                </a>
+                <a href="../landing-prompt-text.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                    <div class="absolute start-3 top-3 mb-2 inline-flex rounded-full bg-gradient-to-r from-green-600 to-pink-500 px-2 py-0.5 text-[11px] font-medium text-white"> Landing </div>
+                    <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/landing/text-gen-1.png" alt="" />
+                    <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Text Generator </h6>
+                </a>
+                <a href="{{ url_for('index') }}"  class="group relative flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-center text-slate-600 transition-all hover:bg-blue-600 hover:text-white dark:border-slate-800 dark:bg-slate-950 dark:text-white hover:dark:bg-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                        <path fill-rule="evenodd" d="M10.72 11.47a.75.75 0 0 0 0 1.06l7.5 7.5a.75.75 0 1 0 1.06-1.06L12.31 12l6.97-6.97a.75.75 0 0 0-1.06-1.06l-7.5 7.5Z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd" d="M4.72 11.47a.75.75 0 0 0 0 1.06l7.5 7.5a.75.75 0 1 0 1.06-1.06L6.31 12l6.97-6.97a.75.75 0 0 0-1.06-1.06l-7.5 7.5Z" clip-rule="evenodd" />
+                    </svg>
+                    <div class="relative mt-6 text-base font-bold">Back to Intro</div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div data-target="#demoSettings" class="class-toggle fixed inset-0 z-10 bg-slate-950 bg-opacity-50"></div>
+</div>
+<div class="fixed start-0 top-0 isolate z-[1020] w-full border-b border-slate-200 bg-white px-3 py-4 dark:border-slate-800 dark:bg-slate-950 xl:py-3">
+    <div class="container px-3">
+        <div class="w-100 flex items-center justify-between">
+            <div class="flex items-center gap-x-2">
+                <div class="-ms-1.5 xl:hidden">
+                    <button class="header-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all hover:bg-slate-200 hover:text-slate-600 hover:dark:bg-slate-800 hover:dark:text-slate-200 [&.active]:bg-slate-200 [&.active]:text-slate-600 [&.active]:dark:bg-slate-800 [&.active]:dark:text-slate-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg><!-- bars-3 - outline - heroicons -->
+                    </button>
+                </div>
+                
+    <div class="flex items-center">
+        <img class="h-6 dark:hidden" src="/static/images/IDC-NEU.jpg" alt="logo" />
+        <img class="hidden h-6 dark:block" src="/static/images/IDC-NEU.jpg" alt="logo" />
+    </div>
+</a><!-- logo -->
+                
+            </div>
+            <!-- header-brand -->
+            <div class="main-header peer fixed start-0 top-0 z-[1020] flex h-screen w-64 flex-shrink-0 -translate-x-full flex-col border-e border-slate-200 bg-white py-4 dark:border-slate-800 dark:bg-slate-950 max-xl:overflow-auto max-xl:transition-all xl:static xl:h-auto xl:w-auto xl:!translate-x-0 xl:border-e-0 xl:py-0 xl:transition-none rtl:translate-x-full [&.header-visible]:translate-x-0">
+                <ul class="menu-head flex flex-col gap-x-6 px-4 xl:flex-row xl:items-center">
+                    <!-- Chat Button -->
+                    <li class="menu-item group relative">
+                        <a href="/" class="menu-link flex items-center py-2 text-sm font-medium text-slate-700 group-hover:text-blue-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-100 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600 xl:py-3">
+                            <span>Chat</span>
+                        </a>
+                    </li>
+                    <!-- Dataset Button -->
+                    <li class="menu-item group relative">
+                        <a href="{{ url_for('documents') }}" class="menu-link flex items-center py-2 text-sm font-medium text-slate-700 group-hover:text-blue-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-100 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600 xl:py-3">
+                            <span>Dataset</span>
+                        </a>
+                    </li>
+                    <!-- Manage Button -->
+                    <li class="menu-item group relative">
+                        <a href="{{ url_for('manage_dataset_page') }}" class="menu-link flex items-center py-2 text-sm font-medium text-slate-700 group-hover:text-blue-600 group-[.active>]:text-blue-600 hover:text-blue-600 dark:text-slate-100 group-[.active>]:dark:text-blue-600 hover:dark:text-blue-600 xl:py-3">
+                            <span>Manage</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- header-main -->
+            <div class="header-toggle pointer-events-none fixed inset-0 z-[1019] bg-slate-950 bg-opacity-50 opacity-0 peer-[.header-visible]:pointer-events-auto peer-[.header-visible]:opacity-100 xl:!opacity-0"></div>
+            <!-- overlay -->
+            <ul class="flex items-center gap-x-3 lg:gap-x-5">
+                <li class="relative inline-flex">
+                    <button class="theme-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all *:pointer-events-none hover:bg-slate-200 hover:text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hidden h-4 dark:block">
+                            <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z" clip-rule="evenodd" />
+                        </svg><!-- moon - solid - heroicons  -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 dark:hidden">
+                            <path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z" />
+                        </svg><!-- sun - solid - heroicons  -->
+                    </button>
+                </li>
+                <!-- mode-switch -->
+                <li class="relative inline-flex">
+                    <button data-offset="0,8" data-placement="bottom-end" data-rtl-placement="bottom-start" class="dropdown-toggle peer inline-flex h-9 w-9 overflow-hidden rounded-full outline outline-2 outline-offset-2 outline-slate-300 *:pointer-events-none dark:outline-slate-700">
+                        <img src="../images/avatar/a.jpg" alt="" />
+                    </button>
+                    <div class="dropdown-menu invisible absolute end-0 top-10 w-48 opacity-0 transition-all duration-100 ease-out peer-[.show]:visible peer-[.show_.dropdown-wrap]:scale-100 peer-[.show]:opacity-100">
+                        <div class="dropdown-wrap ransition-all origin-top-right scale-90 rounded-lg border border-slate-200 bg-white shadow-sm duration-100 ease-out dark:border-slate-800 dark:bg-slate-950">
+                            <div class="flex items-center p-4">
+                                <div class="inline-flex h-10 w-10 flex-shrink-0 overflow-hidden rounded-full outline outline-2 outline-offset-2 outline-slate-300 dark:outline-slate-700">
+                                    <img src="../images/avatar/a.jpg" alt="" />
+                                </div>
+                                <div class="ms-4">
+                                    <h6 class="-mt-0.5 text-xs font-bold text-slate-700 dark:text-white"> Phillip Burke </h6>
+                                    <span class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-500 dark:bg-blue-950"> Balance $18.89 </span>
+                                </div>
+                            </div>
+                            <ul class="border-t border-slate-200 py-2 dark:border-slate-800">
+                                <li>
+                                    <a href="../admin/dashboard.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 0 0 2.25-2.25V6a2.25 2.25 0 0 0-2.25-2.25H6A2.25 2.25 0 0 0 3.75 6v2.25A2.25 2.25 0 0 0 6 10.5Zm0 9.75h2.25A2.25 2.25 0 0 0 10.5 18v-2.25a2.25 2.25 0 0 0-2.25-2.25H6a2.25 2.25 0 0 0-2.25 2.25V18A2.25 2.25 0 0 0 6 20.25Zm9.75-9.75H18a2.25 2.25 0 0 0 2.25-2.25V6A2.25 2.25 0 0 0 18 3.75h-2.25A2.25 2.25 0 0 0 13.5 6v2.25a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                        </svg><!-- squares-plus - outline - heroicons  -->
+                                        <span>Admin</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="profile.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                        </svg><!-- user - outline - heroicons  -->
+                                        <span>Profile</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="packages.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
+                                        </svg><!-- rocket-launch - outline - heroicons  -->
+                                        <span>Upgrade</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="../login.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
+                                        </svg><!-- power - outline - heroicons  -->
+                                        <span>Logout</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+                <!-- user-dropdown -->
+            </ul>
+            <!-- header-tools -->
+        </div>
+    </div>
+    <!-- container -->
+</div>
+<!-- header -->
             
             <!-- Main Content -->
             <div class="relative px-3 py-10">
@@ -427,10 +758,6 @@
                                 <li>Dataset Editor</li>
                             </ul>
                         </div>
-                        <div class="px-3 flex gap-2">
-                            <button class="inline-flex items-center justify-center gap-3 rounded-md border border-slate-200 px-5 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">Back</button>
-                            <button class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">Save Changes</button>
-                        </div>
                     </div>
                     
                     <!-- Main Content - Flex Layout -->
@@ -439,29 +766,20 @@
                         <div class="left-panel">
                             <div class="rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 h-full">
                                 <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
-                                    <h3 class="text-lg font-bold text-slate-700 dark:text-white">Knowledge Bases</h3>
-                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Select a knowledge base to edit</p>
+                                    <h3 class="text-lg font-bold text-slate-700 dark:text-white">data management</h3>
+                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Select a dataset to edit</p>
                                 </div>
                                 
-                                <!-- Knowledge Base List -->
-                                <div class="p-4">
-                                    <ul class="space-y-2">
-                                        <li class="knowledge-base-item active p-3 rounded-md cursor-pointer" data-kb="react">
-                                            <div class="flex items-center">
-                                                <span class="block h-6 w-6"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
-                                                        <path class="fill-blue-300" d="M13.7087 3.30729C12.6049 2.90591 11.395 2.90591 10.2913 3.30729L3.24266 5.87042C1.48732 6.50872 1.4873 8.99128 3.24266 9.62959L10.2913 12.1927C11.395 12.5941 12.6049 12.5941 13.7087 12.1927L20.7573 9.62959C22.5126 8.99128 22.5126 6.50873 20.7573 5.87042L13.7087 3.30729Z" />
-                                                        <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 12.395C2.24283 11.8746 2.81467 11.6028 3.33504 11.7878L11.33 14.6304C11.7634 14.7845 12.2367 14.7845 12.67 14.6304L20.665 11.7878C21.1854 11.6028 21.7572 11.8746 21.9422 12.395C22.1273 12.9154 21.8554 13.4872 21.335 13.6722L13.3401 16.5149C12.4733 16.8231 11.5268 16.8231 10.66 16.5149L2.66502 13.6722C2.14465 13.4872 1.87279 12.9154 2.05781 12.395Z" />
-                                                        <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 16.645C2.24283 16.1246 2.81467 15.8528 3.33504 16.0378L11.33 18.8804C11.7634 19.0345 12.2367 19.0345 12.67 18.8804L20.665 16.0378C21.1854 15.8528 21.7572 16.1246 21.9422 16.645C22.1273 17.1654 21.8554 17.7372 21.335 17.9222L13.3401 20.7649C12.4733 21.0731 11.5268 21.0731 10.66 20.7649L2.66502 17.9222C2.14465 17.7372 1.87279 17.1654 2.05781 16.645Z" />
-                                                    </svg></span>
-                                                <div class="ms-3">
-                                                    <div class="text-sm font-bold text-slate-600 dark:text-slate-200">10 React Best practices</div>
-                                                    <div class="block text-xs text-slate-500 dark:text-slate-400">8 files</div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <!-- ... 其他知识库项目保持不变 ... -->
-                                    </ul>
-                                </div>
+
+                                     <div class="p-4">
+    <ul class="space-y-2" id="knowledgeBaseList">
+        <!-- 知识库列表将通过JavaScript动态生成 -->
+    </ul>
+</div>
+
+                               
+
+
                             </div>
                         </div>
                         
@@ -473,7 +791,7 @@
                                     <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
                                         <div class="flex items-center justify-between">
                                             <div>
-                                                <h3 class="text-lg font-bold text-slate-700 dark:text-white">Files in "10 React Best practices"</h3>
+                                                <h3 class="text-lg font-bold text-slate-700 dark:text-white" id="knowledge-base-name">Files in "10 React Best practices"</h3>
                                                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage documents in this knowledge base</p>
                                             </div>
                                             <button id="add-files-btn" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">
@@ -492,9 +810,9 @@
                                                 <thead class="bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-200">
                                                     <tr>
                                                         <th class="py-3 px-4 text-start">Document</th>
-                                                        <th class="py-3 px-4 text-start">Status</th>
                                                         <th class="py-3 px-4 text-start">Size</th>
                                                         <th class="py-3 px-4 text-start">Uploaded</th>
+                                                        <th class="py-3 px-4 text-start">Status</th>
                                                         <th class="py-3 px-4 text-start"></th>
                                                     </tr>
                                                 </thead>
@@ -514,14 +832,14 @@
                                         <div class="flex items-center justify-between">
                                             <div>
                                                 <h3 class="text-lg font-bold text-slate-700 dark:text-white">Document Relationship Graph</h3>
-                                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Visual representation of relationships between .txt files</p>
+                                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Visual representation of relationships between objects</p>
                                             </div>
                                             <div class="flex gap-2">
-                                                <button class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" onclick="generateGraph()">
+                                                <button id="generate-graph-btn" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-all hover:bg-blue-800 generate-btn" disabled>
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                                                     </svg>
-                                                    Regenerate
+                                                    Visualization
                                                 </button>
                                                 <button id="zoom-in-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
@@ -533,30 +851,45 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
                                                     </svg>
                                                 </button>
-                                                <button id="fit-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" title="适合屏幕">
+                                                <button id="fit-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" title="Fit to screen">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
                                                     </svg>
                                                 </button>
-                                                <button id="fullscreen-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" title="全屏显示">
+                                                <button id="fullscreen-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" title="Full Screen">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
                                                     </svg>
-                                                    全屏显示
+                                                    Full Screen
                                                 </button>
+                                                <!-- 修改了Export按钮的图标 -->
                                                 <button class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-all hover:bg-blue-800">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12M12 16.5V3" />
                                                     </svg>
                                                     Export
                                                 </button>
                                             </div>
                                         </div>
+                                        <!-- 图谱生成进度条 -->
+                                        <div class="graph-progress-container" id="graph-progress-container">
+                                            <div class="graph-progress-bar">
+                                                <div class="graph-progress-fill" id="graph-progress-fill"></div>
+                                            </div>
+                                            <span class="graph-progress-text" id="graph-progress-text">0%</span>
+                                        </div>
                                     </div>
                                     
                                     <!-- Graph Visualization -->
                                     <div id="graph-container">
-                                        <!-- 图内容将通过JavaScript生成 -->
+                                        <div class="flex items-center justify-center h-full">
+                                            <div class="text-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                                                </svg>
+                                                <p class="mt-2 text-lg text-gray-500">Click "Visualization" to create knowledge graph</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -565,23 +898,7 @@
                 </div>
             </div>
             
-            <!-- Footer (same as original) -->
-            <div class="relative isolate mt-auto border-t border-slate-200 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-950">
-                <div class="container px-3">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs font-medium text-slate-600 dark:text-white"> &copy; 2024. Crafted By&nbsp; <a class="text-slate-700 transition-all hover:text-blue-600 dark:text-white hover:dark:text-blue-600" href="https://www.tongzhewang.com" target="_blank"> 童哲网 </a>
-                        </p>
-                        <ul class="-mx-3 flex flex-wrap">
-                            <li>
-                                <a href="#" class="px-3 text-sm font-medium text-slate-600 transition-all hover:text-blue-600 dark:text-slate-100 hover:dark:text-blue-600"> Terms </a>
-                            </li>
-                            <li>
-                                <a target="_blank" href="../about.html" class="px-3 text-sm font-medium text-slate-600 transition-all hover:text-blue-600 dark:text-slate-100 hover:dark:text-blue-600"> About </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            <!-- Footer (removed) -->
         </div>
     </div>
 
@@ -609,7 +926,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    退出全屏
+                    Exit Full Screen
                 </button>
             </div>
         </div>
@@ -662,7 +979,7 @@
         <div class="modal-content" style="max-width: 90%; width: 90%; height: 90%;">
             <div class="preview-container">
                 <div class="preview-header">
-                    <h3 class="modal-title" id="preview-title">File Preview</h3>
+                    <h3 class="modal-title" id="preview-title">Preview: </h3>
                     <button class="close-modal text-2xl" id="close-preview-modal">&times;</button>
                 </div>
                 <div class="preview-content-container">
@@ -671,8 +988,8 @@
                     </div>
                 </div>
                 <div class="preview-toolbar">
-                    <button class="preview-btn preview-btn-secondary" id="download-btn">下载</button>
-                    <button class="preview-btn preview-btn-primary" id="close-preview-btn">关闭</button>
+                    <button class="preview-btn preview-btn-secondary" id="download-btn">Download</button>
+                    <button class="preview-btn preview-btn-primary" id="close-preview-btn">Close</button>
                 </div>
             </div>
         </div>
@@ -688,13 +1005,155 @@
         // 当前选中的知识库
         let currentKnowledgeBase = 'react';
         let selectedFiles = [];
+        let selectedFileRow = null; // 用于跟踪选中的文件行
         
         // 文件上传模态框控制
         let uploadModal, addFilesBtn, closeModal, cancelUpload, fileInput, dropZone;
         let selectedFilesContainer, startUploadBtn, uploadProgress, progressFill, uploadStatus;
 
+        // 解析状态跟踪对象
+        let parsingStatus = {};
+
+        // 图谱生成状态
+        let graphGenerated = false;
+        let graphGenerationInterval = null;
+
+        // 从后端获取知识库列表
+        async function loadKnowledgeBases() {
+            try {
+                const response = await fetch('/api/knowledge_bases');
+                const result = await response.json();
+                if (result.success) {
+                    return result.data;
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Failed to load knowledge bases:', error);
+                // 返回模拟数据作为备选
+                return [
+                    {
+                        "id": 1,
+                        "名称": "人工智能知识库",
+                        "文档个数": 128,
+                        "创建时间": "2024-09-12 10:30:00",
+                    },
+                    {
+                        "id": 2,
+                        "名称": "前端开发文档库",
+                        "文档个数": 86,
+                        "创建时间": "2023-06-05 14:15:00",
+                    },
+                    {
+                        "id": 3,
+                        "名称": "公司政策与规章",
+                        "文档个数": 54,
+                        "创建时间": "2022-11-20 09:00:00",
+                    },
+                ];
+            }
+        }
+
+        // 获取知识库的实际文件数量
+        function getKnowledgeBaseFileCount(kbId) {
+            const files = JSON.parse(localStorage.getItem(`kb-files-${kbId}`) || '[]');
+            return files.length;
+        }
+
+        // 渲染知识库列表
+        async function renderKnowledgeBaseList() {
+            const kbList = await loadKnowledgeBases();
+            const kbListContainer = document.getElementById('knowledgeBaseList');
+            if (!kbListContainer) return;
+
+            kbListContainer.innerHTML = '';
+
+            if (kbList.length === 0) {
+                kbListContainer.innerHTML = `
+                    <li class="p-3 text-center text-slate-500 text-sm">
+                        No knowledge base, please create one first
+                    </li>
+                `;
+                return;
+            }
+
+            kbList.forEach(kb => {
+                // 获取实际文件数量
+                const fileCount = getKnowledgeBaseFileCount(kb.id);
+                
+                const li = document.createElement('li');
+                li.className = 'knowledge-base-item p-3 rounded-md cursor-pointer';
+                li.setAttribute('data-kb', kb.id);
+                li.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="block h-6 w-6">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-full">
+                                <path class="fill-blue-300" d="M13.7087 3.30729C12.6049 2.90591 11.395 2.90591 10.2913 3.30729L3.24266 5.87042C1.48732 6.50872 1.4873 8.99128 3.24266 9.62959L10.2913 12.1927C11.395 12.5941 12.6049 12.5941 13.7087 12.1927L20.7573 9.62959C22.5126 8.99128 22.5126 6.50873 20.7573 5.87042L13.7087 3.30729Z" />
+                                <path class="fill-blue-600" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 12.395C2.24283 11.8746 2.81467 11.6028 3.33504 11.7878L11.33 14.6304C11.7634 14.7845 12.2367 14.7845 12.67 14.6304L20.665 11.7878C21.1854 11.6028 21.7572 11.8746 21.9422 12.395C22.1273 12.9154 21.8554 13.4872 21.335 13.6722L13.3401 16.5149C12.4733 16.8231 11.5268 16.8231 10.66 16.5149L2.66502 13.6722C2.14465 13.4872 1.87279 12.9154 2.05781 12.395Z" />
+                                <path class="fill-blue-300" fill-rule="evenodd" clip-rule="evenodd" d="M2.05781 16.645C2.24283 16.1246 2.81467 15.8528 3.33504 16.0378L11.33 18.8804C11.7634 19.0345 12.2367 19.0345 12.67 18.8804L20.665 16.0378C21.1854 15.8528 21.7572 16.1246 21.9422 16.645C22.1273 17.1654 21.8554 17.7372 21.335 17.9222L13.3401 20.7649C12.4733 21.0731 11.5268 21.0731 10.66 20.7649L2.66502 17.9222C2.14465 17.7372 1.87279 17.1654 2.05781 16.645Z" />
+                            </svg>
+                        </span>
+                        <div class="ms-3">
+                            <div class="text-sm font-bold text-slate-600 dark:text-slate-200">${kb.名称}</div>
+                            <div class="block text-xs text-slate-500 dark:text-slate-400">${fileCount} files</div>
+                        </div>
+                    </div>
+                `;
+                kbListContainer.appendChild(li);
+            });
+
+            // 添加点击事件
+            document.querySelectorAll('.knowledge-base-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.knowledge-base-item').forEach(kb => {
+                        kb.classList.remove('active');
+                    });
+                    item.classList.add('active');
+                    
+                    // 更新当前选中的知识库
+                    currentKnowledgeBase = item.getAttribute('data-kb');
+                    const kbName = item.querySelector('.text-sm.font-bold').textContent;
+                    document.getElementById('knowledge-base-name').textContent = `Files in "${kbName}"`;
+                    
+                    // 重新加载文件列表
+                    loadFiles();
+                    // 重置图谱状态
+                    resetGraph();
+                });
+            });
+
+            // 检查URL参数，如果有kb_id则选中对应的知识库
+            const urlParams = new URLSearchParams(window.location.search);
+            const kbId = urlParams.get('kb_id');
+            if (kbId) {
+                const targetKb = document.querySelector(`.knowledge-base-item[data-kb="${kbId}"]`);
+                if (targetKb) {
+                    targetKb.click();
+                }
+            } else if (kbList.length > 0) {
+                // 默认选中第一个
+                const firstKb = document.querySelector('.knowledge-base-item');
+                if (firstKb) {
+                    firstKb.click();
+                }
+            }
+        }
+
+        // 更新知识库文件数量显示
+        function updateKnowledgeBaseFileCount(kbId) {
+            const kbItem = document.querySelector(`.knowledge-base-item[data-kb="${kbId}"]`);
+            if (kbItem) {
+                const fileCount = getKnowledgeBaseFileCount(kbId);
+                const fileCountElement = kbItem.querySelector('.block.text-xs');
+                if (fileCountElement) {
+                    fileCountElement.textContent = `${fileCount} files`;
+                }
+            }
+        }
+
         // 当DOM加载完成后初始化元素引用和事件监听器
         function initApp() {
+            renderKnowledgeBaseList();
             // 初始化元素引用
             uploadModal = document.getElementById('upload-modal');
             addFilesBtn = document.getElementById('add-files-btn');
@@ -719,12 +1178,12 @@
                     // 更新当前选中的知识库
                     currentKnowledgeBase = item.getAttribute('data-kb');
                     const kbName = item.querySelector('.text-sm.font-bold').textContent;
-                    document.querySelector('h3.text-lg').textContent = `Files in "${kbName}"`;
+                    document.getElementById('knowledge-base-name').textContent = `Files in "${kbName}"`;
                     
                     // 重新加载文件列表
                     loadFiles();
-                    // 重新生成图谱
-                    generateGraph();
+                    // 重置图谱状态
+                    resetGraph();
                 });
             });
 
@@ -839,21 +1298,30 @@
                         
                         // 重新加载文件列表
                         loadFiles();
-                        // 重新生成图谱
-                        generateGraph();
+                        // 重置图谱状态
+                        resetGraph();
+                        // 更新知识库文件数量显示
+                        updateKnowledgeBaseFileCount(currentKnowledgeBase);
                     }, 1500);
                 });
             }
             
             // 初始化全屏功能
             initFullscreen();
+            
+            // 初始化图谱生成按钮
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            if (generateGraphBtn) {
+                generateGraphBtn.addEventListener('click', () => {
+                    generateGraph();
+                });
+            }
         }
 
         // 当DOM加载完成后初始化应用
         document.addEventListener('DOMContentLoaded', function() {
             initApp();
             loadFiles();
-            generateGraph();
             // 等待DOM更新后再添加缩放控制
             setTimeout(() => {
                 addZoomControls();
@@ -929,7 +1397,8 @@
                         type: file.type,
                         uploadDate: new Date().toISOString(),
                         status: 'completed',
-                        path: `${kbFolder}/${file.name}`
+                        path: `${kbFolder}/${file.name}`,
+                        parsed: false // 添加解析状态
                     };
                     
                     // 获取现有文件列表
@@ -949,8 +1418,27 @@
             
             // 如果有保存的文件，显示它们
             if (existingFiles.length > 0) {
-                fileListBody.innerHTML = existingFiles.map(file => `
-                    <tr class="file-item completed border-t border-slate-200 dark:border-slate-800">
+                fileListBody.innerHTML = existingFiles.map(file => {
+                    // 初始化解析状态
+                    if (!parsingStatus[file.name]) {
+                        parsingStatus[file.name] = {
+                            progress: 0,
+                            isParsing: false,
+                            intervalId: null,
+                            isCompleted: file.parsed || false
+                        };
+                    }
+                    
+                    // 确定文件行的状态类
+                    let statusClass = 'uploaded'; // 默认灰色 - 刚上传
+                    if (parsingStatus[file.name].isParsing) {
+                        statusClass = 'parsing'; // 黄色 - 解析中
+                    } else if (parsingStatus[file.name].isCompleted) {
+                        statusClass = 'completed'; // 绿色 - 解析完成
+                    }
+                    
+                    return `
+                    <tr class="file-item ${statusClass} border-t border-slate-200 dark:border-slate-800" data-filename="${file.name}">
                         <td class="py-3 px-4">
                             <div class="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-blue-500">
@@ -962,16 +1450,31 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3 px-4">
-                            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
-                                <svg class="mr-1 h-2 w-2" fill="currentColor" viewBox="0 0 8 8">
-                                    <circle cx="4" cy="4" r="3" />
-                                </svg>
-                                Processed
-                            </span>
-                        </td>
                         <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">${formatFileSize(file.size)}</td>
                         <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">${formatDate(file.uploadDate)}</td>
+                        <td class="py-3 px-4">
+                            <div class="parse-progress-container" data-filename="${file.name}">
+                                ${getStatusText(parsingStatus[file.name])}
+                                <button class="parse-control-btn" data-filename="${file.name}">
+                                    ${parsingStatus[file.name].isCompleted ? 
+                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                        </svg>` :
+                                        parsingStatus[file.name].isParsing ?
+                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
+                                        </svg>` :
+                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+                                        </svg>`
+                                    }
+                                </button>
+                                <div class="parse-progress-bar">
+                                    <div class="parse-progress-fill" style="width: ${parsingStatus[file.name].progress}%;"></div>
+                                </div>
+                                <span class="parse-progress-text">${Math.round(parsingStatus[file.name].progress)}%</span>
+                            </div>
+                        </td>
                         <td class="py-3 px-4">
                             <div class="flex justify-end gap-2">
                                 <button class="rounded-full bg-slate-200 p-2 text-slate-600 transition-all hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:text-slate-200 hover:dark:bg-blue-600 hover:dark:text-white preview-btn" data-filename="${file.name}" data-filepath="${file.path}">
@@ -980,49 +1483,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                     </svg>
                                 </button>
-                                <button class="rounded-full bg-rose-100 p-2 text-rose-600 transition-all hover:bg-rose-600 hover:text-white dark:bg-rose-950 dark:text-rose-200 hover:dark:bg-rose-600 hover:dark:text-white" onclick="deleteFile('${file.name}')">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
-            } else {
-                // 显示默认文件（仅用于演示）
-                fileListBody.innerHTML = `
-                    <tr class="file-item completed border-t border-slate-200 dark:border-slate-800">
-                        <td class="py-3 px-4">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-blue-500">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                                </svg>
-                                <div class="ml-3">
-                                    <div class="text-sm font-medium text-slate-700 dark:text-slate-200">react-best-practices.pdf</div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">Article</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4">
-                            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
-                                <svg class="mr-1 h-2 w-2" fill="currentColor" viewBox="0 0 8 8">
-                                    <circle cx="4" cy="4" r="3" />
-                                </svg>
-                                Processed
-                            </span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">2.4 MB</td>
-                        <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">Apr 3, 2023</td>
-                        <td class="py-3 px-4">
-                            <div class="flex justify-end gap-2">
-                                <button class="rounded-full bg-slate-200 p-2 text-slate-600 transition-all hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:text-slate-200 hover:dark:bg-blue-600 hover:dark:text-white preview-btn" data-filename="react-best-practices.pdf" data-filepath="dataset/react/react-best-practices.pdf">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                    </svg>
-                                </button>
-                                <button class="rounded-full bg-rose-100 p-2 text-rose-600 transition-all hover:bg-rose-600 hover:text-white dark:bg-rose-950 dark:text-rose-200 hover:dark:bg-rose-600 hover:dark:text-white">
+                                <button class="rounded-full bg-rose-100 p-2 text-rose-600 transition-all hover:bg-rose-600 hover:text-white dark:bg-rose-950 dark:text-rose-200 hover:dark:bg-rose-600 hover:dark:text-white delete-file-btn" data-filename="${file.name}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                     </svg>
@@ -1031,7 +1492,67 @@
                         </td>
                     </tr>
                 `;
+                }).join('');
+            } else {
+                // 如果没有文件，显示优化的空状态
+                fileListBody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="empty-state-icon">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                </svg>
+                                <h3 class="empty-state-title">No files uploaded yet</h3>
+                                <p class="empty-state-description">Click "Add Files" to upload documents and start building your knowledge base.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             }
+            
+            // 添加文件行悬停和点击事件
+            document.querySelectorAll('.file-item').forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    if (!row.classList.contains('selected')) {
+                        row.style.backgroundColor = '#f1f5f9';
+                    }
+                });
+                
+                row.addEventListener('mouseleave', () => {
+                    if (!row.classList.contains('selected')) {
+                        row.style.backgroundColor = '';
+                    }
+                });
+                
+                row.addEventListener('click', (e) => {
+                    // 如果点击的是按钮，不触发选中/取消选中
+                    if (e.target.closest('button')) {
+                        return;
+                    }
+                    
+                    // 切换选中状态
+                    if (row.classList.contains('selected')) {
+                        row.classList.remove('selected');
+                        row.style.backgroundColor = '';
+                        selectedFileRow = null;
+                        resetGraphHighlight();
+                    } else {
+                        // 移除之前选中的行的选中状态
+                        document.querySelectorAll('.file-item').forEach(r => {
+                            r.classList.remove('selected');
+                            r.style.backgroundColor = '';
+                        });
+                        
+                        // 设置当前行为选中状态
+                        row.classList.add('selected');
+                        row.style.backgroundColor = '#d1e7fd';
+                        selectedFileRow = row;
+                        
+                        // 高亮对应的图谱节点
+                        highlightGraphNodes(row.getAttribute('data-filename'));
+                    }
+                });
+            });
             
             // 添加预览按钮事件监听器
             document.querySelectorAll('.preview-btn').forEach(button => {
@@ -1041,6 +1562,246 @@
                     previewFile(filename, filepath);
                 });
             });
+            
+            // 添加解析控制按钮事件监听器
+            document.querySelectorAll('.parse-control-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const filename = e.currentTarget.getAttribute('data-filename');
+                    toggleFileParsing(filename);
+                });
+            });
+            
+            // 添加删除按钮事件监听器
+            document.querySelectorAll('.delete-file-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const filename = e.currentTarget.getAttribute('data-filename');
+                    deleteFile(filename);
+                });
+            });
+            
+            // 初始化解析状态
+            Object.keys(parsingStatus).forEach(filename => {
+                if (parsingStatus[filename].isCompleted) {
+                    updateProgressDisplay(filename, parsingStatus[filename].progress, false, true);
+                }
+            });
+            
+            // 检查是否所有文件都已解析完成
+            checkAllFilesParsed();
+        }
+
+        // 获取状态文本
+        function getStatusText(status) {
+            if (status.isCompleted) {
+                return `<span class="proceed-text">proceed</span>`;
+            } else if (status.isParsing) {
+                return `<span class="parsing-text">parsing</span>`;
+            } else {
+                return `<span class="pending-text">pending</span>`;
+            }
+        }
+
+        // 检查是否所有文件都已解析完成
+        function checkAllFilesParsed() {
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            
+            if (existingFiles.length === 0) {
+                // 如果没有文件，禁用生成按钮
+                if (generateGraphBtn) {
+                    generateGraphBtn.disabled = true;
+                }
+                return;
+            }
+            
+            // 检查是否所有文件都已解析
+            const allParsed = existingFiles.every(file => {
+                return parsingStatus[file.name] && parsingStatus[file.name].isCompleted;
+            });
+            
+            // 更新生成按钮状态
+            if (generateGraphBtn) {
+                generateGraphBtn.disabled = !allParsed;
+            }
+        }
+
+        // 切换文件解析状态（开始/暂停）
+        function toggleFileParsing(filename) {
+            const status = parsingStatus[filename];
+            
+            if (status.isCompleted) {
+                // 如果已经完成，重新解析
+                resetFileParsing(filename);
+                startFileParsing(filename);
+            } else {
+                if (status.isParsing) {
+                    // 暂停解析
+                    pauseFileParsing(filename);
+                } else {
+                    // 开始解析
+                    startFileParsing(filename);
+                }
+            }
+        }
+
+        // 开始文件解析
+        function startFileParsing(filename) {
+            const status = parsingStatus[filename];
+            
+            if (status.isCompleted) return;
+            
+            status.isParsing = true;
+            updateParseButton(filename, true);
+            updateProgressDisplay(filename, status.progress, true, false);
+            
+            // 更新文件行状态类
+            updateFileRowStatus(filename, 'parsing');
+            
+            // 模拟解析进度
+            status.intervalId = setInterval(() => {
+                if (status.progress < 100) {
+                    status.progress += Math.random() * 5;
+                    if (status.progress >= 100) {
+                        status.progress = 100;
+                        completeFileParsing(filename);
+                    }
+                    updateProgressDisplay(filename, status.progress, true, false);
+                }
+            }, 200);
+        }
+
+        // 暂停文件解析
+        function pauseFileParsing(filename) {
+            const status = parsingStatus[filename];
+            
+            status.isParsing = false;
+            clearInterval(status.intervalId);
+            updateParseButton(filename, false);
+            updateProgressDisplay(filename, status.progress, false, false);
+            
+            // 更新文件行状态类
+            updateFileRowStatus(filename, 'uploaded');
+        }
+
+        // 完成文件解析
+        function completeFileParsing(filename) {
+            const status = parsingStatus[filename];
+            
+            status.isParsing = false;
+            status.isCompleted = true;
+            clearInterval(status.intervalId);
+            
+            // 更新文件状态
+            updateFileParsedStatus(filename);
+            
+            // 更新UI显示
+            updateParseButton(filename, false, true);
+            updateProgressDisplay(filename, 100, false, true);
+            
+            // 更新文件行状态类
+            updateFileRowStatus(filename, 'completed');
+            
+            // 检查是否所有文件都已解析完成
+            checkAllFilesParsed();
+        }
+
+        // 重置文件解析状态
+        function resetFileParsing(filename) {
+            const status = parsingStatus[filename];
+            
+            status.isParsing = false;
+            status.isCompleted = false;
+            status.progress = 0;
+            clearInterval(status.intervalId);
+            
+            // 更新文件状态
+            updateFileParsedStatus(filename, false);
+            
+            // 更新UI显示
+            updateParseButton(filename, false, false);
+            updateProgressDisplay(filename, 0, false, false);
+            
+            // 更新文件行状态类
+            updateFileRowStatus(filename, 'uploaded');
+            
+            // 检查是否所有文件都已解析完成
+            checkAllFilesParsed();
+        }
+
+        // 更新文件行状态类
+        function updateFileRowStatus(filename, status) {
+            const fileRow = document.querySelector(`.file-item[data-filename="${filename}"]`);
+            if (!fileRow) return;
+            
+            // 移除所有状态类
+            fileRow.classList.remove('uploaded', 'parsing', 'completed');
+            
+            // 添加新的状态类
+            fileRow.classList.add(status);
+        }
+
+        // 更新解析按钮显示
+        function updateParseButton(filename, isParsing, isCompleted = false) {
+            const button = document.querySelector(`.parse-control-btn[data-filename="${filename}"]`);
+            if (!button) return;
+            
+            if (isCompleted) {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                `;
+            } else if (isParsing) {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
+                    </svg>
+                `;
+            } else {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+                    </svg>
+                `;
+            }
+        }
+
+        // 更新进度显示
+        function updateProgressDisplay(filename, progress, isParsing, isCompleted) {
+            const progressContainer = document.querySelector(`.parse-progress-container[data-filename="${filename}"]`);
+            if (!progressContainer) return;
+            
+            const progressFill = progressContainer.querySelector('.parse-progress-fill');
+            const progressText = progressContainer.querySelector('.parse-progress-text');
+            
+            if (progressFill) {
+                progressFill.style.width = `${progress}%`;
+            }
+            
+            if (progressText) {
+                progressText.textContent = `${Math.round(progress)}%`;
+            }
+            
+            // 更新状态文本
+            const statusText = progressContainer.querySelector('.proceed-text, .parsing-text, .pending-text');
+            if (statusText) {
+                statusText.remove();
+            }
+            
+            // 添加新的状态文本
+            progressContainer.insertAdjacentHTML('afterbegin', getStatusText(parsingStatus[filename]));
+        }
+
+        // 更新文件解析状态
+        function updateFileParsedStatus(filename, parsed = true) {
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            const updatedFiles = existingFiles.map(file => {
+                if (file.name === filename) {
+                    return { ...file, parsed: parsed };
+                }
+                return file;
+            });
+            localStorage.setItem(`kb-files-${currentKnowledgeBase}`, JSON.stringify(updatedFiles));
         }
 
         // 文件预览功能
@@ -1050,8 +1811,8 @@
             const previewContent = document.getElementById('preview-content');
             const downloadBtn = document.getElementById('download-btn');
             
-            previewTitle.textContent = `预览文件: ${filename}`;
-            previewContent.innerHTML = '<div class="preview-placeholder"><div class="loading loading-spinner"></div><p>正在加载文件...</p></div>';
+            previewTitle.textContent = `Preview: ${filename}`;
+            previewContent.innerHTML = '<div class="preview-placeholder"><div class="loading loading-spinner"></div><p>Loading file...</p></div>';
             
             // 显示模态框
             previewModal.style.display = 'flex';
@@ -1082,8 +1843,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <h4 class="text-lg font-medium mb-2">${filename}</h4>
-                            <p>该文件类型无法在浏览器中预览</p>
-                            <p class="text-sm mt-2">文件路径: ${filepath}</p>
+                            <p>This file type cannot be previewed in the browser</p>
+                            <p class="text-sm mt-2">File path: ${filepath}</p>
                         </div>
                     `;
             }
@@ -1096,14 +1857,14 @@
             // 模拟从服务器获取文件内容
             setTimeout(() => {
                 // 模拟文本内容
-                const sampleText = `这是文件 "${filename}" 的内容预览。
+                const sampleText = `This is the content preview of file "${filename}".
 
-在实际应用中，这里会显示真实的文件内容。
+In a real application, the actual file content would be displayed here.
 
-文件信息:
-- 文件名: ${filename}
-- 文件路径: ${filepath}
-- 文件类型: ${getFileType(filename)}
+File information:
+- File name: ${filename}
+- File path: ${filepath}
+- File type: ${getFileType(filename)}
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
 
@@ -1141,10 +1902,10 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <h4 class="text-lg font-medium mb-2">${filename}</h4>
-                    <p>PDF 文件预览</p>
+                    <p>PDF file preview</p>
                     <div class="mt-4 text-sm text-gray-500">
-                        <p>在实际应用中，这里会使用 PDF.js 显示真实的 PDF 内容</p>
-                        <p class="mt-2">文件路径: ${filepath}</p>
+                        <p>In a real application, PDF.js would be used to display the actual PDF content</p>
+                        <p class="mt-2">File path: ${filepath}</p>
                     </div>
                 </div>
             `;
@@ -1160,10 +1921,10 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <h4 class="text-lg font-medium mb-2">${filename}</h4>
-                    <p>Word 文档预览</p>
+                    <p>Word document preview</p>
                     <div class="mt-4 text-sm text-gray-500">
-                        <p>在实际应用中，Word文档需要服务器端转换为PDF或HTML格式</p>
-                        <p class="mt-2">文件路径: ${filepath}</p>
+                        <p>In a real application, Word documents need to be converted to PDF or HTML format on the server side</p>
+                        <p class="mt-2">File path: ${filepath}</p>
                     </div>
                 </div>
             `;
@@ -1172,7 +1933,7 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
         // 下载文件功能
         function downloadFile(filename, filepath) {
             // 在实际应用中，这里应该实现真实的文件下载逻辑
-            alert(`在实际应用中，这将下载文件: ${filename}\n文件路径: ${filepath}`);
+            alert(`In a real application, this would download the file: ${filename}\nFile path: ${filepath}`);
         }
         
         // 关闭预览模态框
@@ -1212,9 +1973,246 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
                 const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
                 const updatedFiles = existingFiles.filter(file => file.name !== fileName);
                 localStorage.setItem(`kb-files-${currentKnowledgeBase}`, JSON.stringify(updatedFiles));
+                
+                // 清除解析状态
+                delete parsingStatus[fileName];
+                
                 loadFiles();
-                generateGraph();
+                resetGraph();
+                // 更新知识库文件数量显示
+                updateKnowledgeBaseFileCount(currentKnowledgeBase);
             }
+        }
+
+        // 重置图谱状态
+        function resetGraph() {
+            graphGenerated = false;
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            if (generateGraphBtn) {
+                generateGraphBtn.textContent = 'Visualization';
+                generateGraphBtn.disabled = true;
+            }
+            
+            const graphContainer = document.getElementById('graph-container');
+            if (graphContainer) {
+                graphContainer.innerHTML = `
+                    <div class="flex items-center justify-center h-full">
+                        <div class="text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                            </svg>
+                            <p class="mt-2 text-lg text-gray-500">Click "Visualization" to create knowledge graph</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 隐藏图谱生成进度条
+            const graphProgressContainer = document.getElementById('graph-progress-container');
+            if (graphProgressContainer) {
+                graphProgressContainer.style.display = 'none';
+            }
+            
+            // 清除图谱生成间隔
+            if (graphGenerationInterval) {
+                clearInterval(graphGenerationInterval);
+                graphGenerationInterval = null;
+            }
+        }
+
+        // 重置图谱高亮
+        function resetGraphHighlight() {
+            if (!window.currentCytoscapeInstance) return;
+            
+            const cy = window.currentCytoscapeInstance;
+            
+            // 重置所有节点的样式
+            cy.nodes().style({
+                'background-color': '#3b82f6',
+                'opacity': 1
+            });
+            
+            cy.edges().style({
+                'line-color': '#95A5A6',
+                'target-arrow-color': '#95A5A6',
+                'opacity': 1
+            });
+        }
+
+        // 图谱生成函数
+        function generateGraph() {
+            const graphContainer = document.getElementById('graph-container');
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            const graphProgressContainer = document.getElementById('graph-progress-container');
+            const graphProgressFill = document.getElementById('graph-progress-fill');
+            const graphProgressText = document.getElementById('graph-progress-text');
+            
+            // 禁用生成按钮
+            if (generateGraphBtn) {
+                generateGraphBtn.disabled = true;
+            }
+            
+            // 重置进度条
+            if (graphProgressFill) {
+                graphProgressFill.style.width = '0%';
+            }
+            if (graphProgressText) {
+                graphProgressText.textContent = '0%';
+            }
+            
+            // 显示进度条
+            if (graphProgressContainer) {
+                graphProgressContainer.style.display = 'flex';
+            }
+            
+            // 显示生成中状态
+            graphContainer.innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-lg text-gray-500">Generating knowledge graph...</div></div>';
+            
+            // 模拟生成进度
+            let progress = 0;
+            graphGenerationInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(graphGenerationInterval);
+                    graphGenerationInterval = null;
+                    
+                    // 生成完成
+                    completeGraphGeneration();
+                }
+                
+                // 更新进度条
+                if (graphProgressFill) {
+                    graphProgressFill.style.width = `${progress}%`;
+                }
+                
+                if (graphProgressText) {
+                    graphProgressText.textContent = `${Math.round(progress)}%`;
+                }
+            }, 200);
+        }
+        
+        // 完成图谱生成
+        function completeGraphGeneration() {
+            graphGenerated = true;
+            
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            if (generateGraphBtn) {
+                generateGraphBtn.textContent = 'Visualization';
+                generateGraphBtn.disabled = false;
+            }
+            
+            // 隐藏进度条
+            const graphProgressContainer = document.getElementById('graph-progress-container');
+            if (graphProgressContainer) {
+                graphProgressContainer.style.display = 'none';
+            }
+            
+            // 模拟从后端获取数据
+            setTimeout(() => {
+                // 使用你提供的三元组数据
+                const triplets = [
+                    ['2022 citrus bowl', 'Played_on', 'January 1, 2022'], 
+                    ['2022 citrus bowl', 'Telecast_by', 'Abc'], 
+                    ['Vrbo', 'Sponsored', 'Citrus bowl'], 
+                    ['Homeaway', 'Owns', 'Vrbo'], 
+                    ['Expedia', 'Parent_company_of', 'Homeaway'], 
+                    ['Kentucky wildcats', 'Played_against', 'Iowa hawkeyes'], 
+                    ['Kentucky wildcats', 'Entered_citrus_bowl_with_record', '9-3'], 
+                    ['Kentucky wildcats', 'Entered_citrus_bowl_ranking', 'No. 22'], 
+                    ['Kentucky wildcats', 'Made_second_citrus_bowl_appearance', '2019'], 
+                    ['The hawkeyes', 'Entered', 'Citrus bowl'], 
+                    ['The hawkeyes', 'Had_record', '10-3'], 
+                    ['The hawkeyes', 'Ranked', 'No. 15'], 
+                    ['Iowa', 'Made_appearance', 'Citrus bowl'], 
+                    ['Iowa', 'Played_at', 'Camping world stadium'], 
+                    ['2023 citrus bowl', 'Played_on', 'January 2, 2023'], 
+                    ['2023 citrus bowl', 'Played_at', 'Camping world stadium'], 
+                    ['Lsu tigers', 'Played_against', 'Purdue boilermakers'], 
+                    ['Lsu tigers', 'Won', '63-7'], 
+                    ['Lsu tigers', 'Tied', '56 point margin'], 
+                    ['2022 fbs football season', 'Concluded_with', '2022-23 bowl games'], 
+                    ['Citrus bowl', 'Held', '77th annual'], 
+                    ["Kellogg's", 'Purchased_sponsorship_rights_to', 'Cheez-it citrus bowl'], 
+                    ["Kellogg's", 'Sponsors', 'Cheez-it bowl'], 
+                    ['Georgia', 'Mauled', 'Tcu'], 
+                    ['Georgia', 'Played_in', 'Cfp national championship game'], 
+                    ['Lsu', 'Played_against', 'Purdue'], 
+                    ['Quad wilson', 'Picked_off', 'Jack albers'], 
+                    ['Quad wilson', 'Returned_int', '99'], 
+                    ['Lsu', 'Won_game', '63-7']
+                ];
+                
+                // 将三元组转换为图数据
+                const graphData = convertTripletsToGraphData(triplets);
+                
+                // 保存图数据供全屏使用
+                window.currentGraphData = graphData;
+                
+                // 渲染图谱
+                renderKnowledgeGraph(graphData);
+            }, 500);
+        }
+
+        // 高亮图谱中与选中文件相关的节点
+        function highlightGraphNodes(filename) {
+            if (!window.currentCytoscapeInstance) return;
+            
+            const cy = window.currentCytoscapeInstance;
+            
+            // 重置所有节点的样式
+            cy.nodes().style({
+                'background-color': '#3b82f6',
+                'opacity': 0.4
+            });
+            
+            cy.edges().style({
+                'line-color': '#95A5A6',
+                'target-arrow-color': '#95A5A6',
+                'opacity': 0.4
+            });
+            
+            // 根据文件名确定要突出显示的节点
+            // 这里我们模拟为每个文件分配一些特定的节点
+            const fileNodes = getNodesForFile(filename);
+            
+            // 高亮与选中文件相关的节点
+            fileNodes.forEach(nodeId => {
+                const node = cy.getElementById(nodeId);
+                if (node) {
+                    node.style({
+                        'background-color': '#ef4444',
+                        'opacity': 1
+                    });
+                    
+                    // 高亮与这些节点相连的边
+                    node.connectedEdges().style({
+                        'line-color': '#ef4444',
+                        'target-arrow-color': '#ef4444',
+                        'opacity': 1
+                    });
+                    
+                    // 高亮相连的节点
+                    node.neighbors().style({
+                        'background-color': '#f59e0b',
+                        'opacity': 0.8
+                    });
+                }
+            });
+        }
+        
+        // 根据文件名获取对应的节点
+        function getNodesForFile(filename) {
+            // 模拟数据：为每个文件分配一些节点
+            const fileNodeMapping = {
+                'document1.txt': ['2022 citrus bowl', 'Vrbo', 'Homeaway'],
+                'document2.txt': ['Kentucky wildcats', 'Iowa hawkeyes', 'The hawkeyes'],
+                'document3.txt': ['2023 citrus bowl', 'Lsu tigers', 'Purdue boilermakers'],
+                'document4.txt': ['Citrus bowl', "Kellogg's", 'Cheez-it bowl'],
+                'document5.txt': ['Georgia', 'Tcu', 'Cfp national championship game']
+            };
+            
+            return fileNodeMapping[filename] || [];
         }
 
         // 全屏显示图谱功能
@@ -1403,57 +2401,6 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
             return types[ext] || 'File';
         }
 
-        // 图谱生成函数
-        function generateGraph() {
-            const graphContainer = document.getElementById('graph-container');
-            graphContainer.innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-lg text-gray-500">正在生成知识图谱...</div></div>';
-            
-            // 模拟从后端获取数据
-            setTimeout(() => {
-                // 使用你提供的三元组数据
-                const triplets = [
-                    ['2022 citrus bowl', 'Played_on', 'January 1, 2022'], 
-                    ['2022 citrus bowl', 'Telecast_by', 'Abc'], 
-                    ['Vrbo', 'Sponsored', 'Citrus bowl'], 
-                    ['Homeaway', 'Owns', 'Vrbo'], 
-                    ['Expedia', 'Parent_company_of', 'Homeaway'], 
-                    ['Kentucky wildcats', 'Played_against', 'Iowa hawkeyes'], 
-                    ['Kentucky wildcats', 'Entered_citrus_bowl_with_record', '9-3'], 
-                    ['Kentucky wildcats', 'Entered_citrus_bowl_ranking', 'No. 22'], 
-                    ['Kentucky wildcats', 'Made_second_citrus_bowl_appearance', '2019'], 
-                    ['The hawkeyes', 'Entered', 'Citrus bowl'], 
-                    ['The hawkeyes', 'Had_record', '10-3'], 
-                    ['The hawkeyes', 'Ranked', 'No. 15'], 
-                    ['Iowa', 'Made_appearance', 'Citrus bowl'], 
-                    ['Iowa', 'Played_at', 'Camping world stadium'], 
-                    ['2023 citrus bowl', 'Played_on', 'January 2, 2023'], 
-                    ['2023 citrus bowl', 'Played_at', 'Camping world stadium'], 
-                    ['Lsu tigers', 'Played_against', 'Purdue boilermakers'], 
-                    ['Lsu tigers', 'Won', '63-7'], 
-                    ['Lsu tigers', 'Tied', '56 point margin'], 
-                    ['2022 fbs football season', 'Concluded_with', '2022-23 bowl games'], 
-                    ['Citrus bowl', 'Held', '77th annual'], 
-                    ["Kellogg's", 'Purchased_sponsorship_rights_to', 'Cheez-it citrus bowl'], 
-                    ["Kellogg's", 'Sponsors', 'Cheez-it bowl'], 
-                    ['Georgia', 'Mauled', 'Tcu'], 
-                    ['Georgia', 'Played_in', 'Cfp national championship game'], 
-                    ['Lsu', 'Played_against', 'Purdue'], 
-                    ['Quad wilson', 'Picked_off', 'Jack albers'], 
-                    ['Quad wilson', 'Returned_int', '99'], 
-                    ['Lsu', 'Won_game', '63-7']
-                ];
-                
-                // 将三元组转换为图数据
-                const graphData = convertTripletsToGraphData(triplets);
-                
-                // 保存图数据供全屏使用
-                window.currentGraphData = graphData;
-                
-                // 渲染图谱
-                renderKnowledgeGraph(graphData, graphContainer);
-            }, 1000);
-        }
-        
         // 将三元组转换为图数据
         function convertTripletsToGraphData(triplets) {
             const nodes = [];
@@ -1595,12 +2542,12 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
             // 添加交互功能
             cy.on('tap', 'node', function(evt){
                 const node = evt.target;
-                console.log('点击了节点:', node.data('label'));
+                console.log('Clicked node:', node.data('label'));
             });
             
             cy.on('tap', 'edge', function(evt){
                 const edge = evt.target;
-                console.log('点击了边:', edge.data('label'));
+                console.log('Clicked edge:', edge.data('label'));
             });
             
             // 添加鼠标滚轮缩放支持
