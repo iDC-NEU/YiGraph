@@ -181,6 +181,14 @@ class OllamaEnv:
         print(
             f"llm_mode_name: {llm_mode_name}, llm_embed_name: {llm_embed_name}, chunk_size: {Settings.chunk_size}, chunk_overlap: {chunk_overlap}")
 
+    
+    def chat(self, messages: list) -> str:
+
+        response = self.llm.chat(messages=messages)
+
+        return response.raw
+
+    
     def complete(self, prompt, info=""):
         response = self.llm.complete(prompt)
         print_text(f'{prompt}\n', color='yellow')
@@ -1075,6 +1083,16 @@ Respond with JSON only:
         if not response_text:
             return "Unable to generate answer from the algorithm result."
         return response_text
+    
+    def chat(self, messages: list) -> str:
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages
+        )
+        response_text = response.choices[0].message.content
+        if not response_text:
+            return "Unable to generate answer."
+        return response_text
 
 
 
@@ -1168,6 +1186,24 @@ class Reasoner:
         if hasattr(self.env, "generate_response"):
             return self.env.generate_response(prompt)
         raise NotImplementedError("Underlying environment does not support generate_response/complete")
+
+
+    def chat(self, messages: list):
+        if hasattr(self.env, "chat"):
+            return self.env.chat(messages)
+        raise NotImplementedError("Underlying environment does not support chat")
+
+
+    def general_query_response(self, query):
+        from aag.reasoner.prompt_template.llm_prompt import general_query_prompt
+        messages = [
+            {"role": "system", "content": general_query_prompt},
+            {
+                "role": "user",
+                "content": query
+            },
+        ]
+        return self.chat(messages)
 
 
 

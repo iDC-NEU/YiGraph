@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional, Callable, List
 from aag.config.engine_config import *
 from aag.models.graph_workflow_dag import GraphWorkflowDAG, WorkflowStep
 from aag.reasoner.model_deployment import Reasoner
+from aag.engine.router import QueryRouter, QueryType
 from aag.computing_engine.computing_engine import ComputingEngine
 from aag.expert_search_engine.rag import ExpertSearchEngine
 from aag.data_pipeline.data_transformer.dataset_manager import DatasetManager
@@ -62,7 +63,9 @@ class Scheduler:
 
         self._init_dataset_manager()
 
-        
+        self._init_router()
+
+    
     def _init_reasoner(self):
         """初始化 reasoner 连接"""
         try:
@@ -99,6 +102,15 @@ class Scheduler:
             print(f"✗ DatasetManager initialization failed: {e}")
             raise
 
+
+    def _init_router(self):
+        try:
+            self.router = QueryRouter(reasoner=self.reasoner)
+            print("✓ Reasoner initialized")
+        except Exception as e:
+            print(f"✗ Reasoner initialization failed: {e}")
+            raise
+
     def list_datasets(self, dtype: Optional[str] = None) -> Dict[str, List[str]]:
         return self.dataset_manager.list_datasets(dtype)
 
@@ -107,6 +119,28 @@ class Scheduler:
         return self.current_dataset
 
     async def execute(self, query: str, decompose: bool = True) -> str:
+        
+        decision = self.router.route(
+            query=query,
+        )
+
+        logger.info(f"🚦[Router] query_type={decision.query_type}, reason={decision.reason}")
+
+        # 1) graph analysis
+        if decision.query_type == QueryType.GRAPH:
+            return await self._execute_graph(query, decompose=decompose)
+
+        # 2) rag task
+        elif decision.query_type == QueryType.RAG:
+
+            raise NotImplementedError
+            # return await self.rag_engine.answer(query)
+
+        # 3) general query
+        return self.reasoner.general_query_response(query)
+    
+
+    async def _execute_graph(self, query: str, decompose: bool = True) -> str:
         if not self.computing_engine._initialized:
             await self.computing_engine.initialize()
 
