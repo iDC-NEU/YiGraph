@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
         block.innerHTML = `
             <div class="flex ${flexDirection} items-center gap-x-2">
                 <div class="inline-flex flex-shrink-0 h-8 w-8 rounded-full overflow-hidden border-2 border-white dark:border-slate-700 ${avatarMargin}">
-                    <img src="${sender === 'user' ? '/static/images/avatar/a.jpg' : '/static/images/avatar/bots/AAG.png'}" alt="" />
+                    <img src="${sender === 'user' ? '/static/images/avatar/human.jpeg' : '/static/images/avatar/bots/AAG.png'}" alt="" />
                 </div>
                 <h6 class="font-bold text-sm capitalize text-slate-600 dark:text-slate-100 ${userNameAlign}">
                     ${sender === 'user' ? 'you' : 'AAG'}${isThinking ? ' (thinking)' : ''}
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
         mermaidContainer.style.margin = '0 auto'; 
         mermaidContainer.style.display = 'inline-block';
         
-        // 生成mermaid代码
+        // 生成mermaid代码（保留原始逻辑）
         let mermaidCode = 'graph TD;\n';
         dagData.nodes.forEach(node => {
             const escapedLabel = node.label
@@ -316,37 +316,52 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 只有在DAG模式开启时才显示按钮和示例
         if (isDagModeEnabled) {
-            // 添加按钮
+            // 合并后的按钮样式（采用新代码的按钮样式）
             const buttonContainer = document.createElement('div');
-            buttonContainer.className = 'mt-4 flex gap-4';
+            buttonContainer.className = 'mt-6 flex gap-4 justify-center';
             buttonContainer.innerHTML = `
-                <button class="dag-yes-btn px-4 py-2 rounded-md transition-colors">生成答案</button>
-                <button class="dag-no-btn px-4 py-2 rounded-md transition-colors">修改DAG</button>
+                <button class="dag-yes-btn px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium shadow-md transition-all duration-200 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    生成答案
+                </button>
+                <button class="dag-no-btn px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-md transition-all duration-200 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                    </svg>
+                    修改DAG
+                </button>
             `;
             dagWrapper.appendChild(buttonContainer);
             buttonContainer.querySelector('.dag-yes-btn').addEventListener('click', handleYesClick);
             buttonContainer.querySelector('.dag-no-btn').addEventListener('click', handleNoClick);
             
-            // 添加示例修改建议
+            // 合并后的修改示例（采用新代码的示例样式）
             const exampleDiv = document.createElement('div');
-            exampleDiv.className = 'text-sm text-slate-500 dark:text-slate-400 mb-3';
-            exampleDiv.innerHTML =
-                "<br>" +
-                "<strong>示例修改建议：</strong><br><br>" +
-                "节点修改方式：<br>" +  // 用 <br> 强制换行
-                "调整现有节点标签：对原有节点的描述进行细化（如补充功能细节、限定范围、明确输出要求等），让节点作用更具体；<br>" +
-                "新增节点：根据流程需求，在现有节点之间添加中间环节（如过滤、验证、转换等功能节点），完善逻辑链条；<br>" +
-                "删除节点：移除流程中冗余、重复或不必要的节点，简化链路。<br><br>" +
-                "连接关系修改方式：<br>" +
-                "新增连接：在需要关联的节点间建立新的指向关系（如新增节点与前后节点的衔接、补充反馈链路等）；<br>" +
-                "删除连接：移除无效的循环、冗余或逻辑矛盾的连接（如无意义的回环、重复指向等）；<br>" +
-                "调整连接指向：改变原有连接的起点或终点，优化流程顺序（如将 \"检索→问题\" 的循环改为 \"检索→生成\" 的直接指向）。";
+            exampleDiv.className = 'mt-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-800 text-left w-full max-w-2xl mx-auto';
+            exampleDiv.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="mt-1 p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-medium text-slate-700 dark:text-slate-200 mb-2">DAG 修改指南</h4>
+                        <div class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                            <div>• <strong class="text-blue-600 dark:text-blue-400">节点修改:</strong> 细化功能、添加中间节点、删除冗余节点</div>
+                            <div>• <strong class="text-blue-600 dark:text-blue-400">连接修改:</strong> 新增连接、删除无效连接、调整指向关系</div>
+                        </div>
+                    </div>
+                </div>
+            `;
             dagWrapper.appendChild(exampleDiv);
         }
         
         parentContainer.appendChild(dagWrapper);
         
-        // 创建Tooltip
+        // 原始代码中的Tooltip和渲染逻辑（保持不变）
         const tooltip = document.createElement('div');
         tooltip.className = 'dag-tooltip';
         tooltip.style.cssText = `
@@ -357,14 +372,14 @@ document.addEventListener('DOMContentLoaded', function() {
             border-radius: 4px;
             font-size: 12px;
             pointer-events: none;
-            z-index: 9999; /* 确保在最上层 */
+            z-index: 9999;
             opacity: 0;
             transition: opacity 0.2s;
-            white-space: nowrap; /* 防止ID换行 */
+            white-space: nowrap;
         `;
         document.body.appendChild(tooltip);
         
-        // 渲染图表并绑定事件
+        // 渲染图表并绑定事件（保持原始逻辑）
         mermaid.init(undefined, `#${mermaidId}`).then(() => {
             const svgElement = document.querySelector(`#${mermaidId} svg`);
             if (!svgElement) {
@@ -374,42 +389,30 @@ document.addEventListener('DOMContentLoaded', function() {
             svgElement.style.margin = '0 auto';
             svgElement.style.display = 'block';
             
-            // 存储节点ID与节点数据的映射（方便快速查找）
+            // 节点映射和事件监听（保持原始逻辑）
             const nodeMap = {};
             dagData.nodes.forEach(node => {
                 nodeMap[node.id] = node;
             });
             
-            // 调试：打印所有节点ID，确认数据正确
-            console.log('DAG节点ID列表:', Object.keys(nodeMap));
-            
-            // 事件委托：监听整个SVG的鼠标事件（兼容性更好）
             svgElement.addEventListener('mouseover', (e) => {
-                // 查找当前鼠标所在的节点元素（mermaid的节点通常是g元素，包含rect和text）
-                const nodeG = e.target.closest('g[class*="node"]'); // 匹配包含"node"类的g元素
+                const nodeG = e.target.closest('g[class*="node"]');
                 if (!nodeG) return;
-                // 从节点元素的ID中提取原始nodeId（兼容不同mermaid版本的ID格式）
-                // mermaid可能生成的ID格式：node-xxx、flowchart-node-xxx等，需要提取核心ID
                 const nodeGId = nodeG.id;
                 let matchedNodeId = null;
-                // 遍历节点ID，查找与当前元素ID部分匹配的（如nodeId在元素ID中出现）
                 Object.keys(nodeMap).forEach(originalId => {
                     if (nodeGId.includes(originalId)) {
                         matchedNodeId = originalId;
                     }
                 });
                 if (matchedNodeId) {
-                    // 显示Tooltip
                     tooltip.textContent = `节点ID: ${matchedNodeId}`;
-                    // 定位在鼠标右下方
                     tooltip.style.left = `${e.pageX + 10}px`;
                     tooltip.style.top = `${e.pageY + 10}px`;
                     tooltip.style.opacity = '1';
-                    console.log('悬停节点ID:', matchedNodeId); // 调试用
                 }
             });
             
-            // 鼠标移动时更新Tooltip位置
             svgElement.addEventListener('mousemove', (e) => {
                 if (tooltip.style.opacity === '1') {
                     tooltip.style.left = `${e.pageX + 10}px`;
@@ -417,7 +420,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            // 鼠标离开SVG时隐藏Tooltip
             svgElement.addEventListener('mouseout', () => {
                 tooltip.style.opacity = '0';
             });
@@ -428,7 +430,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
-
+    
     // 内容追加函数
     function appendContentToBlock(block, contentType, content) {
         // 根据消息类型确定内容应该添加到哪个容器
