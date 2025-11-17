@@ -383,8 +383,8 @@ class MilvusDB2:
         """
         self.collection_name = collection_name
         self.dim = dim
-        self.server_ip = server_ip
-        self.server_port = server_port
+        self.server_ip = host
+        self.server_port = port
         self.metric = metric
         self.verbose = verbose
         
@@ -542,6 +542,7 @@ class MilvusDB2:
         # 检查文件扩展名
         file_extension = os.path.splitext(file_path)[1].lower()
         
+        # TODO(sanzo): support different file formats
         if file_extension in ['.yaml', '.yml']:
             # YAML文件
             return self._load_from_yaml_config(file_path)

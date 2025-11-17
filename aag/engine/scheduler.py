@@ -11,9 +11,11 @@ from aag.models.graph_workflow_dag import GraphWorkflowDAG, WorkflowStep
 from aag.reasoner.model_deployment import Reasoner
 from aag.engine.router import QueryRouter, QueryType
 from aag.computing_engine.computing_engine import ComputingEngine
-from aag.expert_search_engine.rag import ExpertSearchEngine
+from aag.expert_search_engine.search import ExpertSearchEngine
 from aag.data_pipeline.data_transformer.dataset_manager import DatasetManager
 from aag.config.data_upload_config import DatasetConfig
+from aag.rag_engine.vector_rag import VectorRAG
+from aag.reasoner.prompt_template.llm_prompt import rag_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +67,8 @@ class Scheduler:
 
         self._init_router()
 
+        self._init_rag_engine()
+
     
     def _init_reasoner(self):
         """初始化 reasoner 连接"""
@@ -111,6 +115,16 @@ class Scheduler:
             print(f"✗ Reasoner initialization failed: {e}")
             raise
 
+
+    def _init_rag_engine(self):
+
+        try:
+            self.rag_engine = VectorRAG(self.config.retrieval)
+            print(f"✓ RAGEngine initialized")
+        except Exception as e:
+            print(f"✗ RAGEngineinitialization failed: {e}")
+            raise
+
     def list_datasets(self, dtype: Optional[str] = None) -> Dict[str, List[str]]:
         return self.dataset_manager.list_datasets(dtype)
 
@@ -132,9 +146,7 @@ class Scheduler:
 
         # 2) rag task
         elif decision.query_type == QueryType.RAG:
-
-            raise NotImplementedError
-            # return await self.rag_engine.answer(query)
+            return await self._execute_rag(query)
 
         # 3) general query
         return self.reasoner.general_query_response(query)
@@ -191,6 +203,27 @@ class Scheduler:
         #     result = self.computing_engine.run_algorithm(node, algo, knowledge)
         #     self.reasoner.explain_result(node, result)
         # return self.reasoner.generate_report(dag)
+
+
+    async def _execute_rag(self, query: str) -> str:
+
+        # collection_name or self.current_dataset
+        if not self.current_dataset:
+            return "⚠️ 未指定分析数据，请先设置分析对象"
+            
+        if not self.rag_engine._initialized:
+            await self.rag_engine.initialize()
+
+
+        retrieved_context, _ = self.rag_engine.retrieve(query)
+
+        prompt = rag_prompt.format(context=retrieved_context, query=query)
+
+        return self.reasoner.generate_response(prompt)
+
+
+
+      # step5. 整理计算结果，输出报告
 
     def build_dag_from_subquery_plan(self, subquery_plan: Dict[str, Any]) -> GraphWorkflowDAG:
         """
