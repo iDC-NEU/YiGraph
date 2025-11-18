@@ -387,6 +387,7 @@ class MilvusDB2:
         self.server_port = port
         self.metric = metric
         self.verbose = verbose
+        self.overwrite = True
         
         # 设置默认的索引参数
         if index_params is None:
@@ -416,9 +417,60 @@ class MilvusDB2:
         
         # 连接数据库
         self._connect_database()
+
+        # create new database when not exist
+        # print(f"{self.collection_name=}")
+        if self.collection_name not in self.client.list_collections() or True:
+            self.create()
+            print(f"create new vector database {self.collection_name}")
         
         # 初始化向量存储
         self._init_vector_store()
+    
+    
+    def create(self, consistency_level="Session"):
+
+        # connections.connect("default", host="localhost", port="19530")
+
+        if self.overwrite and self.collection_name in self.client.list_collections(
+        ):
+            self.client.drop_collection(self.collection_name)
+
+        # 1. Create schema
+        schema = MilvusClient.create_schema(
+            auto_id=False,
+            enable_dynamic_field=True,
+        )
+
+
+        # 2. Add fields to schema
+        schema.add_field(field_name="pk", datatype=DataType.INT64, is_primary=True)
+        schema.add_field(field_name="vec", datatype=DataType.FLOAT_VECTOR, dim=self.dim)
+        # schema.add_field(field_name="my_varchar", datatype=DataType.VARCHAR, max_length=512)
+
+
+        index_params = self.client.prepare_index_params()
+
+        # 4. Add indexes
+
+        index_params.add_index(
+            field_name="vec", 
+            index_type="AUTOINDEX",
+            metric_type=self.metric
+        )
+
+
+        # 5. Create collection
+        self.client.create_collection(
+            collection_name=self.collection_name,
+            schema=schema,
+            index_params=index_params,
+        )
+
+
+        self.db = Collection(self.collection_name)
+        self.db.load()
+    
     
     def _connect_database(self):
         """连接Milvus数据库"""
