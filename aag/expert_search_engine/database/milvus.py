@@ -17,7 +17,7 @@ from llama_index.core import (
     StorageContext,
     load_index_from_storage,
 )
-
+from llama_index.core import Settings
 from pymilvus import (
     connections,
     # utility,
@@ -598,6 +598,8 @@ class MilvusDB2:
         if file_extension in ['.yaml', '.yml']:
             # YAML文件
             return self._load_from_yaml_config(file_path)
+        elif file_extension in ['.md', '.txt']:
+            return self._load_from_raw_text(file_path)
         else:
             # 其他文件类型，暂时忽略
             print(f"File type {file_extension} is not supported yet. Only YAML files are supported.")
@@ -638,6 +640,11 @@ class MilvusDB2:
         except Exception as e:
             print(f"Error loading from YAML config: {e}")
             return []
+    
+    def _load_from_raw_text(self, data_file: str):
+        with open(data_file, 'r', encoding='utf-8') as f:
+            text = f.read()
+        return [Document(text=text)]
     
     
     def search(self, query: str, top_k: int = 5, similarity_threshold: float = 0.0, candidate_algorithms: List[str] = None):

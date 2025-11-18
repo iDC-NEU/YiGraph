@@ -175,8 +175,9 @@ class VectorRAG(RAG):
         self.chunk_size = self.config.embedding.get("chunk_size", 1024)
         self.chunk_overlap = self.config.embedding.get("chunk_overlap", 50)
 
-        # TODO(sanzo): get dataset name from yaml
-        self.collection_name = self.config.database.vector.get("collection_name", "test")
+        # set collection name in ininialize function
+        self.collection_name = None
+        # self.collection_name = self.config.database.vector.get("collection_name", "test")
 
 
         self.vector_k_similarity = self.config.rag.vector.get("k_similarity", 5)
@@ -201,44 +202,42 @@ class VectorRAG(RAG):
         # prepare data
         self._initialized = False
 
-        print(f"✓ VectorRAG_delay initialized with vector_k_similarity={self.vector_k_similarity}")
+        print(f"✓ VectorRAG initialized with vector_k_similarity={self.vector_k_similarity}")
 
 
 
 
-    def initialized(self, ):
+    def initialize(self, db_name: str, file_path):
         
-        
-        self._init_vector_database()
+        self._init_vector_database(db_name)
 
         row_count = self.vector_db.get_collection_stats()['row_count']
 
         if row_count == 0:
-            pass
-
-        # TODO(sanzo): get data firl from yaml
-        self.vector_db.build_index(file_path)
+            self.vector_rag_retriever = self.vector_db.build_index(file_path)
 
         self._initialized = True
 
-        
 
-    def _init_vector_database(self):
-        """初始化向量数据库连接"""
+    def _init_vector_database(self, db_name: str):
+
+        self.collection_name = db_name
+
         try:
-            # 初始化向量数据库
             self.vector_db = MilvusDB2(
                 collection_name=self.collection_name,
                 dim=self.dim,
                 host=self.host,
                 port=self.port,
             )
-            print(f"✓ Vector database initialized: {self.config.database.vector.get('collection_name', 'null_collection')}")
+            print(f"✓ Vector database initialized: {self.collection_name}")
         except Exception as e:
             print(f"✗ Vector database initialization failed: {e}")
             raise
 
 
+    def retrieve_deduplication(self):
+        raise NotImplementedError        
 
 
     def _init_embedding_model(self):
@@ -319,13 +318,18 @@ class VectorRAG(RAG):
         self.time_info['time_embeding'] = time_embeding
 
         time_query = -time.time()
-        node_with_scores = self.vector_rag_retriever._get_node_with_embedding(
-            str_or_query_bundle)
+        # node_with_scores = self.vector_rag_retriever._get_node_with_embedding(
+        #     str_or_query_bundle)
+
+        # node_with_scores = self.vector_rag_retriever.query(str_or_query_bundle)
+        node_with_scores = self.vector_rag_retriever.as_retriever()._get_nodes_with_embeddings(str_or_query_bundle)
+
+        
         # node_with_scores = self.vector_db.retrieve_nodes(query_str, str_or_query_bundle.embedding)
         time_query += time.time()
         self.time_info['time_query'] = time_query
 
-        print(node_with_scores)
+        # print(f"{type(node_with_scores)=}")
         # node_with_scores = self.vector_query_engine.retrieve(QueryBundle(query_str))
         if len(node_with_scores) == 0:
             response = "No information was retrieved, LLM cannot generate a response"

@@ -206,21 +206,21 @@ class Scheduler:
 
 
     async def _execute_rag(self, query: str) -> str:
-
-        # collection_name or self.current_dataset
         if not self.current_dataset:
             return "⚠️ 未指定分析数据，请先设置分析对象"
-            
-        if not self.rag_engine._initialized:
-            await self.rag_engine.initialize()
+        
+        dataset_name = self.current_dataset.name
+        data_info = self.dataset_manager.get_dataset_info(name=dataset_name)
+        file_path = data_info.schema.path
 
+        if not self.rag_engine._initialized:
+            self.rag_engine.initialize(db_name=dataset_name, file_path=file_path)
 
         retrieved_context, _ = self.rag_engine.retrieve(query)
 
         prompt = rag_prompt.format(context=retrieved_context, query=query)
 
         return self.reasoner.generate_response(prompt)
-
 
 
       # step5. 整理计算结果，输出报告

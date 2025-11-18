@@ -71,9 +71,11 @@ class ExpertSearchEngine:
         self.graph_db: Optional[NebulaDB] = None
         self.vector_db: Optional[MilvusDB2] = None
 
-        self.graph_rag = GraphRAG(config=config)
-        self.vector_rag = VectorRAG(config=config)
-
+        
+        # self.graph_rag = GraphRAG(config=config)
+        # self.vector_rag = VectorRAG(config=config)
+        self.graph_rag: Optional[GraphRAG] = None
+        self.vector_rag: Optional[VectorRAG] = None
 
         self.task_index: Dict[Any, Any] = {}
         self.algo_index: Dict[Any, Any] = {}
