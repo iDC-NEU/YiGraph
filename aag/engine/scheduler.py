@@ -188,7 +188,7 @@ class Scheduler:
         self.dag.refresh_data_dependency(self.reasoner)
         self.dag.print_data_dependency()
         print("✅ DAG 构建与算法选择完成，准备执行计算流程")
-
+        sys.exit(0)
         # step4. 根据每个问题确定的算法，调度算法执行
         return await self._run_algorithm_pipeline()
 
