@@ -58,7 +58,7 @@ class VectorRAG_delay(RAG):
         self.time_info['time_embeding'] = time_embeding
 
         time_query = -time.time()
-        node_with_scores = self.vector_rag_retriever._get_nodes_with_embeddings(
+        node_with_scores = self.vector_rag_retriever._get_node_with_embedding(
             str_or_query_bundle)
         # node_with_scores = self.vector_db.retrieve_nodes(query_str, str_or_query_bundle.embedding)
         time_query += time.time()
@@ -110,7 +110,7 @@ class VectorRAG_delay(RAG):
         self.time_info['time_embeding'] = time_embeding
 
         time_query = -time.time()
-        node_with_scores = self.vector_rag_retriever._get_nodes_with_embeddings(
+        node_with_scores = self.vector_rag_retriever._get_node_with_embedding(
             str_or_query_bundle)
         # node_with_scores = self.vector_db.retrieve_nodes(query_str, str_or_query_bundle.embedding)
         time_query += time.time()
@@ -319,7 +319,7 @@ class VectorRAG(RAG):
         self.time_info['time_embeding'] = time_embeding
 
         time_query = -time.time()
-        node_with_scores = self.vector_rag_retriever._get_nodes_with_embeddings(
+        node_with_scores = self.vector_rag_retriever._get_node_with_embedding(
             str_or_query_bundle)
         # node_with_scores = self.vector_db.retrieve_nodes(query_str, str_or_query_bundle.embedding)
         time_query += time.time()
@@ -371,7 +371,7 @@ class VectorRAG(RAG):
         self.time_info['time_embeding'] = time_embeding
 
         time_query = -time.time()
-        node_with_scores = self.vector_rag_retriever._get_nodes_with_embeddings(
+        node_with_scores = self.vector_rag_retriever._get_node_with_embedding(
             str_or_query_bundle)
         # node_with_scores = self.vector_db.retrieve_nodes(query_str, str_or_query_bundle.embedding)
         time_query += time.time()
