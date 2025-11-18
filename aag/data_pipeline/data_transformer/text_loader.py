@@ -17,17 +17,26 @@ from aag.config.data_upload_config import *
 class TextDataLoader:
     """文本数据加载引擎，用于加载非结构化文本类数据集。"""
 
-    def __init__(self, registry_path: str):
+    def __init__(self, schema_path: str):
         """
         初始化文本数据加载器。
 
         Args:
-            registry_path (str): 文本数据注册文件路径（text_registry.yaml）
+            schema_path (str): 文本数据注册文件路径（text_registry.yaml）
         """
-        self.registry_path = registry_path
+        self.schema_path = schema_path
         self.dataset_schemas: Dict[str, DatasetConfig] = {}   
-        pass
+        self._load_yaml()                
 
+
+    def _load_yaml(self):
+        try:
+            self.dataset_schemas = read_datasets_map(self.schema_path)
+            print(f"[INFO] Loaded {len(self.dataset_schemas)} datasets from {self.schema_path}")
+        except Exception as e:
+            raise RuntimeError(f"[ERROR] Failed to load dataset schemas from {self.schema_path}: {e}")
+    
+    
     def _load_registry(self) -> Dict[str, Any]:
         """
         加载文本数据注册表（YAML 文件）。

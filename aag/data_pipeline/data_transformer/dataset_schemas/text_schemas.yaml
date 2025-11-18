@@ -1,2 +1,8 @@
 datasets:
-  
+- description: AMLSim documents.
+  name: AMLSim1K_text
+  schema:
+    path: /home/hdd/dataset/rag-data/AMLSim/README.md 
+    format: txt
+    encoding: utf-8
+  type: text

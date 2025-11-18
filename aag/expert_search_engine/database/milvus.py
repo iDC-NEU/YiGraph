@@ -17,7 +17,7 @@ from llama_index.core import (
     StorageContext,
     load_index_from_storage,
 )
-
+from llama_index.core import Settings
 from pymilvus import (
     connections,
     # utility,
@@ -383,10 +383,11 @@ class MilvusDB2:
         """
         self.collection_name = collection_name
         self.dim = dim
-        self.server_ip = server_ip
-        self.server_port = server_port
+        self.server_ip = host
+        self.server_port = port
         self.metric = metric
         self.verbose = verbose
+        self.overwrite = True
         
         # 设置默认的索引参数
         if index_params is None:
@@ -416,9 +417,60 @@ class MilvusDB2:
         
         # 连接数据库
         self._connect_database()
+
+        # create new database when not exist
+        # print(f"{self.collection_name=}")
+        if self.collection_name not in self.client.list_collections() or True:
+            self.create()
+            print(f"create new vector database {self.collection_name}")
         
         # 初始化向量存储
         self._init_vector_store()
+    
+    
+    def create(self, consistency_level="Session"):
+
+        # connections.connect("default", host="localhost", port="19530")
+
+        if self.overwrite and self.collection_name in self.client.list_collections(
+        ):
+            self.client.drop_collection(self.collection_name)
+
+        # 1. Create schema
+        schema = MilvusClient.create_schema(
+            auto_id=False,
+            enable_dynamic_field=True,
+        )
+
+
+        # 2. Add fields to schema
+        schema.add_field(field_name="pk", datatype=DataType.INT64, is_primary=True)
+        schema.add_field(field_name="vec", datatype=DataType.FLOAT_VECTOR, dim=self.dim)
+        # schema.add_field(field_name="my_varchar", datatype=DataType.VARCHAR, max_length=512)
+
+
+        index_params = self.client.prepare_index_params()
+
+        # 4. Add indexes
+
+        index_params.add_index(
+            field_name="vec", 
+            index_type="AUTOINDEX",
+            metric_type=self.metric
+        )
+
+
+        # 5. Create collection
+        self.client.create_collection(
+            collection_name=self.collection_name,
+            schema=schema,
+            index_params=index_params,
+        )
+
+
+        self.db = Collection(self.collection_name)
+        self.db.load()
+    
     
     def _connect_database(self):
         """连接Milvus数据库"""
@@ -542,9 +594,12 @@ class MilvusDB2:
         # 检查文件扩展名
         file_extension = os.path.splitext(file_path)[1].lower()
         
+        # TODO(sanzo): support different file formats
         if file_extension in ['.yaml', '.yml']:
             # YAML文件
             return self._load_from_yaml_config(file_path)
+        elif file_extension in ['.md', '.txt']:
+            return self._load_from_raw_text(file_path)
         else:
             # 其他文件类型，暂时忽略
             print(f"File type {file_extension} is not supported yet. Only YAML files are supported.")
@@ -585,6 +640,11 @@ class MilvusDB2:
         except Exception as e:
             print(f"Error loading from YAML config: {e}")
             return []
+    
+    def _load_from_raw_text(self, data_file: str):
+        with open(data_file, 'r', encoding='utf-8') as f:
+            text = f.read()
+        return [Document(text=text)]
     
     
     def search(self, query: str, top_k: int = 5, similarity_threshold: float = 0.0, candidate_algorithms: List[str] = None):
