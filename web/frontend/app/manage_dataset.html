@@ -542,6 +542,42 @@
             max-width: 300px;
             line-height: 1.5;
         }
+        
+        /* 总解析进度条样式 */
+        .total-parse-progress-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        
+        .total-parse-progress-bar {
+            flex: 1;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .total-parse-progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .total-parse-progress-text {
+            font-size: 0.75rem;
+            color: #64748b;
+            min-width: 35px;
+        }
+        
+        .total-parse-status {
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+            min-width: 50px;
+        }
     </style>
 </head>
 
@@ -767,8 +803,6 @@
                                
 
 
-
-
                             </div>
                         </div>
                         
@@ -801,7 +835,21 @@
                                                         <th class="py-3 px-4 text-start">Document</th>
                                                         <th class="py-3 px-4 text-start">Size</th>
                                                         <th class="py-3 px-4 text-start">Uploaded</th>
-                                                        <th class="py-3 px-4 text-start">Status</th>
+                                                        <th class="py-3 px-4 text-start">
+    <div class="total-parse-progress-container" id="total-parse-progress-container">
+        <span class="total-parse-status" id="total-parse-status">pending</span>
+        <button class="parse-control-btn" id="total-parse-control-btn" title="Start/Pause all">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+            </svg>
+        </button>
+        <div class="total-parse-progress-bar">
+            <div class="total-parse-progress-fill" id="total-parse-progress-fill" style="width: 0%;"></div>
+        </div>
+        <span class="total-parse-progress-text" id="total-parse-progress-text">0%</span>
+    </div>
+</th>
+                                                        <th class="py-3 px-4 text-start"></th>
                                                         <th class="py-3 px-4 text-start"></th>
                                                     </tr>
                                                 </thead>
@@ -989,7 +1037,7 @@
     
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='assets/js/bundle-app.js') }}"></script>
-    <script src="{{ url_for('static', filename='assets/js/scripts.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/scripts.js') }}"></script>
     <script>
         // 当前选中的知识库
         let currentKnowledgeBase = 'react';
@@ -1000,6 +1048,13 @@
         let uploadModal, addFilesBtn, closeModal, cancelUpload, fileInput, dropZone;
         let selectedFilesContainer, startUploadBtn, uploadProgress, progressFill, uploadStatus;
         
+        // 总解析状态
+        let totalParsingStatus = {
+            progress: 0,
+            isParsing: false,
+            isCompleted: false,
+            intervalId: null
+        };
 
         // 从后端获取知识库列表
 async function loadKnowledgeBases() {
@@ -1419,6 +1474,14 @@ async function renderKnowledgeBaseList() {
                     generateGraph();
                 });
             }
+            
+            // 初始化总解析按钮
+            const totalParseControlBtn = document.getElementById('total-parse-control-btn');
+            if (totalParseControlBtn) {
+                totalParseControlBtn.addEventListener('click', () => {
+                    toggleTotalParsing();
+                });
+            }
         }
 
         // 当DOM加载完成后初始化应用
@@ -1691,6 +1754,9 @@ async function renderKnowledgeBaseList() {
             
             // 检查是否所有文件都已解析完成
             checkAllFilesParsed();
+            
+            // 更新总解析进度
+            updateTotalParseProgress();
         }
 
         // 获取状态文本
@@ -1745,6 +1811,9 @@ async function renderKnowledgeBaseList() {
                     startFileParsing(filename);
                 }
             }
+            
+            // 更新总解析进度
+            updateTotalParseProgress();
         }
 
         // 开始文件解析
@@ -1769,6 +1838,9 @@ async function renderKnowledgeBaseList() {
                         completeFileParsing(filename);
                     }
                     updateProgressDisplay(filename, status.progress, true, false);
+                    
+                    // 更新总解析进度
+                    updateTotalParseProgress();
                 }
             }, 200);
         }
@@ -1784,6 +1856,9 @@ async function renderKnowledgeBaseList() {
             
             // 更新文件行状态类
             updateFileRowStatus(filename, 'uploaded');
+            
+            // 更新总解析进度
+            updateTotalParseProgress();
         }
 
         // 完成文件解析
@@ -1806,6 +1881,9 @@ async function renderKnowledgeBaseList() {
             
             // 检查是否所有文件都已解析完成
             checkAllFilesParsed();
+            
+            // 更新总解析进度
+            updateTotalParseProgress();
         }
 
         // 重置文件解析状态
@@ -1829,6 +1907,9 @@ async function renderKnowledgeBaseList() {
             
             // 检查是否所有文件都已解析完成
             checkAllFilesParsed();
+            
+            // 更新总解析进度
+            updateTotalParseProgress();
         }
 
         // 更新文件行状态类
@@ -2474,6 +2555,176 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
                     }
                 });
             }
+        }
+
+        // 总解析控制函数
+        function toggleTotalParsing() {
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            
+            if (existingFiles.length === 0) {
+                return;
+            }
+            
+            if (totalParsingStatus.isParsing) {
+                // 暂停所有解析
+                pauseTotalParsing();
+            } else {
+                // 开始所有解析
+                startTotalParsing();
+            }
+        }
+        
+        function startTotalParsing() {
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            
+            totalParsingStatus.isParsing = true;
+            updateTotalParseButton(true);
+            updateTotalParseStatus('parsing');
+            
+            // 启动所有未完成的文件解析
+            existingFiles.forEach(file => {
+                if (!parsingStatus[file.name] || !parsingStatus[file.name].isCompleted) {
+                    if (!parsingStatus[file.name]) {
+                        parsingStatus[file.name] = {
+                            progress: 0,
+                            isParsing: false,
+                            intervalId: null,
+                            isCompleted: false
+                        };
+                    }
+                    startFileParsing(file.name);
+                }
+            });
+            
+            // 模拟总解析进度
+            totalParsingStatus.intervalId = setInterval(() => {
+                updateTotalParseProgress();
+                
+                // 检查是否所有文件都已完成
+                const allCompleted = existingFiles.every(file => {
+                    return parsingStatus[file.name] && parsingStatus[file.name].isCompleted;
+                });
+                
+                if (allCompleted) {
+                    completeTotalParsing();
+                }
+            }, 500);
+        }
+        
+        function pauseTotalParsing() {
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            
+            totalParsingStatus.isParsing = false;
+            clearInterval(totalParsingStatus.intervalId);
+            updateTotalParseButton(false);
+            updateTotalParseStatus('pending');
+            
+            // 暂停所有正在解析的文件
+            existingFiles.forEach(file => {
+                if (parsingStatus[file.name] && parsingStatus[file.name].isParsing) {
+                    pauseFileParsing(file.name);
+                }
+            });
+        }
+        
+        function completeTotalParsing() {
+            totalParsingStatus.isParsing = false;
+            totalParsingStatus.isCompleted = true;
+            clearInterval(totalParsingStatus.intervalId);
+            
+            updateTotalParseButton(false, true);
+            updateTotalParseStatus('completed');
+        }
+        
+        function updateTotalParseProgress() {
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            
+            if (existingFiles.length === 0) {
+                totalParsingStatus.progress = 0;
+                updateTotalParseDisplay(0);
+                return;
+            }
+            
+            // 计算平均进度
+            let totalProgress = 0;
+            let completedCount = 0;
+            
+            existingFiles.forEach(file => {
+                if (parsingStatus[file.name]) {
+                    totalProgress += parsingStatus[file.name].progress;
+                    if (parsingStatus[file.name].isCompleted) {
+                        completedCount++;
+                    }
+                }
+            });
+            
+            const averageProgress = totalProgress / existingFiles.length;
+            totalParsingStatus.progress = averageProgress;
+            
+            updateTotalParseDisplay(averageProgress);
+        }
+        
+        function updateTotalParseDisplay(progress) {
+            const progressFill = document.getElementById('total-parse-progress-fill');
+            const progressText = document.getElementById('total-parse-progress-text');
+            
+            if (progressFill) {
+                progressFill.style.width = `${progress}%`;
+            }
+            
+            if (progressText) {
+                progressText.textContent = `${Math.round(progress)}%`;
+            }
+        }
+        
+        function updateTotalParseButton(isParsing, isCompleted = false) {
+            const button = document.getElementById('total-parse-control-btn');
+            if (!button) return;
+            
+            if (isCompleted) {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                `;
+            } else if (isParsing) {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
+                    </svg>
+                `;
+            } else {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+                    </svg>
+                `;
+            }
+        }
+        
+        function updateTotalParseStatus(status) {
+            const statusElement = document.getElementById('total-parse-status');
+            if (!statusElement) return;
+            
+            let statusText = 'pending';
+            let statusClass = 'pending-text';
+            
+            switch (status) {
+                case 'parsing':
+                    statusText = 'parsing';
+                    statusClass = 'parsing-text';
+                    break;
+                case 'completed':
+                    statusText = 'completed';
+                    statusClass = 'proceed-text';
+                    break;
+                default:
+                    statusText = 'pending';
+                    statusClass = 'pending-text';
+            }
+            
+            statusElement.textContent = statusText;
+            statusElement.className = `total-parse-status ${statusClass}`;
         }
 
         // 工具函数
