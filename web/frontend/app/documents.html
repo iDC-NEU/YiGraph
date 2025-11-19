@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zxx" id="pageroot">
+<html lang="en" id="pageroot">
 
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,7 @@
     <!-- Fav Icon  -->
     <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
     <title>Dataset List - Scribbler.AI - AI Content Generator Dashboard and User App HTML Template </title>
-    <link rel="stylesheet" href="/static/assets/css/app.css">
+   <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/app.css') }}">
 </head>
 
 <body class="min-w-[320px] bg-slate-100 dark:bg-slate-900">
@@ -22,10 +22,6 @@
         create_knowledge_base: "/api/knowledge_bases"
     };
 </script>
-
-
-
-
 
     <div id="root">
         <button data-target="#demoSettings" class="class-toggle fixed end-0 top-1/4 z-[1000] flex h-10 w-10 items-center justify-center rounded-s-lg border border-e-0 border-slate-200 bg-white text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
@@ -415,7 +411,9 @@
                             </ul>
                         </div>
                         <div class="px-3">
-                            <a href="{{ url_for('manage_dataset') }}" class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">Create New</a>
+                           <button id="createDatasetBtn" class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">
+    Create New
+</button>
                         </div>
                     </div>
                     <!-- head -->
@@ -426,17 +424,7 @@
                                     <input placeholder="Search all columns..." class="z-10 w-full rounded-md border-slate-200 bg-white py-2 text-sm/[1.125rem] text-slate-600 placeholder:text-slate-400 focus:border-slate-200 focus:shadow-none focus:outline-none disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 placeholder:dark:text-slate-500" type="text" />
                                 </div>
                             </div>
-                            <div class="flex items-center gap-x-3">
-                                <div class="hidden text-sm text-slate-500 dark:text-slate-300 xs:block"> Show </div>
-                                <div class="w-16 xs:w-20">
-                                    <select class="js-select z-10 w-full rounded-md border-slate-200 bg-white py-2 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
-                                        <option>8</option>
-                                        <option>16</option>
-                                        <option>24</option>
-                                        <option>32</option>
-                                    </select>
-                                </div>
-                            </div>
+                            <!-- 删除了 Show 选择框区域 -->
                         </div>
                         <!-- head -->
                         <div class="overflow-x-auto scrollbar-thin scrollbar-track-slate-200 scrollbar-thumb-slate-600 dark:scrollbar-track-slate-800">
@@ -445,24 +433,13 @@
                                     <tr>
                                         <th class="py-2 pe-5 ps-5 text-start last:sticky last:end-0 last:bg-white last:ps-2 last:dark:bg-slate-950"> Datasets </th>
                                         <th class="py-2 pe-5 ps-5 text-start last:sticky last:end-0 last:bg-white last:ps-2 last:dark:bg-slate-950"> Files </th>
-                                        <th class="py-2 pe-5 ps-5 text-start last:sticky last:end-0 last:bg-white last:ps-2 last:dark:bg-slate-950"> Creatd At </th>
+                                        <th class="py-2 pe-5 ps-5 text-start last:sticky last:end-0 last:bg-white last:ps-2 last:dark:bg-slate-950"> Created At </th>
                                         <th class="py-2 pe-5 ps-5 text-start last:sticky last:end-0 last:bg-white last:ps-2 last:dark:bg-slate-950"></th>
                                     </tr>
                                 </thead>
                                    <tbody id="knowledgeBaseTableBody">
                                         <!-- 这里会被JavaScript动态填充 -->
                                     </tbody>
-
-
-
-
-
-                               
-
-
-
-
-
 
                             </table>
                         </div>
@@ -501,31 +478,62 @@
                         </div>
                     </div>
                     <!-- card -->
+
+                     <!-- 创建知识库的模态框 -->
+<div id="createDatasetModal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black bg-opacity-50">
+    <div class="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-slate-900">
+        <div class="mb-4 flex items-center justify-between">
+            <h3 class="text-lg font-bold text-slate-700 dark:text-white">Create New Dataset</h3>
+            <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+        
+        <form id="createDatasetForm">
+            <div class="mb-4">
+                <label for="datasetName" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Dataset Name
+                </label>
+                <input 
+                    type="text" 
+                    id="datasetName" 
+                    name="datasetName"
+                    class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                    placeholder="Enter dataset name"
+                    required
+                />
+                <div id="nameError" class="mt-1 text-xs text-red-500 hidden">Please enter a dataset name</div>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button 
+                    type="button" 
+                    id="cancelCreateBtn"
+                    class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                >
+                    Cancel
+                </button>
+                <button 
+                    type="submit" 
+                    class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                    Create Dataset
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
                 </div><!-- container -->
             </div>
-            <div class="relative isolate mt-auto border-t border-slate-200 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-950">
-                <div class="container px-3">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs font-medium text-slate-600 dark:text-white"> &copy; 2024. Crafted By&nbsp; <a class="text-slate-700 transition-all hover:text-blue-600 dark:text-white hover:dark:text-blue-600" href="https://www.tongzhewang.com" target="_blank"> 童哲网 </a>
-                        </p>
-                        <ul class="-mx-3 flex flex-wrap">
-                            <li>
-                                <a href="#" class="px-3 text-sm font-medium text-slate-600 transition-all hover:text-blue-600 dark:text-slate-100 hover:dark:text-blue-600"> Terms </a>
-                            </li>
-                            <li>
-                                <a target="_blank" href="../about.html" class="px-3 text-sm font-medium text-slate-600 transition-all hover:text-blue-600 dark:text-slate-100 hover:dark:text-blue-600"> About </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <!-- footer -->
+            <!-- 删除了页脚部分 -->
         </div><!-- page-content -->
     </div><!-- root -->
     <!-- JavaScript -->
-    <script src="../assets/js/bundle-app.js"></script>
-    <script src="../assets/js/scripts.js"></script>
-
+    <script src="{{ url_for('static', filename='assets/js/bundle-app.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/scripts.js') }}"></script>
 
     
 
@@ -536,7 +544,7 @@ const API_BASE = "/api";
 // 获取知识库数据
 async function getKnowledgeBases() {
     try {
-        console.log('开始获取知识库数据...');
+        console.log('Fetching knowledge base data...');
         const response = await fetch(`${API_BASE}/knowledge_bases`);
         
         if (!response.ok) {
@@ -544,32 +552,32 @@ async function getKnowledgeBases() {
         }
         
         const result = await response.json();
-        console.log('API响应:', result);
+        console.log('API response:', result);
         
         if (result.success) {
             return result.data;
         } else {
-            throw new Error(result.error || '获取数据失败');
+            throw new Error(result.error || 'Failed to fetch data');
         }
     } catch (error) {
-        console.error('获取知识库失败:', error);
-        // 返回模拟数据作为备选
+        console.error('Failed to fetch knowledge bases:', error);
+        // Return mock data as fallback
         return [
             {
                 "id": 1,
-                "名称": "人工智能知识库",
+                "名称": "AI Knowledge Base",
                 "文档个数": 128,
                 "创建时间": "2024-09-12 10:30:00",
             },
             {
                 "id": 2,
-                "名称": "前端开发文档库",
+                "名称": "Frontend Development Docs",
                 "文档个数": 86,
                 "创建时间": "2023-06-05 14:15:00",
             },
             {
                 "id": 3,
-                "名称": "公司政策与规章",
+                "名称": "Company Policies & Regulations",
                 "文档个数": 54,
                 "创建时间": "2022-11-20 09:00:00",
             },
@@ -579,7 +587,7 @@ async function getKnowledgeBases() {
 
 // 删除知识库
 async function deleteKnowledgeBase(id) {
-    if (confirm('确定要删除这个知识库吗？')) {
+    if (confirm('Are you sure you want to delete this knowledge base?')) {
         try {
             const response = await fetch(`${API_BASE}/knowledge_bases/${id}`, {
                 method: 'DELETE'
@@ -588,34 +596,34 @@ async function deleteKnowledgeBase(id) {
             const result = await response.json();
             
             if (result.success) {
-                alert('删除成功');
+                alert('Successfully deleted');
                 await renderKnowledgeBases();
             } else {
-                alert(`删除失败: ${result.error}`);
+                alert(`Deletion failed: ${result.error}`);
             }
         } catch (error) {
-            console.error('删除失败:', error);
-            alert('删除失败: ' + error.message);
+            console.error('Deletion failed:', error);
+            alert('Deletion failed: ' + error.message);
         }
     }
 }
 
 // 渲染知识库表格
 async function renderKnowledgeBases() {
-    console.log('开始渲染知识库表格...');
+    console.log('Rendering knowledge base table...');
     const knowledgeBases = await getKnowledgeBases();
     const tbody = document.getElementById('knowledgeBaseTableBody');
     
     if (!tbody) {
-        console.error('找不到表格tbody元素');
+        console.error('Could not find table tbody element');
         return;
     }
     
-    console.log('获取到的知识库数量:', knowledgeBases.length);
+    console.log('Number of knowledge bases fetched:', knowledgeBases.length);
     tbody.innerHTML = '';
     
     if (knowledgeBases.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-500">暂无数据</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-500">No data available</td></tr>';
         return;
     }
     
@@ -633,13 +641,13 @@ async function renderKnowledgeBases() {
                     </span>
                     <div class="ms-3">
                         <div class="line-clamp-2 text-xs font-bold text-slate-600 dark:text-slate-200">${kb.名称}</div>
-                        <div class="block text-[11px] font-medium text-slate-500 dark:text-slate-400">知识库</div>
+                        <div class="block text-[11px] font-medium text-slate-500 dark:text-slate-400">Knowledge Base</div>
                     </div>
                 </div>
             </td>
             <td class="border-t border-slate-200 py-3 pe-5 ps-5 last:sticky last:end-0 last:bg-white last:ps-2 dark:border-slate-800 last:dark:bg-slate-950">
                 <span class="text-xs text-slate-500 dark:text-slate-400">
-                    <strong>${kb.文档个数}</strong> 个文档
+                    <strong>${kb.文档个数}</strong> documents
                 </span>
             </td>
             <td class="border-t border-slate-200 py-3 pe-5 ps-5 last:sticky last:end-0 last:bg-white last:ps-2 dark:border-slate-800 last:dark:bg-slate-950">
@@ -651,9 +659,8 @@ async function renderKnowledgeBases() {
                     <li>
                         <button onclick="viewKnowledgeBase(${kb.id})" class="inline-flex items-center justify-center rounded-full bg-slate-200 p-2 text-slate-600 transition-all hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:text-slate-200 hover:dark:bg-blue-600 hover:dark:text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-3 w-3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                            </svg>
+    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+</svg>
                         </button>
                     </li>
                     <li>
@@ -670,27 +677,131 @@ async function renderKnowledgeBases() {
     });
 }
 
-// 查看知识库详情
+// 创建知识库
+async function createKnowledgeBase(name) {
+    try {
+        console.log('Creating knowledge base:', name);
+        
+        const response = await fetch(`${API_BASE}/knowledge_bases`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                名称: name
+            })
+        });
+        
+        const result = await response.json();
+        console.log('Create knowledge base response:', result);
+        
+        if (result.success) {
+            return result.data;
+        } else {
+            throw new Error(result.error || 'Failed to create knowledge base');
+        }
+    } catch (error) {
+        console.error('Failed to create knowledge base:', error);
+        throw error;
+    }
+}
+
+// 模态框管理
+function setupModal() {
+    const modal = document.getElementById('createDatasetModal');
+    const createBtn = document.getElementById('createDatasetBtn');
+    const closeBtn = document.getElementById('closeModalBtn');
+    const cancelBtn = document.getElementById('cancelCreateBtn');
+    const form = document.getElementById('createDatasetForm');
+    const nameInput = document.getElementById('datasetName');
+    const nameError = document.getElementById('nameError');
+
+    // 显示模态框
+    function showModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        nameInput.value = '';
+        nameError.classList.add('hidden');
+        nameInput.focus();
+    }
+
+    // 隐藏模态框
+    function hideModal() {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+
+    // 事件监听器
+    createBtn.addEventListener('click', showModal);
+    closeBtn.addEventListener('click', hideModal);
+    cancelBtn.addEventListener('click', hideModal);
+
+    // 点击模态框背景关闭
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            hideModal();
+        }
+    });
+
+    // 表单提交
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const datasetName = nameInput.value.trim();
+        
+        if (!datasetName) {
+            nameError.classList.remove('hidden');
+            nameInput.focus();
+            return;
+        }
+        
+        nameError.classList.add('hidden');
+        
+        try {
+            // 显示加载状态
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Creating...';
+            submitBtn.disabled = true;
+            
+            // 调用创建API
+            const newDataset = await createKnowledgeBase(datasetName);
+            console.log('Created successfully:', newDataset);
+            
+            // 隐藏模态框
+            hideModal();
+            
+            // 重新渲染表格
+            await renderKnowledgeBases();
+            
+            // 显示成功消息
+            alert(`Successfully created knowledge base: ${datasetName}`);
+            
+        } catch (error) {
+            console.error('Creation failed:', error);
+            alert(`Creation failed: ${error.message}`);
+        } finally {
+            // 恢复按钮状态
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.textContent = 'Create Dataset';
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+// 查看知识库详情 - 跳转到管理页面
 function viewKnowledgeBase(id) {
-    alert(`查看知识库 ID: ${id}`);
+    window.location.href = "{{ url_for('manage_dataset_page') }}?kb_id=" + id;
 }
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('页面加载完成，开始初始化...');
+    console.log('Page loaded, initializing...');
     renderKnowledgeBases();
+    setupModal();
 });
 </script>
 
-
-  
-
-
-
-
-
-
-   
 </body>
 
 </html>
