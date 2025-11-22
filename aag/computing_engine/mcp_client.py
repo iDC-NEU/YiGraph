@@ -128,9 +128,9 @@ class DynamicCodeExecutor:
         
         # 创建独立命名空间
         namespace = {
-        "data": data,
-        "__builtins__": __builtins__,  # 保留内置函数
-    }
+            "data": data,
+            "__builtins__": __builtins__,  # 保留内置函数
+        }
         
         try:
             # 执行代码
@@ -410,6 +410,7 @@ class GraphMCPClient:
             else:
                 return {"error": "❌ 工具调用失败: 无法解析工具调用结果"}
 
+            logger.info(f"result,result: {original_response}")
             # ========== 步骤2: 如果有后处理代码，调用后处理工具 ==========
             if post_processing_code:
                 logger.info(f"📤 应用后处理代码...")

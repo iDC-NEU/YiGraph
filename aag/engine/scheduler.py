@@ -5,14 +5,20 @@ import logging
 import json
 from argparse import OPTIONAL
 from dataclasses import asdict
-from typing import Any, Dict, Optional, Callable, List
+from typing import Any, Dict, Optional, Callable, List, Tuple
+
+from sympy import N
 from aag.config.engine_config import *
 from aag.models.graph_workflow_dag import GraphWorkflowDAG, WorkflowStep
+from aag.models.task_types import GraphAnalysisType
 from aag.reasoner.model_deployment import Reasoner
 from aag.computing_engine.computing_engine import ComputingEngine
 from aag.expert_search_engine.rag import ExpertSearchEngine
 from aag.data_pipeline.data_transformer.dataset_manager import DatasetManager
 from aag.config.data_upload_config import DatasetConfig
+from aag.engine.dependency_resolver import DataDependencyResolver
+from aag.expert_search_engine.database.datatype import VertexData, EdgeData
+from aag.utils.graph_conversion import flatten_graph, reconstruct_graph
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +35,11 @@ class Scheduler:
         self.expert_search_engine: Optional[ExpertSearchEngine] = None
         self.dag: Optional[GraphWorkflowDAG] = None
         self.dataset_manager: Optional[DatasetManager] = None
+        self.data_dependency_resolver: Optional[DataDependencyResolver] = None
 
         self.current_dataset : DatasetConfig = None
+        self.global_vertices: Optional[List[VertexData]] = None
+        self.global_edges: Optional[List[EdgeData]] = None
         
         self._initialize_components()
 
@@ -61,6 +70,8 @@ class Scheduler:
         self._init_expert_search_engine()
 
         self._init_dataset_manager()
+
+        self._init_data_dependency_resolver()
 
         
     def _init_reasoner(self):
@@ -98,12 +109,24 @@ class Scheduler:
         except Exception as e:
             print(f"✗ DatasetManager initialization failed: {e}")
             raise
+    
+    def _init_data_dependency_resolver(self):
+        """初始化 data dependency resolver 连接"""
+        try:
+            self.data_dependency_resolver = DataDependencyResolver(self.reasoner)
+            print("✓ DataDependencyResolver initialized")
+        except Exception as e:
+            print(f"✗ DataDependencyResolver initialization failed: {e}")
+            raise
 
     def list_datasets(self, dtype: Optional[str] = None) -> Dict[str, List[str]]:
         return self.dataset_manager.list_datasets(dtype)
 
     def specific_analysis_dataset(self, name: str, dtype: Optional[str] = None) -> DatasetConfig: 
         self.current_dataset  = self.dataset_manager.get_dataset_info(name, dtype)
+        if self.current_dataset and self.current_dataset.type == "graph":
+            self.global_vertices, self.global_edges = self.dataset_manager.get_dataset_content(self.current_dataset)
+            self.data_dependency_resolver.set_global_graph(flatten_graph(self.global_vertices, self.global_edges))
         return self.current_dataset
 
     async def execute(self, query: str, decompose: bool = False) -> str:
@@ -265,34 +288,27 @@ class Scheduler:
             logger.info(f"✅ 算法已选择 | ❓ 问题:{step.question}, 🧩 选择的任务类型: {step.task_type}, 🔍 选择的算法: {step.graph_algorithm}")
 
     async def _run_algorithm_pipeline(self):
-        #  按照 dag 的顺序，对每个节点，执行算法
-        #  对于每个节点来说：
-        #   （1） 首先获取这个节点的算法，然后调用  computing_engine的get_algorithm_description 函数，获取注册的tool 信息。
-        #   （2） 将这个节点的问题 和 tool信息 一起喂给 self.reasoner 的 xxx函数，该函数的作用是根据问题和tool的信息，从问题中提取参数并生成后处理代码。 根据这个函数的作用，给这个函数起个名字。 这个函数的内容先不用写
-        #   （3） 调用computing_engine的run_algorithm 执行函数，获取执行结果 tool_result
-        #   （4）  调用  self.reasoner 和分析结果生成回答， 同样起名字，不写函数内容
         analysis_result = ""
-        for step_id in self.dag.topological_order():
+
+        for step_id in self.dag.topological_order(): 
             step = self.dag.steps[step_id]
+
             if not step.graph_algorithm:
                 self.dag.set_failed(step_id, "未为该节点选择图算法")
                 raise RuntimeError(f"节点 {step_id} 缺少 graph_algorithm")
 
-            # 获取上层依赖节点的计算结果
-            # parents = self.dag.parents_of(step_id)
-            # upstream_results = [self.dag.steps[parent_id].result for parent_id in parents]
-
-            tool_description = await self.computing_engine.get_algorithm_description(
+            # step 1. 获取算法描述（doc， tool_metadata)， doc 是 tool_metadata 的字符串形式
+            tool_description,  tool_metadata = await self.computing_engine.get_algorithm_description(
                 step.graph_algorithm
             )
+
+            logger.info(f"tool_description:{tool_description}")
 
             extraction_result = self.reasoner.extract_parameters_with_postprocess(
                 question=step.question,
                 tool_description=tool_description
             )
-
-            # print(f"extraction_result:{extraction_result}")
-
+            
             logger.info(
                 f"✅ LLM 提取的参数: {json.dumps(extraction_result.get('parameters'), ensure_ascii=False)}")
 
@@ -313,23 +329,300 @@ class Scheduler:
                 self.dag.set_failed(step_id, error_msg)
                 raise RuntimeError(f"节点 {step_id} 执行失败：{error_msg}")
 
-            answer = self.reasoner.generate_answer_from_algorithm_result(
+            llm_analysis = self.reasoner.generate_answer_from_algorithm_result(
                 question=step.question,
                 tool_description=tool_description,
                 tool_result=tool_result,
             )
 
-            analysis_result += answer
+            analysis_result += llm_analysis
 
             self.dag.set_success(
                 step_id,
-                {
-                    "tool_result": tool_result,
-                    "answer": answer
-                },
+                output_data = None,
+                llm_analysis= llm_analysis
             )
 
         return analysis_result
+    
+    async def _run_algorithm_pipeline2(self):
+        analysis_result = ""
+
+        for step_id in self.dag.topological_order(): 
+            step = self.dag.steps[step_id]
+            tool_description = None
+            tool_metadata = None
+
+            if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
+                if not step.graph_algorithm:
+                    self.dag.set_failed(step_id, "未为该节点选择图算法")
+                    raise RuntimeError(f"节点 {step_id} 缺少 graph_algorithm")
+
+                 # step 1. 获取算法描述（doc， tool_metadata)， doc 是 tool_metadata 的字符串形式
+                tool_description,  tool_metadata = await self.computing_engine.get_algorithm_description(
+                    step.graph_algorithm
+                )   
+                logger.info(f"tool_description:{tool_description}")
+
+            # step 2. 上游依赖解析
+            data_dependency_ids = self.dag.parents_of(step_id)  # TODO（zihan: 改成获取数据依赖的邻居点）
+            data_dependency_parents = [self.dag.steps[pid] for pid in data_dependency_ids]
+            data_dependency_context = {
+                "graph_dependencies": [],
+                "parameter_dependencies": [],
+                "graph_input_adapter_result": None,
+                "parameter_input_adapter_result": None,
+            }
+            
+            if data_dependency_parents:
+                data_dependency_context = self.data_dependency_resolver.resolve_dependencies(
+                    step_id=step_id,
+                    step=step,
+                    alg_des_info= tool_metadata,
+                    data_dependency_parents=data_dependency_parents
+                )
+                logger.info(
+                    "📊 依赖上下文 | 图依赖:%s | 参数依赖:%s",
+                    len(data_dependency_context.get("graph_dependencies", [])),
+                    len(data_dependency_context.get("parameter_dependencies", [])),
+                )
+
+
+            # 如果任务类型是 GRAPH_ALGORITHM, 
+            # 进一步判断data_dependency_context中的graph_dependencies是否为空，如果不为空，表示有图依赖  
+            #     从 data_dependency_context中的graph_input_adapter_result拿到节点集合和边结合，调度reconstruct_graph 恢复成VertexData和EdgeData,调用 self.computing_engine.run_algorithm("initialize_graph", 切换到小图上
+            # 如果graph_dependencies为空, 用全图 self.computing_engine.run_algorithm("initialize_graph",
+            # 进一步判断data_dependency_context中的parameter_input_adapter_result是否为空，如果不为空，表示有参数依赖
+            #    调用reasoner的  self.reasoner.xxxx方法， 这个方法先不要实现，根据上下文先起一个合适的函数名
+            # 如果 parameter_input_adapter_result 为空，调用extraction_result = self.reasoner.extract_parameters_with_postprocess
+
+            # 如果任务类型是 NUMERIC_ANALYSIS,
+            # 这里写 pass
+
+
+            if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
+                try:
+                    await self._prepare_graph_for_execution(
+                        graph_dependencies=data_dependency_context.get("graph_dependencies") or [],
+                        graph_adapter_result=data_dependency_context.get("graph_input_adapter_result"),
+                    )
+                except Exception as graph_err:
+                    self.dag.set_failed(step_id, f"初始化工作图失败: {graph_err}")
+                    raise
+
+                try:
+                    extraction_result = self._prepare_parameters_for_execution(
+                        step=step,
+                        tool_description=tool_description,
+                        dependency_parameters=data_dependency_context.get("parameter_input_adapter_result") or {},
+                    )
+                except Exception as param_err:
+                    self.dag.set_failed(step_id, f"参数准备失败: {param_err}")
+                    raise
+
+                logger.info(
+                    "✅ LLM/依赖提取的参数: %s",
+                    json.dumps(extraction_result.get("parameters", {}), ensure_ascii=False)
+                )
+
+                tool_result = await self.computing_engine.run_algorithm(
+                    step.graph_algorithm,
+                    extraction_result.get("parameters", {}),
+                    extraction_result.get("post_processing_code", ""),
+                )
+
+                logger.info(f"✅ 工具执行: {tool_result.get('summary','完成')}")
+
+                if not tool_result.get("success", False):
+                    error_msg = tool_result.get("error", "算法执行失败")
+                    self.dag.set_failed(step_id, error_msg)
+                    raise RuntimeError(f"节点 {step_id} 执行失败：{error_msg}")
+
+                # llm_analysis = self.reasoner.generate_answer_from_algorithm_result(
+                #     question=step.question,
+                #     tool_description=tool_description,
+                #     tool_result=tool_result,
+                # )
+
+                # analysis_result += llm_analysis
+
+                self.dag.set_success(
+                    step_id,
+                    output_data=None
+                )
+
+                continue
+
+            elif step.task_type == GraphAnalysisType.NUMERIC_ANALYSIS:
+                logger.info("🧮 当前任务类型：Numeric Analysis → 暂未实现执行逻辑")
+                # TODO(chaoyi): 如果是数值依赖， 判定是否图数据依赖，如果有图数据依赖则一起喂给生成代码，如果没有则指示把依赖的参数喂给llm生成代码，调度执行代码
+                continue
+
+
+        #    if self.current_dataset.type == "graph":
+        #     try:
+        #         vertices, edges = self.dataset_manager.get_dataset_content(self.current_dataset)
+
+        #         result = await self.computing_engine.run_algorithm("initialize_graph", {
+        #         "vertices": [v.to_dict() for v in vertices],
+        #         "edges": [e.to_dict() for e in edges],
+        #         "dataset_config": self.current_dataset.to_dict()
+        #         })
+
+        #         if not result.get('success'):
+        #             raise Exception(result.get('error', '初始化失败'))
+        #     except Exception as e:
+        #         return f"❌ 加载图数据失败：{e}"
+
+
+            # 获取上层依赖节点的计算结果
+            # parents = self.dag.parents_of(step_id)
+            # upstream_results = [self.dag.steps[parent_id].result for parent_id in parents]
+            
+            # 找到上层依赖的数据节点， 获取数据依赖节点的计算结果和问题
+            # 把 数据依赖的问题和计算结果，一起喂给 llm，判断是 g 依赖 还是非 g 依赖。 然后决定做哪种转换？
+            # 从 数据依赖节点的计算结果中，选具体是依赖哪个计算结果。 计算结果都是 dict{key: value, description} 
+            # 如果是 g 依赖， 从全图上抽g
+            # 如果是 非 g 依赖， 直接做参数适配
+
+
+            # step 3. LLM 提取参数， 这里要合并参数
+            # extraction_result = self.reasoner.extract_parameters_with_postprocess(
+            #     question=step.question,
+            #     tool_description=tool_description,
+            #     dependency_context=data_dependency_context,
+            # )
+
+            # extraction_result = self.reasoner.extract_parameters_with_postprocess(
+            #     question=step.question,
+            #     tool_description=tool_description
+            # )
+            
+            # logger.info(
+            #     f"✅ LLM 提取的参数: {json.dumps(extraction_result.get('parameters'), ensure_ascii=False)}")
+
+            # if extraction_result.get("post_processing_code"):
+            #     logger.info(
+            #         f"✅ 后处理代码:\n{extraction_result.get('post_processing_code','')[:200]}...")
+
+
+            # tool_result = await self.computing_engine.run_algorithm(
+            #     step.graph_algorithm,
+            #     extraction_result.get("parameters", {}),
+            #     extraction_result.get("post_processing_code", "")
+            # )
+
+            # logger.info(f"✅ 工具执行: {tool_result.get('summary','完成')}")
+
+            # if not tool_result.get("success", False):
+            #     error_msg = tool_result.get("error", "算法执行失败")
+            #     self.dag.set_failed(step_id, error_msg)
+            #     raise RuntimeError(f"节点 {step_id} 执行失败：{error_msg}")
+
+            # llm_analysis = self.reasoner.generate_answer_from_algorithm_result(
+            #     question=step.question,
+            #     tool_description=tool_description,
+            #     tool_result=tool_result,
+            # )
+
+            # analysis_result += llm_analysis
+
+            # self.dag.set_success(step_id, tool_result, llm_analysis)
+            # self.dag.set_success(
+            #     step_id,
+            #     {
+            #         "tool_result": tool_result,
+            #         "answer": llm_analysis
+            #     },
+            # )
+
+        return analysis_result
+
+    async def _prepare_graph_for_execution(
+        self,
+        *,
+        graph_dependencies: List[Any],
+        graph_adapter_result: Optional[Dict[str, Any]],
+    ) -> Tuple[List[VertexData], List[EdgeData]]:
+        """
+        根据依赖上下文初始化当前应使用的图（全图或子图）。
+        """
+        if self.global_vertices is None or self.global_edges is None:
+            raise RuntimeError("全局图数据尚未加载，无法执行图算法。")
+
+        use_subgraph = bool(graph_dependencies) and bool(graph_adapter_result)
+        vertices_to_use = self.global_vertices
+        edges_to_use = self.global_edges
+
+        if use_subgraph:
+            node_ids_raw = (graph_adapter_result or {}).get("nodes") or []
+            edge_pairs_raw = (graph_adapter_result or {}).get("edges") or []
+            node_ids = [str(n) for n in node_ids_raw]
+            edge_pairs: List[Tuple[str, str]] = []
+            for edge in edge_pairs_raw:
+                if isinstance(edge, (list, tuple)) and len(edge) >= 2:
+                    edge_pairs.append((str(edge[0]), str(edge[1])))
+            if node_ids or edge_pairs:
+                vertices_to_use, edges_to_use = reconstruct_graph(
+                    node_ids,
+                    edge_pairs,
+                    self.global_vertices,
+                    self.global_edges,
+                )
+            else:
+                logger.warning("⚠️ 子图依赖缺少有效的节点或边数据，回退至全图。")
+                use_subgraph = False
+
+        payload = {
+            "vertices": [v.to_dict() for v in vertices_to_use or []],
+            "edges": [e.to_dict() for e in edges_to_use or []],
+        }
+        if self.current_dataset:
+            payload["dataset_config"] = self.current_dataset.to_dict()
+
+        result = await self.computing_engine.run_algorithm("initialize_graph", payload)
+        if not result.get("success", False):
+            raise RuntimeError(result.get("error", "初始化图数据失败"))
+
+        logger.info(
+            "🗺️ 初始化工作图 | 使用子图:%s | 节点:%s | 边:%s",
+            use_subgraph,
+            len(vertices_to_use or []),
+            len(edges_to_use or []),
+        )
+
+        return vertices_to_use, edges_to_use
+
+    def _prepare_parameters_for_execution(
+        self,
+        *,
+        step: WorkflowStep,
+        tool_description: Optional[str],
+        dependency_parameters: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """
+        根据数据依赖或 LLM 结果准备图算法输入参数。
+        """
+        dependency_parameters = dependency_parameters or {}
+        result = None
+        
+        try:
+            if dependency_parameters:
+                result = self.reasoner.merge_parameters_from_dependencies(
+                    question=step.question,
+                    tool_description=tool_description,
+                    dependency_parameters=dependency_parameters,
+                )
+            else:
+                result = self.reasoner.extract_parameters_with_postprocess(
+                    question=step.question,
+                    tool_description=tool_description,
+                )
+        except Exception as e:
+            logger.info(f"Parameter processing failed: {e}")
+            result = None
+
+        return result
 
     async def shutdown(self):
         if self.computing_engine:

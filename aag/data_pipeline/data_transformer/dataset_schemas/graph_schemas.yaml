@@ -1,5 +1,5 @@
 datasets:
-- description: AMLSim 1K synthetic transaction graph."
+- description: "AMLSim 1K synthetic transaction graph."
   name: AMLSim1K
   schema:
     edge:
@@ -31,3 +31,5 @@ datasets:
       path: /home/chency/GraphLLM/aag/datasets/graphs/transaction_amlsim/1K/accounts.csv
       type: account
   type: graph
+
+

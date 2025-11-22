@@ -3,9 +3,65 @@
 专注于DAG构建、拓扑排序和依赖关系管理
 """
 
+import collections
+# from pickle import DICT
+from pydantic import BaseModel
 from typing import Dict, List, Set, Any, Optional
 from dataclasses import dataclass
-import collections
+from aag.models.task_types import GraphAnalysisType, GraphAnalysisSubType
+from aag.engine.dependency_resolver import DataDependencyInfo
+
+class OutputField(BaseModel):
+    type: str
+    field_description: Optional[str] = None
+
+class OutputSchema(BaseModel):
+    description: Optional[str] = None
+    type: str = "dict"
+    fields: Dict[str, OutputField]
+
+@dataclass
+class StepOutputItem:
+    """单个步骤输出项（用于描述算法执行结果的结构化内容）"""
+    output_id: int          # 在同一dag节点中的顺序编号，用于表示结果生成顺序（从1开始）
+    task_type: GraphAnalysisSubType
+    source: str             # 算法名或处理动作名
+    output_schema: Optional[OutputSchema] = None
+    value: Dict[str, Any] = None             # 实际计算结果
+    path: Optional[str] = None
+
+    def to_meta(self) -> dict:
+        """返回仅包含用于语义判断的元信息"""
+        meta = {
+            "output_id": self.output_id,
+            "source": self.source,
+        }
+
+        if self.output_schema and self.task_type==GraphAnalysisSubType.POST_PROCESSING:
+            meta["type"] = self.output_schema.type
+            meta["description"] = self.output_schema.description
+            fields = []
+            for k, v in self.output_schema.fields.items():
+                fields.append({
+                    "key": k,
+                    "type": v.get("type", "unknown"),
+                    "desc": v.get("field_description", "")
+                })
+            if fields:
+                meta["fields"] = fields
+        elif self.output_schema and self.task_type==GraphAnalysisSubType.GRAPH_ALGORITHM:
+            fields = []
+            for k, v in self.output_schema.fields.items():
+                fields.append({
+                    "key": k,
+                    "type": v.get("type", "unknown"),
+                    "desc": v.get("field_description", "")
+                })
+            if fields:
+                meta["fields"] = fields
+
+        return meta
+    
 
 
 @dataclass
@@ -13,13 +69,82 @@ class WorkflowStep:
     """DAG节点，代表一个子问题"""
     step_id: int
     question: str                           # 该节点表示问题的问题描述
-    task_type: Optional[str] = None         # 该节点表示问题解决的任务类型（设置为None）
+    task_type: Optional[GraphAnalysisType] = None         # 该节点表示问题解决的任务类型（graph processing / numeric_analysis）
     graph_algorithm: Optional[str] = None   # 该节点表示问题解决的图算法（设置为None）
     status: str = "pending"                 # 节点状态: pending, running, success, failed
-    result: Any = None                      # 节点执行结果
-    
+    result: Optional[Dict[int, StepOutputItem]] = None                      # 节点执行结果  
+    llm_analysis: Optional[str] = None
+
+    next_output_id: int = 1
+
     def __str__(self):
         return f"Step({self.step_id}): {self.question[:50]}..."
+
+    def get_result_meta(self) -> List[dict]:
+        """
+        获取当前步骤结果的元信息视图，仅用于依赖判定或 LLM 语义输入。
+        如果 result 为空，返回空列表。
+        """
+        if not self.result:
+            return []
+        return [item.to_meta() for item in self.result]
+    
+    def add_output(
+    self,
+    task_type: GraphAnalysisSubType,
+    source: str,
+    output_schema: Optional[OutputSchema] = None,
+    value: Any = None,
+    path: Optional[str] = None,
+    validate_schema: bool = False,
+    ) -> StepOutputItem:
+        """
+        向当前 WorkflowStep 插入一个 StepOutputItem，并自动分配 output_id。
+
+        参数：
+            task_type: 当前输出是哪类任务的结果
+            source: 执行来源（算法名、后处理代码名等）
+            value: 实际计算输出
+            output_schema: 输出的结构化描述（可选）
+            path: 若输出保存在文件中，则是文件路径
+            validate_schema: 是否对 value 与 output_schema 做结构验证
+        """
+
+        if self.result is None:
+            self.result = []
+
+        output_id = self.next_output_id
+        self.next_output_id += 1
+
+        # -------- 可选：验证 value 是否符合 output_schema -------
+        if validate_schema and output_schema is not None:
+            if output_schema.type == "dict" and not isinstance(value, dict):
+                raise ValueError(f"value 必须为 dict，但实际为 {type(value)}")
+
+            # 如果 fields 存在，则逐项验证
+            if isinstance(value, dict) and output_schema.fields:
+                for field_name, field_schema in output_schema.fields.items():
+                    if field_name not in value:
+                        raise ValueError(f"value 缺少字段 {field_name}")
+                    # 可继续加更多验证逻辑（例如类型检查）
+
+        # -------- 创建 StepOutputItem -------
+        item = StepOutputItem(
+            output_id=output_id,
+            task_type=task_type,
+            source=source,
+            output_schema=output_schema,
+            value=value,
+            path=path,
+        )
+
+        self.result[output_id] = item
+        return item
+    
+    def get_output(self, output_id: int) -> Optional[StepOutputItem]:
+        if not self.result:
+            return None
+        return self.result.get(output_id)
 
 
 class GraphWorkflowDAG:
@@ -152,7 +277,7 @@ class GraphWorkflowDAG:
         
         return ready
     
-    def set_success(self, step_id: int, output_data: Any = None):
+    def set_success(self, step_id: int, output_data: Optional[List[StepOutputItem]] = None, llm_analysis: str = None):
         """设置步骤为成功状态"""
         if step_id not in self.steps:
             raise ValueError(f"步骤 {step_id} 不存在")
@@ -160,6 +285,8 @@ class GraphWorkflowDAG:
         self.steps[step_id].status = "success"
         if output_data is not None:
             self.steps[step_id].result = output_data
+        if llm_analysis is not None:
+            self.steps[step_id].llm_analysis =  llm_analysis
     
     def set_running(self, step_id: int):
         """设置步骤为运行状态"""

@@ -131,7 +131,6 @@ class ComputingEngine:
         if algo_name in engine_mapping:
             return engine_mapping[algo_name]
         
-        # ✅ 改进：记录警告并抛出异常，而不是返回无效字符串
         logger.error(f"❌ Cannot resolve tool name for algorithm '{algo_name}' in engine '{engine_name}'")
         raise ValueError(f"Algorithm '{algo_name}' has no tool mapping in engine '{engine_name}'. "
                          f"Please check config_servers.yaml")
@@ -162,7 +161,7 @@ class ComputingEngine:
             logger.error(f"❌ Algorithm '{algo_name}' failed: {e}")
             return {"success": False, "error": str(e)}
 
-    async def get_algorithm_description(self, algo_name: str) -> str:
+    async def get_algorithm_description(self, algo_name: str) -> tuple[str, dict]:
         """
         获取指定算法的工具描述信息（包含 input/output schema）
         """
@@ -195,8 +194,16 @@ class ComputingEngine:
             f"```json\n{json.dumps(output_schema, indent=2, ensure_ascii=False)}\n```\n"
             f"{'-'*50}\n"
         )
+
+        tool_metadata = {
+            "name": tool_name,
+            "engine": engine,
+            "description": tool_info.get("description", "No description"),
+            "input_params": annotated_input,
+            "output_params": output_schema,
+        }
         logger.debug(f"🧩 Generated description for '{tool_name}':\n{doc}")
-        return doc
+        return doc, tool_metadata
 
     def _annotate_schema(self, input_schema: Dict, engine_name: str) -> Dict:
         """

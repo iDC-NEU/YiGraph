@@ -24,6 +24,7 @@ from aag.reasoner.prompt_template.prompt import (
     gemma_synonym_expand_prompt_template,
 )
 
+from aag.reasoner.prompt_en import *
 from aag.utils.parse_json import extract_json_from_response
 
 
@@ -494,7 +495,36 @@ Output:{{
         if not response_text:
             return "Unable to generate answer from the algorithm result."
         return response_text
+    
+    def analyze_dependency_type_and_locate_dependency_data(self, current_question:str, task_type:str, current_algo_desc:str, parent_question: str,  parent_outputs_meta:list)-> dict:
+        full_prompt = analyze_dependency_type_and_locate_dependency_data_prompt.format(
+            current_question=current_question,
+            task_type=task_type,
+            current_algo_desc=current_algo_desc,
+            parent_question=parent_question,
+            parent_outputs_meta=parent_outputs_meta
+        )
+        response = self.llm.complete(full_prompt)
+        return extract_json_from_response(response.text)
+ 
+    def map_parameters(self, current_question: str, current_algo_desc: str, dependency_items: List[Dict[str, Any]]) -> Dict[str, Any]:
+        full_prompt = map_parameters_prompt.format(
+            current_question=current_question,
+            algo_desc=current_algo_desc,
+            dependency_items=json.dumps(dependency_items, ensure_ascii=False, indent=2)
+        )
+        response = self.llm.complete(full_prompt)
+        return extract_json_from_response(response.text)
+    
+    def generate_graph_conversion_code(self, current_question: str, dependency_items: List[Dict[str, Any]])-> Dict[str, Any]:
+        full_prompt = generate_graph_conversion_code_prompt.format(
+            current_question=current_question,
+            dependency_items=json.dumps(dependency_items, ensure_ascii=False, indent=2)
+        )
+        response = self.llm.complete(full_prompt)
+        return extract_json_from_response(response.text)
 
+ 
 
 class OpenAIEnv:
 
@@ -843,6 +873,79 @@ class OpenAIEnv:
             return "Unable to generate answer from the algorithm result."
         return response_text
 
+    def analyze_dependency_type_and_locate_dependency_data(self, current_question:str, task_type:str, current_algo_desc:str, parent_question: str,  parent_outputs_meta:list)-> dict:
+        full_prompt = analyze_dependency_type_and_locate_dependency_data_prompt.format(
+            current_question=current_question,
+            task_type=task_type,
+            current_algo_desc=current_algo_desc,
+            parent_question=parent_question,
+            parent_outputs_meta=parent_outputs_meta
+        )
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": full_prompt}]
+        )
+        response_text = response.choices[0].message.content
+        if not response_text:
+            return {"error": "Empty response from OpenAI API"}
+        result_text = re.sub(r'^```(?:json)?\s*', '', response_text, flags=re.MULTILINE)
+        result_text = re.sub(r'\s*```$', '', result_text, flags=re.MULTILINE)
+        result_text = result_text.strip()    
+        try:
+            result_json = json.loads(result_text)
+            return result_json
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON in extract_parameters_with_postprocess: {e}")
+            print(f"Response text: {result_text}")
+            return {"error": "JSONDecodeError", "message": str(e), "raw_response": result_text}
+
+
+    def map_parameters(self, current_question: str, current_algo_desc: str, dependency_items: List[Dict[str, Any]]) -> Dict[str, Any]:
+        full_prompt = map_parameters_prompt.format(
+            current_question=current_question,
+            algo_desc=current_algo_desc,
+            dependency_items=json.dumps(dependency_items, ensure_ascii=False, indent=2)
+        )
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": full_prompt}]
+        )
+        response_text = response.choices[0].message.content
+        if not response_text:
+            return {"error": "Empty response from OpenAI API"}
+        result_text = re.sub(r'^```(?:json)?\s*', '', response_text, flags=re.MULTILINE)
+        result_text = re.sub(r'\s*```$', '', result_text, flags=re.MULTILINE)
+        result_text = result_text.strip()    
+        try:
+            result_json = json.loads(result_text)
+            return result_json
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON in extract_parameters_with_postprocess: {e}")
+            print(f"Response text: {result_text}")
+            return {"error": "JSONDecodeError", "message": str(e), "raw_response": result_text}
+
+    def generate_graph_conversion_code(self, current_question: str, dependency_items: List[Dict[str, Any]])-> Dict[str, Any]:
+        full_prompt = generate_graph_conversion_code_prompt.format(
+            current_question=current_question,
+            dependency_items=json.dumps(dependency_items, ensure_ascii=False, indent=2)
+        )
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": full_prompt}]
+        )
+        response_text = response.choices[0].message.content
+        if not response_text:
+            return {"error": "Empty response from OpenAI API"}
+        result_text = re.sub(r'^```(?:json)?\s*', '', response_text, flags=re.MULTILINE)
+        result_text = re.sub(r'\s*```$', '', result_text, flags=re.MULTILINE)
+        result_text = result_text.strip()    
+        try:
+            result_json = json.loads(result_text)
+            return result_json
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON in extract_parameters_with_postprocess: {e}")
+            print(f"Response text: {result_text}")
+            return {"error": "JSONDecodeError", "message": str(e), "raw_response": result_text}
 
 
 # 写一个 reasoner 类， 根据传入的配置参数ReasonerConfig 来初始化参数， 要求实现 根据provider 来选择切换对应的大模型OllamaEnv 和  OpenAIEnv
@@ -906,6 +1009,21 @@ class Reasoner:
 
     def generate_answer_from_algorithm_result(self, question: str, tool_description: str, tool_result: Dict[str, Any]):
         return self.env.generate_answer_from_algorithm_result(question, tool_description, tool_result)
+
+    def analyze_dependency_type_and_locate_dependency_data(self, current_question:str, task_type:str, current_algo_desc:str, parent_question: str,  parent_outputs_meta:list) -> dict:
+        return self.env.analyze_dependency_type_and_locate_dependency_data(
+                current_question=current_question,
+                task_type=task_type,
+                current_algo_desc=current_algo_desc,
+                parent_question=parent_question,
+                parent_outputs_meta=parent_outputs_meta
+            )
+
+    def map_parameters(self, current_question: str, current_algo_desc: str, dependency_items: List[Dict[str, Any]]) -> Dict[str, Any]:
+        return self.env.map_parameters(current_question, current_algo_desc, dependency_items)
+
+    def generate_graph_conversion_code(self, current_question: str, dependency_items: List[Dict[str, Any]])-> Dict[str, Any]:
+        return self.env.generate_graph_conversion_code(current_question, dependency_items)
 
     def get_question_entity(self, question, language="en"):
         if hasattr(self.env, "get_question_entity"):
