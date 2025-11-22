@@ -182,6 +182,14 @@ class OllamaEnv:
         print(
             f"llm_mode_name: {llm_mode_name}, llm_embed_name: {llm_embed_name}, chunk_size: {Settings.chunk_size}, chunk_overlap: {chunk_overlap}")
 
+    
+    def chat(self, messages: list) -> str:
+
+        response = self.llm.chat(messages=messages)
+
+        return response.raw
+
+    
     def complete(self, prompt, info=""):
         response = self.llm.complete(prompt)
         print_text(f'{prompt}\n', color='yellow')
@@ -263,6 +271,67 @@ class OllamaEnv:
             print(f"Error in Ollama graph algorithm selection: {e}")
             return None
         
+    def check_data_dependency(
+            self,
+            q1_question: str,
+            q1_algorithm: str,
+            q2_question: str,
+            q2_algorithm: str) -> bool:
+        """Determine whether Q2 depends on the result of Q1 using the LLM."""
+        prompt = f"""
+You are a graph analytics planning assistant. Decide whether a second sub-question (Q2) requires running after a first sub-question (Q1) because Q2 needs Q1's computed result.
+
+Dependency definition:
+- Return true only when information produced by solving Q1 is a required input for solving Q2.
+- If Q2 can be solved directly from the original data or context without first executing Q1, return false.
+
+###Example 1
+Original query: "Recently I discovered that Anna's transaction behavior is anomalous and she might be a potential fraud user. I want to find the potential fraud community around her, suggest possible suspicious transaction paths, and determine how much cash has likely been illegally transferred out."
+Q1 question: "Is Anna a fraud user based on her anomalous transaction behavior?"
+Q1 algorithm: "detect_fraud_user"
+Q2 question: "Find the potential fraud community centered around Anna."
+Q2 algorithm: "detect_fraud_community"
+Expected dependency: false
+Reason: Community detection around Anna can use the transaction graph directly without first proving she is fraudulent.
+
+###Example 2
+Original query (same as above).
+Q1 question: "Find the potential fraud community centered around Anna."
+Q1 algorithm: "detect_fraud_community"
+Q2 question: "What are the possible suspicious transaction paths associated with Anna?"
+Q2 algorithm: "discover_suspicious_paths"
+Expected dependency: true
+Reason: Identifying suspicious paths should leverage the community detected in Q1 to limit the search space.
+
+###Input To Evaluate
+Q1 question: {q1_question}
+Q1 algorithm: {q1_algorithm}
+Q2 question: {q2_question}
+Q2 algorithm: {q2_algorithm}
+
+###Output Format
+Respond with JSON only:
+{{
+  "q2_depends_on_q1": true or false,
+  "reason": "Brief justification."
+}}
+"""
+        try:
+            response = self.llm.complete(prompt)
+            result = extract_json_from_response(response.text)
+            depends = result.get("q2_depends_on_q1")
+            if isinstance(depends, bool):
+                return depends
+            if isinstance(depends, str):
+                normalized = depends.strip().lower()
+                if normalized in {"true", "yes"}:
+                    return True
+                if normalized in {"false", "no"}:
+                    return False
+        except Exception as e:
+            print(f"Error determining data dependency with Ollama: {e}")
+        return False
+        
     def get_question_entity(self, question, language="en"):  #TODO: 需要补充一个函数，从问题中确定需要查询的实体, 如果查询实体为空，则返回none（表示要查询全图）
         """从问题中确定需要查询的实体, 如果查询实体为空，则返回none（表示要查询全图）"""
         """返回类型是list，表示需要查询的实体"""
@@ -280,35 +349,88 @@ class OllamaEnv:
                         "query": query,
                         "depends_on": []
                     }]}  
-        prompt = f"""You are an AI assistant specialized in decomposing complex queries. Your task is to break down a complex question into multiple sub-queries that have logical dependencies.
-         Each sub-query must have a unique ID (e.g., "q1", "q2"), the query text itself, and a depends_on list specifying which other sub-query IDs must be resolved before this one can be answered. 
-         Infer dependencies based on logical necessity. If answering a sub-query requires the answer from another sub-query, specify that ID in the depends_on field. Dependencies should be based on prerequisites and the flow of information.
-         Example for Guidance:Input Query:
-"Recently I discovered that Anna's transaction behavior is anomalous and she might be a potential fraud user. I want to find the potential fraud community around her, suggest possible suspicious transaction paths, and determine how much cash has likely been illegally transferred out."
-Output:{{
-  "subqueries": [
-    {{
-      "id": "q1",
-      "query": "Is Anna a fraud user based on her anomalous transaction behavior?",
-      "depends_on": []
-    }},
-    {{
-      "id": "q2",
-      "query": "Find the potential fraud community centered around Anna.",
-      "depends_on": ["q1"]  
-    }},
-    {{
-      "id": "q3",
-      "query": "What are the possible suspicious transaction paths associated with Anna?",
-      "depends_on": ["q1"] 
-    }},
-    {{
-      "id": "q4",
-      "query": "Determine how much cash has likely been illegally transferred out.",
-      "depends_on": ["q1", "q2", "q3"]  
-    }}
-  ]
-}} Now, based on the instructions and example above, decompose the new complex query provided by the user. Your output must be the valid JSON object only.The query is : {query}.Note: Your response must be a valid JSON object without any additional text or explanation."""
+        prompt = f"""**Role**:You are an AI assistant specialized in decomposing complex queries. Your task is to break down a complex question into multiple sub-queries that have logical dependencies.
+        **Available Resources**:
+        1. **Complete Algorithm Library**: Supports all graph algorithms in NetworkX, including but not limited to:
+        - Traversal Algorithms: BFS, DFS
+        - Shortest Path: Dijkstra, A*, Bellman-Ford
+        - Community Detection: Louvain, Leiden, Girvan-Newman
+        - Centrality Metrics: Degree Centrality, Betweenness Centrality, Proximity Centrality, Eigenvector Centrality, PageRank
+        - Matching Algorithms: Maximum Matching, Minimum Weight Matching
+        - Connectivity: Strongly Connected Components, Weakly Connected Components
+        - And all other NetworkX algorithms
+        2. **Powerful Post-Processing Capabilities**: Can perform the following operations on the results of any graph algorithm:
+        - Sorting, Filtering, Intersection/Union
+        - Mathematical Operations: Weighted Summation, Normalization, Standardization
+        - Statistical Analysis: Maximum, Minimum, Average, Percentiles
+        - Logical Operations: Conditional Filtering, Multiple Result Fusion
+        **Decomposition Principles**:
+        1. **Single Algorithm Principle**: Each subproblem uses only one core graph algorithm.
+        2. **Pipeline Thinking**: The results of preceding algorithms, after post-processing, can be used as input for subsequent algorithms.
+        Each sub-query must have a unique ID (e.g., "q1", "q2"), the query text itself, and a depends_on list specifying which other sub-query IDs must be resolved before this one can be answered.
+        Infer dependencies based on logical necessity. If answering a sub-query requires the answer from another sub-query, specify that ID in the depends_on field. Dependencies should be based on prerequisites and the flow of information.
+        Example 1 for Guidance:
+        Input Query:
+        "Recently I discovered that Anna's transaction behavior is anomalous and she might be a potential fraud user. I want to find the potential fraud community around her, suggest possible suspicious transaction paths, and determine how much cash has likely been illegally transferred out."
+        Output:{{
+        "subqueries": [
+            {{
+            "id": "q1",
+            "query": "Is Anna a fraud user based on her anomalous transaction behavior?",
+            "depends_on": []
+            }},
+            {{
+            "id": "q2",
+            "query": "Find the potential fraud community centered around Anna.",
+            "depends_on": ["q1"]
+            }},
+            {{
+            "id": "q3",
+            "query": "What are the possible suspicious transaction paths associated with Anna?",
+            "depends_on": ["q2"]
+            }},
+            {{
+            "id": "q4",
+            "query": "Determine how much cash has likely been illegally transferred out.",
+            "depends_on": ["q2", "q3"]    
+            }}
+        ]
+        }} 
+        Example 2 for Guidance:
+        Input Query:
+        "Please help me identify the ten most influential people in the picture, calculate their sum, and find out who has the least influence."
+        Output:{{
+        "subqueries": [
+            {{
+                "id": "q1",
+                "query": "Identify the ten most influential people in the picture, calculate their sum, and find out who has the least influence.",
+                "depends_on": []
+            }}
+        ]
+        }}
+        Example 3 for Guidance:
+        Input Query:
+        "In a wartime supply network, cities are linked by roads of varying maintenance costs, and command needs the most reliable evacuation blueprint. First locate the city whose influence score is the lowest. Then enumerate every minimum spanning tree of the road network graph and, using that least influential city as the root, add up the distances from it to every other city inside each tree. Return the minimum total distance observed among all the spanning trees."
+        Output{{
+        "subqueries": [
+            {{
+                "id": "q1",
+                "query": "Identify the city with the lowest influence score in the network.",
+                "depends_on": []
+            }},
+            {{
+                "id": "q2",
+                "query": "Enumerate all minimum spanning trees of the road network graph.",
+                "depends_on": []
+            }},
+            {{
+                "id": "q3",
+                "query": "For each minimum spanning tree, sum the distances from the least influential city to all other cities and keep the smallest total.",
+                "depends_on": ["q1", "q2"]
+            }}
+        ]
+        }}
+        Now, based on the instructions and example above, decompose the new complex query provided by the user. Your output must be the valid JSON object only.The query is : {query}"""
         response = self.llm.complete(prompt)
         return extract_json_from_response(response.text)
 
@@ -560,6 +682,72 @@ class OpenAIEnv:
         except Exception as e:
             print(f"Error in OpenAI API call: {e}")
             return None
+        
+    def check_data_dependency(
+            self,
+            q1_question: str,
+            q1_algorithm: str,
+            q2_question: str,
+            q2_algorithm: str) -> bool:
+        """Use the llm to assess whether Q2 depends on Q1."""
+        prompt = f"""
+You are a graph analytics planning assistant. Decide whether a second sub-question (Q2) requires running after a first sub-question (Q1) because Q2 needs Q1's computed result.
+
+Dependency definition:
+- Return true only when information produced by solving Q1 is a required input for solving Q2.
+- If Q2 can be solved directly from the original data or context without first executing Q1, return false.
+
+###Example 1
+Original query: "Recently I discovered that Anna's transaction behavior is anomalous and she might be a potential fraud user. I want to find the potential fraud community around her, suggest possible suspicious transaction paths, and determine how much cash has likely been illegally transferred out."
+Q1 question: "Is Anna a fraud user based on her anomalous transaction behavior?"
+Q1 algorithm: "detect_fraud_user"
+Q2 question: "Find the potential fraud community centered around Anna."
+Q2 algorithm: "detect_fraud_community"
+Expected dependency: false
+Reason: Community detection around Anna can use the transaction graph directly without first proving she is fraudulent.
+
+###Example 2
+Original query (same as above).
+Q1 question: "Find the potential fraud community centered around Anna."
+Q1 algorithm: "detect_fraud_community"
+Q2 question: "What are the possible suspicious transaction paths associated with Anna?"
+Q2 algorithm: "discover_suspicious_paths"
+Expected dependency: true
+Reason: Identifying suspicious paths should leverage the community detected in Q1 to limit the search space.
+
+###Input To Evaluate
+Q1 question: {q1_question}
+Q1 algorithm: {q1_algorithm}
+Q2 question: {q2_question}
+Q2 algorithm: {q2_algorithm}
+
+###Output Format
+Respond with JSON only:
+{{
+  "q2_depends_on_q1": true or false,
+  "reason": "Brief justification."
+}}
+"""
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"}
+            )
+            content = response.choices[0].message.content
+            result = json.loads(content)
+            depends = result.get("q2_depends_on_q1")
+            if isinstance(depends, bool):
+                return depends
+            if isinstance(depends, str):
+                normalized = depends.strip().lower()
+                if normalized in {"true", "yes"}:
+                    return True
+                if normalized in {"false", "no"}:
+                    return False
+        except Exception as e:
+            print(f"Error determining data dependency with OpenAI: {e}")
+        return False
 
     def get_question_entity(self, question, context, language="en"):  #TODO: 需要补充一个函数，从问题中确定需要查询的实体, 如果查询实体为空，则返回none（表示要查询全图）
         """从问题中确定需要查询的实体, 如果查询实体为空，则返回none（表示要查询全图）"""
@@ -590,36 +778,89 @@ class OpenAIEnv:
                         "query": query,
                         "depends_on": []
                     }]}  
-        prompt = f"""You are an AI assistant specialized in decomposing complex queries. Your task is to break down a complex question into multiple sub-queries that have logical dependencies.
+        prompt = f"""**Role**:You are an AI assistant specialized in decomposing complex queries. Your task is to break down a complex question into multiple sub-queries that have logical dependencies.
+        **Available Resources**:
+        1. **Complete Algorithm Library**: Supports all graph algorithms in NetworkX, including but not limited to:
+        - Traversal Algorithms: BFS, DFS
+        - Shortest Path: Dijkstra, A*, Bellman-Ford
+        - Community Detection: Louvain, Leiden, Girvan-Newman
+        - Centrality Metrics: Degree Centrality, Betweenness Centrality, Proximity Centrality, Eigenvector Centrality, PageRank
+        - Matching Algorithms: Maximum Matching, Minimum Weight Matching
+        - Connectivity: Strongly Connected Components, Weakly Connected Components
+        - And all other NetworkX algorithms
+        2. **Powerful Post-Processing Capabilities**: Can perform the following operations on the results of any graph algorithm:
+        - Sorting, Filtering, Intersection/Union
+        - Mathematical Operations: Weighted Summation, Normalization, Standardization
+        - Statistical Analysis: Maximum, Minimum, Average, Percentiles
+        - Logical Operations: Conditional Filtering, Multiple Result Fusion
+        **Decomposition Principles**:
+        1. **Single Algorithm Principle**: Each subproblem uses only one core graph algorithm.
+        2. **Pipeline Thinking**: The results of preceding algorithms, after post-processing, can be used as input for subsequent algorithms.
         Each sub-query must have a unique ID (e.g., "q1", "q2"), the query text itself, and a depends_on list specifying which other sub-query IDs must be resolved before this one can be answered.
         Infer dependencies based on logical necessity. If answering a sub-query requires the answer from another sub-query, specify that ID in the depends_on field. Dependencies should be based on prerequisites and the flow of information.
-        Example for Guidance:Input Query:
-        "A customer has made several high-value purchases in the last month but has also initiated an unusually high number of returns. I need to determine if this is a case 
-        of 'wardrobing' or fraudulent returns, identify other accounts potentially linked to this behavior, and estimate the total financial loss to the company."
+        Example 1 for Guidance:
+        Input Query:
+        "Recently I discovered that Anna's transaction behavior is anomalous and she might be a potential fraud user. I want to find the potential fraud community around her, suggest possible suspicious transaction paths, and determine how much cash has likely been illegally transferred out."
+        Output:{{
+        "subqueries": [
+            {{
+            "id": "q1",
+            "query": "Is Anna a fraud user based on her anomalous transaction behavior?",
+            "depends_on": []
+            }},
+            {{
+            "id": "q2",
+            "query": "Find the potential fraud community centered around Anna.",
+            "depends_on": ["q1"]
+            }},
+            {{
+            "id": "q3",
+            "query": "What are the possible suspicious transaction paths associated with Anna?",
+            "depends_on": ["q2"]
+            }},
+            {{
+            "id": "q4",
+            "query": "Determine how much cash has likely been illegally transferred out.",
+            "depends_on": ["q2", "q3"]    
+            }}
+        ]
+        }} 
+        Example 2 for Guidance:
+        Input Query:
+        "Please help me identify the ten most influential people in the picture, calculate their sum, and find out who has the least influence."
         Output:{{
         "subqueries": [
             {{
                 "id": "q1",
-                "query": "What are the specific patterns of the customer's high-value purchases and returns in the last month?",
+                "query": "Identify the ten most influential people in the picture, calculate their sum, and find out who has the least influence.",
+                "depends_on": []
+            }}
+        ]
+        }}
+        Example 3 for Guidance:
+        Input Query:
+        "In a wartime supply network, cities are linked by roads of varying maintenance costs, and command needs the most reliable evacuation blueprint. First locate the city whose influence score is the lowest. Then enumerate every minimum spanning tree of the road network graph and, using that least influential city as the root, add up the distances from it to every other city inside each tree. Return the minimum total distance observed among all the spanning trees."
+        Output{{
+        "subqueries": [
+            {{
+                "id": "q1",
+                "query": "Identify the city with the lowest influence score in the network.",
                 "depends_on": []
             }},
             {{
                 "id": "q2",
-                "query": "Based on the purchase and return patterns, is this behavior indicative of 'wardrobing' or fraudulent activity?",
-                "depends_on": ["q1"]
+                "query": "Enumerate all minimum spanning trees of the road network graph.",
+                "depends_on": []
             }},
             {{
                 "id": "q3",
-                "query": "Can we find other user accounts that are linked to this customer (e.g., by shipping address, payment method, IP address) and exhibit similar behavior?",
+                "query": "For each minimum spanning tree, sum the distances from the least influential city to all other cities and keep the smallest total.",
                 "depends_on": ["q1", "q2"]
-            }},
-            {{
-                "id": "q4",
-                "query": "What is the total estimated financial loss from the confirmed fraudulent returns, including from the original customer and any linked accounts?",
-                "depends_on": ["q2", "q3"]
             }}
         ]
-        }}Now, based on the instructions and example above, decompose the new complex query provided by the user. Your output must be the valid JSON object only.The query is : {query}"""
+        }}
+        Now, based on the instructions and example above, decompose the new complex query provided by the user. Your output must be the valid JSON object only.The query is : {query}"""
+
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[{"role": "user", "content": prompt}]
@@ -872,6 +1113,16 @@ class OpenAIEnv:
         if not response_text:
             return "Unable to generate answer from the algorithm result."
         return response_text
+    
+    def chat(self, messages: list) -> str:
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages
+        )
+        response_text = response.choices[0].message.content
+        if not response_text:
+            return "Unable to generate answer."
+        return response_text
 
     def analyze_dependency_type_and_locate_dependency_data(self, current_question:str, task_type:str, current_algo_desc:str, parent_question: str,  parent_outputs_meta:list)-> dict:
         full_prompt = analyze_dependency_type_and_locate_dependency_data_prompt.format(
@@ -1006,6 +1257,20 @@ class Reasoner:
     
     def extract_parameters_with_postprocess(self, question: str, tool_description: str) -> dict:
         return self.env.extract_parameters_with_postprocess(question, tool_description)
+    
+    def check_data_dependency(
+            self,
+            q1_question: str,
+            q1_algorithm: str,
+            q2_question: str,
+            q2_algorithm: str) -> bool:
+        if hasattr(self.env, "check_data_dependency"):
+            return self.env.check_data_dependency(
+                q1_question=q1_question,
+                q1_algorithm=q1_algorithm,
+                q2_question=q2_question,
+                q2_algorithm=q2_algorithm)
+        return False
 
     def generate_answer_from_algorithm_result(self, question: str, tool_description: str, tool_result: Dict[str, Any]):
         return self.env.generate_answer_from_algorithm_result(question, tool_description, tool_result)
@@ -1039,6 +1304,24 @@ class Reasoner:
         if hasattr(self.env, "generate_response"):
             return self.env.generate_response(prompt)
         raise NotImplementedError("Underlying environment does not support generate_response/complete")
+
+
+    def chat(self, messages: list):
+        if hasattr(self.env, "chat"):
+            return self.env.chat(messages)
+        raise NotImplementedError("Underlying environment does not support chat")
+
+
+    def general_query_response(self, query):
+        from aag.reasoner.prompt_template.llm_prompt import general_query_prompt
+        messages = [
+            {"role": "system", "content": general_query_prompt},
+            {
+                "role": "user",
+                "content": query
+            },
+        ]
+        return self.chat(messages)
 
 
 

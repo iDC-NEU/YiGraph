@@ -35,7 +35,7 @@ retrieval:
   embedding:
     model_name: "BAAI/bge-large-en-v1.5"
     batch_size: 20
-    chunk_size: 100000
+    chunk_size: 512
     chunk_overlap: 20
     device: "cuda:2"
 

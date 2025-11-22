@@ -158,6 +158,7 @@ class GraphWorkflowDAG:
         self.out_edges: Dict[int, Set[int]] = collections.defaultdict(set)  # 出边: step_id -> {child_steps}
         self.in_edges: Dict[int, Set[int]] = collections.defaultdict(set)   # 入边: step_id -> {parent_steps}
         self.next_step_id: int = 1
+        self.data_dependency: Dict[int, Set[int]] = collections.defaultdict(set)  # 数据依赖: step_id -> {depended_steps}
     
     def add_step(self, question: str, graph_algorithm: Optional[str] = None) -> int:
         """
@@ -218,6 +219,20 @@ class GraphWorkflowDAG:
         if step_id not in self.steps:
             raise ValueError(f"步骤 {step_id} 不存在")
         return list(self.out_edges[step_id])
+    
+    def ancestors_of(self, step_id: int) -> Set[int]:
+        """获取步骤的所有祖先步骤"""
+        if step_id not in self.steps:
+            raise ValueError(f"步骤 {step_id} 不存在")
+        ancestors: Set[int] = set()
+        stack = list(self.in_edges[step_id])
+        while stack:
+            current = stack.pop()
+            if current in ancestors:
+                continue
+            ancestors.add(current)
+            stack.extend(self.in_edges[current])
+        return ancestors
     
     def topological_order(self) -> List[int]:
         """
@@ -372,3 +387,44 @@ class GraphWorkflowDAG:
                 lines.append(f"  {parent_id} -> {child_id};")
         lines.append("}")
         return "\n".join(lines)
+    
+    def refresh_data_dependency(self, reasoner) -> None:
+        """
+        遍历所有(q1, q2)对，其中q1是q2的祖先节点，并使用reasoner判断q2是否依赖q1。
+        如果需要依赖，则在self.data_dependency[q2]中加入q1。
+        """
+        
+        self.data_dependency.clear()
+        
+        for q2_id, q2_step in self.steps.items():
+            ancestors = self.ancestors_of(q2_id)
+            if not ancestors:
+                continue
+            
+            q2_question = q2_step.question or ""
+            q2_algorithm = q2_step.graph_algorithm or ""
+            
+            for q1_id in ancestors:
+                q1_step = self.steps[q1_id]
+                q1_question = q1_step.question or ""
+                q1_algorithm = q1_step.graph_algorithm or ""
+                
+                try:
+                    depends = reasoner.check_data_dependency(
+                        q1_question=q1_question,
+                        q1_algorithm=q1_algorithm,
+                        q2_question=q2_question,
+                        q2_algorithm=q2_algorithm,
+                    )
+                except Exception as exc:
+                    print(f"检查数据依赖时出现异常: q1={q1_id}, q2={q2_id}, error={exc}")
+                    depends = False
+                
+                if depends:
+                    self.data_dependency[q2_id].add(q1_id)
+    
+    def print_data_dependency(self):
+        """打印数据依赖关系"""
+        print("数据依赖关系:")
+        for step_id, dependencies in self.data_dependency.items():
+            print(f"步骤 {step_id} 数据依赖于步骤: {list(dependencies)}")
