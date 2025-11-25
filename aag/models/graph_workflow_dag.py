@@ -3,9 +3,13 @@
 专注于DAG构建、拓扑排序和依赖关系管理
 """
 
-from typing import Dict, List, Set, Any, Optional
+from typing import Dict, List, Set, Any, Optional, TYPE_CHECKING
 from dataclasses import dataclass
 import collections
+import copy
+
+if TYPE_CHECKING:
+    from aag.reasoner.model_deployment import Reasoner
 
 
 @dataclass
@@ -29,11 +33,17 @@ class GraphWorkflowDAG:
     """
     
     def __init__(self):
+        self.subquery_plan: Dict[str, Any] = {"subqueries": []}
+        self._reset_structure()
+
+    def _reset_structure(self):
+        """重置 DAG 节点、边和状态信息。"""
         self.steps: Dict[int, WorkflowStep] = {}
-        self.out_edges: Dict[int, Set[int]] = collections.defaultdict(set)  # 出边: step_id -> {child_steps}
-        self.in_edges: Dict[int, Set[int]] = collections.defaultdict(set)   # 入边: step_id -> {parent_steps}
+        self.out_edges: Dict[int, Set[int]] = collections.defaultdict(set)
+        self.in_edges: Dict[int, Set[int]] = collections.defaultdict(set)
+        self.data_dependency: Dict[int, Set[int]] = collections.defaultdict(set)
         self.next_step_id: int = 1
-        self.data_dependency: Dict[int, Set[int]] = collections.defaultdict(set)  # 数据依赖: step_id -> {depended_steps}
+        self.query_id_mapping: Dict[str, int] = {}
     
     def add_step(self, question: str, graph_algorithm: Optional[str] = None) -> int:
         """
@@ -301,3 +311,114 @@ class GraphWorkflowDAG:
         print("数据依赖关系:")
         for step_id, dependencies in self.data_dependency.items():
             print(f"步骤 {step_id} 数据依赖于步骤: {list(dependencies)}")
+
+    def set_subquery_plan(self, subquery_plan: Dict[str, Any]) -> None:
+        """
+        保存最新的 subquery_plan 副本，供后续修改时使用。
+        """
+        self._validate_subquery_plan_structure(subquery_plan)
+        self.subquery_plan = copy.deepcopy(subquery_plan)
+
+    def get_subquery_plan(self) -> Dict[str, Any]:
+        """
+        返回当前缓存的 subquery_plan（副本），避免外部直接修改原对象。
+        """
+        return copy.deepcopy(self.subquery_plan)
+
+    def build_from_subquery_plan(self, subquery_plan: Dict[str, Any]) -> Dict[str, int]:
+        """
+        根据 subquery_plan 重构整个 DAG，并返回 query_id -> step_id 的映射。
+        """
+        self._validate_subquery_plan_structure(subquery_plan)
+        subqueries = subquery_plan.get("subqueries", [])
+        if not subqueries:
+            raise ValueError("子查询计划为空，必须包含至少一个子查询")
+
+        self._reset_structure()
+        self.subquery_plan = copy.deepcopy(subquery_plan)
+
+        query_id_to_step_id: Dict[str, int] = {}
+        for subquery in subqueries:
+            query_id = subquery.get("id")
+            question = subquery.get("query")
+            if query_id is None:
+                raise ValueError("子查询缺少必需的'id'字段")
+            if question is None:
+                raise ValueError("子查询缺少必需的'query'字段")
+            step_id = self.add_step(question=question, graph_algorithm=None)
+            query_id_to_step_id[query_id] = step_id
+
+        for subquery in subqueries:
+            query_id = subquery["id"]
+            depends_on = subquery.get("depends_on", [])
+            current_step_id = query_id_to_step_id[query_id]
+            for parent_query_id in depends_on:
+                if parent_query_id not in query_id_to_step_id:
+                    raise ValueError(f"依赖的查询ID '{parent_query_id}' 在子查询列表中不存在")
+                parent_step_id = query_id_to_step_id[parent_query_id]
+                self.add_dependency(parent_step_id, current_step_id)
+
+        # 验证拓扑序，确保没有产生环
+        self.topological_order()
+        self.query_id_mapping = copy.deepcopy(query_id_to_step_id)
+        return copy.deepcopy(query_id_to_step_id)
+
+    def get_query_id_mapping(self) -> Dict[str, int]:
+        """返回 query_id -> step_id 映射的副本。"""
+        return copy.deepcopy(self.query_id_mapping)
+
+    def modify_dag(self, reasoner: "Reasoner", user_request: str,
+                             system_prompt: Optional[str] = None) -> Dict[str, Any]:
+        """
+        基于用户的自然语言修改请求，重新生成 subquery_plan。
+
+        Args:
+            reasoner: 用于和大模型交互的 Reasoner 实例。
+            user_request: 用户输入的修改说明。
+            system_prompt: 可选的系统提示词，未提供时使用默认值。
+
+        Returns:
+            dict: 更新后的 subquery_plan。
+        """
+        if reasoner is None:
+            raise ValueError("reasoner 不能为空")
+
+        normalized_request = (user_request or "").strip()
+        if not normalized_request:
+            raise ValueError("user_request 不能为空字符串")
+
+        if not self.subquery_plan or not self.subquery_plan.get("subqueries"):
+            raise ValueError("当前 DAG 还没有可用的 subquery_plan")
+
+        updated_plan = reasoner.revise_subquery_plan(
+            current_plan=self.get_subquery_plan(),
+            user_request=normalized_request,
+            system_prompt=system_prompt,
+        )
+        self.build_from_subquery_plan(updated_plan)
+        return updated_plan
+
+    def _validate_subquery_plan_structure(self, plan: Dict[str, Any]) -> None:
+        """
+        基础结构校验，确保 plan 至少包含合法的 subqueries 字段。
+        """
+        if not isinstance(plan, dict):
+            raise ValueError("subquery_plan 必须是 dict")
+
+        subqueries = plan.get("subqueries")
+        if not isinstance(subqueries, list):
+            raise ValueError("subquery_plan['subqueries'] 必须是 list")
+
+        for idx, item in enumerate(subqueries):
+            if not isinstance(item, dict):
+                raise ValueError(f"subqueries[{idx}] 必须是 dict")
+            if "id" not in item:
+                raise ValueError(f"subqueries[{idx}] 缺少 'id'")
+            if "query" not in item:
+                raise ValueError(f"subqueries[{idx}] 缺少 'query'")
+            depends_on = item.get("depends_on", [])
+            if depends_on is None:
+                continue
+            if not isinstance(depends_on, list):
+                raise ValueError(
+                    f"subqueries[{idx}]['depends_on'] 必须是 list 或省略")

@@ -180,7 +180,12 @@ class Scheduler:
         # step1. 根据 query 解析 生成 dag
         self._build_dag_from_query(query, decompose)
 
-        
+        self.dag.print_dag_info()
+
+        # 如果需要修改的话，根据用户要求进行修改
+        user_input = input("请输入修改DAG要求")
+        self.dag.modify_dag(self.reasoner, user_input)
+        self.dag.print_dag_info()
         # step2. 遍历每个 dag 的节点，确定算法
         self._find_algorithm()
         self.dag.print_dag_info()
@@ -188,11 +193,11 @@ class Scheduler:
         self.dag.refresh_data_dependency(self.reasoner)
         self.dag.print_data_dependency()
         print("✅ DAG 构建与算法选择完成，准备执行计算流程")
-        sys.exit(0)
+        
         # step4. 根据每个问题确定的算法，调度算法执行
         return await self._run_algorithm_pipeline()
 
-      # step5. 整理计算结果，输出报告
+        # step5. 整理计算结果，输出报告
 
 
         # dag = self.reasoner.parse_query(query)
@@ -223,7 +228,6 @@ class Scheduler:
         return self.reasoner.generate_response(prompt)
 
 
-      # step5. 整理计算结果，输出报告
 
     def build_dag_from_subquery_plan(self, subquery_plan: Dict[str, Any]) -> GraphWorkflowDAG:
         """
@@ -248,67 +252,12 @@ class Scheduler:
         Raises:
             ValueError: 如果输入格式不正确或存在循环依赖
         """
-        # 创建新的DAG实例
+        # 创建新的DAG实例并构建
         self.dag = GraphWorkflowDAG()
-        
-        # 提取子查询列表
-        subqueries = subquery_plan.get("subqueries", [])
-        if not subqueries:
-            raise ValueError("子查询计划为空，必须包含至少一个子查询")
-        
-        # 步骤1: 建立查询ID到步骤ID的映射
-        query_id_to_step_id = {}
-        
-        # 步骤2: 为每个子查询创建DAG步骤
-        logger.info(f"⚙️ 正在创建 {len(subqueries)} 个DAG步骤·...")
-        for subquery in subqueries:
-            # 验证子查询格式
-            if "id" not in subquery:
-                raise ValueError("子查询缺少必需的'id'字段")
-            if "query" not in subquery:
-                raise ValueError("子查询缺少必需的'query'字段")
-            
-            query_id = subquery["id"]
-            question = subquery["query"]
-            
-            # 创建步骤（图算法设置为None）
-            step_id = self.dag.add_step(
-                question=question,
-                graph_algorithm=None
-            )
-            
-            query_id_to_step_id[query_id] = step_id
-            logger.info(f"⚙️  创建步骤 {step_id} for 查询 '{query_id}': {question[:50]}...")
-        
-        # 步骤3: 建立依赖关系
-        logger.info("⚙️ 正在建立依赖关系...")
-        for subquery in subqueries:
-            query_id = subquery["id"]
-            depends_on = subquery.get("depends_on", [])
-            
-            current_step_id = query_id_to_step_id[query_id]
-            
-            # 为每个依赖关系添加边
-            for parent_query_id in depends_on:
-                if parent_query_id not in query_id_to_step_id:
-                    raise ValueError(f"依赖的查询ID '{parent_query_id}' 在子查询列表中不存在")
-                
-                parent_step_id = query_id_to_step_id[parent_query_id]
-                print(f"  添加依赖: {parent_step_id}({parent_query_id}) -> {current_step_id}({query_id})")
-                
-                # 添加边，如果产生环会自动抛出异常
-                self.dag.add_dependency(parent_step_id, current_step_id)
-        
-        # 步骤4: 验证DAG并获取拓扑序
-        try:
-            topological_order = self.dag.topological_order()
-            logger.info(f"✅ DAG构建成功！拓扑序: {topological_order}")
-        except ValueError as e:
-            raise ValueError(f"DAG构建失败，检测到循环依赖: {e}")
-        
-        # 步骤5: 存储查询ID映射（用于后续查询）
+        query_id_to_step_id = self.dag.build_from_subquery_plan(subquery_plan)
+        logger.info(f"✅ DAG构建成功！拓扑序: {self.dag.topological_order()}")
         self.query_id_mapping = query_id_to_step_id
-        
+
         return self.dag
 
 
