@@ -1,6 +1,5 @@
 """
 Dynamic Code Executor
-支持自动安装依赖的动态代码执行器
 """
 
 import logging
@@ -13,9 +12,7 @@ from aag.expert_search_engine.database.datatype import GraphData
 
 logger = logging.getLogger(__name__)
 
-
 class DynamicCodeExecutor:
-    """支持自动安装依赖的动态代码执行器"""
     
     def __init__(self, timeout: int = 120, auto_install: bool = True):
         self.timeout = timeout
