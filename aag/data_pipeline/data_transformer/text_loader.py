@@ -17,21 +17,41 @@ from aag.config.data_upload_config import *
 class TextDataLoader:
     """文本数据加载引擎，用于加载非结构化文本类数据集。"""
 
-    def __init__(self, schema_path: str):
+    def __init__(self, schema_path: Optional[str] = None):
         """
-        初始化文本数据加载器。
+        Initialize text data loader.
 
         Args:
-            schema_path (str): 文本数据注册文件路径（text_registry.yaml）
+            schema_path (str, optional): Path to text schemas YAML file.
+                                        If None, schemas will be loaded by DatasetManager.
         """
         self.schema_path = schema_path
-        self.dataset_schemas: Dict[str, DatasetConfig] = {}   
-        self._load_yaml()                
+        self.dataset_schemas: Dict[str, List[DatasetConfig]] = {}
+        
+        # Only load from schema_path if provided (for backward compatibility)
+        if schema_path:
+            self._load_yaml()                
 
 
     def _load_yaml(self):
+        """
+        读取 text_schemas.yaml 文件 (for backward compatibility)
+        Converts Dict[str, DatasetConfig] to Dict[str, List[DatasetConfig]]
+        Note: For text datasets, multiple files may share the same dataset name prefix.
+        This method groups configs by dataset name.
+        """
         try:
-            self.dataset_schemas = read_datasets_map(self.schema_path)
+            old_map = read_datasets_map(self.schema_path)
+            # Convert to new format: Dict[str, List[DatasetConfig]]
+            # Group configs by dataset name (extract prefix before first underscore)
+            grouped = {}
+            for name, config in old_map.items():
+                # Extract dataset name (prefix before first underscore, or full name if no underscore)
+                dataset_name = name.split('_')[0] if '_' in name else name
+                if dataset_name not in grouped:
+                    grouped[dataset_name] = []
+                grouped[dataset_name].append(config)
+            self.dataset_schemas = grouped
             print(f"[INFO] Loaded {len(self.dataset_schemas)} datasets from {self.schema_path}")
         except Exception as e:
             raise RuntimeError(f"[ERROR] Failed to load dataset schemas from {self.schema_path}: {e}")

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 import json
 from aag.reasoner.model_deployment import Reasoner
-from aag.reasoner.prompt_template.llm_prompt import query_router_prompt
+from aag.reasoner.prompt_template.llm_prompt_en import query_router_prompt
 
 class QueryType(str, Enum):
     GRAPH = "graph"          
@@ -41,7 +41,6 @@ class QueryRouter:
             qtype = QueryType(data.get("type", "general"))
             reason = data.get("reason", "")
         except Exception:
-            # 兜底：LLM 输出异常时，统一走 general
             qtype = QueryType.GENERAL
             reason = f"Failed to parse LLM output: {raw}"
 

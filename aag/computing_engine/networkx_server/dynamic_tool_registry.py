@@ -497,7 +497,6 @@ def _create_tool_function(
             algo_name = tool_name.replace('run_', '')
             actual_func = algorithm_func
 
-            # (这部分逻辑保持不变)
             if algo_name in UNDIRECTED_ONLY_ALGORITHMS and processor.graph.is_directed():
                 alternative_name = UNDIRECTED_ONLY_ALGORITHMS.get(algo_name)
                 if alternative_name:
@@ -520,8 +519,6 @@ def _create_tool_function(
             logger.info(f"🔍 final_kwargs 准备完成: {final_kwargs}")
             logger.info(f"🔍 execution_kwargs 过滤后: {execution_kwargs}")
 
-            
-            
             result = actual_func(**execution_kwargs)
             
             # 5. 返回结果

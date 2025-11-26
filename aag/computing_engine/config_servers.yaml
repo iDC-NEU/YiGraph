@@ -22,8 +22,6 @@ engine_supported_algorithms:
       - tool: astar_path
     louvain:
       - tool: louvain_communities
-    leiden:
-      - tool: leiden_communities
     degree_centrality:
       - tool: degree_centrality
     betweenness_centrality:

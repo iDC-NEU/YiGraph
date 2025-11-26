@@ -1,0 +1,66 @@
+# 数据集元信息
+id: "dataset_002"
+name: "DocumentDemo"
+type: "text"                        # 数据集类型：text（文本类型）
+description: "Demo document collection for knowledge extraction and graph conversion"
+
+# 时间信息
+created_at: "2024-01-10T10:00:00"
+updated_at: "2024-01-10T10:00:00"
+
+# 数据内容标记
+has_text_data: true                 # 有原始文本数据
+has_graph_data: false               # 尚未转换为图数据
+graph_status: "pending"              # 图数据状态：native（原生图）、extracted（已转换）、pending（待转换）、processing（转换中）、failed（转换失败）、null（无图）
+
+# 文本文件信息
+text_files:
+  total_count: 3
+  formats: ["md"]
+  total_size: "~15KB"
+  last_updated: "2024-01-10T10:00:00"
+  files:
+    - "demo_document1.md"
+    - "demo_document2.md"
+    - "demo_document3.md"
+
+# 转换信息（当前未转换）
+extraction_info:
+  extracted_at: null
+  extraction_method: null
+  extraction_version: null
+  
+  # 转换配置（预设，待转换时使用）
+  config:
+    model: "gpt-4"
+    batch_size: 10
+    entity_types: ["person", "organization", "location", "concept"]
+    relation_types: ["works_for", "located_in", "related_to", "invests_in"]
+  
+  # 转换统计（转换后填充）
+  stats:
+    input_documents: 3
+    processed_documents: 0
+    extracted_entities: 0
+    extracted_relations: 0
+    graph_nodes: 0
+    graph_edges: 0
+  
+  # 转换历史
+  history: []
+
+# 数据血缘
+data_lineage:
+  source_type: "text"
+  source_files:
+    - "demo_document1.md"
+    - "demo_document2.md"
+    - "demo_document3.md"
+  conversion_chain:
+    - step: "text_upload"
+      timestamp: "2024-01-10T10:00:00"
+      status: "completed"
+
+# 状态管理
+status: "active"                    # active（活跃）、archived（归档）、deleted（已删除）
+

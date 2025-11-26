@@ -1,0 +1,22 @@
+# Dataset index file
+# For quick query of basic information of all datasets
+datasets:
+  # Native graph dataset example
+  - id: "dataset_001"
+    name: "AMLSim1K"
+    type: "graph"                    # Dataset type: graph (native graph data)
+    description: "AMLSim 1K synthetic transaction graph."
+    created_at: "2024-01-01T10:00:00"
+    updated_at: "2024-01-15T10:00:00"
+    status: "active" 
+    data_path: "AMLSim1K"            # Dataset folder path (relative to dataset_schemas)
+ 
+  # Text dataset example (to be converted to graph)
+  - id: "dataset_002"
+    name: "DocumentDemo"
+    type: "text"                     # Dataset type: text (text data, can be converted to graph)
+    description: "Demo document collection for knowledge extraction and graph conversion"
+    created_at: "2024-01-10T10:00:00"
+    updated_at: "2024-01-10T10:00:00"
+    status: "active"
+    data_path: "DocumentDemo"

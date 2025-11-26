@@ -166,43 +166,6 @@
     type: list
     description: "List of sets, each representing one detected community (nodes in the same set belong to the same community)."
 
-
-- id: leiden
-  task_type_id: search
-  description:
-    principle: "Leiden is a community detection algorithm based on modularity optimization. It improves upon the Louvain algorithm by refining partitions through three phases: (1) moving nodes between communities to maximize modularity, (2) refining the resulting partition by splitting communities if they are not sufficiently well-connected, and (3) aggregating the refined communities into super-nodes for the next iteration. This guarantees better-connected communities and avoids disconnected groups."
-    meaning: "Leiden is used to uncover communities or clusters within a graph. Compared to Louvain, it ensures communities are internally well-connected, improves robustness, and often leads to more meaningful partitions of the network."
-  support_engines: networkx (requires backend such as cuGraph)
-  inputSchema:
-    parameters:
-      graph:
-        type: graph
-        description: "A NetworkX graph. Must be executed with a supported backend (e.g., cuGraph)."
-        required: true
-      weight:
-        type: string
-        description: "Edge attribute key for edge weights. If None, all edges have weight=1."
-        default: "weight"
-      resolution:
-        type: float
-        description: "Resolution parameter for modularity optimization. Values < 1 favor larger communities; values > 1 favor smaller communities."
-        default: 1.0
-      max_level:
-        type: int
-        description: "Maximum number of refinement levels (steps of the algorithm).  Must be a positive integer or None. If None, then there is no max level and the algorithm will run until converged."
-        required: false
-        default: null
-      seed:
-        type: int
-        description: "Random seed or state for reproducibility. If None, randomness is uncontrolled."
-        required: false
-        default: null
-    required: ["graph"]
-  output:
-    type: list
-    description: "A list of disjoint sets, each set representing one community. Together, all sets cover all nodes in the graph."
-
-
 - id: pagerank
   task_type_id: centrality_importance
   description:

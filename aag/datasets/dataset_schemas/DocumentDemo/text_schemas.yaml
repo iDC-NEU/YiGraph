@@ -1,0 +1,27 @@
+datasets:
+  - name: "DocumentDemo_aml_doc"
+    description: "Anti-Money Laundering knowledge document"
+    type: text
+    graph_status: "pending"          # 文件级别的图转换状态：pending（待转换）、extracted（已转换）、processing（转换中）、failed（转换失败）
+    schema:
+      path: "../../data/DocumentDemo/text/demo_document1.md"
+      format: "md"
+      encoding: "utf-8"
+  
+  - name: "DocumentDemo_graph_analysis_doc"
+    description: "Graph data analysis technical document"
+    type: text
+    graph_status: "pending"          # 文件级别的图转换状态
+    schema:
+      path: "../../data/DocumentDemo/text/demo_document2.md"
+      format: "md"
+      encoding: "utf-8"
+  
+  - name: "DocumentDemo_knowledge_graph_doc"
+    description: "Knowledge graph construction guide"
+    type: text
+    graph_status: "pending"          # 文件级别的图转换状态
+    schema:
+      path: "../../data/DocumentDemo/text/demo_document3.md"
+      format: "md"
+      encoding: "utf-8"

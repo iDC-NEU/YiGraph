@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from aag.models.graph_workflow_dag import WorkflowStep, StepOutputItem
 from aag.reasoner.model_deployment import Reasoner
 from aag.models.task_types import GraphAnalysisType
+from aag.utils.data_utils import take_sample
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +111,7 @@ class DataDependencyResolver:
                 parent_step=parent_step
             )
             dependencies.append(dep_info)
-        
+
         # Step 2: 把所有依赖项拆分为 graph / parameter 两类
         graph_items: List[SingleDependencyItem] = []
         param_items: List[SingleDependencyItem] = []
@@ -155,16 +156,11 @@ class DataDependencyResolver:
                     parent_steps=parent_step_map
                 )
                 parameter_input_adapter_result = convert_parameter_llm_info.get("mapped_params")
-
-        # todo: 如果 task_type == GraphAnalysisType.GRAPH_ALGORITHM, 则返回处理后的graph 和 处理后的参数。
-
         elif step.task_type == GraphAnalysisType.NUMERIC_ANALYSIS:
-            # todo: 如果是数值类型的任务，不做任何处理，直接返回graph_items 和 param_items 即可
             logger.info("🧮 当前任务类型：Numeric Analysis → 返回原始依赖项")
         else:
             logger.info("ℹ️ 非图算法/非数值分析 → 不做适配，只返回依赖项")
         
-
         return {
             "graph_dependencies": graph_items,
             "parameter_dependencies": param_items,
@@ -172,8 +168,6 @@ class DataDependencyResolver:
             "parameter_input_adapter_result": parameter_input_adapter_result
         }
             
-
-    
     def _classify_and_locate_dependency(
         self,
         current_step: WorkflowStep,
@@ -196,8 +190,9 @@ class DataDependencyResolver:
             task_type=current_step.task_type,
             current_algo_desc=current_algo_desc,
             parent_question=parent_step.question,
-            parent_result=parent_step.get_result_meta()
+            parent_outputs_meta=parent_step.get_result_meta()
         )
+        logger.info(f"analysis analysis:{analysis}")
 
         if not analysis:
             logger.error("❌ LLM 返回结果为空，视为无依赖")
@@ -255,7 +250,7 @@ class DataDependencyResolver:
                 field_schema = match.output_schema.fields.get(field_key)
                 if field_schema:
                     f_type = field_schema.type
-                    f_desc = field_schema.desc
+                    f_desc = field_schema.field_description
 
             dependency_items.append(
                 SingleDependencyItem(
@@ -321,7 +316,7 @@ class DataDependencyResolver:
         for item in graph_items:
             parent_step = parent_steps[item.parent_step_id]
             raw_data = item.value
-            sample_value =self._take_sample(raw_data)
+            sample_value = take_sample(raw_data)
             dependency_list.append({
                 "field_key": item.field_key,
                 "field_type": item.field_type,
@@ -416,7 +411,7 @@ class DataDependencyResolver:
         for item in param_items:
             parent_step = parent_steps[item.parent_step_id]
             raw_data = item.value
-            sample_value =self._take_sample(raw_data)
+            sample_value = take_sample(raw_data)
             dependency_list.append({
                 "field_key": item.field_key,
                 "field_type": item.field_type,
@@ -483,28 +478,3 @@ class DataDependencyResolver:
         }
 
 
-    def _take_sample(self, value):
-        """从真实值中抽取最多两个样本，用于 LLM 推断结构。"""
-        # 标量 → 直接返回
-        if isinstance(value, (int, float, str, bool)) or value is None:
-            return value
-
-        if isinstance(value, list):
-            return value[:2]
-
-        if isinstance(value, tuple):
-            return tuple(value[:2])
-
-        if isinstance(value, set):
-            return  set(list(value)[:2])
-
-        if isinstance(value, dict):
-            keys = list(value.keys())[:2]
-            return {k: value[k] for k in keys}
-
-        # 其他类型（如自定义对象） → 转 string，只截断长度
-        try:
-            s = str(value)
-            return s[:200]  # 避免太长
-        except:
-            return "UNSUPPORTED_SAMPLE_TYPE"

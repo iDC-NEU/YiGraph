@@ -7,6 +7,8 @@ from typing import Dict, Any, Optional
 from aag.utils.path_utils import DEFAULT_CONFIG_SERVER_PATH
 
 from aag.computing_engine.mcp_client import GraphMCPClient
+from aag.computing_engine.code_executor import DynamicCodeExecutor
+from aag.expert_search_engine.database.datatype import GraphData
 
 
 logger = logging.getLogger(__name__)
@@ -28,6 +30,7 @@ class ComputingEngine:
         self.algorithm_tool_mapping = {}        #   algorithm_name → tool_name
         self.parameter_modules = {}
         self._initialized = False
+        self.code_executor = DynamicCodeExecutor(timeout=120, auto_install=True)
 
     async def initialize(self):
         """初始化：加载配置并连接所有 MCP servers"""
@@ -135,7 +138,7 @@ class ComputingEngine:
         raise ValueError(f"Algorithm '{algo_name}' has no tool mapping in engine '{engine_name}'. "
                          f"Please check config_servers.yaml")
 
-    async def run_algorithm(self, algo_name: str, parameters: Dict[str, Any], post_processing_code: Optional[str] = None) -> Dict[str, Any]:
+    async def run_algorithm(self, algo_name: str, parameters: Dict[str, Any], post_processing_code: Optional[str] = None, global_graph: Optional[GraphData] = None) -> Dict[str, Any]:
         """
         执行指定算法
         """
@@ -154,7 +157,7 @@ class ComputingEngine:
                 prepared_params = self._normalize_parameters(engine_name, tool_name, prepared_params)
             
             logger.info(f"🚀 Running '{algo_name}' (tool: {tool_name}) on engine [{engine_name}]")
-            result = await client.call_tool(tool_name, prepared_params, post_processing_code)
+            result = await client.call_tool(tool_name, prepared_params, post_processing_code, global_graph)
             return result
 
         except Exception as e:
@@ -249,6 +252,38 @@ class ComputingEngine:
         except Exception as exc:
             logger.warning("⚠️ 参数规范化失败 (%s): %s", tool_name, exc)
             return parameters
+
+    def execute_code(self, code: str, data: Any, global_graph: Optional[GraphData] = None, fallback_to_direct_exec: bool = True) -> Any:
+        """
+        执行动态生成的代码（数值分析、后处理等）
+        
+        Args:
+            code: 要执行的 Python 代码字符串
+            data: 传递给代码的数据（可以是 dict 或其他类型）
+            fallback_to_direct_exec: 如果代码不是 process 函数格式，是否直接执行
+            
+        Returns:
+            代码执行结果
+            
+        Raises:
+            RuntimeError: 代码执行失败
+        """
+        try:
+            # 尝试使用 execute 方法（期望代码定义 process 函数）
+            return self.code_executor.execute(code, data, global_graph=global_graph)
+        except (ValueError, AttributeError) as e:
+            if not fallback_to_direct_exec:
+                raise RuntimeError(f"代码执行失败: {e}")
+            
+            # 如果代码不是 process 函数格式，直接执行
+            if isinstance(data, dict):
+                namespace = {**data, "__builtins__": __builtins__}
+            else:
+                namespace = {"data": data, "__builtins__": __builtins__}
+            
+            exec(code, namespace)
+            # 假设代码会定义一个 result 变量
+            return namespace.get("result", data)
 
     async def shutdown(self):
         """断开所有引擎连接"""

@@ -1,0 +1,37 @@
+datasets:
+- description: "AMLSim 1K synthetic transaction graph."
+  name: AMLSim1K
+  schema:
+    edge:
+    - attribute_fields: []
+      format: csv
+      label_field: is_sar
+      path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/graph/transactions.csv
+      source_field: orig_acct
+      target_field: bene_acct
+      type: transfer
+      weight_field: null
+    graph:
+      directed: true
+      heterogeneous: false
+      multigraph: true
+      weighted: false
+    graph_store_info:
+      backend: nebula_graph
+      edge_count: 17512
+      space_name: AMLSim1K
+      status: success
+      version: null
+      vertex_count: 1446
+    vertex:
+    - attribute_fields: []
+      format: csv
+      # query_field: acct_id
+      query_field: [last_name, first_name]
+      id_field: acct_id
+      label_field: prior_sar_count
+      path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/graph/accounts.csv
+      type: account
+  type: graph
+
+

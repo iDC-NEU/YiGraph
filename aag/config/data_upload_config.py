@@ -62,7 +62,6 @@ class TableSchemaConfig:
 
 
 # ======== 文本型数据结构（示例，预留扩展） ========
-
 @dataclass
 class TextSchemaConfig:
     path: str
@@ -174,7 +173,7 @@ class DataUploadConfig:
 
 # ======== 动态加载函数 ========
 
-def load_data_upload_config(yaml_path: str) -> DataUploadConfig:
+def load_data_upload_config(yaml_path: str, validate_files: bool = False) -> DataUploadConfig:
     """
     从 data_upload_config.yaml 加载多类型数据注册配置（支持 graph/table/text）
     
@@ -273,13 +272,14 @@ def load_data_upload_config(yaml_path: str) -> DataUploadConfig:
         # 创建数据注册表
         registry = DataUploadConfig(datasets=datasets)
         
-        # 验证所有数据集
-        for dataset in datasets:
-            errors = registry.validate_dataset(dataset)
-            if errors:
-                print(f"警告: 数据集 '{dataset.name}' 配置有问题:")
-                for error in errors:
-                    print(f"  - {error}")
+        if validate_files:
+            # 验证所有数据集
+            for dataset in datasets:
+                errors = registry.validate_dataset(dataset)
+                if errors:
+                    print(f"警告: 数据集 '{dataset.name}' 配置有问题:")
+                    for error in errors:
+                        print(f"  - {error}")
         
         return registry
         

@@ -238,7 +238,7 @@ def transform_graph(field_key1, field_key2, field_key3, global_nodes, global_edg
   # global_nodes: list[str]
   # global_edges: list[(str, str)]
   # 你必须在此处填入代码逻辑
-  ...
+  ... 
   result = {{
       "nodes": final_nodes,   # list[str]
       "edges": final_edges    # list[(str, str)]
@@ -282,9 +282,9 @@ def transform_graph(field_key1, field_key2, field_key3, global_nodes, global_edg
 ```
 ## Input
 ### 当前子问题:
-{{current_question}}
+{current_question}
 ### 数据依赖项:
-{{dependency_items}}
+{dependency_items}
 
 ##Instruction: 你必须根据上述所有规则生成一个完整、可执行、无伪代码、严格符合格式要求的 transform_graph Python 函数，并将其作为 JSON 中的 "code" 字段返回。不得输出多余文字。
 """

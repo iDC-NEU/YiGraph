@@ -15,7 +15,6 @@ from aag.config.engine_config import EngineConfig
 from aag.engine.scheduler import Scheduler
 
 
-
 class AAGEngine:
     """
     Analytics Augmented Generation Engine - 端到端分析增强生成框架
@@ -67,7 +66,7 @@ class AAGEngine:
     async def run(self, query: str) -> str:
         return await self.scheduler.execute(query)
 
-
+        
     def list_datasets(self, dtype: Optional[str] = None) -> Dict[str, List[str]]:
         return self.scheduler.list_datasets(dtype)
 
@@ -75,50 +74,7 @@ class AAGEngine:
         result = self.scheduler.specific_analysis_dataset(name, dtype)
         return result if result is not None else None
 
- 
-    def query(self, question: str) -> str:
-        """
-        查询处理：多模态检索 + LLM生成
-        
-        Args:
-            question: 查询问题
-            
-        Returns:
-            回答
-        """
-        start_time = time.time()
-        
-        # TODO(zihan): 根据输入问题，生成 subquery 构成的 plan，并将 plan 转换为 DAG
-        query_plan =  self.llm_env.plan_subqueries(True, question)  # 在 /home/chency/GraphLLM/graphllm/model_deploy/model_deployment.py 中  OllamaEnv 和  OpenAIEnv 分别实现该函数
-        self.scheduler.build_dag_from_subquery_plan(query_plan)
 
-        # TODO(chaoyi): 
-        # 1.遍历 dag, 对每个子问题确定适合的图算法， 从层次化的领域知识库里确定
-        self.scheduler.find_graph_algorithm()
-
-        # 2.调度器 run DAG
-
-
-        # 1. 检索阶段: 调用self.rag_engine.vector_rag.retrieve() 检索与问题相关的论文
-        retrieval_result, retrieve_information = self.rag_engine.vector_rag.retrieve(question)
-
-        # 2. 图算法和问题实体确定阶段，先调用 self.llm_env.get_graph_algorithm 确定图算法执行计划; 再调用 self.llm_env.get_question_entity 确定问题实体
-        graph_algorithm_plan = self.llm_env.get_graph_algorithm(question, retrieval_result)
-        # question_entity_list = self.llm_env.get_question_entity(question)   # 暂时不使用
-
-        # 3. 根据问题实体列表，调用self.rag_engine.graph_rag.query_with_entity() 获取这些子图的边表形式
-        # graph_data_list = self.rag_engine.graph_rag.query_with_entity(question_entity_list)
-        graph_data_list = self.rag_engine.graph_rag.get_all_edges()
-
-        # 4. 将边表和算法执行计划传入self.graph_processor.graph_algorithm_execution() 执行图算法
-        results  = self.graph_processor.execute_plan(graph_data_list, graph_algorithm_plan)
-        
-        # 5. 将图算法结果list中的最后一个结果和问题实体列表传入self.llm_env.get_graph_algorithm_result() 生成回答
-        response = self.llm_env.get_graph_algorithm_result(results[-1], question_entity_list)
-
-        return response
-
-    
     def _record_metrics(self, retrieval_time: float, generation_time: float, total_time: float):
         """记录性能指标"""
         self.metrics["retrieval_time"].append(retrieval_time)

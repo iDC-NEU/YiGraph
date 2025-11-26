@@ -25,6 +25,33 @@ def extract_json_from_response(text: str):
         raise ValueError(f"❌ JSON 解析失败: {e}\n提取内容:\n{json_str}")
 
 
+def parse_openai_json_response(response_text: str, method_name: str = "unknown") -> dict:
+    """
+    Parse JSON response from OpenAI API, handling errors gracefully.
+    
+    Args:
+        response_text: The response text from OpenAI API
+        method_name: Name of the calling method (for error logging)
+        
+    Returns:
+        dict: Parsed JSON object, or error dict if parsing fails
+    """
+    if not response_text:
+        return {"error": "Empty response from OpenAI API"}
+    
+    # Remove markdown code block markers
+    result_text = re.sub(r'^```(?:json)?\s*', '', response_text, flags=re.MULTILINE)
+    result_text = re.sub(r'\s*```$', '', result_text, flags=re.MULTILINE)
+    result_text = result_text.strip()
+    
+    try:
+        result_json = json.loads(result_text)
+        return result_json
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON in {method_name}: {e}")
+        print(f"Response text: {result_text}")
+        return {"error": "JSONDecodeError", "message": str(e), "raw_response": result_text}
+
 
 
 def test():

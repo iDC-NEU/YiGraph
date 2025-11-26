@@ -17,7 +17,6 @@
   description: "Identify clusters or community structures in a graph, used to analyze aggregation patterns and network partitioning."
   algorithm:
     - louvain
-    - leiden
 
 - id: centrality_importance
   task_type: "Centrality and Importance Measures"

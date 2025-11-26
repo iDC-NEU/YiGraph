@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from aag.config.data_upload_config import *
 from aag.expert_search_engine.database.datatype import VertexData, EdgeData
 from aag.expert_search_engine.database.nebulagraph import  NebulaGraphClient
@@ -9,33 +9,35 @@ logger = logging.getLogger(__name__)
 
 class GraphDataLoader:
     """
-    图数据加载引擎：负责
-    1. 读取 graph_schemas.yaml 文件（系统内已有数据集定义）
-    2. 根据指定 DatasetConfig 加载数据文件
-    3. 将数据写入图数据库（示例代码）
-    4. 从数据库中统计节点/边数，更新 metadata 信息
+    Graph data loading engine: responsible for
+    1. Reading graph_schemas.yaml files (existing dataset definitions in the system)
+    2. Loading data files according to specified DatasetConfig
+    3. Writing data to graph database (example code)
+    4. Counting nodes/edges from database and updating graph_store_info
     """
 
-    def __init__(self, schema_path: str):
+    def __init__(self, schema_path: Optional[str] = None):
         """
-        初始化图数据加载器。
+        Initialize graph data loader.
 
         Args:
-            schema_path (str): 存储所有图数据集 schema 的 YAML 文件路径。
+            schema_path (str, optional): Path to graph schemas YAML file.
+                                        If None, schemas will be loaded by DatasetManager.
         """
         self.schema_path = schema_path                         
-        self.dataset_schemas: Dict[str, DatasetConfig] = {}     
-        self.graphdb_client: Optional[NebulaGraphClient] = None                   
-        self._load_yaml()                
+        self.dataset_schemas: Dict[str, List[DatasetConfig]] = {}     
+        self.graphdb_client: Optional[NebulaGraphClient] = None
+        
+        # Only load from schema_path if provided (for backward compatibility)
+        if schema_path:
+            self._load_yaml()                
 
         try:
             self.graphdb_client = NebulaGraphClient()
-            logger.info("✅ 已初始化 NebulaGraphClient 实例")
+            logger.info("✅ Initialized NebulaGraphClient instance")
         except Exception as e:
-            logger.warning(f"⚠️ NebulaGraphClient 初始化失败：{e}")
+            logger.warning(f"⚠️ Failed to initialize NebulaGraphClient: {e}")
             self.graphdb_client = None
-
-        # logger.info(f"📚 GraphDataLoader 已初始化，共加载 {len(self.dataset_schemas)} 个图数据集定义")
                       
 
     
@@ -75,13 +77,19 @@ class GraphDataLoader:
         print(f"[INFO] Dataset '{dataset_config.name}' registered in {self.schema_path}")
 
         # === Step 4: 同步内存对象 ===
-        self.dataset_schemas[dataset_config.name] = dataset_config
+        # Store as list to match new architecture (dataset_name -> List[DatasetConfig])
+        self.dataset_schemas[dataset_config.name] = [dataset_config]
 
 
     def _load_yaml(self):
-        """读取 graph_schemas.yaml 文件"""
+        """
+        读取 graph_schemas.yaml 文件 (for backward compatibility)
+        Converts Dict[str, DatasetConfig] to Dict[str, List[DatasetConfig]]
+        """
         try:
-            self.dataset_schemas = read_datasets_map(self.schema_path)
+            old_map = read_datasets_map(self.schema_path)
+            # Convert to new format: Dict[str, List[DatasetConfig]]
+            self.dataset_schemas = {name: [config] for name, config in old_map.items()}
             print(f"[INFO] Loaded {len(self.dataset_schemas)} datasets from {self.schema_path}")
         except Exception as e:
             raise RuntimeError(f"[ERROR] Failed to load dataset schemas from {self.schema_path}: {e}")
@@ -113,11 +121,8 @@ class GraphDataLoader:
         all_dfs = []
 
         for config in data_config:
-
             all_fields = self.get_field_data(config, "field")
-
             logger.info(f"Reading ({all_fields}) fields from raw file")
-
             df = pd.read_csv(config.path, usecols=all_fields)
 
             # only for vetext data
@@ -131,7 +136,6 @@ class GraphDataLoader:
         merged_df = pd.concat(all_dfs, ignore_index=True)
         # print(merged_df.head())
         # print(f"{len(merged_df)=}")
-
         return merged_df
 
 
@@ -165,9 +169,6 @@ class GraphDataLoader:
             props = row.drop(query_name).to_dict()          
             vertices.append(VertexData(vid=vid, properties=props))
         
-        # print(f"{len(vertices)=}")
-        # print(vertices[0:5])
-
 
         # process edge: src => query_name, dst => query_name
         edges = []

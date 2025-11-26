@@ -17,12 +17,18 @@ from aag.config.data_upload_config import *
 
 
 class TableDataLoader:
-    """表格数据加载引擎，用于加载结构化表格类数据集。"""
+    """Table data loader for structured tabular datasets."""
 
-    def __init__(self, registry_path: str):
-        self.registry_path =  registry_path
-        self.dataset_schemas: Dict[str, DatasetConfig] = {}   
-        pass
+    def __init__(self, registry_path: Optional[str] = None):
+        """
+        Initialize table data loader.
+
+        Args:
+            registry_path (str, optional): Path to table schemas YAML file.
+                                          If None, schemas will be loaded by DatasetManager.
+        """
+        self.registry_path = registry_path
+        self.dataset_schemas: Dict[str, List[DatasetConfig]] = {}
 
     def _load_registry(self) -> Dict[str, Any]:
         """

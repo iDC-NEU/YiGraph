@@ -9,7 +9,6 @@ from pydantic import BaseModel
 from typing import Dict, List, Set, Any, Optional
 from dataclasses import dataclass
 from aag.models.task_types import GraphAnalysisType, GraphAnalysisSubType
-from aag.engine.dependency_resolver import DataDependencyInfo
 
 class OutputField(BaseModel):
     type: str
@@ -44,8 +43,8 @@ class StepOutputItem:
             for k, v in self.output_schema.fields.items():
                 fields.append({
                     "key": k,
-                    "type": v.get("type", "unknown"),
-                    "desc": v.get("field_description", "")
+                    "type": v.type,
+                    "desc": v.field_description
                 })
             if fields:
                 meta["fields"] = fields
@@ -54,15 +53,14 @@ class StepOutputItem:
             for k, v in self.output_schema.fields.items():
                 fields.append({
                     "key": k,
-                    "type": v.get("type", "unknown"),
-                    "desc": v.get("field_description", "")
+                    "type": v.type,
+                    "desc": v.field_description
                 })
             if fields:
                 meta["fields"] = fields
 
         return meta
     
-
 
 @dataclass
 class WorkflowStep:
@@ -87,16 +85,16 @@ class WorkflowStep:
         """
         if not self.result:
             return []
-        return [item.to_meta() for item in self.result]
+        return [item.to_meta() for item in self.result.values()]
     
     def add_output(
-    self,
-    task_type: GraphAnalysisSubType,
-    source: str,
-    output_schema: Optional[OutputSchema] = None,
-    value: Any = None,
-    path: Optional[str] = None,
-    validate_schema: bool = False,
+        self,
+        task_type: GraphAnalysisSubType,
+        source: str,
+        output_schema: Optional[OutputSchema] = None,
+        value: Any = None,
+        path: Optional[str] = None,
+        validate_schema: bool = False,
     ) -> StepOutputItem:
         """
         向当前 WorkflowStep 插入一个 StepOutputItem，并自动分配 output_id。
@@ -111,7 +109,7 @@ class WorkflowStep:
         """
 
         if self.result is None:
-            self.result = []
+            self.result = {}
 
         output_id = self.next_output_id
         self.next_output_id += 1
@@ -145,6 +143,75 @@ class WorkflowStep:
         if not self.result:
             return None
         return self.result.get(output_id)
+    
+    def add_algorithm_result(
+        self,
+        tool_name: str,
+        tool_result_data: Dict[str, Any],
+        output_schema: Dict[str, Any],
+        is_has_extract_code: bool = False,
+    ) -> None:
+        """
+        添加算法执行结果到当前步骤。
+        
+        参数:
+            tool_name: 算法名称
+            tool_result_data: 算法执行结果数据，格式: {"original_result": value, "filed1": value, ...}
+            output_schema: 输出schema定义，包含fields字段
+            is_has_extract_code: 是否有后处理代码
+        """
+        schema_fields = output_schema.get("fields", {})
+        
+        # 1. 添加原始图算法计算结果 (original_result 字段)
+        if "original_result" in schema_fields:
+            original_result_field = schema_fields["original_result"]
+            original_result_value = tool_result_data.get("original_result") if isinstance(tool_result_data, dict) else tool_result_data
+            
+            self.add_output(
+                task_type=GraphAnalysisSubType.GRAPH_ALGORITHM,
+                source=tool_name,
+                output_schema=OutputSchema(
+                    description=f"The {tool_name} algorithm is executed",
+                    type="dict",
+                    fields={
+                        "original_result": OutputField(
+                            type=original_result_field.get("type", ""),
+                            field_description=original_result_field.get("field_description", "")
+                        )
+                    }
+                ),
+                value={"original_result": original_result_value},
+                path=None,  # 需要一个保存中间结果的模块
+                validate_schema=True
+            )
+        
+        # 2. 如果有后处理代码，添加后处理计算结果（排除 original_result 字段）
+        if is_has_extract_code:
+            post_processing_fields = {
+                name: OutputField(
+                    type=info.get("type", ""),
+                    field_description=info.get("field_description", "")
+                )
+                for name, info in schema_fields.items()
+                if name != "original_result"
+            }
+            
+            # 从结果中移除 original_result
+            if isinstance(tool_result_data, dict) and "original_result" in tool_result_data:
+                tool_result_data.pop("original_result")
+            
+            self.add_output(
+                task_type=GraphAnalysisSubType.POST_PROCESSING,
+                source="python code",
+                output_schema=OutputSchema(
+                    description=output_schema.get("description", ""),
+                    type=output_schema.get("type", "dict"),
+                    fields=post_processing_fields
+                ),
+                value=tool_result_data,
+                path=None,  # 需要一个保存中间结果的模块
+                validate_schema=True
+            )
 
 
 class GraphWorkflowDAG:
@@ -422,6 +489,11 @@ class GraphWorkflowDAG:
                 
                 if depends:
                     self.data_dependency[q2_id].add(q1_id)
+    
+    def get_data_dependency(self, step_id: int) -> Set[int]:
+        if step_id not in self.steps:
+            raise ValueError(f"步骤 {step_id} 不存在")
+        return self.data_dependency.get(step_id, set())
     
     def print_data_dependency(self):
         """打印数据依赖关系"""
