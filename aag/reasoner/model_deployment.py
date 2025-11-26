@@ -4,7 +4,7 @@ import openai
 import json
 import re
 import requests # deepseek
-from typing import Dict, Literal, Any, List
+from typing import Dict, Literal, Any, List, Optional
 from llama_index.core import Settings
 from llama_index.core.utils import print_text
 from llama_index.llms.openai import OpenAI
@@ -23,6 +23,70 @@ EMBEDD_DIMS = {
     "BAAI/bge-small-en-v1.5": 384
 }
 
+<<<<<<< HEAD
+=======
+DAG_REVISION_SYSTEM_PROMPT = (
+    "You are an expert workflow planner for a graph-computation pipeline. "
+    "You will modify an existing subquery DAG plan based on user edit instructions. "
+    "\n\n### Responsibilities:\n"
+    "1. Interpret user edits precisely (add / delete / modify nodes or dependencies). "
+    "2. Maintain logical correctness and valid dependencies (no cycles, causal order only). "
+    "3. Each node must contain exactly: id, query, depends_on. "
+    "4. Output must strictly follow the JSON schema below, with NO explanations and NO extra text.\n\n"
+    "### Required Output JSON Schema:\n"
+    "{\n"
+    "  \"subqueries\": [\n"
+    "    {\n"
+    "      \"id\": \"qX\",\n"
+    "      \"query\": \"text\",\n"
+    "      \"depends_on\": []\n"
+    "    }\n"
+    "  ]\n"
+    "}\n\n"
+    "### Example Input (Before Modification):\n"
+    "{\n"
+    "  \"subqueries\": [\n"
+    "    {\"id\": \"q1\", \"query\": \"Check if user Anna is a high-risk user.\", \"depends_on\": []},\n"
+    "    {\"id\": \"q2\", \"query\": \"List all potential money laundering pathways around Anna.\", \"depends_on\": [\"q1\"]},\n"
+    "    {\"id\": \"q3\", \"query\": \"Estimate the amount of cash that may have been illegally transferred out in relation to Anna.\", \"depends_on\": [\"q2\"]},\n"
+    "    {\"id\": \"q4\", \"query\": \"Find the account with the largest transaction amount in the suspicious paths.\", \"depends_on\": [\"q2\"]}\n"
+    "  ]\n"
+    "}\n\n"
+    "### Example User Edit Instruction:\n"
+    "Add a step between node 1 and node 2 to identify Anna's fraud community. "
+    "Modify node 4 so that it becomes: identify the account with the largest transaction amount within Anna’s community.\n\n"
+    "### Example Output:\n"
+    "{\n"
+    "  \"subqueries\": [\n"
+    "    {\"id\": \"q1\", \"query\": \"Check if user Anna is a high-risk user.\", \"depends_on\": []},\n"
+    "    {\"id\": \"q2\", \"query\": \"Identify the potential fraud community in which Anna resides to narrow the scope of subsequent risk monitoring.\", \"depends_on\": [\"q1\"]},\n"
+    "    {\"id\": \"q3\", \"query\": \"List all potential money laundering pathways within the high-risk community where Anna is located.\", \"depends_on\": [\"q2\"]},\n"
+    "    {\"id\": \"q4\", \"query\": \"Estimate the amount of cash that may have been illegally transferred out in relation to Anna.\", \"depends_on\": [\"q3\"]},\n"
+    "    {\"id\": \"q5\", \"query\": \"Identify the account with the largest transaction amount within Anna's fraud community.\", \"depends_on\": [\"q2\"]}\n"
+    "  ]\n"
+    "}"
+)
+
+
+def build_dag_revision_user_prompt(current_plan: Dict[str, Any], user_request: str) -> str:
+    plan_text = json.dumps(current_plan, ensure_ascii=False, indent=2)
+    normalized_request = user_request.strip()
+    return (
+        "Current subquery_plan:\n"
+        f"{plan_text}\n\n"
+        "User request:\n"
+        f"{normalized_request}\n\n"
+        "Update the plan so it satisfies the request. Rules:\n"
+        "1. Output JSON only with the shape {\"subqueries\": [...]}.\n"
+        "2. Each entry needs \"id\", \"query\", and \"depends_on\" (list) fields.\n"
+        "3. Preserve existing ids when editing content; introduce new ids only for new steps.\n"
+        "4. Keep dependencies acyclic and align them with the described changes.\n"
+        "5. If the user removes or inserts nodes between two ids, reflect that explicitly.\n"
+        "Return JSON only."
+    )
+
+
+>>>>>>> origin/main
 class EmbeddingEnv:
 
     def __init__(self,
@@ -174,10 +238,30 @@ class OllamaEnv:
         response = self.llm.complete(plan_subqueries_prompt.format(query=query))
         return extract_json_from_response(response.text)
 
+<<<<<<< HEAD
     def classify_question_type(self, question: str) -> dict:
         """Classify whether a question requires graph algorithm or numeric analysis."""
         response = self.llm.complete(classify_question_type_prompt.format(question=question))
         return extract_json_from_response(response.text)
+=======
+    def revise_subquery_plan(
+            self,
+            current_plan: Dict[str, Any],
+            user_request: str,
+            system_prompt: Optional[str] = None) -> Dict[str, Any]:
+        """
+        调用大模型根据用户描述更新 subquery_plan。
+        """
+        system_prompt = system_prompt or DAG_REVISION_SYSTEM_PROMPT
+        user_prompt = build_dag_revision_user_prompt(current_plan, user_request)
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+        response_text = self.chat(messages)
+        return extract_json_from_response(response_text)
+
+>>>>>>> origin/main
 
     def select_task_type(self, question: str, task_type_list: list) -> dict:
         response = self.llm.complete(select_task_type_prompt.format(
@@ -389,6 +473,27 @@ class OpenAIEnv:
         )
         response = response.choices[0].message.content
         return json.loads(response)
+
+    def revise_subquery_plan(
+            self,
+            current_plan: Dict[str, Any],
+            user_request: str,
+            system_prompt: Optional[str] = None) -> Dict[str, Any]:
+        system_prompt = system_prompt or DAG_REVISION_SYSTEM_PROMPT
+        user_prompt = build_dag_revision_user_prompt(current_plan, user_request)
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                response_format={"type": "json_object"},
+            )
+            content = response.choices[0].message.content
+            return extract_json_from_response(content)
+        except Exception as exc:
+            raise RuntimeError(f"Failed to revise subquery plan: {exc}") from exc
     
     def classify_question_type(self, question: str) -> dict:
         """Classify whether a question requires graph algorithm or numeric analysis."""
@@ -665,6 +770,15 @@ class Reasoner:
 
     def plan_subqueries(self, decompose: bool, query: str) -> dict:
         return self.env.plan_subqueries(decompose, query)
+    
+    def revise_subquery_plan(
+            self,
+            current_plan: Dict[str, Any],
+            user_request: str,
+            system_prompt: Optional[str] = None) -> Dict[str, Any]:
+        if hasattr(self.env, "revise_subquery_plan"):
+            return self.env.revise_subquery_plan(current_plan, user_request, system_prompt)
+        raise NotImplementedError("Underlying environment does not support revising subquery plans")
     
     def select_task_type(self, question: str, task_type_list: list) -> dict:
         return self.env.select_task_type(question, task_type_list)
