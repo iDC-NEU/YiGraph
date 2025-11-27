@@ -326,14 +326,10 @@ class Scheduler:
         if self.dataset_manager.get_dataset_original_type(self.current_dataset_name) != "text":
             return f"❌ 错误：RAG任务需要文本数据，但当前数据集类型是 {self.current_dataset.type}"
         
-        # Use dataset-level name stored in specific_analysis_dataset
-        # For RAG, we might need to handle multiple files
-        # Currently use first file, but could be extended to handle all files
-        first_file_config = self.current_dataset[0]
-        file_path = first_file_config.schema.path
+        file_paths = [config.schema.path for config in self.current_dataset]
 
         if not self.rag_engine._initialized:
-            self.rag_engine.initialize(db_name=self.current_dataset_name, file_path=file_path)
+            self.rag_engine.initialize(db_name=self.current_dataset_name, file_paths=file_paths)
 
         retrieved_context, _ = self.rag_engine.retrieve(query)
 

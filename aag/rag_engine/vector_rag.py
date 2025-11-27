@@ -18,7 +18,7 @@ class VectorRAG_delay(RAG):
 
     def __init__(
         self,
-        vector_db: MilvusDB2,
+        vector_db: MilvusDB,
         vector_k_similarity: int,
         llm_env_ = None,
         data_type: str = 'summary'
@@ -207,14 +207,11 @@ class VectorRAG(RAG):
 
 
 
-    def initialize(self, db_name: str, file_path):
+    def initialize(self, db_name: str, file_paths: List[str]):
         
         self._init_vector_database(db_name)
 
-        row_count = self.vector_db.get_collection_stats()['row_count']
-
-        if row_count == 0:
-            self.vector_rag_retriever = self.vector_db.build_index(file_path)
+        self.vector_db.process_data(file_paths)
 
         self._initialized = True
 
@@ -224,8 +221,9 @@ class VectorRAG(RAG):
         self.collection_name = db_name
 
         try:
-            self.vector_db = MilvusDB2(
+            self.vector_db = MilvusDB(
                 collection_name=self.collection_name,
+                top_k=self.vector_k_similarity,
                 dim=self.dim,
                 host=self.host,
                 port=self.port,
@@ -302,31 +300,12 @@ class VectorRAG(RAG):
         self.vector_rag_retriever = self.vector_db.build_index(file_path)
 
     def retrieve(self, query_str: str, query_id: Optional[int] = -1):
-        """检索相关的图算法论文"""
-        str_or_query_bundle = QueryBundle(query_str)
-
-        time_embeding = -time.time()
-        if self.vector_rag_retriever._vector_store.is_embedding_query:
-            if str_or_query_bundle.embedding is None and len(str_or_query_bundle.embedding_strs) > 0:
-                str_or_query_bundle.embedding = (
-                    self.vector_rag_retriever._embed_model.get_agg_embedding_from_queries(
-                        str_or_query_bundle.embedding_strs
-                    )
-                )
-        # embedding = self.llm_env_.embed_model.get_text_embedding(query_str)
-        time_embeding += time.time()
-        self.time_info['time_embeding'] = time_embeding
-
         time_query = -time.time()
-        # node_with_scores = self.vector_rag_retriever._get_node_with_embedding(
-        #     str_or_query_bundle)
-
-        # node_with_scores = self.vector_rag_retriever.query(str_or_query_bundle)
-        node_with_scores = self.vector_rag_retriever.as_retriever()._get_nodes_with_embeddings(str_or_query_bundle)
-
         
-        # node_with_scores = self.vector_db.retrieve_nodes(query_str, str_or_query_bundle.embedding)
+        node_with_scores = self.vector_db.search(query_str)
+        
         time_query += time.time()
+        
         self.time_info['time_query'] = time_query
 
         # print(f"{type(node_with_scores)=}")
@@ -340,8 +319,7 @@ class VectorRAG(RAG):
             }
             return [], retrieve_information
 
-        self.time_info["time_retrieve"] = self.time_info['time_embeding'] + \
-            self.time_info['time_query']
+        self.time_info["time_retrieve"] = self.time_info['time_query']
 
         retrieve_results = []
         retrieved_context = []
