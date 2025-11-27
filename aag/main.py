@@ -1,7 +1,7 @@
 import os
 import sys
 import argparse
-from typing import List, Optional
+from typing import List, Optional, Dict, Any, Union
 import time
 import platform
 import datetime
@@ -31,6 +31,57 @@ CYAN = "\033[96m"
 GREEN = "\033[92m"
 YELLOW = "\033[93m"
 GRAY = "\033[90m"
+
+
+def get_user_prompt(current_mode: str) -> str:
+    """
+    根据当前模式生成用户输入提示符
+    
+    Args:
+        current_mode: 当前模式 "normal" | "expert"
+    
+    Returns:
+        格式化的提示符字符串
+    """
+    if current_mode == "expert":
+        return "(expert mode) 👤 用户 > "
+    return "👤 用户 > "
+
+
+def print_dag_info(dag_info: Dict[str, Any]) -> None:
+    """打印DAG信息（格式化输出）"""
+    if not dag_info:
+        return
+    
+    print("\n📊 --- DAG 信息 ---")
+    
+    # 打印子查询计划
+    if "subquery_plan" in dag_info:
+        plan = dag_info["subquery_plan"]
+        if "subqueries" in plan:
+            print("\n子查询列表：")
+            for i, subq in enumerate(plan["subqueries"], 1):
+                print(f"  {i}. [{subq.get('id', '?')}] {subq.get('query', '')}")
+                deps = subq.get('depends_on', [])
+                if deps:
+                    print(f"     依赖: {', '.join(deps)}")
+    
+    # 打印步骤信息
+    if "steps" in dag_info:
+        print("\n步骤详情：")
+        for step_id, step_info in dag_info["steps"].items():
+            print(f"  [{step_id}] {step_info.get('question', '')}")
+            if step_info.get('algorithm'):
+                print(f"      算法: {step_info['algorithm']}")
+            if step_info.get('task_type'):
+                print(f"      类型: {step_info['task_type']}")
+    
+    # 打印拓扑顺序
+    if "topological_order" in dag_info:
+        order = dag_info["topological_order"]
+        print(f"\n执行顺序: {' → '.join(order)}")
+    
+    print("-" * 74)
 
 
 def parse_arguments():
@@ -77,17 +128,39 @@ def parse_arguments():
 
 
 async def interactive_mode(engine: AAGEngine):
-    """交互模式"""
-
+    """交互模式 - 支持普通模式和专家模式"""
+    
+    # 模式状态（默认普通模式）
+    current_mode = "normal"
+    expert_dag_built = False  # 专家模式下DAG是否已构建
+    
     while True:
         try:
-            # 👤 用户输入
-            question = input("\n👤 用户 > ").strip()
+            # 👤 用户输入（根据模式显示不同提示符）
+            question = input(f"\n{get_user_prompt(current_mode)}").strip()
             
             # 🔚 退出命令
             if question.lower() in ['quit', 'exit', 'q']:
                 print("🐾 AAG小助手退下喵~ 再见! (ฅ'ω'ฅ)")
                 break
+
+            # 🔄 模式切换命令（新增）
+            elif question.lower().startswith('mode '):
+                mode_arg = question[5:].strip().lower()
+                if mode_arg in ['expert', 'normal']:
+                    old_mode = current_mode
+                    current_mode = mode_arg
+                    expert_dag_built = False  # 切换模式时重置状态
+                    print(f"✅ 已切换到{'专家' if current_mode == 'expert' else '普通'}模式")
+                    if old_mode == "expert" and current_mode == "normal":
+                        print("   提示：普通模式下输入问题将直接执行完整分析")
+                    elif old_mode == "normal" and current_mode == "expert":
+                        print("   提示：专家模式下输入问题将生成DAG，可使用 modify/start 命令")
+                    print("-" * 74)
+                else:
+                    print(f"⚠️ 无效的模式: {mode_arg}，请使用 'mode expert' 或 'mode normal'")
+                    print("-" * 74)
+                continue
 
             # 📊 性能统计
             elif question.lower() == 'stats':
@@ -134,6 +207,9 @@ async def interactive_mode(engine: AAGEngine):
                         print(f"❌ 未找到数据集: '{name}' (搜索范围: {scope})")
                     else:
                         print(f"✅ 已选择数据集: {name}" + (f" ({dtype})" if dtype else ""))
+                    # 切换数据集时重置专家模式状态
+                    if current_mode == "expert":
+                        expert_dag_built = False
                     print("-" * 74)
                 except Exception as e:
                     print(f"⚠️ 选择数据集失败: {e}")
@@ -143,125 +219,137 @@ async def interactive_mode(engine: AAGEngine):
             # 🆘 帮助命令
             elif question.lower() in ['help', 'h']:
                 print("\n📌 === 帮助菜单 ===")
-                print("可用命令：")
+                print("通用命令：")
                 print("  📊 stats                         显示性能统计")
                 print("  📁 datasets | list               列出所有可用数据集")
                 print("  🗂 use <name>                    选定数据集 (自动推断类型)")
                 print("  🗂 use <name> <dtype>            指定类型 (graph/table/text)")
                 print("  🗂 use <dtype>:<name>            dtype:name 形式选择")
-                print("  ❓ help | h                 显示帮助")
+                print("  🔄 mode expert | mode normal     切换执行模式")
+                print("  ❓ help | h                      显示帮助")
                 print("  👋 quit | exit | q               退出系统")
-                print("\n示例：")
-                print("  use AMLSim1K")
-                print("  use AMLSim1K graph")
-                print("  use graph:AMLSim1K")
+                
+                if current_mode == "expert":
+                    print("\n专家模式命令：")
+                    print("  🔧 modify <request>             修改DAG（例如：modify 删除节点3）")
+                    print("  ▶️  start | analyze              开始执行分析")
+                    print("\n专家模式流程：")
+                    print("  1. 输入问题 → 生成DAG并显示")
+                    print("  2. 选择操作：")
+                    print("     - modify <request> 修改DAG（可多次）")
+                    print("     - start 开始执行分析")
+                
+                print(f"\n当前模式: {'专家模式' if current_mode == 'expert' else '普通模式'}")
+                print("\n提示：也可以在问题前加前缀指定模式，例如：")
+                print("  expert: 找出节点45的社区")
+                print("  normal: 找出节点45的社区")
                 print("-" * 74)
                 continue
 
             elif not question:
                 continue
             
-            # 🤖 执行查询
+            # ========== 检查问题前缀（支持 expert: 或 normal: 前缀）==========
+            actual_question = question
+            question_mode = current_mode  # 默认使用当前模式
+            
+            if question.lower().startswith('expert:'):
+                actual_question = question[7:].strip()
+                question_mode = "expert"
+            elif question.lower().startswith('normal:'):
+                actual_question = question[7:].strip()
+                question_mode = "normal"
+            
+            if not actual_question:
+                print("⚠️ 问题不能为空")
+                continue
+            
+            # 如果通过前缀指定了不同模式，临时切换
+            if question_mode != current_mode:
+                print(f"ℹ️ 本次查询使用{'专家' if question_mode == 'expert' else '普通'}模式（通过前缀指定）")
+                current_mode = question_mode
+                expert_dag_built = False
+            
+            # ========== 专家模式特殊命令 ==========
+            if current_mode == "expert":
+                # 修改DAG命令
+                if actual_question.lower().startswith('modify '):
+                    if not expert_dag_built:
+                        print("⚠️ 请先输入问题生成DAG")
+                        continue
+                    
+                    modification_request = actual_question[7:].strip()
+                    if not modification_request:
+                        print("⚠️ 请输入修改需求")
+                        continue
+                    
+                    print("🔧 正在修改DAG...", flush=True)
+                    try:
+                        result = await engine.expert_modify_dag(modification_request)
+                        if isinstance(result, dict) and "error" in result:
+                            print(f"❌ {result['error']}")
+                        else:
+                            print(f"✅ {result.get('message', 'DAG已更新')}")
+                            print_dag_info(result.get('dag_info', {}))
+                            print("\n请选择下一步操作：")
+                            print("  🔧 modify <request>  修改DAG")
+                            print("  ▶️  start            开始分析")
+                            expert_dag_built = True  # DAG已更新
+                    except Exception as e:
+                        print(f"⚠️ 修改DAG失败: {e}")
+                    print("-" * 74)
+                    continue
+                
+                # 开始分析命令
+                elif actual_question.lower() in ['start', 'analyze', '开始分析']:
+                    if not expert_dag_built:
+                        print("⚠️ 请先输入问题生成DAG")
+                        continue
+                    
+                    print("▶️ 开始执行分析...", flush=True)
+                    try:
+                        result = await engine.expert_start_analysis()
+                        print(f"\n🤖 分析报告\n：{result}")
+                        expert_dag_built = False  # 分析完成，重置状态
+                    except Exception as e:
+                        print(f"⚠️ 分析执行失败: {e}")
+                    print("-" * 74)
+                    continue
+            
+            # ========== 执行查询（根据模式不同处理）==========
             print("🤖 正在思考中，请稍等… 🧠✨", flush=True)
-            result = await engine.run(question)
-
-            print(f"\n🤖 分析报告\n：{result}")
-            print("-" * 74)
+            
+            if current_mode == "normal":
+                # 普通模式：直接执行完整流程
+                result = await engine.run(actual_question, mode="normal")
+                print(f"\n🤖 分析报告\n：{result}")
+                print("-" * 74)
+            
+            else:  # expert mode
+                # 专家模式：只生成DAG，返回信息
+                result = await engine.run(actual_question, mode="expert")
+                
+                if isinstance(result, dict):
+                    # 返回的是DAG信息
+                    if "error" in result:
+                        print(f"❌ {result['error']}")
+                    else:
+                        print(f"✅ {result.get('message', 'DAG已生成')}")
+                        print_dag_info(result.get('dag_info', {}))
+                        print("\n请选择下一步操作：")
+                        print("  🔧 modify <request>  修改DAG")
+                        print("  ▶️  start            开始分析")
+                        expert_dag_built = True
+                else:
+                    # 返回的是字符串（可能是错误信息）
+                    print(f"\n{result}")
+                print("-" * 74)
 
         except KeyboardInterrupt:
             print("\n\n⛔ 用户中断，系统退出")
             break
         except Exception as e:
             print(f"⚠️ 处理分析时出错: {e}")
-
-    # while True:
-    #     try:
-    #         question = input("\n请输入问题: ").strip()
-            
-    #         if question.lower() in ['quit', 'exit', 'q']:
-    #             print("退出交互模式")
-    #             break
-    #         elif question.lower() == 'stats':
-    #             reponse = engine.get_performance_summary()
-    #             print("\n--- 性能统计 ---")
-    #             for key, value in reponse.items():
-    #                 print(f"{key}: {value}")
-    #             print("-" * 74)
-    #             continue
-    #         elif question.lower() in ['datasets', 'list', 'list datasets']:
-    #             # 列出当前可用数据集
-    #             try:
-    #                 ds_map = engine.list_datasets()
-    #                 print("\n--- 可用数据集 ---")
-    #                 for dtype, names in ds_map.items():
-    #                     print(f"{dtype}: {', '.join(names) if names else '(empty)'}")
-    #                     print(f" - {dtype} ({len(names)}): {', '.join(names)}")
-    #                 print("-" * 74)
-    #             except Exception as e:
-    #                 print(f"列出数据集失败: {e}")
-    #                 print("-" * 74)
-    #             continue
-    #         elif question.lower().startswith('use '):
-    #             # 选择要分析的数据集
-    #             # 支持格式：use <name>、use <name> <dtype>、use <dtype>:<name>
-    #             cmd = question[4:].strip()
-    #             dtype = None
-    #             name = cmd
-    #             if ':' in cmd:
-    #                 # dtype:name 形式
-    #                 parts = cmd.split(':', 1)
-    #                 if len(parts) == 2:
-    #                     dtype, name = parts[0].strip(), parts[1].strip()
-    #             else:
-    #                 # 尝试用空格分离 name 和 dtype（末尾为 dtype 更自然）
-    #                 toks = cmd.split()
-    #                 if len(toks) >= 2:
-    #                     name = ' '.join(toks[:-1]).strip()
-    #                     dtype = toks[-1].strip()
-    #             try:
-    #                 data = engine.specific_dataset(name, dtype)
-    #                 if data is None:
-    #                     scope = dtype if dtype else "graph/table/text"
-    #                     print(f"未找到数据集: name='{name}', type_scope='{scope}'")
-    #                 else:
-    #                     print(f"已选择数据集: name='{name}'" + (f", type='{dtype}'" if dtype else ""))
-    #                 print("-" * 74)
-    #             except Exception as e:
-    #                 print(f"选择数据集失败: {e}")
-    #                 print("-" * 74)
-    #             continue
-    #         # 补充一个 help， 输出可用的所有命令和对应的输出格式，参考成熟的输出方案
-    #         elif question.lower() in ['help', 'h']:
-    #             print("\n=== 帮助 (Help) ===")
-    #             print("可用命令：")
-    #             print("  stats                         显示性能统计")
-    #             print("  datasets | list               列出所有可用数据集，按类型分组")
-    #             print("  use <name>                    选择要分析的数据集（类型自动推断）")
-    #             print("  use <name> <dtype>            选择数据集并指定类型（graph/table/text）")
-    #             print("  use <dtype>:<name>            以 dtype:name 形式选择数据集")
-    #             print("  help | h                 显示本帮助")
-    #             print("  quit | exit | q               退出系统")
-    #             print("\n示例：")
-    #             print("  use AMLSim1K")
-    #             print("  use AMLSim1K graph")
-    #             print("  use graph:AMLSim1K")
-    #             print("-" * 74)
-    #             continue
-    #         elif not question:
-    #             continue
-            
-    #         # 处理查询（非命令输入时，交由引擎进行分析）
-    #         print("🤔思考中...", flush=True)
-    #         result = await engine.run(question)
-            
-    #         print(f"\n回答: {result}")
-    #         print("-" * 74)
-
-    #     except KeyboardInterrupt:
-    #         print("\n\n用户中断，退出交互模式")
-    #         break
-    #     except Exception as e:
-    #         print(f"处理查询时出错: {e}")
 
 
 def batch_mode(engine: AAGEngine, questions: List[str], output_file: Optional[str] = None):
@@ -327,7 +415,8 @@ async def main():
         if mode == "interactive":
             print(f"{BOLD}💬 当前运行模式：交互模式 (Interactive Mode){RESET}")
             print("-" * 74)
-            print(" 输入问题按 Enter 分析；命令：stats | datasets | use <name> [dtype] | help | quit")
+            print(" 输入问题按 Enter 分析；命令：stats | datasets | use <name> [dtype] | mode | help | quit")
+            print(" 支持普通模式和专家模式，使用 'mode expert' 或 'mode normal' 切换")
             print(f"{CYAN}{'=' * 74}{RESET}")
             # interactive_mode(engine)
             await interactive_mode(engine)

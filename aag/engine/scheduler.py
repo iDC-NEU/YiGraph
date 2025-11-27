@@ -173,13 +173,22 @@ class Scheduler:
         
         return self.current_dataset
 
-    async def execute(self, query: str, decompose: bool = True) -> str:
+    async def execute(self, query: str, decompose: bool = True, mode: str = "normal") -> Union[str, Dict[str, Any]]:
         """
         Execute query with dataset type validation
         
+        Args:
+            query: 用户查询
+            decompose: 是否分解查询
+            mode: 执行模式 "normal" | "expert"
+        
+        Returns:
+            普通模式: 返回分析结果字符串
+            专家模式: 返回DAG信息字典（包含 dag_info, message 等）
+        
         Validates:
-        1. RAG query + graph dataset → Error (graph data cannot do retrieval)
-        2. GRAPH query + text dataset → Check if converted graph exists
+            1. RAG query + graph dataset → Error (graph data cannot do retrieval)
+            2. GRAPH query + text dataset → Check if converted graph exists
         """
         decision = self.router.route(query=query)
         logger.info(f"🚦[Router] query_type={decision.query_type}, reason={decision.reason}")
@@ -209,15 +218,24 @@ class Scheduler:
                 graph_nodes, graph_edges = flatten_graph(global_vertices, global_edges)
                 self.data_dependency_resolver.set_global_graph(graph_nodes, graph_edges)         
             
-            return await self._execute_graph(query, decompose=decompose)
+            return await self._execute_graph(query, decompose=decompose, mode=mode)
         
         # 3) General query
         return self.reasoner.general_query_response(query)
     
 
-    async def _execute_graph(self, query: str, decompose: bool = True) -> str:
+    async def _execute_graph(self, query: str, decompose: bool = True, mode: str = "normal") -> Union[str, Dict[str, Any]]:
         """
         Execute graph analysis query
+        
+        Args:
+            query: 用户查询
+            decompose: 是否分解查询
+            mode: 执行模式 "normal" | "expert"
+        
+        Returns:
+            普通模式: 返回分析结果字符串
+            专家模式: 返回DAG信息字典
         
         Uses self.current_graph_dataset (which may be converted graph for text datasets)
         """
@@ -231,33 +249,68 @@ class Scheduler:
         if not self.global_graph:
             return "⚠️ 图数据未加载，请先加载图数据"
         
-        # step1. 根据 query 解析 生成 dag
+
         self._build_dag_from_query(query, decompose)
-
-<<<<<<< HEAD
-=======
-        self.dag.print_dag_info()
-
-        # 如果需要修改的话，根据用户要求进行修改
-        user_input = input("请输入修改DAG要求")
-        self.dag.modify_dag(self.reasoner, user_input)
-        self.dag.print_dag_info()
->>>>>>> origin/main
-        # step2. 遍历每个 dag 的节点，确定算法
         self._find_algorithm()
+        
+        if mode == "expert":
+            dag_info = self.dag.get_dag_info()
+            return {
+                "message": "DAG已生成，请选择下一步操作",
+                "dag_info": dag_info
+            }
+        
+        # 普通模式：继续执行完整流程
         self.dag.print_dag_info()
-
-        # step3. 根据每个节点问题内容和图算法得到数据依赖
         self.dag.refresh_data_dependency(self.reasoner)
         self.dag.print_data_dependency()
         print("✅ DAG 构建与算法选择完成，准备执行计算流程")
-        
-        # step4. 根据每个问题确定的算法，调度算法执行
+          
         return await self._run_algorithm_pipeline2()
 
-        # step5. 整理计算结果，输出报告
+    async def expert_modify_dag(self, modification_request: str) -> Dict[str, Any]:
+        """
+        专家模式：根据用户需求修改DAG
+        
+        Args:
+            modification_request: 用户修改需求（自然语言）
+        
+        Returns:
+            包含更新后DAG信息的字典
+        """
+        if not self.dag:
+            return {
+                "error": "DAG尚未构建，请先输入问题生成DAG"
+            }
+        
+        try:
+            self.dag.modify_dag(self.reasoner, modification_request)
+            self._find_algorithm()
+            dag_info = self.dag.get_dag_info()
+            return {
+                "message": "DAG已更新",
+                "dag_info": dag_info
+            }
+        except Exception as e:
+            logger.error(f"修改DAG失败: {e}", exc_info=True)
+            return {
+                "error": f"修改DAG失败: {str(e)}"
+            }
 
-
+    async def expert_start_analysis(self) -> str:
+        """
+        专家模式：开始执行分析
+        
+        Returns:
+            分析结果字符串
+        """
+        if not self.dag:
+            return "❌ 错误：DAG尚未构建，请先输入问题生成DAG"
+                
+        self.dag.refresh_data_dependency(self.reasoner)
+        self.dag.print_data_dependency()
+        print("✅ DAG 构建与算法选择完成，准备执行计算流程")
+        return await self._run_algorithm_pipeline2()
 
     async def _execute_rag(self, query: str) -> str:
         """
@@ -563,7 +616,8 @@ class Scheduler:
                     code_result_value = self.computing_engine.execute_code(
                         code=generated_code,
                         data=execution_data,
-                        global_graph=self.global_graph
+                        global_graph=self.global_graph,
+                        is_numeric_analysis=True
                     )
 
                     if isinstance(code_result_value, dict) and "error" in code_result_value:
@@ -707,164 +761,4 @@ class Scheduler:
     async def shutdown(self):
         if self.computing_engine:
             await self.computing_engine.shutdown()
-<<<<<<< HEAD
         
-=======
-        
-
-
-    # 
-    # 
-    # ----------------- 外部入口 -----------------
-    def run(self, *, stop_on_fail: bool = True) -> None:
-        """
-        顺序调度执行：不断消费 DAG 的就绪步骤。
-        """
-        while True:
-            ready: List[int] = self.dag.ready_steps()
-            if not ready:
-                # 没有就绪节点：若还有 pending，则说明被失败阻塞或已无可前进
-                pending_exists = any(s.status == "pending" for s in self.dag.steps.values())
-                if not pending_exists:
-                    # 全部完成
-                    break
-                # 无就绪但仍有 pending：结束（等待外部处理/回滚/修复）
-                break
-
-            for sid in ready:
-                step = self.dag.steps[sid]
-                fn = self._dispatch.get(step.step_type)
-                if fn is None:
-                    self.dag.set_failed(sid, error=f"Unsupported step_type={step.step_type}")
-                    if stop_on_fail:
-                        return
-                    else:
-                        continue
-
-                if self.on_step_start:
-                    self.on_step_start(step)
-
-                self.dag.set_running(sid)
-
-                tries = 0
-                while True:
-                    try:
-                        output = fn(step_id=sid)  # 执行内部“执行器”
-                        self.dag.set_success(sid, output_data=output)
-                        break
-                    except Exception as e:
-                        tries += 1
-                        err = f"{type(e).__name__}: {e}\n{traceback.format_exc()}"
-                        if tries <= self.max_retries:
-                            time.sleep(self.retry_sleep_sec)
-                            continue
-                        self.dag.set_failed(sid, error=err)
-                        if stop_on_fail:
-                            return
-                        break
-
-                if self.on_step_end:
-                    self.on_step_end(step)
-
-    # ----------------- 内部执行器 -----------------
-
-    def _exec_retrieval(self, *, step_id: int) -> Any:
-        """
-        检索/子图构建等。约定 parameters 里包含 node/depth 等。
-        从父节点拿输入（如上游 planning 的结果）也可以。
-        """
-        step  = self.dag.steps[step_id]
-        params = step.parameters
-        node  = params.get("node")
-        depth = int(params.get("depth", 1))
-
-        # 从父节点拿到上游结果（如需）
-        parents = self.dag.parents_of(step_id)
-        parent_outputs = [self.dag.get_result(pid) for pid in parents]
-
-        # 具体调用你的图引擎（此处示例）
-        # subgraph = self.graph_computing_engine.k_hop_neighbors(node=node, k=depth)
-        subgraph = {"nodes": ["C_1", "C_2"], "edges": [("C_0","C_1"),("C_1","C_2")], "src": node, "depth": depth,
-                    "evidence_from_parents": parent_outputs}
-        return subgraph
-
-    def _exec_graph_algorithm(self, *, step_id: int) -> Any:
-        """
-        图算法执行：如 connected_components、pagerank、shortest_path 等。
-        约定 parameters["algo"] 指明算法类型。
-        """
-        step = self.dag.steps[step_id]
-        algo = step.parameters.get("algo")
-        parents = self.dag.parents_of(step_id)
-        # 通常取第一个父的子图输入；或做多父合并
-        subgraph = self.dag.get_result(parents[0]) if parents else None
-
-        # 具体算法分派（示例）
-        if algo in ("connected_components", "cc"):
-            # result = self.graph_computing_engine.connected_components(subgraph)
-            result = {"components": 3, "labels": {"C_1":0, "C_2":0}}
-        elif algo in ("pagerank", "pr"):
-            # result = self.graph_computing_engine.pagerank(subgraph)
-            result = {"scores": {"C_1":0.42, "C_2":0.58}}
-        elif algo == "shortest_path":
-            src = step.parameters.get("src"); dst = step.parameters.get("dst")
-            # result = self.graph_computing_engine.shortest_path(subgraph, src, dst)
-            result = {"path": ["C_0","C_1","C_2"], "length": 2, "src": src, "dst": dst}
-        else:
-            raise ValueError(f"Unknown graph algorithm: {algo}")
-        return result
-
-    def _exec_graph_learning(self, *, step_id: int) -> Any:
-        """
-        图学习：节点分类/链路预测/图分类等。把父步骤产出的子图/特征喂给 GNN。
-        约定 parameters["task"] 指定任务。
-        """
-        step = self.dag.steps[step_id]
-        task = step.parameters.get("task", "node_classification")
-        parents = self.dag.parents_of(step_id)
-        subgraph = self.dag.get_result(parents[0]) if parents else None
-
-        # 具体的训练/推理调用替换成你的 gnn_engine
-        # logits = self.gnn_engine.infer(subgraph, **step.parameters)
-        if task == "node_classification":
-            logits = {"preds": {"C_1": 1, "C_2": 0}}
-        elif task == "link_prediction":
-            logits = {"links": [( "C_1","C_2", 0.91)]}
-        else:
-            raise ValueError(f"Unknown graph learning task: {task}")
-        return logits
-
-    def _exec_llm_interaction(self, *, step_id: int) -> Any:
-        """
-        LLM 解释/总结/对话：把证据链（祖先步骤）作为上下文，结合参数提示词，让 LLM 输出说明。
-        """
-        step = self.dag.steps[step_id]
-        chain = self.dag.explain_path_to(step_id)
-        context = [
-            {"id": s.step_id, "type": s.step_type, "params": s.parameters, "out": s.output_data}
-            for s in chain
-        ]
-        prompt = step.parameters.get("prompt", "请基于步骤证据给出解释。")
-        # reply = self.llm_client.summarize(context=context, prompt=prompt)
-        reply = f"[LLM] 依据 {len(context)} 步证据生成解释：节点 C_2 风险较高。"
-        return {"explanation": reply, "context_size": len(context)}
-
-    def _exec_llm_planning(self, *, step_id: int) -> Any:
-        """
-        若你让 LLM 生成或优化 plan，这里执行规划（也可把新步骤动态加入 DAG）。
-        """
-        step = self.dag.steps[step_id]
-        question = step.parameters.get("q", "")
-        # plan = self.llm_client.plan(question)
-        plan = {"plan": ["retrieval(depth=2)", "cc", "pagerank", "llm_interaction"]}
-        return plan
-
-    def _exec_aggregation(self, *, step_id: int) -> Any:
-        """
-        聚合多个父节点输出，做最终汇总/打分/组装返回。
-        """
-        parents = self.dag.parents_of(step_id)
-        outs = [self.dag.get_result(pid) for pid in parents]
-        # 简单合并示例
-        return {"aggregated": outs}
->>>>>>> origin/main

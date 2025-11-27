@@ -407,6 +407,7 @@ class GraphWorkflowDAG:
             "step_id": step.step_id,
             "question": step.question,
             "graph_algorithm": step.graph_algorithm,
+            "task_type": step.task_type,
             "status": step.status,
             "parents": list(self.in_edges[step_id]),
             "children": list(self.out_edges[step_id]),
@@ -424,15 +425,48 @@ class GraphWorkflowDAG:
             
             for step_id in topo_order:
                 info = self.get_step_info(step_id)
-                print(f"\n步骤 {step_id}:")
-                print(f"  问题: {info['question']}")
-                print(f"  图算法: {info['graph_algorithm']}")
-                print(f"  状态: {info['status']}")
-                print(f"  父步骤: {info['parents']}")
-                print(f"  子步骤: {info['children']}")
+                print(f"\nstep {step_id}:")
+                print(f"  question: {info['question']}")
+                print(f"  task_type: {info['task_type']}")
+                print(f"  algorithm: {info['graph_algorithm']}")
+                print(f"  status: {info['status']}")
+                print(f"  parents: {info['parents']}")
+                print(f"  children: {info['children']}")
                 
         except ValueError as e:
             print(f"拓扑排序失败: {e}")
+            
+    def get_dag_info(self) -> Dict[str, Any]:
+        """
+        获取当前DAG的详细信息
+        
+        Returns:
+            包含DAG信息的字典
+        """
+
+        # 获取步骤信息
+        steps_info = {}
+        topological_order = []
+        
+        try:
+            topological_order = self.topological_order()
+            for step_id in topological_order:
+                step = self.steps[step_id]
+                steps_info[str(step_id)] = {
+                    "question": step.question,
+                    "task_type": step.task_type if step.task_type else None,
+                    "algorithm": step.graph_algorithm if step.graph_algorithm else None,
+                    "status": step.status.value if hasattr(step.status, 'value') else str(step.status)
+                }
+        except Exception as e:
+            # 如果获取信息时出错，返回部分信息
+            print(f"获取DAG信息时出错: {e}")
+        
+        return {
+            "subquery_plan": self.get_subquery_plan(),
+            "steps": steps_info,
+            "topological_order": [str(sid) for sid in topological_order]
+        }
     
     def export_as_dict(self) -> Dict[str, Any]:
         """将DAG转换为字典格式"""
@@ -568,18 +602,9 @@ class GraphWorkflowDAG:
         """返回 query_id -> step_id 映射的副本。"""
         return copy.deepcopy(self.query_id_mapping)
 
-    def modify_dag(self, reasoner: "Reasoner", user_request: str,
-                             system_prompt: Optional[str] = None) -> Dict[str, Any]:
+    def modify_dag(self, reasoner: Reasoner, user_request: str) -> Dict[str, Any]:
         """
-        基于用户的自然语言修改请求，重新生成 subquery_plan。
-
-        Args:
-            reasoner: 用于和大模型交互的 Reasoner 实例。
-            user_request: 用户输入的修改说明。
-            system_prompt: 可选的系统提示词，未提供时使用默认值。
-
-        Returns:
-            dict: 更新后的 subquery_plan。
+        Based on the user's natural language modification request, regenerate the subquery_plan.
         """
         if reasoner is None:
             raise ValueError("reasoner 不能为空")
@@ -593,8 +618,7 @@ class GraphWorkflowDAG:
 
         updated_plan = reasoner.revise_subquery_plan(
             current_plan=self.get_subquery_plan(),
-            user_request=normalized_request,
-            system_prompt=system_prompt,
+            user_request=normalized_request
         )
         self.build_from_subquery_plan(updated_plan)
         return updated_plan

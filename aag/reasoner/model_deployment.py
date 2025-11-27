@@ -23,8 +23,6 @@ EMBEDD_DIMS = {
     "BAAI/bge-small-en-v1.5": 384
 }
 
-<<<<<<< HEAD
-=======
 DAG_REVISION_SYSTEM_PROMPT = (
     "You are an expert workflow planner for a graph-computation pipeline. "
     "You will modify an existing subquery DAG plan based on user edit instructions. "
@@ -86,7 +84,6 @@ def build_dag_revision_user_prompt(current_plan: Dict[str, Any], user_request: s
     )
 
 
->>>>>>> origin/main
 class EmbeddingEnv:
 
     def __init__(self,
@@ -238,30 +235,18 @@ class OllamaEnv:
         response = self.llm.complete(plan_subqueries_prompt.format(query=query))
         return extract_json_from_response(response.text)
 
-<<<<<<< HEAD
     def classify_question_type(self, question: str) -> dict:
         """Classify whether a question requires graph algorithm or numeric analysis."""
         response = self.llm.complete(classify_question_type_prompt.format(question=question))
         return extract_json_from_response(response.text)
-=======
-    def revise_subquery_plan(
-            self,
-            current_plan: Dict[str, Any],
-            user_request: str,
-            system_prompt: Optional[str] = None) -> Dict[str, Any]:
-        """
-        调用大模型根据用户描述更新 subquery_plan。
-        """
-        system_prompt = system_prompt or DAG_REVISION_SYSTEM_PROMPT
-        user_prompt = build_dag_revision_user_prompt(current_plan, user_request)
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-        response_text = self.chat(messages)
-        return extract_json_from_response(response_text)
 
->>>>>>> origin/main
+
+    def revise_subquery_plan(self, current_plan: Dict[str, Any], user_request: str) -> Dict[str, Any]:
+        response = self.llm.complete(revise_subquery_plan_prompt.format(
+            current_plan=json.dumps(current_plan, ensure_ascii=False),
+            user_request=user_request
+        ))
+        return extract_json_from_response(response.text)
 
     def select_task_type(self, question: str, task_type_list: list) -> dict:
         response = self.llm.complete(select_task_type_prompt.format(
@@ -477,24 +462,14 @@ class OpenAIEnv:
     def revise_subquery_plan(
             self,
             current_plan: Dict[str, Any],
-            user_request: str,
-            system_prompt: Optional[str] = None) -> Dict[str, Any]:
-        system_prompt = system_prompt or DAG_REVISION_SYSTEM_PROMPT
-        user_prompt = build_dag_revision_user_prompt(current_plan, user_request)
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                response_format={"type": "json_object"},
-            )
-            content = response.choices[0].message.content
-            return extract_json_from_response(content)
-        except Exception as exc:
-            raise RuntimeError(f"Failed to revise subquery plan: {exc}") from exc
-    
+            user_request: str) -> Dict[str, Any]:
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": revise_subquery_plan_prompt.format(current_plan=json.dumps(current_plan, ensure_ascii=False), user_request=user_request)}]
+        )
+        content = response.choices[0].message.content
+        return parse_openai_json_response(content, "revise_subquery_plan")
+
     def classify_question_type(self, question: str) -> dict:
         """Classify whether a question requires graph algorithm or numeric analysis."""
         response = self.client.chat.completions.create(
@@ -525,7 +500,6 @@ class OpenAIEnv:
         )
         response = response.choices[0].message.content
         return json.loads(response)
-    
     
     def extract_parameters_with_postprocess(self, question: str, tool_description: str) -> dict:
         response = self.client.chat.completions.create(
@@ -771,14 +745,8 @@ class Reasoner:
     def plan_subqueries(self, decompose: bool, query: str) -> dict:
         return self.env.plan_subqueries(decompose, query)
     
-    def revise_subquery_plan(
-            self,
-            current_plan: Dict[str, Any],
-            user_request: str,
-            system_prompt: Optional[str] = None) -> Dict[str, Any]:
-        if hasattr(self.env, "revise_subquery_plan"):
-            return self.env.revise_subquery_plan(current_plan, user_request, system_prompt)
-        raise NotImplementedError("Underlying environment does not support revising subquery plans")
+    def revise_subquery_plan(self, current_plan: Dict[str, Any], user_request: str) -> Dict[str, Any]:
+        return self.env.revise_subquery_plan(current_plan, user_request)
     
     def select_task_type(self, question: str, task_type_list: list) -> dict:
         return self.env.select_task_type(question, task_type_list)

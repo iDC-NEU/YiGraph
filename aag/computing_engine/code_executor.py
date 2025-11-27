@@ -7,6 +7,7 @@ import importlib
 import subprocess
 import sys
 import re
+import inspect
 from typing import Any, Optional
 from aag.expert_search_engine.database.datatype import GraphData
 
@@ -100,7 +101,7 @@ class DynamicCodeExecutor:
         
         return True
     
-    def execute(self, code: str, data: Any, global_graph: Optional[GraphData] = None) -> Any:
+    def execute(self, code: str, data: Any, global_graph: Optional[GraphData] = None, is_numeric_analysis: bool = False) -> Any:
         """在独立命名空间中执行代码"""
         # 检查并安装依赖
         if not self.check_and_install_dependencies(code):
@@ -126,8 +127,24 @@ class DynamicCodeExecutor:
             if not callable(process_func):
                 raise ValueError("'process' 必须是一个函数")
             
-            # 执行处理函数
-            result = process_func(data)
+            # 根据 is_numeric_analysis 决定参数传递方式
+            if is_numeric_analysis:
+                # 数值分析场景：data 是包含多个字段的字典，使用 **data 解包传递
+                if isinstance(data, dict):
+                    sig = inspect.signature(process_func)
+                    param_names = list(sig.parameters.keys())
+                    # 检查所有参数名是否都在 data 的键中
+                    if all(name in data for name in param_names):
+                        result = process_func(**data)
+                    else:
+                        raise ValueError(f"函数参数 {param_names} 与 data 的键不匹配")
+                else:
+                    # data 不是字典，直接传递
+                    result = process_func(data)
+            else:
+                # 后处理场景：data 是算法结果（可能是字典），直接传递整个 data
+                result = process_func(data)
+            
             logger.info(f"✅ 后处理执行成功")
             
             return result

@@ -424,7 +424,7 @@ class DataDependencyResolver:
 
         mapping_result = self.reasoner.map_parameters(
             current_question=current_question,
-            algo_desc=alg_des_doc,
+            current_algo_desc=alg_des_doc,
             dependency_items=dependency_list
         )
 

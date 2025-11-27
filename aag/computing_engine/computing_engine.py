@@ -253,7 +253,7 @@ class ComputingEngine:
             logger.warning("⚠️ 参数规范化失败 (%s): %s", tool_name, exc)
             return parameters
 
-    def execute_code(self, code: str, data: Any, global_graph: Optional[GraphData] = None, fallback_to_direct_exec: bool = True) -> Any:
+    def execute_code(self, code: str, data: Any, global_graph: Optional[GraphData] = None, fallback_to_direct_exec: bool = True, is_numeric_analysis: bool = False) -> Any:
         """
         执行动态生成的代码（数值分析、后处理等）
         
@@ -261,6 +261,7 @@ class ComputingEngine:
             code: 要执行的 Python 代码字符串
             data: 传递给代码的数据（可以是 dict 或其他类型）
             fallback_to_direct_exec: 如果代码不是 process 函数格式，是否直接执行
+            is_numeric_analysis: 是否为数值分析场景（True：使用 **data 解包；False：直接传递 data）
             
         Returns:
             代码执行结果
@@ -269,8 +270,7 @@ class ComputingEngine:
             RuntimeError: 代码执行失败
         """
         try:
-            # 尝试使用 execute 方法（期望代码定义 process 函数）
-            return self.code_executor.execute(code, data, global_graph=global_graph)
+            return self.code_executor.execute(code, data, global_graph=global_graph, is_numeric_analysis=is_numeric_analysis)
         except (ValueError, AttributeError) as e:
             if not fallback_to_direct_exec:
                 raise RuntimeError(f"代码执行失败: {e}")

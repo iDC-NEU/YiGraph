@@ -1095,7 +1095,7 @@ def process(data):
 ```
 
 Code Patterns & Examples
-Example 1: Handling Nested Lists (Community Detection) Context: data is a list of communities [['1','2'], ['3','4']]. Requirement: "Find neighbors of node '45' in its community."
+Example 1: Handling Nested Lists (Community Detection) Context: data is a list of communities [['1','2'], ['3','4']]. Question: "Find neighbors of node '45' in its community."
 ```python
 def process(data):
     node_45 = "45"
@@ -1128,7 +1128,7 @@ def process(data):
         "neighbor_count": len(neighbors)
     }}
 ```
-Example 2: Dictionary Processing (PageRank) & Property Enrichment Context: data is {{node_id: score}}. Requirement: "Top 5 nodes sorted by age."
+Example 2: Dictionary Processing (PageRank) & Property Enrichment Context: data is {{node_id: score}}. Question: "Top 5 nodes sorted by age."
 ```python
 def process(data):
     # 1. Get Top 5 (Dict processing)
@@ -1168,7 +1168,7 @@ def process(data):
         "qualified_nodes": filtered
     }}
 ```
-Example 4: Multi-field Return  Requirement: "Get the top 10 nodes by PageRank score, calculate their total score sum, and identify the fifth-ranked node."
+Example 4: Multi-field Return Requirement: "Get the top 10 nodes by PageRank score, calculate their total score sum, and identify the fifth-ranked node."
 ```python
 def process(data):
     top_10 = dict(list(sorted(data.items(), key=lambda x: x[1], reverse=True))[:10])
@@ -1212,43 +1212,37 @@ def process(data):
         'min_in_top10':  {{'node': min_node, 'score': top_10[min_node]}}
     }}
 ```
+
 Rule 4: Output JSON Format
 Return the result in this strictly defined JSON structure:
 ```json
 {{
-    "tool_name": "run_pagerank",
+    "tool_name": "<algorithm_name>",
     "parameters": {{
-        "alpha": 0.85,
-        "max_iter": 100,
-        ……
+        "<param_name_1>": <param_value_1>,
+        "<param_name_2>": <param_value_2>,
+        ...
     }},
     "post_processing_code": {{
-        "code": "def process(data):\\n  top_10 = dict(list(sorted(data.items(), key=lambda x: x[1], reverse=True))[:10])\\n  return {{\\n"original_result":data,\\n "top_10_nodes":top_10,\\n "total_score": sum(top_10.values()),\\n "fifth_node": {{ "node": list(top_10.keys())[4], "score": top_10[list(top_10.keys())[4]] }} }}",
-        "is_calculate": true,
+        "code": "<escaped_python_code_string_with_\\n_for_newlines>",
+        "is_calculate": <true_or_false>,
         "output_schema": {{
-            "description": "PageRank post-processing results, including top 10 nodes, total score, and details of fifth node",
-            "type": "dict",
+            "description": "<description_of_output>",
+            "type": "<dict_or_list>",
             "fields": {{
                 "original_result": {{
                     "type": "data_type",  # or list, depending on actual type
-                    "field_description": "Original output result of graph algorithm. This field is of type dict, where the key represents the node ID and the value represents the PageRank score. And the key is string type and the value is float type."
+                    "field_description": "Original output result of graph algorithm. This field is of type xxx, where the key represents the node ID and the value represents the PageRank score. And the key is string type and the value is float type."
                 }},
-                "top_10_nodes": {{
-                    "type": "dict",
-                    "field_description": "Top 10 nodes by influence and their corresponding PageRank scores"
+                "<field_name_1>": {{
+                    "type": "<field_type>",
+                    "field_description": "<detailed_description_of_field>"
                 }},
-                "total_score": {{
-                    "type": "float",
-                    "field_description": "Sum of PageRank scores for the top 10 nodes by influence"
-                }},
-                "fifth_node": {{
-                    "type": "dict",
-                    "field_description": "The fifth-ranked node among the top 10 nodes by influence and its score"
-                }}
+                ...
             }}
         }}
     }},
-    "reasoning": "The parameters max_iter=100 are because the question explicitly specifies max_iter as 100. And the post_processing_code is to xxx"
+    "reasoning": "<explanation_of_parameter_selection_and_post_processing_logic>"
 }}
 ```
 Key Constraints:
@@ -1571,44 +1565,39 @@ def process(data):
     }}
 ```
 
-###Rule 4: Output JSON Format
+Rule 4: Output JSON Format
 Return the result in this strictly defined JSON structure:
 ```json
 {{
-    "tool_name": "run_pagerank",
+    "tool_name": "<algorithm_name>",
     "parameters": {{
-        "alpha": 0.85,
-        "max_iter": 100
+        "<param_name_1>": <param_value_1>,
+        "<param_name_2>": <param_value_2>,
+        ...
     }},
     "post_processing_code": {{
-        "code": "def process(data):\\n  top_10 = dict(list(sorted(data.items(), key=lambda x: x[1], reverse=True))[:10])\\n  return {{\\n"original_result":data,\\n "top_10_nodes":top_10,\\n "total_score": sum(top_10.values()),\\n "fifth_node": {{ "node": list(top_10.keys())[4], "score": top_10[list(top_10.keys())[4]] }} }}",
-        "is_calculate": true,
+        "code": "<escaped_python_code_string_with_\\n_for_newlines>",
+        "is_calculate": <true_or_false>,
         "output_schema": {{
-            "description": "PageRank post-processing results, including top 10 nodes, total score, and details of fifth node",
-            "type": "dict",
+            "description": "<description_of_output>",
+            "type": "<dict_or_list>",
             "fields": {{
                 "original_result": {{
-                    "type": "data_type",
-                    "field_description": "Original output result of graph algorithm. This field is of type dict, where the key represents the node ID and the value represents the PageRank score. And the key is string type and the value is float type."
+                    "type": "data_type",  # or list, depending on actual type
+                    "field_description": "Original output result of graph algorithm. This field is of type xxx, where the key represents the node ID and the value represents the PageRank score. And the key is string type and the value is float type."
                 }},
-                "top_10_nodes": {{
-                    "type": "dict",
-                    "field_description": "Top 10 nodes by influence and their corresponding PageRank scores"
+                "<field_name_1>": {{
+                    "type": "<field_type>",
+                    "field_description": "<detailed_description_of_field>"
                 }},
-                "total_score": {{
-                    "type": "float",
-                    "field_description": "Sum of PageRank scores for the top 10 nodes by influence"
-                }},
-                "fifth_node": {{
-                    "type": "dict",
-                    "field_description": "The fifth-ranked node among the top 10 nodes by influence and its score"
-                }}
+                ...
             }}
         }}
     }},
-    "reasoning": "The dependency_parameters provided xxx. I extracted parameters alpha=0.85 and max_iter=100 from the question. And the post_processing_code is to xxx"
+    "reasoning": "<explanation_of_parameter_selection_and_post_processing_logic>"
 }}
 ```
+
 Key Constraints:
 Newlines: Escape newlines in code as \n.
 Schema Match: Keys in output_schema.fields MUST match the keys returned in the process function dictionary.
@@ -1982,4 +1971,72 @@ Output Format key Requirements:
 
 ##Instructions:
 Generate a Python function to solve the user question based on the dependency data items, vertexData schema, and edgeData schema.
+"""
+
+
+revise_subquery_plan_prompt = """
+You are a graph workflow planning expert skilled at revising DAG-based subquery plans
+based on a user's modification request. You will be given:
+1. A current subquery plan in JSON format.
+2. A natural language user request describing edits to the plan.
+
+### Input Description
+The current subquery plan consists of nodes, each containing:
+- id: the unique node id (example: "q1")
+- query: a natural language description of the step
+- depends_on: a list of prerequisite node ids
+
+The user request may include one or more of the following types of edits:
+- Add a new step (node insertion)
+- Delete a step (node removal)
+- Modify an existing step's natural language query
+- Change dependencies (parent or child relations)
+- Express no required modification
+
+### Revision Rules
+1. Preserve original ids when modifying content.
+2. Assign new ids only when new steps are added.
+3. All dependencies must remain acyclic and logically correct.
+4. Each node must contain exactly: id, query, depends_on.
+5. If the user explicitly indicates no change, output the original plan unchanged.
+6. The output must strictly follow the schema below without any explanation:
+{{
+    "subqueries": [
+    {{
+        "id": "qX",
+        "query": "text",
+        "depends_on": []
+    }}
+    ]
+}}
+
+### Example for Guidance
+**Input Current Plan:**
+{{
+"subqueries": [
+    {{"id": "q1", "query": "Check if user Anna is a high-risk user.", "depends_on": []}},
+    {{"id": "q2", "query": "List all potential money laundering pathways around Anna.", "depends_on": ["q1"]}},
+    {{"id": "q3", "query": "Estimate the amount of cash that may have been illegally transferred out in relation to Anna.", "depends_on": ["q2"]}},
+    {{"id": "q4", "query": "Find the account with the largest transaction amount in the suspicious paths.", "depends_on": ["q2"]}}
+]
+}}
+
+**User Request:**
+Add a step between node 1 and node 2 to identify Anna's fraud community. Modify node 4 so it becomes: identify the account with the largest transaction amount within Anna’s community.
+
+**Correct Output:**
+{{
+"subqueries": [
+    {{"id": "q1", "query": "Check if user Anna is a high-risk user.", "depends_on": []}},
+    {{"id": "q2", "query": "Identify the potential fraud community in which Anna resides to narrow the scope of subsequent risk monitoring.", "depends_on": ["q1"]}},
+    {{"id": "q3", "query": "List all potential money laundering pathways within the high-risk community where Anna is located.", "depends_on": ["q2"]}},
+    {{"id": "q4", "query": "Estimate the amount of cash that may have been illegally transferred out in relation to Anna.", "depends_on": ["q3"]}},
+    {{"id": "q5", "query": "Identify the account with the largest transaction amount within Anna's fraud community.", "depends_on": ["q2"]}}
+]
+}}
+
+### Now Execute
+Based on the user instructions below, revise the current plan. Output must be valid JSON only:
+Current Plan: {current_plan}
+User Request: {user_request}
 """

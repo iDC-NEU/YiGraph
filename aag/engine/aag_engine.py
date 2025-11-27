@@ -40,7 +40,6 @@ class AAGEngine:
             "retrieval_quality": [],
             "generation_quality": []
         }
-
         self._init_scheduler()
         
 
@@ -63,8 +62,40 @@ class AAGEngine:
         print("Engine initialization completed!")
     
 
-    async def run(self, query: str) -> str:
-        return await self.scheduler.execute(query)
+    async def run(self, query: str, mode: str = "normal") -> Union[str, Dict[str, Any]]:
+        """
+        执行查询，支持普通模式和专家模式
+        
+        Args:
+            query: 用户查询
+            mode: 执行模式 "normal" | "expert"
+        
+        Returns:
+            普通模式: 返回分析结果字符串
+            专家模式: 返回DAG信息字典（包含 dag_info, message 等）
+        """
+        return await self.scheduler.execute(query, mode=mode)
+    
+    async def expert_modify_dag(self, modification_request: str) -> Dict[str, Any]:
+        """
+        专家模式：修改DAG
+        
+        Args:
+            modification_request: 用户修改需求
+        
+        Returns:
+            包含更新后DAG信息的字典
+        """
+        return await self.scheduler.expert_modify_dag(modification_request)
+    
+    async def expert_start_analysis(self) -> str:
+        """
+        专家模式：开始执行分析
+        
+        Returns:
+            分析结果字符串
+        """
+        return await self.scheduler.expert_start_analysis()
 
         
     def list_datasets(self, dtype: Optional[str] = None) -> Dict[str, List[str]]:
