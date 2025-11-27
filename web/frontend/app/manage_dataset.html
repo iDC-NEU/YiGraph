@@ -1,0 +1,3988 @@
+<!DOCTYPE html>
+<html lang="zxx" id="pageroot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="tongzhewang">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A powerful and conceptual apps base dashboard template that especially build for developers and programmers.">
+    <!-- Fav Icon  -->
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <title>Dataset Editor - Scribbler.AI - AI Content Generator Dashboard and User App HTML Template</title>
+    <link rel="stylesheet" href="/static/assets/css/app.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* 导航栏美化样式 */
+.menu-head {
+    background: transparent;
+}
+
+/* 添加新样式 */
+#dataset-type-info {
+    border-left: 4px solid #3b82f6;
+}
+
+#graph-extra-inputs {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 1rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.menu-item {
+    margin: 0;
+}
+
+.menu-link {
+    position: relative;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.menu-link:not(.active):hover {
+    transform: translateY(-1px);
+}
+
+/* 移动端导航项样式 */
+@media (max-width: 1279px) {
+    .menu-head {
+        padding: 0.5rem 0;
+    }
+    
+    .menu-item {
+        margin: 0.125rem 0;
+    }
+    
+    .menu-link {
+        border-radius: 0.375rem;
+        margin: 0.125rem 0;
+    }
+}
+
+/* 桌面端导航项样式 */
+@media (min-width: 1280px) {
+    .menu-head {
+        padding: 0;
+    }
+    
+    .menu-link {
+        margin: 0 0.125rem;
+    }
+    
+    /* 活动状态指示器 */
+    .menu-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 4px;
+        background: #3b82f6;
+        border-radius: 50%;
+    }
+}
+        .knowledge-base-item {
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+        }
+        .knowledge-base-item:hover {
+            border-left-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+        .knowledge-base-item.active {
+            border-left-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        
+        /* 文件行状态颜色 */
+        .file-item.uploaded {
+            border-left: 4px solid #9ca3af; /* 灰色 - 刚上传 */
+        }
+        .file-item.parsing {
+            border-left: 4px solid #f59e0b; /* 黄色 - 解析中 */
+        }
+        .file-item.completed {
+            border-left: 4px solid #10b981; /* 绿色 - 解析完成 */
+        }
+        
+        /* 文件行悬停和选中效果 */
+        .file-item:hover {
+            background-color: #f1f5f9;
+        }
+        .file-item.selected {
+            background-color: #d1e7fd;
+        }
+        .file-item.selected:hover {
+            background-color: #c2dfff;
+        }
+        
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+        .upload-area input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        /* Custom layout adjustments */
+        .left-panel {
+            flex: 0 0 300px;
+            max-width: 300px;
+            height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        .right-panel {
+            flex: 1;
+            min-width: 0;
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .file-list-section {
+            flex: 0 0 50%;
+            overflow-y: auto;
+            min-height: 300px;
+        }
+        .graph-section {
+            flex: 1;
+            border-top: 1px solid #e2e8f0;
+            overflow: hidden;
+            min-height: 400px;
+        }
+        @media (max-width: 1024px) {
+            .responsive-container {
+                flex-direction: column;
+            }
+            .left-panel, .right-panel {
+                flex: none;
+                max-width: 100%;
+                height: auto;
+            }
+        }
+        
+        /* Graph visualization styles */
+        #graph-container {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            background-color: #f8fafc;
+            position: relative;
+            user-select: none;
+            touch-action: none;
+        }
+        
+        /* 全屏图谱样式 */
+        #fullscreen-graph-container {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background-color: white !important;
+            z-index: 9999 !important;
+            display: none;
+            flex-direction: column;
+        }
+        
+        #fullscreen-graph-container.active {
+            display: flex !important;
+        }
+        
+        #fullscreen-graph-container .graph-content {
+            flex: 1;
+            height: calc(100vh - 60px);
+            width: 100%;
+        }
+        
+        .graph-controls-toolbar {
+            padding: 10px;
+            background-color: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* 缩放控制按钮样式 */
+        .zoom-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        
+        .zoom-controls button, .graph-controls button {
+            padding: 5px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .zoom-controls button:hover, .graph-controls button:hover {
+            background: #f1f5f9;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1e293b;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .close-modal:hover {
+            color: #475569;
+        }
+        .upload-progress {
+            margin-top: 1rem;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .upload-status {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        .selected-files {
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .file-item-small {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .file-name {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+        .file-size {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        .remove-file {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+        
+        /* 文件预览样式 */
+        .preview-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .preview-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8fafc;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        
+        .preview-content-container {
+            flex: 1;
+            overflow: auto;
+            padding: 1rem;
+            background-color: white;
+        }
+        
+        .preview-text-content {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            background-color: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            overflow: auto;
+            max-height: 70vh;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .preview-pdf-content, .preview-word-content {
+            height: 70vh;
+            width: 100%;
+        }
+        
+        .preview-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 70vh;
+            text-align: center;
+            color: #64748b;
+            background-color: #f8fafc;
+            border-radius: 0.25rem;
+            padding: 2rem;
+        }
+        
+        .preview-placeholder svg {
+            width: 4rem;
+            height: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .preview-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin: 1rem 0;
+        }
+        
+        /* 按钮样式 */
+        .preview-toolbar {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            background-color: #f8fafc;
+            border-radius: 0 0 0.5rem 0.5rem;
+        }
+        
+        .preview-btn {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .preview-btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            border: 1px solid #3b82f6;
+        }
+        
+        .preview-btn-primary:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        
+        .preview-btn-secondary {
+            background-color: #e2e8f0;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+        
+        .preview-btn-secondary:hover {
+            background-color: #cbd5e1;
+            border-color: #94a3b8;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+        }
+        
+        /* 解析按钮和进度条样式 */
+        .parse-control-btn {
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            background-color: transparent;
+            color: #3b82f6;
+            border: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+        
+        .parse-control-btn:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .parse-control-btn:disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .parse-progress-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        
+        .parse-progress-bar {
+            flex: 1;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .parse-progress-fill {
+            height: 100%;
+            background-color: #10b981;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .parse-progress-text {
+            font-size: 0.75rem;
+            color: #64748b;
+            min-width: 35px;
+        }
+        
+        .proceed-text {
+            font-size: 0.75rem;
+            color: #10b981;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        
+        .parsing-text {
+            font-size: 0.75rem;
+            color: #f59e0b;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        
+        .pending-text {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        
+        /* 生成图谱按钮样式 */
+        .generate-btn {
+            background-color: #3b82f6;
+            color: white;
+            border: 1px solid #3b82f6;
+        }
+        
+        .generate-btn:disabled {
+            background-color: #cbd5e1;
+            border-color: #cbd5e1;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+        
+        .generate-btn:disabled:hover {
+            background-color: #cbd5e1;
+            border-color: #cbd5e1;
+        }
+        
+        /* 图谱生成进度条样式 */
+        .graph-progress-container {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .graph-progress-bar {
+            flex: 1;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .graph-progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .graph-progress-text {
+            font-size: 0.75rem;
+            color: #64748b;
+            min-width: 35px;
+        }
+        
+        /* 空状态样式优化 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            text-align: center;
+            color: #64748b;
+        }
+        
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            color: #cbd5e1;
+        }
+        
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #475569;
+        }
+        
+        .empty-state-description {
+            font-size: 0.875rem;
+            max-width: 300px;
+            line-height: 1.5;
+        }
+        
+        /* 总解析进度条样式 */
+        .total-parse-progress-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        
+        .total-parse-progress-bar {
+            flex: 1;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .total-parse-progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .total-parse-progress-text {
+            font-size: 0.75rem;
+            color: #64748b;
+            min-width: 35px;
+        }
+        
+        .total-parse-status {
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+            min-width: 50px;
+        }
+
+        /* 模态框样式优化 */
+.modal-content {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 750px;
+    height: 90vh;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.modal-footer {
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+/* 上传区域样式优化 */
+.upload-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    transition: all 0.3s;
+    position: relative;
+    background-color: #f8fafc;
+}
+
+.upload-area:hover, .upload-area.drag-over {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+.upload-area input[type="file"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* 表单字段样式 */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #ef4444;
+}
+
+.form-input, .form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    background-color: white;
+}
+
+.form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* 进度条样式优化 */
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #e2e8f0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 5px;
+}
+
+/* 滚动条样式 */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+
+
+/* 模态框样式优化 */
+.modal-content {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 750px;
+    height: 90vh;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.modal-footer {
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+/* 上传区域样式优化 */
+.upload-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    transition: all 0.3s;
+    position: relative;
+    background-color: #f8fafc;
+}
+
+.upload-area:hover, .upload-area.drag-over {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+.upload-area input[type="file"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* 表单字段样式 */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #ef4444;
+}
+
+.form-input, .form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    background-color: white;
+}
+
+.form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* 单选按钮样式 */
+.radio-group {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+}
+
+.radio-option input[type="radio"] {
+    margin-right: 0.5rem;
+}
+
+/* 进度条样式优化 */
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #e2e8f0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 5px;
+}
+
+/* 滚动条样式 */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 卡片标题样式 */
+.section-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #3b82f6;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+/* 字段标签样式调整 */
+.field-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* 必填字段标签样式 */
+.required-field-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* 输入框placeholder字体调整 */
+.form-input::placeholder,
+.form-textarea::placeholder {
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
+/* 说明文字样式调整 */
+.field-description {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+    line-height: 1.4;
+}
+
+/* 已上传文件列表样式 */
+.selected-files-container {
+    margin-bottom: 1.5rem;
+}
+
+.file-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+    background-color: #f9fafb;
+}
+
+.file-list-item:last-child {
+    margin-bottom: 0;
+}
+
+.file-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.file-size {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.remove-file-btn {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+}
+
+.remove-file-btn:hover {
+    background-color: #fee2e2;
+}
+
+
+
+    </style>
+</head>
+
+<body class="min-w-[320px] bg-slate-100 dark:bg-slate-900">
+    <div id="root">
+        <!-- Settings Button (same as original) -->
+        <button data-target="#demoSettings" class="class-toggle fixed end-0 top-1/4 z-[1000] flex h-10 w-10 items-center justify-center rounded-s-lg border border-e-0 border-slate-200 bg-white text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5">
+        <path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" clip-rule="evenodd" />
+    </svg>
+</button>
+<div id="demoSettings" class="fixed z-[5001] hidden h-full w-full [&.active]:block">
+    <div class="fixed bottom-4 end-4 z-20 flex max-h-[calc(100%-theme(space.8))] w-72 flex-col rounded-xl border border-slate-200 bg-white pt-4 dark:border-slate-800 dark:bg-slate-950 md:w-[600px]">
+        <div class="border-b border-slate-200 px-5 pb-5 dark:border-slate-800">
+            <div class="flex items-center justify-between">
+                <h6 class="font-bold text-slate-700 dark:text-white">Mode</h6>
+                <button class="theme-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all *:pointer-events-none hover:bg-slate-200 hover:text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hidden h-4 dark:block">
+                        <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z" clip-rule="evenodd" />
+                    </svg><!-- moon - solid - heroicons  -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 dark:hidden">
+                        <path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z" />
+                    </svg><!-- sun - solid - heroicons  -->
+                </button>
+            </div>
+            <div class="flex items-center justify-between pt-3">
+                <h6 class="font-bold text-slate-700 dark:text-white">Direction</h6>
+                <button class="direction-toggle rounded border border-slate-200 px-2 py-1 text-xs font-bold text-slate-600 transition-all *:pointer-events-none hover:bg-slate-200 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">
+                    <span class="hidden rtl:block">LTR</span>
+                    <span class="rtl:hidden">RTL</span>
+                </button>
+            </div>
+            <div class="mt-4 rounded-md bg-sky-50 px-4 py-3 text-sm text-sky-600 dark:bg-sky-950 dark:text-sky-400"> This is a HTML template so you might see a flicker on load after switching to dark or RTL mode. </div>
+        </div>
+        <div class="overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-600">
+            <div class="grid grid-flow-dense grid-cols-1 gap-4 p-5 md:grid-cols-2">
+                <a href="{{ url_for('pages.overview') }}" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                    <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-blue-100 group-hover:dark:shadow-blue-950" src="../images/preview/user/dashboard.png" alt="" />
+                    <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> User App </h6>
+                </a>
+                <a href="../admin/dashboard.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                    <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/admin/dashboard.png" alt="" />
+                    <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Admin Dashboard </h6>
+                </a>
+                <a href="../landing-text-image.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                    <div class="absolute start-3 top-3 mb-2 inline-flex rounded-full bg-gradient-to-r from-green-600 to-pink-500 px-2 py-0.5 text-[11px] font-medium text-white"> Landing </div>
+                    <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/landing/image-gen-1.png" alt="" />
+                    <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Image Generator </h6>
+                </a>
+                <a href="../landing-text-code.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                    <div class="absolute start-3 top-3 mb-2 inline-flex rounded-full bg-gradient-to-r from-green-600 to-pink-500 px-2 py-0.5 text-[11px] font-medium text-white"> Landing </div>
+                    <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/landing/code-gen-1.png" alt="" />
+                    <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Code Generator </h6>
+                </a>
+                <a href="../landing-prompt-text.html" class="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-2 text-center dark:border-slate-800 dark:bg-slate-950">
+                    <div class="absolute start-3 top-3 mb-2 inline-flex rounded-full bg-gradient-to-r from-green-600 to-pink-500 px-2 py-0.5 text-[11px] font-medium text-white"> Landing </div>
+                    <img class="h-full w-full rounded-xl border border-slate-100 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-pink-100 group-hover:dark:shadow-pink-950" src="../images/preview/landing/text-gen-1.png" alt="" />
+                    <h6 class="relative z-10 pb-2 pt-4 text-base font-bold text-slate-600 dark:text-slate-200"> Text Generator </h6>
+                </a>
+                <a href="{{ url_for('pages.index') }}"  class="group relative flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-center text-slate-600 transition-all hover:bg-blue-600 hover:text-white dark:border-slate-800 dark:bg-slate-950 dark:text-white hover:dark:bg-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                        <path fill-rule="evenodd" d="M10.72 11.47a.75.75 0 0 0 0 1.06l7.5 7.5a.75.75 0 1 0 1.06-1.06L12.31 12l6.97-6.97a.75.75 0 0 0-1.06-1.06l-7.5 7.5Z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd" d="M4.72 11.47a.75.75 0 0 0 0 1.06l7.5 7.5a.75.75 0 1 0 1.06-1.06L6.31 12l6.97-6.97a.75.75 0 0 0-1.06-1.06l-7.5 7.5Z" clip-rule="evenodd" />
+                    </svg>
+                    <div class="relative mt-6 text-base font-bold">Back to Intro</div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div data-target="#demoSettings" class="class-toggle fixed inset-0 z-10 bg-slate-950 bg-opacity-50"></div>
+</div>
+<div class="fixed start-0 top-0 isolate z-[1020] w-full border-b border-slate-200 bg-white px-3 py-4 dark:border-slate-800 dark:bg-slate-950 xl:py-3">
+    <div class="container px-3">
+        <div class="w-100 flex items-center justify-between">
+            <div class="flex items-center gap-x-2">
+                <div class="-ms-1.5 xl:hidden">
+                    <button class="header-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all hover:bg-slate-200 hover:text-slate-600 hover:dark:bg-slate-800 hover:dark:text-slate-200 [&.active]:bg-slate-200 [&.active]:text-slate-600 [&.active]:dark:bg-slate-800 [&.active]:dark:text-slate-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg><!-- bars-3 - outline - heroicons -->
+                    </button>
+                </div>
+                
+                            <!-- Logo + Slogan 开始 -->
+                            <div class="flex items-center gap-x-5">
+                                <a href="overview.html" class="flex-shrink-0">
+                                    <div class="flex items-center">
+                                        <img class="h-16 dark:hidden" src="/static/images/IDC-NEUNEW.jpg" alt="logo" />
+                                        <img class="hidden h-16 dark:block" src="/static/images/IDC-NEUNEW.jpg" alt="logo" />
+                                    </div>
+                                </a>
+
+                                <!-- Slogan：两行 -->
+                                <div class="block"> <!-- lg 断点以上显示（≥1024px）-->
+                                    <div class="flex flex-col justify-center">
+                                        <h1 class="leading-tight text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+                                            Analytics-Augmented Generation
+                                        </h1>
+                                        <p class="leading-none text-sm text-blue-600 dark:text-blue-400">
+                                            from <span class="font-semibold">iDC-NEU</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Logo + Slogan 结束 -->
+                
+            </div>
+            <!-- header-brand -->
+            <div class="main-header peer fixed start-0 top-0 z-[1020] flex h-screen w-64 flex-shrink-0 -translate-x-full flex-col border-e border-slate-200 bg-white py-4 dark:border-slate-800 dark:bg-slate-950 max-xl:overflow-auto max-xl:transition-all xl:static xl:h-auto xl:w-auto xl:!translate-x-0 xl:border-e-0 xl:py-0 xl:transition-none rtl:translate-x-full [&.header-visible]:translate-x-0">
+            <ul class="menu-head flex flex-col gap-x-4 px-4 xl:flex-row xl:items-center xl:space-x-6">
+    <!-- Chat Button -->
+    <li class="menu-item group relative">
+        <a href="/" class="menu-link flex items-center px-4 py-3 text-base font-bold text-slate-600 transition-all duration-200 group-hover:text-blue-600 hover:text-blue-600 dark:text-slate-300 hover:dark:text-blue-400 xl:rounded-lg xl:py-2.5 group-hover:xl:bg-slate-50 dark:group-hover:xl:bg-slate-800/50">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            <span>Chat</span>
+        </a>
+    </li>
+    <!-- Dataset Button -->
+    <li class="menu-item group relative">
+        <a href="{{ url_for('pages.documents') }}" class="menu-link flex items-center px-4 py-3 text-base font-bold text-slate-600 transition-all duration-200 group-hover:text-blue-600 hover:text-blue-600 dark:text-slate-300 hover:dark:text-blue-400 xl:rounded-lg xl:py-2.5 group-hover:xl:bg-slate-50 dark:group-hover:xl:bg-slate-800/50">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <span>Dataset</span>
+        </a>
+    </li>
+    <!-- Manage Button - Active State -->
+    <li class="menu-item group relative">
+        <a href="{{ url_for('pages.manage_dataset_page') }}" class="menu-link flex items-center px-4 py-3 text-base font-bold text-blue-600 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400 transition-all duration-200 xl:rounded-lg xl:py-2.5 xl:shadow-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span>File Management</span>
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-200 group-hover:w-full xl:hidden"></span>
+        </a>
+    </li>
+</ul>
+            </div>
+            <!-- header-main -->
+            <div class="header-toggle pointer-events-none fixed inset-0 z-[1019] bg-slate-950 bg-opacity-50 opacity-0 peer-[.header-visible]:pointer-events-auto peer-[.header-visible]:opacity-100 xl:!opacity-0"></div>
+            <!-- overlay -->
+            <ul class="flex items-center gap-x-3 lg:gap-x-5">
+                <li class="relative inline-flex">
+                    <button class="theme-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all *:pointer-events-none hover:bg-slate-200 hover:text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hidden h-4 dark:block">
+                            <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z" clip-rule="evenodd" />
+                        </svg><!-- moon - solid - heroicons  -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 dark:hidden">
+                            <path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z" />
+                        </svg><!-- sun - solid - heroicons  -->
+                    </button>
+                </li>
+                <!-- mode-switch -->
+                <li class="relative inline-flex">
+                                <button data-offset="0,8" data-placement="bottom-end" data-rtl-placement="bottom-start" class="dropdown-toggle peer inline-flex h-9 w-9 overflow-hidden rounded-full outline outline-2 outline-offset-2 outline-slate-300 *:pointer-events-none dark:outline-slate-700">
+                                    <img src="static/images/avatar/human.jpeg" alt="" />
+                                </button>
+                                <div class="dropdown-menu invisible absolute end-0 top-10 w-48 opacity-0 transition-all duration-100 ease-out peer-[.show]:visible peer-[.show_.dropdown-wrap]:scale-100 peer-[.show]:opacity-100">
+                                    <div class="dropdown-wrap ransition-all origin-top-right scale-90 rounded-lg border border-slate-200 bg-white shadow-sm duration-100 ease-out dark:border-slate-800 dark:bg-slate-950">
+                                        <div class="flex items-center p-4">
+                                            <div class="inline-flex h-10 w-10 flex-shrink-0 overflow-hidden rounded-full outline outline-2 outline-offset-2 outline-slate-300 dark:outline-slate-700">
+                                                <img src="static/images/avatar/human.jpeg" alt="" />
+                                            </div>
+                                            <div class="ms-4">
+                                                <h6 class="-mt-0.5 text-xs font-bold text-slate-700 dark:text-white"> Phillip Burke </h6>
+                                                <span class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-500 dark:bg-blue-950"> Balance $18.89 </span>
+                                            </div>
+                                        </div>
+                                        <ul class="border-t border-slate-200 py-2 dark:border-slate-800">
+                                            <li>
+                                                <a href="../admin/dashboard.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 0 0 2.25-2.25V6a2.25 2.25 0 0 0-2.25-2.25H6A2.25 2.25 0 0 0 3.75 6v2.25A2.25 2.25 0 0 0 6 10.5Zm0 9.75h2.25A2.25 2.25 0 0 0 10.5 18v-2.25a2.25 2.25 0 0 0-2.25-2.25H6a2.25 2.25 0 0 0-2.25 2.25V18A2.25 2.25 0 0 0 6 20.25Zm9.75-9.75H18a2.25 2.25 0 0 0 2.25-2.25V6A2.25 2.25 0 0 0 18 3.75h-2.25A2.25 2.25 0 0 0 13.5 6v2.25a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                                    </svg><!-- squares-plus - outline - heroicons  -->
+                                                    <span>Admin</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="profile.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                                    </svg><!-- user - outline - heroicons  -->
+                                                    <span>Profile</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="packages.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
+                                                    </svg><!-- rocket-launch - outline - heroicons  -->
+                                                    <span>Upgrade</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="../login.html" class="flex px-4 py-2 text-xs font-bold text-slate-500 transition-all hover:text-blue-600 dark:text-slate-400 hover:dark:text-blue-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="me-2 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
+                                                    </svg><!-- power - outline - heroicons  -->
+                                                    <span>Logout</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </li>
+                <!-- user-dropdown -->
+            </ul>
+            <!-- header-tools -->
+        </div>
+    </div>
+    <!-- container -->
+</div>
+<!-- header -->
+            
+            <!-- Main Content -->
+            <div class="relative px-3 py-10">
+                <div class="container px-3">
+                    <!-- Breadcrumb and Title -->
+                    <div class="-mx-3 mb-7 flex items-center justify-between">
+                        <div class="px-3">
+                            <h2 class="mb-2 text-xl font-bold text-slate-700 dark:text-white">Dataset Editor</h2>
+                        </div>
+                        <div class="px-3 flex gap-2">
+                            <!-- <a href="/documents" class="inline-flex items-center justify-center gap-3 rounded-md border border-slate-200 px-5 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">Back</a>   -->
+                            <!-- <button class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">Save Changes</button> -->
+                        </div>
+                    </div>
+                    
+                    <!-- Main Content - Flex Layout -->
+                    <div class="responsive-container flex gap-6">
+                        <!-- Left Column - Knowledge Base List -->
+                        <div class="left-panel">
+                            <div class="rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 h-full">
+                                <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+                                    <h3 class="text-lg font-bold text-slate-700 dark:text-white">Data Management</h3>
+                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Select a dataset to edit</p>
+                                </div>
+                                
+
+                                     <div class="p-4">
+    <ul class="space-y-2" id="knowledgeBaseList">
+        <!-- 知识库列表将通过JavaScript动态生成 -->
+    </ul>
+</div>
+
+                               
+
+
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column - File List and Graph -->
+                        <div class="right-panel">
+                            <!-- File List Section -->
+                            <div class="file-list-section">
+                                <div class="rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 h-full flex flex-col">
+                                    <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h3 class="text-lg font-bold text-slate-700 dark:text-white" id="knowledge-base-name">Files in "10 React Best practices"</h3>
+                                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage documents in this Dataset</p>
+                                            </div>
+                                            <button id="add-files-btn" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                </svg>
+                                                Add Files
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- File List -->
+                                    <div class="p-5 flex-1 overflow-auto">
+                                        <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
+                                            <table class="w-full table-auto border-collapse text-sm">
+                                                <thead class="bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-200">
+    <tr>
+        <th class="py-3 px-4 text-start">Document</th>
+        <th class="py-3 px-4 text-start">Size</th>
+        <th class="py-3 px-4 text-start">Uploaded Time</th>
+        <th class="py-3 px-4 text-start">
+    <div class="flex items-center gap-2">
+        <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Parsing Status</span>
+        <button class="parse-control-btn" id="total-parse-control-btn" title="Start/Pause all">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+            </svg>
+        </button>
+    </div>
+</th>
+        <th class="py-3 px-4 text-start"></th>
+        <th class="py-3 px-4 text-start"></th>
+    </tr>
+</thead>
+                                                <tbody id="file-list-body">
+                                                    <!-- 文件列表将通过JavaScript动态生成 -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Graph Section -->
+                            <div class="graph-section">
+                                <div class="rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 h-full flex flex-col">
+                                    <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h3 class="text-lg font-bold text-slate-700 dark:text-white">Document Relationship Graph</h3>
+                                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Visual representation of graph</p>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button id="generate-graph-btn" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-all hover:bg-blue-800 generate-btn" disabled>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                                    </svg>
+                                                    Visualization
+                                                </button>
+                                                <button id="zoom-in-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                                    </svg>
+                                                </button>
+                                                <button id="zoom-out-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+                                                    </svg>
+                                                </button>
+                                                <button id="fit-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" title="Fit to screen">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                                                    </svg>
+                                                </button>
+                                                <button id="fullscreen-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" title="Full Screen">
+                                                    Full Screen
+                                                </button>
+                                                <!-- 修改了Export按钮的图标 -->
+                                                <button class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-all hover:bg-blue-800">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12M12 16.5V3" />
+                                                    </svg>
+                                                    Export
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- 图谱生成进度条 -->
+                                        <div class="graph-progress-container" id="graph-progress-container">
+                                            <div class="graph-progress-bar">
+                                                <div class="graph-progress-fill" id="graph-progress-fill"></div>
+                                            </div>
+                                            <span class="graph-progress-text" id="graph-progress-text">0%</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Graph Visualization -->
+                                    <div id="graph-container">
+                                        <div class="flex items-center justify-center h-full">
+                                            <div class="text-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                                                </svg>
+                                                <p class="mt-2 text-lg text-gray-500">Click "Visualization" to create knowledge graph</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer (removed) -->
+        </div>
+    </div>
+
+    <!-- 全屏图谱容器 -->
+    <div id="fullscreen-graph-container">
+        <div class="graph-controls-toolbar">
+            <h3 class="text-lg font-bold text-slate-700 dark:text-white">Document Relationship Graph (Fullscreen)</h3>
+            <div class="zoom-controls">
+                <button id="fullscreen-zoom-in">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                </button>
+                <button id="fullscreen-zoom-out">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+                    </svg>
+                </button>
+                <button id="fullscreen-fit">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                    </svg>
+                </button>
+                <button id="exit-fullscreen">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Exit Full Screen
+                </button>
+            </div>
+        </div>
+        <div class="graph-content" id="fullscreen-graph-content">
+            <!-- 全屏图谱内容 -->
+        </div>
+    </div>
+
+    <!-- 文件上传模态框 -->
+<!-- 文件上传模态框 -->
+<!-- 文件上传模态框 -->
+<!-- 文件上传模态框 -->
+<div id="upload-modal" class="modal">
+    <div class="modal-content" style="max-width: 750px; width: 90%; height: 90vh;">
+        <div class="modal-header">
+            <h3 class="modal-title">Upload Files to Dataset</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+
+        <div id="dataset-type-info" class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg hidden">
+            <div class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                <p class="text-sm text-blue-700" id="dataset-type-text">Graph Dataset: Please provide the required information for graph configuration.</p>
+            </div>
+        </div>
+
+        <!-- 可滚动的内容区域 -->
+        <div class="modal-body" style="overflow-y: auto; max-height: calc(90vh - 200px);">
+            <!-- 文件上传区域 -->
+            <div class="upload-area p-8 text-center cursor-pointer mb-6" id="drop-zone">
+                <div class="mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-12 w-12 mx-auto text-slate-400">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                    </svg>
+                </div>
+                <p class="text-lg font-medium text-slate-700">Drag and drop files here</p>
+                <p class="text-sm text-slate-500 mt-2">or</p>
+                <button class="mt-4 inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">
+                    Browse Files
+                </button>
+                <input type="file" id="file-input" multiple accept=".txt,.pdf,.doc,.docx,.md,.csv,.json">
+            </div>
+            
+            <!-- 已上传文件列表 - 移动到表单上方 -->
+            <div class="selected-files-container mb-6" id="selected-files">
+                <!-- 选中的文件将在这里显示 -->
+            </div>
+            
+            <!-- Graph类型额外输入区域 -->
+            <div id="graph-extra-inputs" class="hidden">
+                <div class="space-y-6">
+                    <!-- 1. Graph基本信息 -->
+                    <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+                        <h4 class="text-lg font-semibold text-slate-800 mb-4 pb-3 border-b border-slate-200">
+                            <span style="color: red;">*</span> Graph Information
+                        </h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="required-field-label">
+                                    <span style="color: red;">*</span> Graph Name
+                                </label>
+                                <input type="text" id="graph-name" class="form-input" placeholder="Enter graph name" required>
+                            </div>
+                            <div>
+                                <br>
+                                <label class="field-label">Description</label>
+                                <textarea id="graph-description" rows="2" class="form-textarea" placeholder="Enter description"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Vertex Schema -->
+                    <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+                        <h4 class="text-lg font-semibold text-slate-800 mb-4 pb-3 border-b border-slate-200">
+                            Vertex Schema (Optional)
+                        </h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="field-label">File name (Optional)</label>
+                                <input type="text" id="vertex-filename" class="form-input" placeholder="Vertex file name">
+                            </div>
+                            <div>
+                                <br>
+                                <label class="field-label">Id Field (Optional)</label>
+                                <input type="text" id="vertex-id-field" class="form-input" placeholder="ID field name">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Edge Schema -->
+                    <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+                        <h4 class="text-lg font-semibold text-slate-800 mb-4 pb-3 border-b border-slate-200">
+                            <span style="color: red;">*</span> Edge Schema (Required)
+                        </h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="required-field-label">
+                                    <span style="color: red;">*</span> File name
+                                </label>
+                                <input type="text" id="edge-filename" class="form-input" placeholder="Edge file name" required>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="required-field-label">
+                                        <br>
+                                        <span style="color: red;">*</span> Source Field
+                                    </label>
+                                    <input type="text" id="edge-source-field" class="form-input" placeholder="Source field name" required>
+                                </div>
+                                <div>
+                                    <label class="required-field-label">
+                                        <br>
+                                        <span style="color: red;">*</span> Target Field
+                                    </label>
+                                    <input type="text" id="edge-target-field" class="form-input" placeholder="Target field name" required>
+                                </div>
+                            </div>
+                            <div>
+                                <br>
+                                <label class="field-label">Weight Field</label>
+                                <input type="text" id="edge-weight-field" class="form-input" placeholder="Weight field name">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Graph Properties -->
+                    <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+                        <h4 class="text-lg font-semibold text-slate-800 mb-4 pb-3 border-b border-slate-200">
+                            Graph Properties
+                        </h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="field-label">Is Directed</label>
+                                <div class="flex space-x-6">
+                                    <div class="flex items-center">
+                                        <input type="radio" id="is-directed-true" name="is-directed" value="true" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300">
+                                        &nbsp;
+                                        <label for="is-directed-true" class="ml-2 block text-sm text-slate-700">Yes</label>
+                                    </div>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <div class="flex items-center">
+                                        <input type="radio" id="is-directed-false" name="is-directed" value="false" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300">
+                                        &nbsp;
+                                        <label for="is-directed-false" class="ml-2 block text-sm text-slate-700">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <br>
+                                <label class="field-label">Is Multi-Edge</label>
+                                <div class="flex space-x-6">
+                                    <div class="flex items-center">
+                                        <input type="radio" id="is-multi-edge-true" name="is-multi-edge" value="true" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300">
+                                        &nbsp;
+                                        <label for="is-multi-edge-true" class="ml-2 block text-sm text-slate-700">Yes</label>
+                                    </div>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <div class="flex items-center">
+                                        <input type="radio" id="is-multi-edge-false" name="is-multi-edge" value="false" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300">
+                                        &nbsp;
+                                        <label for="is-multi-edge-false" class="ml-2 block text-sm text-slate-700">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 表单验证提示 -->
+                    <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
+                        <div class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-yellow-800">Important Notes</p>
+                                <p class="text-sm text-yellow-700 mt-1">
+                                    Fields marked with <span style="color: red;">*</span> are required. 
+                                    For edge files, source and target fields must be specified to define relationships between vertices.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 上传进度和操作按钮 -->
+        <div class="modal-footer mt-4 pt-4 border-t border-slate-200">
+            <div class="upload-progress mb-4" id="upload-progress" style="display: none;">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-sm font-medium text-slate-700">Upload Progress</span>
+                    <span class="text-sm text-slate-500" id="upload-percentage">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="upload-status mt-1 text-sm text-slate-500" id="upload-status">Preparing upload...</div>
+            </div>
+            
+            <div class="flex justify-end gap-3">
+                <button class="inline-flex items-center justify-center gap-3 rounded-md border border-slate-200 px-5 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" id="cancel-upload">Cancel</button>
+                <button class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800" id="start-upload">Upload Files</button>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- 文件预览模态框 -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content" style="max-width: 90%; width: 90%; height: 90%;">
+            <div class="preview-container">
+                <div class="preview-header">
+                    <h3 class="modal-title" id="preview-title">Preview: </h3>
+                    <button class="close-modal text-2xl" id="close-preview-modal">&times;</button>
+                </div>
+                <div class="preview-content-container">
+                    <div id="preview-content">
+                        <!-- 预览内容将在这里显示 -->
+                    </div>
+                </div>
+                <div class="preview-toolbar">
+                    <button class="preview-btn preview-btn-secondary" id="download-btn">Download</button>
+                    <button class="preview-btn preview-btn-primary" id="close-preview-btn">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cytoscape.js库 -->
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <!-- 在Cytoscape.js库之后添加 -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='assets/js/bundle-app.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/scripts.js') }}"></script>
+    <script>
+        // 当前选中的知识库
+        let currentKnowledgeBase = 'react';
+        let selectedFiles = [];
+        let selectedFileRow = null; // 用于跟踪选中的文件行
+        
+        // 文件上传模态框控制
+        let uploadModal, addFilesBtn, closeModal, cancelUpload, fileInput, dropZone;
+        let selectedFilesContainer, startUploadBtn, uploadProgress, progressFill, uploadStatus;
+        
+        // 总解析状态
+        let totalParsingStatus = {
+            progress: 0,
+            isParsing: false,
+            isCompleted: false,
+            intervalId: null
+        };
+
+        // 从后端获取知识库列表
+// 从后端获取知识库列表
+// 从后端获取知识库列表
+async function loadKnowledgeBases() {
+    try {
+        const response = await fetch('/api/knowledge_bases');
+        const result = await response.json();
+        if (result.success) {
+            console.log('Loaded knowledge bases:', result.data); // 添加这行来调试
+            return result.data;
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Failed to load knowledge bases:', error);
+        // 返回模拟数据作为备选
+        return [
+            {
+                "id": 1,
+                "名称": "人工智能知识库",
+                "文件类型": "text",
+                "文档个数": 128,
+                "创建时间": "2024-09-12 10:30:00",
+            },
+            {
+                "id": 2,
+                "名称": "前端开发文档库", 
+                "文件类型": "text",
+                "文档个数": 86,
+                "创建时间": "2023-06-05 14:15:00",
+            },
+            {
+                "id": 3,
+                "名称": "社交网络图谱",
+                "文件类型": "graph",
+                "文档个数": 54,
+                "创建时间": "2022-11-20 09:00:00",
+            },
+        ];
+    }
+}
+// 渲染知识库列表
+// 渲染知识库列表
+// 渲染知识库列表
+// 渲染知识库列表
+// 渲染知识库列表
+async function renderKnowledgeBaseList() {
+    const kbList = await loadKnowledgeBases();
+    const kbListContainer = document.getElementById('knowledgeBaseList');
+    if (!kbListContainer) return;
+
+    kbListContainer.innerHTML = '';
+
+    if (kbList.length === 0) {
+        kbListContainer.innerHTML = `
+            <li class="p-3 text-center text-slate-500 text-sm">
+                暂无知识库，请先创建
+            </li>
+        `;
+        return;
+    }
+
+    kbList.forEach(kb => {
+        // 使用从后端获取的实际文件数量
+        const fileCount = kb.文档个数 || 0;
+        
+        // 根据文件类型选择图标
+        const fileTypeIcon = kb.文件类型 === 'graph' 
+            ? `<i class="fas fa-project-diagram text-blue-400 mr-2" style="font-size: 1.1rem;"></i>`
+            : `<i class="fas fa-file-alt text-blue-400 mr-2" style="font-size: 1.3rem;"></i>`;
+        
+        const li = document.createElement('li');
+        li.className = 'knowledge-base-item p-3 rounded-md cursor-pointer';
+        li.setAttribute('data-kb', kb.id);
+        li.innerHTML = `
+            <div class="flex items-center">
+                <span class="block h-6 w-6 flex items-center justify-center">
+                    ${fileTypeIcon}
+                </span>
+                <div class="ms-3">
+                    <div class="text-sm font-bold text-slate-600 dark:text-slate-200">${kb.名称}</div>
+                    <div class="block text-xs text-slate-500 dark:text-slate-400">${fileCount} files</div>
+                </div>
+            </div>
+        `;
+        kbListContainer.appendChild(li);
+    });
+
+    // 添加点击事件
+    document.querySelectorAll('.knowledge-base-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.knowledge-base-item').forEach(kb => {
+                kb.classList.remove('active');
+            });
+            item.classList.add('active');
+            
+            // 更新当前选中的知识库
+            currentKnowledgeBase = item.getAttribute('data-kb');
+            const kbName = item.querySelector('.text-sm.font-bold').textContent;
+            document.getElementById('knowledge-base-name').textContent = `Files in "${kbName}"`;
+            
+            // 重新加载文件列表
+            loadFiles();
+            // 重置图谱状态
+            resetGraph();
+        });
+    });
+
+    // 检查URL参数，如果有kb_id则选中对应的知识库
+    const urlParams = new URLSearchParams(window.location.search);
+    const kbId = urlParams.get('kb_id');
+    if (kbId) {
+        const targetKb = document.querySelector(`.knowledge-base-item[data-kb="${kbId}"]`);
+        if (targetKb) {
+            targetKb.click();
+        }
+    } else if (kbList.length > 0) {
+        // 默认选中第一个
+        const firstKb = document.querySelector('.knowledge-base-item');
+        if (firstKb) {
+            firstKb.click();
+        }
+    }
+}
+// 解析状态跟踪对象
+        let parsingStatus = {};
+
+        // 图谱生成状态
+        let graphGenerated = false;
+        let graphGenerationInterval = null;
+
+        // 从后端获取知识库列表
+        // 从后端获取知识库列表
+async function loadKnowledgeBases() {
+    try {
+        const response = await fetch('/api/knowledge_bases');
+        const result = await response.json();
+        if (result.success) {
+            console.log('Loaded knowledge bases:', result.data); // 添加这行来调试
+            return result.data;
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Failed to load knowledge bases:', error);
+        // 返回模拟数据作为备选
+        return [
+            {
+                "id": 1,
+                "名称": "人工智能知识库",
+                "文件类型": "text",
+                "文档个数": 128,
+                "创建时间": "2024-09-12 10:30:00",
+            },
+            {
+                "id": 2,
+                "名称": "前端开发文档库", 
+                "文件类型": "text",
+                "文档个数": 86,
+                "创建时间": "2023-06-05 14:15:00",
+            },
+            {
+                "id": 3,
+                "名称": "社交网络图谱",
+                "文件类型": "graph",
+                "文档个数": 54,
+                "创建时间": "2022-11-20 09:00:00",
+            },
+        ];
+    }
+}
+
+        // 获取知识库的实际文件数量
+        function getKnowledgeBaseFileCount(kbId) {
+            const files = JSON.parse(localStorage.getItem(`kb-files-${kbId}`) || '[]');
+            return files.length;
+        }
+
+        // 渲染知识库列表
+        // 渲染知识库列表
+
+        // 更新知识库文件数量显示
+        // 更新知识库文件数量显示
+async function updateKnowledgeBaseFileCount(kbId) {
+    try {
+        // 重新加载知识库列表以获取最新文件数量
+        await renderKnowledgeBaseList();
+    } catch (error) {
+        console.error('Failed to update knowledge base file count:', error);
+    }
+}
+
+        // 当DOM加载完成后初始化元素引用和事件监听器
+        function initApp() {
+// WebSocket连接
+let uploadSocket = null;
+
+function initWebSocket() {
+    // 连接到文件管理WebSocket
+    uploadSocket = io('/manage', {
+        path: '/socket.io'
+    });
+    
+    uploadSocket.on('connect', function() {
+        console.log('WebSocket连接成功');
+    });
+    
+    uploadSocket.on('connection_status', function(data) {
+        console.log('WebSocket状态:', data.status);
+    });
+    
+    uploadSocket.on('upload_ready', function(data) {
+        console.log('上传准备完成:', data.file_name);
+    });
+    
+    uploadSocket.on('upload_progress', function(data) {
+        updateUploadProgressForFile(data.file_name, data.progress);
+    });
+    
+    uploadSocket.on('upload_complete', function(data) {
+        console.log('文件上传完成:', data.file_name);
+        handleFileUploadComplete(data);
+    });
+    
+    uploadSocket.on('all_uploads_complete', function(data) {
+        console.log('所有文件上传完成:', data);
+        // 显示成功消息
+        if (uploadStatus) uploadStatus.textContent = data.message;
+        
+        // 完成后的处理
+        setTimeout(() => {
+            if (uploadModal) uploadModal.style.display = 'none';
+            if (uploadProgress) uploadProgress.style.display = 'none';
+            if (progressFill) progressFill.style.width = '0%';
+            if (startUploadBtn) startUploadBtn.disabled = false;
+            
+            // 重置表单
+            resetGraphForm();
+            
+            // 重新加载文件列表
+            loadFiles();
+            // 重置图谱状态
+            resetGraph();
+            // 更新知识库文件数量显示
+            updateKnowledgeBaseFileCount(currentKnowledgeBase);
+        }, 1500);
+    });
+    
+    uploadSocket.on('upload_error', function(data) {
+        console.error('上传错误:', data.error);
+        if (uploadStatus) uploadStatus.textContent = `上传错误: ${data.error}`;
+        if (startUploadBtn) startUploadBtn.disabled = false;
+    });
+    
+    uploadSocket.on('disconnect', function() {
+        console.log('WebSocket连接断开');
+    });
+
+    uploadSocket.on('parse_status', function(data) {
+        console.log('解析状态更新:', data);
+        handleParseStatusUpdate(data);
+    });
+    
+    uploadSocket.on('parse_complete', function(data) {
+        console.log('解析完成:', data);
+        handleParseComplete(data);
+    });
+    
+    uploadSocket.on('parse_error', function(data) {
+        console.error('解析错误:', data);
+        handleParseError(data);
+    });
+}
+
+function handleParseStatusUpdate(data) {
+    const { file_name, progress, status } = data;
+    
+    if (parsingStatus[file_name]) {
+        parsingStatus[file_name].progress = progress;
+        
+        // 更新UI显示
+        updateProgressDisplay(file_name, progress, status === 'parsing', false);
+        
+        if (status === 'parsing') {
+            parsingStatus[file_name].isParsing = true;
+            updateParseButton(file_name, true);
+            updateFileRowStatus(file_name, 'parsing');
+        } else if (status === 'paused') {
+            parsingStatus[file_name].isParsing = false;
+            updateParseButton(file_name, false);
+            updateFileRowStatus(file_name, 'uploaded');
+        }
+    }
+}
+
+function handleParseComplete(data) {
+    const { file_name } = data;
+    
+    if (parsingStatus[file_name]) {
+        completeFileParsing(file_name);
+        
+        // 显示成功消息
+        showNotification(`文件 ${file_name} 解析完成`, 'success');
+    }
+}
+
+function handleParseError(data) {
+    const { file_name, error } = data;
+    
+    if (parsingStatus[file_name]) {
+        parsingStatus[file_name].isParsing = false;
+        updateParseButton(file_name, false);
+        updateFileRowStatus(file_name, 'uploaded');
+        
+        // 显示错误消息
+        showNotification(`文件 ${file_name} 解析失败: ${error}`, 'error');
+    }
+}
+
+
+
+            initWebSocket();
+            renderKnowledgeBaseList();
+            // 初始化元素引用
+            uploadModal = document.getElementById('upload-modal');
+            addFilesBtn = document.getElementById('add-files-btn');
+            closeModal = document.querySelector('.close-modal');
+            cancelUpload = document.getElementById('cancel-upload');
+            fileInput = document.getElementById('file-input');
+            dropZone = document.getElementById('drop-zone');
+            selectedFilesContainer = document.getElementById('selected-files');
+            startUploadBtn = document.getElementById('start-upload');
+            uploadProgress = document.getElementById('upload-progress');
+            progressFill = document.getElementById('progress-fill');
+            uploadStatus = document.getElementById('upload-status');
+
+            // 知识库选择
+            document.querySelectorAll('.knowledge-base-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.knowledge-base-item').forEach(kb => {
+                        kb.classList.remove('active');
+                    });
+                    item.classList.add('active');
+                    
+                    // 更新当前选中的知识库
+                    currentKnowledgeBase = item.getAttribute('data-kb');
+                    const kbName = item.querySelector('.text-sm.font-bold').textContent;
+                    document.getElementById('knowledge-base-name').textContent = `Files in "${kbName}"`;
+                    
+                    // 重新加载文件列表
+                    loadFiles();
+                    // 重置图谱状态
+                    resetGraph();
+                });
+            });
+
+            // 打开模态框
+            // 在现有的initApp函数中，修改Add Files按钮的事件监听
+if (addFilesBtn) {
+    addFilesBtn.addEventListener('click', async () => {
+        // 先获取当前数据集类型
+        try {
+            const datasetType = await getDatasetType(currentKnowledgeBase);
+            showUploadModal(datasetType);
+        } catch (error) {
+            console.error('Failed to get dataset type:', error);
+            // 如果获取失败，默认显示text类型
+            showUploadModal('text');
+        }
+    });
+}
+
+// 添加获取数据集类型的函数
+async function getDatasetType(kbId) {
+    try {
+        const response = await fetch(`/api/dataset_type?kb_id=${kbId}`);
+        const result = await response.json();
+        if (result.success) {
+            return result.dataset_type; // 返回 "text" 或 "graph"
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Error fetching dataset type:', error);
+        throw error;
+    }
+}
+
+// 添加显示上传模态框的函数
+function showUploadModal(datasetType) {
+    if (uploadModal) {
+        uploadModal.style.display = 'flex';
+        selectedFiles = [];
+        updateSelectedFilesDisplay();
+        
+        // 重置表单
+        resetGraphForm();
+        
+        // 显示数据集类型信息
+        const datasetTypeInfo = document.getElementById('dataset-type-info');
+        const datasetTypeText = document.getElementById('dataset-type-text');
+        const graphExtraInputs = document.getElementById('graph-extra-inputs');
+        
+        if (datasetType === 'graph') {
+            datasetTypeInfo.classList.remove('hidden');
+            datasetTypeText.textContent = 'Graph Dataset: Please provide the required information for graph configuration.';
+            graphExtraInputs.classList.remove('hidden');
+        } else {
+            datasetTypeInfo.classList.add('hidden');
+            graphExtraInputs.classList.add('hidden');
+        }
+    }
+}
+
+function resetGraphForm() {
+    document.getElementById('graph-name').value = '';
+    document.getElementById('graph-description').value = '';
+    document.getElementById('vertex-filename').value = '';
+    document.getElementById('vertex-id-field').value = '';
+    document.getElementById('edge-filename').value = '';
+    document.getElementById('edge-source-field').value = '';
+    document.getElementById('edge-target-field').value = '';
+    document.getElementById('edge-weight-field').value = '';
+    
+    // 重置单选按钮为默认值
+    document.getElementById('is-directed-false').checked = true;
+    document.getElementById('is-multi-edge-false').checked = true;
+}
+// 在保存文件时，如果是graph类型，需要获取额外信息
+async function saveFileLocally(file) {
+    return new Promise((resolve, reject) => {
+        // 获取额外信息（如果是graph类型）
+        let extraInfo = null;
+        const datasetTypeInfo = document.getElementById('dataset-type-info');
+        if (!datasetTypeInfo.classList.contains('hidden')) {
+            // 获取单选按钮的值
+            const isDirected = document.querySelector('input[name="is-directed"]:checked').value === 'true';
+            const isMultiEdge = document.querySelector('input[name="is-multi-edge"]:checked').value === 'true';
+            
+            // 当前是graph类型，收集额外信息
+            extraInfo = {
+                graphInfo: {
+                    graphName: document.getElementById('graph-name').value,
+                    description: document.getElementById('graph-description').value
+                },
+                vertexSchema: {
+                    fileName: document.getElementById('vertex-filename').value,
+                    idField: document.getElementById('vertex-id-field').value
+                },
+                edgeSchema: {
+                    fileName: document.getElementById('edge-filename').value,
+                    sourceField: document.getElementById('edge-source-field').value,
+                    targetField: document.getElementById('edge-target-field').value,
+                    weightField: document.getElementById('edge-weight-field').value
+                },
+                graphProperties: {
+                    isDirected: isDirected,
+                    isMultiEdge: isMultiEdge
+                }
+            };
+            
+            // 验证必填字段
+            if (!extraInfo.graphInfo.graphName || 
+                !extraInfo.edgeSchema.fileName || 
+                !extraInfo.edgeSchema.sourceField || 
+                !extraInfo.edgeSchema.targetField) {
+                alert('Please fill in all required fields (marked with *) for Graph dataset.');
+                reject(new Error('Missing required fields for Graph dataset'));
+                return;
+            }
+        }
+        
+        // 模拟保存文件
+        setTimeout(() => {
+            console.log(`File ${file.name} saved to dataset/${currentKnowledgeBase}/`);
+            
+            // 将文件信息保存到本地存储
+            const fileInfo = {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                uploadDate: new Date().toISOString(),
+                status: 'completed',
+                path: `dataset/${currentKnowledgeBase}/${file.name}`,
+                parsed: false,
+                extraInfo: extraInfo // 保存额外信息
+            };
+            
+            // 获取现有文件列表
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            existingFiles.push(fileInfo);
+            localStorage.setItem(`kb-files-${currentKnowledgeBase}`, JSON.stringify(existingFiles));
+            
+            resolve(fileInfo);
+        }, 500);
+    });
+}
+
+
+function updateUploadProgress(current, total) {
+    const progressFill = document.getElementById('progress-fill');
+    const uploadPercentage = document.getElementById('upload-percentage');
+    const uploadStatus = document.getElementById('upload-status');
+    
+    if (progressFill && uploadPercentage) {
+        const percentage = Math.round((current / total) * 100);
+        progressFill.style.width = `${percentage}%`;
+        uploadPercentage.textContent = `${percentage}%`;
+    }
+    
+    if (uploadStatus) {
+        uploadStatus.textContent = `Uploading ${current} of ${total} files`;
+    }
+}
+            // 关闭模态框
+            if (closeModal) {
+                closeModal.addEventListener('click', () => {
+                    if (uploadModal) {
+                        uploadModal.style.display = 'none';
+                    }
+                });
+            }
+
+            if (cancelUpload) {
+                cancelUpload.addEventListener('click', () => {
+                    if (uploadModal) {
+                        uploadModal.style.display = 'none';
+                    }
+                });
+            }
+
+            // 点击模态框外部关闭 (修复上传模态框)
+            if (uploadModal) {
+                uploadModal.addEventListener('click', (e) => {
+                    if (e.target.id === 'upload-modal') {
+                        uploadModal.style.display = 'none';
+                    }
+                });
+            }
+
+            // 文件选择处理
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    handleFiles(e.target.files);
+                });
+            }
+
+            // 拖放功能
+            if (dropZone) {
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('drag-over');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+                    handleFiles(e.dataTransfer.files);
+                });
+            }
+
+            // 开始上传
+// 开始上传
+// 开始上传
+if (startUploadBtn) {
+    startUploadBtn.addEventListener('click', async () => {
+        if (selectedFiles.length === 0) {
+            alert('Please select at least one file to upload.');
+            return;
+        }
+        
+        // 获取数据集类型
+        let datasetType = 'text';
+        const datasetTypeInfo = document.getElementById('dataset-type-info');
+        if (!datasetTypeInfo.classList.contains('hidden')) {
+            datasetType = 'graph';
+            
+            // 验证图数据的必填字段
+            const graphName = document.getElementById('graph-name').value;
+            const edgeFileName = document.getElementById('edge-filename').value;
+            const sourceField = document.getElementById('edge-source-field').value;
+            const targetField = document.getElementById('edge-target-field').value;
+            
+            if (!graphName || !edgeFileName || !sourceField || !targetField) {
+                alert('Please fill in all required fields (marked with *) for Graph dataset.');
+                return;
+            }
+        }
+        
+        // 显示上传进度
+        if (uploadProgress) uploadProgress.style.display = 'block';
+        if (startUploadBtn) startUploadBtn.disabled = true;
+        
+        // 准备图数据信息
+        let graphInfo = null;
+        if (datasetType === 'graph') {
+            const isDirected = document.querySelector('input[name="is-directed"]:checked').value === 'true';
+            const isMultiEdge = document.querySelector('input[name="is-multi-edge"]:checked').value === 'true';
+            
+            graphInfo = {
+                graphName: document.getElementById('graph-name').value,
+                description: document.getElementById('graph-description').value,
+                vertexSchema: {
+                    fileName: document.getElementById('vertex-filename').value,
+                    idField: document.getElementById('vertex-id-field').value
+                },
+                edgeSchema: {
+                    fileName: document.getElementById('edge-filename').value,
+                    sourceField: document.getElementById('edge-source-field').value,
+                    targetField: document.getElementById('edge-target-field').value,
+                    weightField: document.getElementById('edge-weight-field').value
+                },
+                graphProperties: {
+                    isDirected: isDirected,
+                    isMultiEdge: isMultiEdge
+                }
+            };
+        }
+        
+        // 初始化文件上传进度跟踪
+        window.uploadProgressMap = {};
+        selectedFiles.forEach(file => {
+            window.uploadProgressMap[file.name] = 0;
+        });
+        
+        // 逐个上传文件
+        for (let i = 0; i < selectedFiles.length; i++) {
+            const file = selectedFiles[i];
+            await uploadFileViaWebSocket(file, currentKnowledgeBase, datasetType, graphInfo);
+        }
+        
+        // 通知后端所有文件上传完成
+        uploadSocket.emit('file_upload_complete', {
+            kb_id: currentKnowledgeBase,
+            file_count: selectedFiles.length
+        });
+    });
+}   
+////////////////////////
+// 通过WebSocket上传文件
+// 通过WebSocket上传文件
+async function uploadFileViaWebSocket(file, kbId, fileType, graphInfo) {
+    return new Promise((resolve, reject) => {
+        const CHUNK_SIZE = 64 * 1024; // 64KB chunks
+        const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+        let currentChunk = 0;
+        
+        // 开始文件上传
+        uploadSocket.emit('file_upload_start', {
+            kb_id: kbId,
+            file_name: file.name,
+            file_size: file.size,
+            file_type: fileType,
+            graph_info: graphInfo
+        });
+        
+        // 读取并发送文件块
+        function sendNextChunk() {
+            const start = currentChunk * CHUNK_SIZE;
+            const end = Math.min(start + CHUNK_SIZE, file.size);
+            const chunk = file.slice(start, end);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // 将ArrayBuffer转换为base64字符串
+                const arrayBuffer = e.target.result;
+                const uint8Array = new Uint8Array(arrayBuffer);
+                let binaryString = '';
+                for (let i = 0; i < uint8Array.length; i++) {
+                    binaryString += String.fromCharCode(uint8Array[i]);
+                }
+                const base64Data = btoa(binaryString);
+                
+                uploadSocket.emit('file_chunk', {
+                    kb_id: kbId,
+                    file_name: file.name,
+                    chunk_data: base64Data,  // 发送base64编码的数据
+                    chunk_index: currentChunk,
+                    total_chunks: totalChunks
+                });
+                
+                currentChunk++;
+                if (currentChunk < totalChunks) {
+                    // 继续发送下一个块
+                    setTimeout(sendNextChunk, 10); // 小延迟避免阻塞
+                } else {
+                    resolve(); // 文件上传完成
+                }
+            };
+            reader.readAsArrayBuffer(chunk);
+        }
+        
+        // 开始发送第一个块
+        sendNextChunk();
+    });
+}
+// 更新单个文件的上传进度
+function updateUploadProgressForFile(fileName, progress) {
+    if (window.uploadProgressMap) {
+        window.uploadProgressMap[fileName] = progress;
+        
+        // 计算总进度
+        const totalProgress = Object.values(window.uploadProgressMap).reduce((sum, p) => sum + p, 0) / selectedFiles.length;
+        
+        // 更新进度条显示
+        updateUploadProgress(totalProgress, 100);
+        
+        if (uploadStatus) {
+            uploadStatus.textContent = `上传 ${fileName}: ${progress}%`;
+        }
+    }
+}
+
+// 处理单个文件上传完成
+function handleFileUploadComplete(data) {
+    // 保存文件信息到本地存储（保持现有逻辑）
+    const fileInfo = {
+        name: data.file_name,
+        size: data.file_size,
+        type: getFileType(data.file_name),
+        uploadDate: data.upload_time,
+        status: 'completed',
+        path: data.file_path,
+        parsed: false
+    };
+    
+    // 获取现有文件列表
+    const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+    existingFiles.push(fileInfo);
+    localStorage.setItem(`kb-files-${currentKnowledgeBase}`, JSON.stringify(existingFiles));
+    
+    console.log(`文件 ${data.file_name} 上传完成并保存`);
+}
+////////////////////////
+            // 初始化全屏功能
+            initFullscreen();
+            
+            // 初始化图谱生成按钮
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            if (generateGraphBtn) {
+                generateGraphBtn.addEventListener('click', () => {
+                    generateGraph();
+                });
+            }
+            
+            // 初始化总解析按钮
+            const totalParseControlBtn = document.getElementById('total-parse-control-btn');
+            if (totalParseControlBtn) {
+                totalParseControlBtn.addEventListener('click', () => {
+                    toggleTotalParsing();
+                });
+            }
+        }
+
+        // 当DOM加载完成后初始化应用
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+            loadFiles();
+            // 等待DOM更新后再添加缩放控制
+            setTimeout(() => {
+                addZoomControls();
+            }, 100);
+        });
+
+        // 处理选择的文件
+        function handleFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                // 检查是否已存在同名文件
+                if (!selectedFiles.some(f => f.name === file.name)) {
+                    selectedFiles.push(file);
+                }
+            }
+            updateSelectedFilesDisplay();
+        }
+
+        // 更新选中的文件显示
+        function updateSelectedFilesDisplay() {
+            selectedFilesContainer.innerHTML = '';
+            
+            if (selectedFiles.length === 0) {
+                selectedFilesContainer.innerHTML = '<p class="text-slate-500 text-sm text-center py-4">No files selected</p>';
+                startUploadBtn.disabled = true;
+                return;
+            }
+            
+            startUploadBtn.disabled = false;
+            
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item-small';
+                fileItem.innerHTML = `
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${formatFileSize(file.size)}</div>
+                    <button class="remove-file" data-index="${index}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                `;
+                selectedFilesContainer.appendChild(fileItem);
+            });
+            
+            // 添加删除文件事件
+            document.querySelectorAll('.remove-file').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'));
+                    selectedFiles.splice(index, 1);
+                    updateSelectedFilesDisplay();
+                });
+            });
+        }
+
+        // 保存文件到本地（模拟）
+        async function saveFileLocally(file) {
+            return new Promise((resolve, reject) => {
+                // 在实际应用中，这里应该发送到服务器
+                // 这里我们模拟保存到本地存储
+                
+                // 创建知识库文件夹路径
+                const kbFolder = `dataset/${currentKnowledgeBase}`;
+                
+                // 模拟保存文件
+                setTimeout(() => {
+                    console.log(`File ${file.name} saved to ${kbFolder}/`);
+                    
+                    // 将文件信息保存到本地存储
+                    const fileInfo = {
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        uploadDate: new Date().toISOString(),
+                        status: 'completed',
+                        path: `${kbFolder}/${file.name}`,
+                        parsed: false // 添加解析状态
+                    };
+                    
+                    // 获取现有文件列表
+                    const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+                    existingFiles.push(fileInfo);
+                    localStorage.setItem(`kb-files-${currentKnowledgeBase}`, JSON.stringify(existingFiles));
+                    
+                    resolve(fileInfo);
+                }, 500);
+            });
+        }
+
+        // 加载文件列表
+        // 加载文件列表
+async function loadFiles() {
+    const fileListBody = document.getElementById('file-list-body');
+    
+    try {
+        // 从后端API获取文件列表
+        const response = await fetch(`/api/knowledge_bases/${currentKnowledgeBase}/files`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const existingFiles = result.data;
+            
+            // 如果有保存的文件，显示它们
+            if (existingFiles.length > 0) {
+                fileListBody.innerHTML = existingFiles.map(file => {
+                    // 初始化解析状态
+                    if (!parsingStatus[file.name]) {
+                        parsingStatus[file.name] = {
+                            progress: 0,
+                            isParsing: false,
+                            intervalId: null,
+                            isCompleted: file.parsed || false
+                        };
+                    }
+                    
+                    // 确定文件行的状态类
+                    let statusClass = 'uploaded'; // 默认灰色 - 刚上传
+                    if (parsingStatus[file.name].isParsing) {
+                        statusClass = 'parsing'; // 黄色 - 解析中
+                    } else if (parsingStatus[file.name].isCompleted) {
+                        statusClass = 'completed'; // 绿色 - 解析完成
+                    }
+                    
+                    return `
+                    <tr class="file-item ${statusClass} border-t border-slate-200 dark:border-slate-800" data-filename="${file.name}">
+                        <td class="py-3 px-4">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-blue-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                </svg>
+                                <div class="ml-3">
+                                    <div class="text-sm font-medium text-slate-700 dark:text-slate-200">${file.name}</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">${getFileType(file.name)}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">${formatFileSize(file.size)}</td>
+                        <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">${formatDate(file.uploadDate)}</td>
+                        <td class="py-3 px-4">
+                            <div class="parse-progress-container" data-filename="${file.name}">
+                                ${getStatusText(parsingStatus[file.name])}
+                                <button class="parse-control-btn" data-filename="${file.name}">
+                                    ${parsingStatus[file.name].isCompleted ? 
+                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                        </svg>` :
+                                        parsingStatus[file.name].isParsing ?
+                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
+                                        </svg>` :
+                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+                                        </svg>`
+                                    }
+                                </button>
+                                <div class="parse-progress-bar">
+                                    <div class="parse-progress-fill" style="width: ${parsingStatus[file.name].progress}%;"></div>
+                                </div>
+                                <span class="parse-progress-text">${Math.round(parsingStatus[file.name].progress)}%</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex justify-end gap-2">
+                                <button class="rounded-full bg-slate-200 p-2 text-slate-600 transition-all hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:text-slate-200 hover:dark:bg-blue-600 hover:dark:text-white preview-btn" data-filename="${file.name}" data-filepath="${file.path}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                </button>
+                                <button class="rounded-full bg-rose-100 p-2 text-rose-600 transition-all hover:bg-rose-600 hover:text-white dark:bg-rose-950 dark:text-rose-200 hover:dark:bg-rose-600 hover:dark:text-white delete-file-btn" data-filename="${file.name}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+            } else {
+                // 如果没有文件，显示优化的空状态
+                fileListBody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="empty-state-icon">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                </svg>
+                                <h3 class="empty-state-title">No files uploaded yet</h3>
+                                <p class="empty-state-description">Click "Add Files" to upload documents and start building your Dataset.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('Failed to load files:', error);
+        fileListBody.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    <div class="text-center text-red-500 py-4">
+                        Failed to load files: ${error.message}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+    
+    // 添加文件行悬停和点击事件
+    document.querySelectorAll('.file-item').forEach(row => {
+        row.addEventListener('mouseenter', () => {
+            if (!row.classList.contains('selected')) {
+                row.style.backgroundColor = '#f1f5f9';
+            }
+        });
+        
+        row.addEventListener('mouseleave', () => {
+            if (!row.classList.contains('selected')) {
+                row.style.backgroundColor = '';
+            }
+        });
+        
+        row.addEventListener('click', (e) => {
+            // 如果点击的是按钮，不触发选中/取消选中
+            if (e.target.closest('button')) {
+                return;
+            }
+            
+            // 切换选中状态
+            if (row.classList.contains('selected')) {
+                row.classList.remove('selected');
+                row.style.backgroundColor = '';
+                selectedFileRow = null;
+                resetGraphHighlight();
+            } else {
+                // 移除之前选中的行的选中状态
+                document.querySelectorAll('.file-item').forEach(r => {
+                    r.classList.remove('selected');
+                    r.style.backgroundColor = '';
+                });
+                
+                // 设置当前行为选中状态
+                row.classList.add('selected');
+                row.style.backgroundColor = '#d1e7fd';
+                selectedFileRow = row;
+                
+                // 高亮对应的图谱节点
+                highlightGraphNodes(row.getAttribute('data-filename'));
+            }
+        });
+    });
+    
+    // 添加预览按钮事件监听器
+    document.querySelectorAll('.preview-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const filename = e.currentTarget.getAttribute('data-filename');
+            const filepath = e.currentTarget.getAttribute('data-filepath');
+            previewFile(filename, filepath);
+        });
+    });
+    
+    // 添加解析控制按钮事件监听器
+    document.querySelectorAll('.parse-control-btn').forEach(button => {
+    button.addEventListener('click', (e) => {
+        e.stopPropagation(); // 防止事件冒泡
+        const filename = e.currentTarget.getAttribute('data-filename');
+        toggleFileParsing(filename);
+    });
+});
+    // 添加删除按钮事件监听器
+    // 添加删除按钮事件监听器
+document.querySelectorAll('.delete-file-btn').forEach(button => {
+    button.addEventListener('click', (e) => {
+        e.stopPropagation(); // 防止事件冒泡
+        const filename = e.currentTarget.getAttribute('data-filename');
+        deleteFile(filename);
+    });
+});
+    
+    // 初始化解析状态
+    Object.keys(parsingStatus).forEach(filename => {
+        if (parsingStatus[filename].isCompleted) {
+            updateProgressDisplay(filename, parsingStatus[filename].progress, false, true);
+        }
+    });
+    
+    // 检查是否所有文件都已解析完成
+    checkAllFilesParsed();
+    
+    // 更新总解析进度
+    updateTotalParseProgress();
+}
+
+function sendParseControlMessage(filename, action) {
+    console.log(`发送解析控制: ${action} ${filename} in kb ${currentKnowledgeBase}`);
+    
+    // 显示加载状态
+    const parseBtn = document.querySelector(`.parse-control-btn[data-filename="${filename}"]`);
+    if (parseBtn) {
+        parseBtn.innerHTML = '<div class="loading" style="width: 16px; height: 16px;"></div>';
+        parseBtn.disabled = true;
+    }
+    
+    // 使用HTTP GET请求
+    fetch(`/api/parse_control?kb_id=${currentKnowledgeBase}&file_name=${encodeURIComponent(filename)}&action=${action}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('解析控制成功:', data.message);
+                showNotification(`解析控制成功: ${data.message}`, 'success');
+                
+                // 根据action更新UI状态
+                if (action === 'start') {
+                    startFileParsing(filename);
+                } else if (action === 'pause') {
+                    pauseFileParsing(filename);
+                }
+            } else {
+                console.error('解析控制失败:', data.error);
+                showNotification(`解析控制失败: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('解析控制请求错误:', error);
+            showNotification(`Parse control error: ${error.message}`, 'error');
+        })
+        .finally(() => {
+            // 恢复按钮状态
+            if (parseBtn) {
+                // 重新加载文件列表来恢复按钮状态，或者直接更新按钮状态
+                setTimeout(() => {
+                    loadFiles(); // 重新加载以确保状态同步
+                }, 500);
+            }
+        });
+}
+
+        // 获取状态文本
+        function getStatusText(status) {
+            if (status.isCompleted) {
+                return `<span class="proceed-text">proceed</span>`;
+            } else if (status.isParsing) {
+                return `<span class="parsing-text">parsing</span>`;
+            } else {
+                return `<span class="pending-text">pending</span>`;
+            }
+        }
+
+        // 检查是否所有文件都已解析完成
+        function checkAllFilesParsed() {
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            
+            if (existingFiles.length === 0) {
+                // 如果没有文件，禁用生成按钮
+                if (generateGraphBtn) {
+                    generateGraphBtn.disabled = true;
+                }
+                return;
+            }
+            
+            // 检查是否所有文件都已解析
+            const allParsed = existingFiles.every(file => {
+                return parsingStatus[file.name] && parsingStatus[file.name].isCompleted;
+            });
+            
+            // 更新生成按钮状态
+            if (generateGraphBtn) {
+                generateGraphBtn.disabled = !allParsed;
+            }
+        }
+
+        // 切换文件解析状态（开始/暂停）
+        function toggleFileParsing(filename) {
+    const status = parsingStatus[filename];
+    
+    if (status.isCompleted) {
+        // 如果已经完成，重新解析
+        resetFileParsing(filename);
+        sendParseControlMessage(filename, 'start');
+    } else {
+        if (status.isParsing) {
+            // 暂停解析
+            sendParseControlMessage(filename, 'pause');
+        } else {
+            // 开始解析
+            sendParseControlMessage(filename, 'start');
+        }
+    }
+    
+    updateTotalParseProgress();
+}
+
+        function startFileParsing(filename) {
+            const status = parsingStatus[filename];
+            
+            if (status.isCompleted) return;
+            
+            status.isParsing = true;
+            updateParseButton(filename, true);
+            updateProgressDisplay(filename, status.progress, true, false);
+            
+            // 更新文件行状态类
+            updateFileRowStatus(filename, 'parsing');
+            
+            // 模拟解析进度
+            status.intervalId = setInterval(() => {
+                if (status.progress < 100) {
+                    status.progress += Math.random() * 5;
+                    if (status.progress >= 100) {
+                        status.progress = 100;
+                        completeFileParsing(filename);
+                    }
+                    updateProgressDisplay(filename, status.progress, true, false);
+                    
+                    // 更新总解析进度
+                    updateTotalParseProgress();
+                }
+            }, 200);
+        }
+
+        // 暂停文件解析
+        function pauseFileParsing(filename) {
+            const status = parsingStatus[filename];
+            
+            status.isParsing = false;
+            clearInterval(status.intervalId);
+            updateParseButton(filename, false);
+            updateProgressDisplay(filename, status.progress, false, false);
+            
+            // 更新文件行状态类
+            updateFileRowStatus(filename, 'uploaded');
+            
+            // 更新总解析进度
+            updateTotalParseProgress();
+        }
+
+        // 完成文件解析
+        function completeFileParsing(filename) {
+            const status = parsingStatus[filename];
+            
+            status.isParsing = false;
+            status.isCompleted = true;
+            clearInterval(status.intervalId);
+            
+            // 更新文件状态
+            updateFileParsedStatus(filename);
+            
+            // 更新UI显示
+            updateParseButton(filename, false, true);
+            updateProgressDisplay(filename, 100, false, true);
+            
+            // 更新文件行状态类
+            updateFileRowStatus(filename, 'completed');
+            
+            // 检查是否所有文件都已解析完成
+            checkAllFilesParsed();
+            
+            // 更新总解析进度
+            updateTotalParseProgress();
+        }
+
+        // 重置文件解析状态
+        function resetFileParsing(filename) {
+            const status = parsingStatus[filename];
+            
+            status.isParsing = false;
+            status.isCompleted = false;
+            status.progress = 0;
+            clearInterval(status.intervalId);
+            
+            // 更新文件状态
+            updateFileParsedStatus(filename, false);
+            
+            // 更新UI显示
+            updateParseButton(filename, false, false);
+            updateProgressDisplay(filename, 0, false, false);
+            
+            // 更新文件行状态类
+            updateFileRowStatus(filename, 'uploaded');
+            
+            // 检查是否所有文件都已解析完成
+            checkAllFilesParsed();
+            
+            // 更新总解析进度
+            updateTotalParseProgress();
+        }
+
+        // 更新文件行状态类
+        function updateFileRowStatus(filename, status) {
+            const fileRow = document.querySelector(`.file-item[data-filename="${filename}"]`);
+            if (!fileRow) return;
+            
+            // 移除所有状态类
+            fileRow.classList.remove('uploaded', 'parsing', 'completed');
+            
+            // 添加新的状态类
+            fileRow.classList.add(status);
+        }
+
+        // 更新解析按钮显示
+        function updateParseButton(filename, isParsing, isCompleted = false) {
+            const button = document.querySelector(`.parse-control-btn[data-filename="${filename}"]`);
+            if (!button) return;
+            
+            if (isCompleted) {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                `;
+            } else if (isParsing) {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
+                    </svg>
+                `;
+            } else {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+                    </svg>
+                `;
+            }
+        }
+
+        // 更新进度显示
+        function updateProgressDisplay(filename, progress, isParsing, isCompleted) {
+            const progressContainer = document.querySelector(`.parse-progress-container[data-filename="${filename}"]`);
+            if (!progressContainer) return;
+            
+            const progressFill = progressContainer.querySelector('.parse-progress-fill');
+            const progressText = progressContainer.querySelector('.parse-progress-text');
+            
+            if (progressFill) {
+                progressFill.style.width = `${progress}%`;
+            }
+            
+            if (progressText) {
+                progressText.textContent = `${Math.round(progress)}%`;
+            }
+            
+            // 更新状态文本
+            const statusText = progressContainer.querySelector('.proceed-text, .parsing-text, .pending-text');
+            if (statusText) {
+                statusText.remove();
+            }
+            
+            // 添加新的状态文本
+            progressContainer.insertAdjacentHTML('afterbegin', getStatusText(parsingStatus[filename]));
+        }
+
+        // 更新文件解析状态
+        function updateFileParsedStatus(filename, parsed = true) {
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            const updatedFiles = existingFiles.map(file => {
+                if (file.name === filename) {
+                    return { ...file, parsed: parsed };
+                }
+                return file;
+            });
+            localStorage.setItem(`kb-files-${currentKnowledgeBase}`, JSON.stringify(updatedFiles));
+        }
+
+        // 文件预览功能
+        function previewFile(filename, filepath) {
+            const previewModal = document.getElementById('preview-modal');
+            const previewTitle = document.getElementById('preview-title');
+            const previewContent = document.getElementById('preview-content');
+            const downloadBtn = document.getElementById('download-btn');
+            
+            previewTitle.textContent = `Preview: ${filename}`;
+            previewContent.innerHTML = '<div class="preview-placeholder"><div class="loading loading-spinner"></div><p>Loading file...</p></div>';
+            
+            // 显示模态框
+            previewModal.style.display = 'flex';
+            
+            // 设置下载按钮事件
+            downloadBtn.onclick = () => downloadFile(filename, filepath);
+            
+            // 获取文件扩展名
+            const fileExtension = filename.split('.').pop().toLowerCase();
+            
+            // 根据文件类型进行预览
+            switch (fileExtension) {
+                case 'txt':
+                case 'md':
+                    previewTextFile(filename, filepath);
+                    break;
+                case 'pdf':
+                    previewPdfFile(filename, filepath);
+                    break;
+                case 'doc':
+                case 'docx':
+                    previewWordFile(filename, filepath);
+                    break;
+                default:
+                    previewContent.innerHTML = `
+                        <div class="preview-placeholder">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <h4 class="text-lg font-medium mb-2">${filename}</h4>
+                            <p>This file type cannot be previewed in the browser</p>
+                            <p class="text-sm mt-2">File path: ${filepath}</p>
+                        </div>
+                    `;
+            }
+        }
+        
+        // 预览文本文件
+        function previewTextFile(filename, filepath) {
+            const previewContent = document.getElementById('preview-content');
+            
+            // 模拟从服务器获取文件内容
+            setTimeout(() => {
+                // 模拟文本内容
+                const sampleText = `This is the content preview of file "${filename}".
+
+In a real application, the actual file content would be displayed here.
+
+File information:
+- File name: ${filename}
+- File path: ${filepath}
+- File type: ${getFileType(filename)}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+
+Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
+                `;
+                
+                previewContent.innerHTML = `<pre class="preview-text-content">${escapeHtml(sampleText)}</pre>`;
+            }, 800);
+        }
+        
+        // 辅助函数：转义HTML特殊字符
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+        
+        // 预览PDF文件
+        function previewPdfFile(filename, filepath) {
+            const previewContent = document.getElementById('preview-content');
+            
+            previewContent.innerHTML = `
+                <div class="preview-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h4 class="text-lg font-medium mb-2">${filename}</h4>
+                    <p>PDF file preview</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        <p>In a real application, PDF.js would be used to display the actual PDF content</p>
+                        <p class="mt-2">File path: ${filepath}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 预览Word文档
+        function previewWordFile(filename, filepath) {
+            const previewContent = document.getElementById('preview-content');
+            
+            previewContent.innerHTML = `
+                <div class="preview-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h4 class="text-lg font-medium mb-2">${filename}</h4>
+                    <p>Word document preview</p>
+                    <div class="mt-4 text-sm text-gray-500">
+                        <p>In a real application, Word documents need to be converted to PDF or HTML format on the server side</p>
+                        <p class="mt-2">File path: ${filepath}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 下载文件功能
+        function downloadFile(filename, filepath) {
+            // 在实际应用中，这里应该实现真实的文件下载逻辑
+            alert(`In a real application, this would download the file: ${filename}\nFile path: ${filepath}`);
+        }
+        
+        // 关闭预览模态框
+        document.getElementById('close-preview-btn').addEventListener('click', () => {
+            document.getElementById('preview-modal').style.display = 'none';
+        });
+        
+        // 关闭预览模态框 (X按钮)
+        document.getElementById('close-preview-modal').addEventListener('click', () => {
+            document.getElementById('preview-modal').style.display = 'none';
+        });
+
+        // 点击预览模态框外部关闭
+        const previewModal = document.getElementById('preview-modal');
+        if (previewModal) {
+            previewModal.addEventListener('click', (e) => {
+                if (e.target === previewModal) {
+                    previewModal.style.display = 'none';
+                }
+            });
+        }
+
+        // 点击上传模态框外部关闭
+        window.addEventListener('click', (e) => {
+            if (uploadModal && e.target === uploadModal) {
+                uploadModal.style.display = 'none';
+            }
+            
+            if (previewModal && e.target === previewModal) {
+                previewModal.style.display = 'none';
+            }
+        });
+
+        // 删除文件
+        // 删除文件
+function deleteFile(fileName) {
+    if (confirm(`Are you sure you want to delete ${fileName}?`)) {
+        console.log(`发送删除请求: ${fileName} in kb ${currentKnowledgeBase}`);
+        
+        // 显示加载状态
+        const deleteBtn = document.querySelector(`.delete-file-btn[data-filename="${fileName}"]`);
+        if (deleteBtn) {
+            deleteBtn.innerHTML = '<div class="loading" style="width: 16px; height: 16px;"></div>';
+            deleteBtn.disabled = true;
+        }
+        
+        // 使用HTTP GET请求
+        fetch(`/api/delete_file?kb_id=${currentKnowledgeBase}&file_name=${encodeURIComponent(fileName)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 从本地存储中删除文件
+                    const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+                    const updatedFiles = existingFiles.filter(file => file.name !== fileName);
+                    localStorage.setItem(`kb-files-${currentKnowledgeBase}`, JSON.stringify(updatedFiles));
+                    
+                    // 清除解析状态
+                    delete parsingStatus[fileName];
+                    
+                    loadFiles();
+                    resetGraph();
+                    updateKnowledgeBaseFileCount(currentKnowledgeBase);
+                    
+                    showNotification('File deleted successfully', 'success');
+                } else {
+                    showNotification(`Failed to delete file: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('删除文件错误:', error);
+                showNotification(`Delete error: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                // 恢复按钮状态
+                if (deleteBtn) {
+                    loadFiles(); // 重新加载文件列表来恢复按钮状态
+                }
+            });
+    }
+}
+// 添加通知函数（如果不存在）
+function showNotification(message, type = 'info') {
+    // 创建通知元素
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 p-4 rounded-md text-white z-50 ${
+        type === 'success' ? 'bg-green-500' : 
+        type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // 3秒后自动移除
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+        // 重置图谱状态
+        function resetGraph() {
+            graphGenerated = false;
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            if (generateGraphBtn) {
+                generateGraphBtn.textContent = 'Visualization';
+                generateGraphBtn.disabled = true;
+            }
+            
+            const graphContainer = document.getElementById('graph-container');
+            if (graphContainer) {
+                graphContainer.innerHTML = `
+                    <div class="flex items-center justify-center h-full">
+                        <div class="text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                            </svg>
+                            <p class="mt-2 text-lg text-gray-500">Click "Visualization" to create knowledge graph</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 隐藏图谱生成进度条
+            const graphProgressContainer = document.getElementById('graph-progress-container');
+            if (graphProgressContainer) {
+                graphProgressContainer.style.display = 'none';
+            }
+            
+            // 清除图谱生成间隔
+            if (graphGenerationInterval) {
+                clearInterval(graphGenerationInterval);
+                graphGenerationInterval = null;
+            }
+        }
+
+        // 重置图谱高亮
+        function resetGraphHighlight() {
+            if (!window.currentCytoscapeInstance) return;
+            
+            const cy = window.currentCytoscapeInstance;
+            
+            // 重置所有节点的样式
+            cy.nodes().style({
+                'background-color': '#3b82f6',
+                'opacity': 1
+            });
+            
+            cy.edges().style({
+                'line-color': '#95A5A6',
+                'target-arrow-color': '#95A5A6',
+                'opacity': 1
+            });
+        }
+
+        // 图谱生成函数
+        function generateGraph() {
+            const graphContainer = document.getElementById('graph-container');
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            const graphProgressContainer = document.getElementById('graph-progress-container');
+            const graphProgressFill = document.getElementById('graph-progress-fill');
+            const graphProgressText = document.getElementById('graph-progress-text');
+            
+            // 禁用生成按钮
+            if (generateGraphBtn) {
+                generateGraphBtn.disabled = true;
+            }
+            
+            // 重置进度条
+            if (graphProgressFill) {
+                graphProgressFill.style.width = '0%';
+            }
+            if (graphProgressText) {
+                graphProgressText.textContent = '0%';
+            }
+            
+            // 显示进度条
+            if (graphProgressContainer) {
+                graphProgressContainer.style.display = 'flex';
+            }
+            
+            // 显示生成中状态
+            graphContainer.innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-lg text-gray-500">Generating knowledge graph...</div></div>';
+            
+            // 模拟生成进度
+            let progress = 0;
+            graphGenerationInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(graphGenerationInterval);
+                    graphGenerationInterval = null;
+                    
+                    // 生成完成
+                    completeGraphGeneration();
+                }
+                
+                // 更新进度条
+                if (graphProgressFill) {
+                    graphProgressFill.style.width = `${progress}%`;
+                }
+                
+                if (graphProgressText) {
+                    graphProgressText.textContent = `${Math.round(progress)}%`;
+                }
+            }, 200);
+        }
+        
+        // 完成图谱生成
+        function completeGraphGeneration() {
+            graphGenerated = true;
+            
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            if (generateGraphBtn) {
+                generateGraphBtn.textContent = 'Visualization';
+                generateGraphBtn.disabled = false;
+            }
+            
+            // 隐藏进度条
+            const graphProgressContainer = document.getElementById('graph-progress-container');
+            if (graphProgressContainer) {
+                graphProgressContainer.style.display = 'none';
+            }
+            
+            // 模拟从后端获取数据
+            setTimeout(() => {
+                // 使用你提供的三元组数据
+                // 使用new.xlsx中的三元组数据（修改后的格式）
+const triplets = [
+    ['Maureen Alvarado', '2025-05-01T00:00:00Z: 545.88', 'Paul Baird'],
+    ['Jessica Miller', '2025-07-11T00:00:00Z: 490.85', 'Daniel Miller'],
+    ['John Johnson', '2025-07-11T00:00:00Z: 892.56', 'Eric Murphy'],
+    ['Alan Medina', '2025-07-11T00:00:00Z: 350.6', 'John Allen']
+];
+                
+                // 将三元组转换为图数据
+                const graphData = convertTripletsToGraphData(triplets);
+                
+                // 保存图数据供全屏使用
+                window.currentGraphData = graphData;
+                
+                // 渲染图谱
+                renderKnowledgeGraph(graphData);
+            }, 500);
+        }
+
+        // 高亮图谱中与选中文件相关的节点
+        function highlightGraphNodes(filename) {
+            if (!window.currentCytoscapeInstance) return;
+            
+            const cy = window.currentCytoscapeInstance;
+            
+            // 重置所有节点的样式
+            cy.nodes().style({
+                'background-color': '#3b82f6',
+                'opacity': 0.4
+            });
+            
+            cy.edges().style({
+                'line-color': '#95A5A6',
+                'target-arrow-color': '#95A5A6',
+                'opacity': 0.4
+            });
+            
+            // 根据文件名确定要突出显示的节点
+            // 这里我们模拟为每个文件分配一些特定的节点
+            const fileNodes = getNodesForFile(filename);
+            
+            // 高亮与选中文件相关的节点
+            fileNodes.forEach(nodeId => {
+                const node = cy.getElementById(nodeId);
+                if (node) {
+                    node.style({
+                        'background-color': '#ef4444',
+                        'opacity': 1
+                    });
+                    
+                    // 高亮与这些节点相连的边
+                    node.connectedEdges().style({
+                        'line-color': '#ef4444',
+                        'target-arrow-color': '#ef4444',
+                        'opacity': 1
+                    });
+                    
+                    // 高亮相连的节点
+                    node.neighbors().style({
+                        'background-color': '#f59e0b',
+                        'opacity': 0.8
+                    });
+                }
+            });
+        }
+        
+        // 根据文件名获取对应的节点
+        function getNodesForFile(filename) {
+            // 模拟数据：为每个文件分配一些节点
+            const fileNodeMapping = {
+                'document1.txt': ['2022 citrus bowl', 'Vrbo', 'Homeaway'],
+                'document2.txt': ['Kentucky wildcats', 'Iowa hawkeyes', 'The hawkeyes'],
+                'document3.txt': ['2023 citrus bowl', 'Lsu tigers', 'Purdue boilermakers'],
+                'document4.txt': ['Citrus bowl', "Kellogg's", 'Cheez-it bowl'],
+                'document5.txt': ['Georgia', 'Tcu', 'Cfp national championship game']
+            };
+            
+            return fileNodeMapping[filename] || [];
+        }
+
+        // 全屏显示图谱功能
+        let isGraphFullscreen = false;
+        let originalGraphContent = null;
+        let fullscreenGraphContainer = null;
+        
+        function initFullscreen() {
+            // 获取全屏按钮和容器
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            fullscreenGraphContainer = document.getElementById('fullscreen-graph-container');
+            
+            // 全屏按钮事件
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', toggleGraphFullscreen);
+            }
+            
+            // 退出全屏按钮事件
+            const exitFullscreenBtn = document.getElementById('exit-fullscreen');
+            if (exitFullscreenBtn) {
+                exitFullscreenBtn.addEventListener('click', toggleGraphFullscreen);
+            }
+            
+            // 全屏模式下的缩放控制
+            const fullscreenZoomIn = document.getElementById('fullscreen-zoom-in');
+            const fullscreenZoomOut = document.getElementById('fullscreen-zoom-out');
+            const fullscreenFit = document.getElementById('fullscreen-fit');
+            
+            if (fullscreenZoomIn) {
+                fullscreenZoomIn.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.zoom(window.currentCytoscapeInstance.zoom() * 1.2);
+                    }
+                });
+            }
+            
+            if (fullscreenZoomOut) {
+                fullscreenZoomOut.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.zoom(window.currentCytoscapeInstance.zoom() * 0.8);
+                    }
+                });
+            }
+            
+            if (fullscreenFit) {
+                fullscreenFit.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.fit();
+                    }
+                });
+            }
+        }
+        
+        function toggleGraphFullscreen() {
+            const graphContainer = document.getElementById('graph-container');
+            const fullscreenGraphContent = document.getElementById('fullscreen-graph-content');
+            
+            if (!isGraphFullscreen) {
+                // 进入全屏模式
+                enterFullscreen(graphContainer, fullscreenGraphContent);
+            } else {
+                // 退出全屏模式
+                exitFullscreen(graphContainer, fullscreenGraphContent);
+            }
+        }
+        
+        function enterFullscreen(graphContainer, fullscreenGraphContent) {
+            // 保存原始内容
+            originalGraphContent = graphContainer.innerHTML;
+            
+            // 将图谱内容复制到全屏容器
+            fullscreenGraphContent.innerHTML = originalGraphContent;
+            
+            // 显示全屏容器
+            fullscreenGraphContainer.classList.add('active');
+            
+            // 更新状态
+            isGraphFullscreen = true;
+            
+            // 重新渲染图谱以适应新尺寸
+            setTimeout(() => {
+                if (window.currentCytoscapeInstance) {
+                    // 重新创建图谱实例在全屏容器中
+                    recreateGraphInFullscreen();
+                }
+            }, 100);
+        }
+        
+        function exitFullscreen(graphContainer, fullscreenGraphContent) {
+            // 恢复原始内容
+            graphContainer.innerHTML = originalGraphContent;
+            
+            // 隐藏全屏容器
+            fullscreenGraphContainer.classList.remove('active');
+            
+            // 清空全屏内容
+            fullscreenGraphContent.innerHTML = '';
+            
+            // 更新状态
+            isGraphFullscreen = false;
+            
+            // 重新渲染图谱以适应原始尺寸
+            setTimeout(() => {
+                if (window.currentCytoscapeInstance) {
+                    // 重新创建图谱实例在原始容器中
+                    recreateGraphInOriginal();
+                }
+            }, 100);
+        }
+        
+        function recreateGraphInFullscreen() {
+            const fullscreenGraphContent = document.getElementById('fullscreen-graph-content');
+            
+            // 重新创建图谱实例
+            if (window.currentGraphData) {
+                renderKnowledgeGraph(window.currentGraphData, fullscreenGraphContent);
+            }
+        }
+        
+        function recreateGraphInOriginal() {
+            const graphContainer = document.getElementById('graph-container');
+            
+            // 重新创建图谱实例
+            if (window.currentGraphData) {
+                renderKnowledgeGraph(window.currentGraphData, graphContainer);
+            }
+        }
+
+        // 添加缩放控制功能
+        function addZoomControls() {
+            // 常规视图缩放控制
+            const zoomInBtn = document.getElementById('zoom-in-btn');
+            const zoomOutBtn = document.getElementById('zoom-out-btn');
+            const fitBtn = document.getElementById('fit-btn');
+            
+            if (zoomInBtn) {
+                zoomInBtn.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.zoom(window.currentCytoscapeInstance.zoom() * 1.2);
+                    }
+                });
+            }
+            
+            if (zoomOutBtn) {
+                zoomOutBtn.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.zoom(window.currentCytoscapeInstance.zoom() * 0.8);
+                    }
+                });
+            }
+            
+            if (fitBtn) {
+                fitBtn.addEventListener('click', () => {
+                    if (window.currentCytoscapeInstance) {
+                        window.currentCytoscapeInstance.fit();
+                    }
+                });
+            }
+        }
+
+        // 总解析控制函数
+        function toggleTotalParsing() {
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            
+            if (existingFiles.length === 0) {
+                return;
+            }
+            
+            if (totalParsingStatus.isParsing) {
+                // 暂停所有解析
+                pauseTotalParsing();
+            } else {
+                // 开始所有解析
+                startTotalParsing();
+            }
+        }
+        
+        function startTotalParsing() {
+    const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+    
+    if (existingFiles.length === 0) {
+        return;
+    }
+    
+    totalParsingStatus.isParsing = true;
+    updateTotalParseButton(true);
+    
+    // 启动所有未完成的文件解析
+    existingFiles.forEach(file => {
+        if (!parsingStatus[file.name] || !parsingStatus[file.name].isCompleted) {
+            if (!parsingStatus[file.name]) {
+                parsingStatus[file.name] = {
+                    progress: 0,
+                    isParsing: false,
+                    intervalId: null,
+                    isCompleted: false
+                };
+            }
+            startFileParsing(file.name);
+        }
+    });
+    
+    // 只保留状态检查，移除进度更新
+    totalParsingStatus.intervalId = setInterval(() => {
+        updateTotalParseProgress();
+    }, 500);
+}
+        function pauseTotalParsing() {
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+            
+            totalParsingStatus.isParsing = false;
+            clearInterval(totalParsingStatus.intervalId);
+            updateTotalParseButton(false);
+            updateTotalParseStatus('pending');
+            
+            // 暂停所有正在解析的文件
+            existingFiles.forEach(file => {
+                if (parsingStatus[file.name] && parsingStatus[file.name].isParsing) {
+                    pauseFileParsing(file.name);
+                }
+            });
+        }
+        
+        function completeTotalParsing() {
+            totalParsingStatus.isParsing = false;
+            totalParsingStatus.isCompleted = true;
+            clearInterval(totalParsingStatus.intervalId);
+            
+            updateTotalParseButton(false, true);
+            updateTotalParseStatus('completed');
+        }
+        
+        function updateTotalParseProgress() {
+    const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+    
+    if (existingFiles.length === 0) {
+        totalParsingStatus.progress = 0;
+        return;
+    }
+    
+    // 计算平均进度
+    let totalProgress = 0;
+    let completedCount = 0;
+    
+    existingFiles.forEach(file => {
+        if (parsingStatus[file.name]) {
+            totalProgress += parsingStatus[file.name].progress;
+            if (parsingStatus[file.name].isCompleted) {
+                completedCount++;
+            }
+        }
+    });
+    
+    const averageProgress = totalProgress / existingFiles.length;
+    totalParsingStatus.progress = averageProgress;
+    
+    // 检查是否所有文件都已完成
+    const allCompleted = existingFiles.every(file => {
+        return parsingStatus[file.name] && parsingStatus[file.name].isCompleted;
+    });
+    
+    if (allCompleted) {
+        completeTotalParsing();
+    }
+}
+        function updateTotalParseDisplay(progress) {
+            const progressFill = document.getElementById('total-parse-progress-fill');
+            const progressText = document.getElementById('total-parse-progress-text');
+            
+            if (progressFill) {
+                progressFill.style.width = `${progress}%`;
+            }
+            
+            if (progressText) {
+                progressText.textContent = `${Math.round(progress)}%`;
+            }
+        }
+        
+        function updateTotalParseButton(isParsing, isCompleted = false) {
+            const button = document.getElementById('total-parse-control-btn');
+            if (!button) return;
+            
+            if (isCompleted) {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                `;
+            } else if (isParsing) {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
+                    </svg>
+                `;
+            } else {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+                    </svg>
+                `;
+            }
+        }
+        
+        function updateTotalParseStatus(status) {
+            const statusElement = document.getElementById('total-parse-status');
+            if (!statusElement) return;
+            
+            let statusText = 'pending';
+            let statusClass = 'pending-text';
+            
+            switch (status) {
+                case 'parsing':
+                    statusText = 'parsing';
+                    statusClass = 'parsing-text';
+                    break;
+                case 'completed':
+                    statusText = 'completed';
+                    statusClass = 'proceed-text';
+                    break;
+                default:
+                    statusText = 'pending';
+                    statusClass = 'pending-text';
+            }
+            
+            statusElement.textContent = statusText;
+            statusElement.className = `total-parse-status ${statusClass}`;
+        }
+
+        // 工具函数
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function getFileType(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const types = {
+                'txt': 'Text',
+                'pdf': 'PDF',
+                'doc': 'Word',
+                'docx': 'Word',
+                'md': 'Markdown',
+                'json': 'JSON',
+                'csv': 'CSV'
+            };
+            return types[ext] || 'File';
+        }
+
+        // 将三元组转换为图数据
+        function convertTripletsToGraphData(triplets) {
+            const nodes = [];
+            const edges = [];
+            const nodeIds = new Set();
+            
+            // 为不同的关系类型定义颜色
+            const relationColors = {
+                'Played_on': '#FF6B6B',
+                'Telecast_by': '#4ECDC4',
+                'Sponsored': '#45B7D1',
+                'Owns': '#96CEB4',
+                'Parent_company_of': '#FFEAA7',
+                'Played_against': '#DDA0DD',
+                'Entered_citrus_bowl_with_record': '#98D8C8',
+                'Entered_citrus_bowl_ranking': '#F7DC6F',
+                'Made_second_citrus_bowl_appearance': '#BB8FCE',
+                'Entered': '#85C1E9',
+                'Had_record': '#F8C471',
+                'Ranked': '#D7BDE2',
+                'Made_appearance': '#82E0AA',
+                'Played_at': '#F1948A',
+                'Concluded_with': '#85C1E9',
+                'Held': '#F8C471',
+                'Purchased_sponsorship_rights_to': '#D7BDE2',
+                'Sponsors': '#82E0AA',
+                'Mauled': '#F1948A',
+                'Played_in': '#FF6B6B',
+                'Won': '#4ECDC4',
+                'Tied': '#45B7D1',
+                'Picked_off': '#96CEB4',
+                'Returned_int': '#FFEAA7',
+                'Won_game': '#DDA0DD',
+                'default': '#95A5A6'
+            };
+            
+            triplets.forEach((triplet, index) => {
+                const [source, relation, target] = triplet;
+                
+                // 添加节点
+                
+                if (!nodeIds.has(source)) {
+                    nodes.push({
+                        data: {
+                            id: source,
+                            label: source
+                        }
+                    });
+                    nodeIds.add(source);
+                }
+                
+                if (!nodeIds.has(target)) {
+                    nodes.push({
+                        data: {
+                            id: target,
+                            label: target
+                        }
+                    });
+                    nodeIds.add(target);
+                }
+                
+                // 添加边
+                edges.push({
+                    data: {
+                        id: `e${index}`,
+                        source: source,
+                        target: target,
+                        label: relation,
+                        color: relationColors[relation] || relationColors['default']
+                    }
+                });
+            });
+            
+            return { nodes, edges };
+        }
+        
+        // 渲染知识图谱
+        function renderKnowledgeGraph(graphData, container) {
+            if (!container) {
+                container = document.getElementById('graph-container');
+            }
+            
+            container.innerHTML = '';
+            
+            // 创建图谱实例
+            const cy = cytoscape({
+                container: container,
+                elements: {
+                    nodes: graphData.nodes,
+                    edges: graphData.edges
+                },
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#3b82f6',
+                            'label': 'data(label)',
+                            'color': '#000',
+                            'text-valign': 'center',
+                            'text-halign': 'center',
+                            'text-outline-color': '#fff',
+                            'text-outline-width': 1,
+                            'font-size': 14,
+                            'width': 80,
+                            'height': 80
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'line-color': 'data(color)',
+                            'target-arrow-color': 'data(color)',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier',
+                            'label': 'data(label)',
+                            'font-size': 12,
+                            'text-background-color': '#fff',
+                            'text-background-opacity': 1,
+                            'text-background-padding': '4px',
+                            'text-rotation': 'autorotate',
+                            'width': 2
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'cose',
+                    animate: true,
+                    fit: true,
+                    padding: 30,
+                    nodeRepulsion: 400000,
+                    idealEdgeLength: 100,
+                    nodeOverlap: 20
+                }
+            });
+            
+            // 保存实例到全局变量，供全屏功能使用
+            window.currentCytoscapeInstance = cy;
+            
+            // 添加交互功能
+            cy.on('tap', 'node', function(evt){
+                const node = evt.target;
+                console.log('Clicked node:', node.data('label'));
+            });
+            
+            cy.on('tap', 'edge', function(evt){
+                const edge = evt.target;
+                console.log('Clicked edge:', edge.data('label'));
+            });
+            
+            // 添加鼠标滚轮缩放支持
+            if (container) {
+                container.addEventListener('wheel', (e) => {
+                    if (e.ctrlKey && window.currentCytoscapeInstance) {
+                        e.preventDefault();
+                        const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+                        window.currentCytoscapeInstance.zoom(window.currentCytoscapeInstance.zoom() * zoomFactor);
+                    }
+                });
+
+                
+            }
+        }
+    </script>
+</body>
+</html>
