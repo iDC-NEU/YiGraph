@@ -452,9 +452,11 @@ class GraphWorkflowDAG:
             topological_order = self.topological_order()
             for step_id in topological_order:
                 step = self.steps[step_id]
+                # 将枚举对象转换为字符串值，确保JSON可序列化
+                task_type_str = str(step.task_type) if step.task_type else None
                 steps_info[str(step_id)] = {
                     "question": step.question,
-                    "task_type": step.task_type if step.task_type else None,
+                    "task_type": task_type_str,
                     "algorithm": step.graph_algorithm if step.graph_algorithm else None,
                     "status": step.status.value if hasattr(step.status, 'value') else str(step.status)
                 }
@@ -462,10 +464,20 @@ class GraphWorkflowDAG:
             # 如果获取信息时出错，返回部分信息
             print(f"获取DAG信息时出错: {e}")
         
+        # 构建边信息（根据实际的依赖关系）
+        edges_info = []
+        for parent_id, children in self.out_edges.items():
+            for child_id in children:
+                edges_info.append({
+                    "from": str(parent_id),
+                    "to": str(child_id)
+                })
+        
         return {
             "subquery_plan": self.get_subquery_plan(),
             "steps": steps_info,
-            "topological_order": [str(sid) for sid in topological_order]
+            "topological_order": [str(sid) for sid in topological_order],
+            "edges": edges_info
         }
     
     def export_as_dict(self) -> Dict[str, Any]:
