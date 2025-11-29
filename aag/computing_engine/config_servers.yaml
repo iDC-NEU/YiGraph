@@ -15,7 +15,7 @@ engine_supported_algorithms:
     bfs:
       - tool: bfs_edges
     dfs:
-      - tool: dfs_edges
+      - tool: run_find_cycle
     dijkstra:
       - tool: dijkstra_path
     a_star:
