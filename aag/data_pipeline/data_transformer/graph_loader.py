@@ -99,7 +99,6 @@ class GraphDataLoader:
         from dataclasses import fields
 
         result = []
-
         for f in fields(config):
             if key in f.name:
                 value = getattr(config, f.name)
@@ -121,9 +120,29 @@ class GraphDataLoader:
         all_dfs = []
 
         for config in data_config:
-            all_fields = self.get_field_data(config, "field")
-            logger.info(f"Reading ({all_fields}) fields from raw file")
-            df = pd.read_csv(config.path, usecols=all_fields)
+            # 获取必需的字段（不包括 attribute_fields）
+            required_fields = []
+            from dataclasses import fields
+            for f in fields(config):
+                if "field" in f.name and f.name != "attribute_fields":
+                    value = getattr(config, f.name)
+                    if value is not None:
+                        if isinstance(value, list):
+                            required_fields += value
+                        else:
+                            required_fields.append(value)
+            
+            # 获取 attribute_fields
+            attribute_fields = getattr(config, "attribute_fields", None)
+            
+            # 如果 attribute_fields 为空，读取所有列；否则只读取必需字段 + attribute_fields
+            if not attribute_fields:
+                logger.info(f"attribute_fields is empty, reading all columns from raw file")
+                df = pd.read_csv(config.path)
+            else:
+                all_fields = list(set(required_fields + attribute_fields))
+                logger.info(f"Reading ({all_fields}) fields from raw file")
+                df = pd.read_csv(config.path, usecols=all_fields)
 
             # only for vetext data
             query_field = self.get_field_name(config, "query_field")
@@ -169,13 +188,14 @@ class GraphDataLoader:
             props = row.drop(query_name).to_dict()          
             vertices.append(VertexData(vid=vid, properties=props))
         
-
         # process edge: src => query_name, dst => query_name
         edges = []
         src_field = edge_config[0].source_field
         dst_field = edge_config[0].target_field
+        rank_field = edge_config[0].rank_field  
+        multigraph = dataset_config.schema.graph_structure.multigraph 
         id_to_query = dict(zip(vertex_df[id_field], vertex_df[query_name]))
-        for _, row in edge_df.iterrows():
+        for idx, (_, row) in enumerate(edge_df.iterrows()):
             src_raw = row[src_field]
             dst_raw = row[dst_field]
 
@@ -187,9 +207,15 @@ class GraphDataLoader:
                     f"Edge references unknown id: src={src_raw}, dst={dst_raw}"
                 )
 
-            # modify rank when need
-            rank = _
-            rank_field = None
+            if multigraph:
+                # 多重图：需要 rank 来区分多条边
+                if rank_field and rank_field in row and pd.notna(row[rank_field]):
+                    rank = str(row[rank_field])
+                else:
+                    rank = idx  # 使用循环索引作为 rank，确保每条边都有唯一标识
+            else:
+                # 非多重图：不需要 rank
+                rank = None
 
             props = row.drop([src_field, dst_field] + ([rank_field] if rank_field else [])).to_dict()
 
