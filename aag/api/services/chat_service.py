@@ -175,8 +175,8 @@ class ChatService:
             
             logger.info(f"流式处理消息: mode={mode}, message={message[:50]}...")
             
-            # 执行查询
-            result = await engine.run(message, mode=mode)
+            # 执行查询（传递 callback，用于在 scheduler 中判断是否返回 DAG 信息）
+            result = await engine.run(message, mode=mode, callback=callback)
             
             # 根据模式返回不同格式
             if mode == "expert" and isinstance(result, dict):
@@ -188,8 +188,31 @@ class ChatService:
                         "contentType": "dag",
                         "content": dag_content
                     })
+            elif mode == "normal" and isinstance(result, dict) and "dag_info" in result:
+                # 普通模式：如果返回了包含 DAG 信息的字典（Web 调用）
+                # 先发送 DAG 信息
+                dag_content = self._convert_dag_to_frontend_format({
+                    "dag_info": result.get("dag_info", {})
+                })
+                if callback:
+                    callback({
+                        "type": "result",
+                        "contentType": "dag",
+                        "content": dag_content
+                    })
+                
+                # 再发送分析结果文本
+                result_text = result.get("analysis_result", "")
+                if callback and result_text:
+                    paragraphs = [p.strip() for p in result_text.split('\n') if p.strip()]
+                    for para in paragraphs:
+                        callback({
+                            "type": "result",
+                            "contentType": "text",
+                            "content": para
+                        })
             else:
-                # 普通模式返回文本
+                # 普通模式：返回字符串（向后兼容，或没有 callback 的情况）
                 result_text = str(result) if result else "未获取到结果"
                 if callback:
                     # 分段发送文本结果

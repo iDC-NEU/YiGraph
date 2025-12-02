@@ -173,7 +173,13 @@ class Scheduler:
         
         return self.current_dataset
 
-    async def execute(self, query: str, decompose: bool = True, mode: str = "normal") -> Union[str, Dict[str, Any]]:
+    async def execute(
+        self, 
+        query: str, 
+        decompose: bool = True, 
+        mode: str = "normal",
+        callback: Optional[Callable[[Dict[str, Any]], None]] = None
+    ) -> Union[str, Dict[str, Any]]:
         """
         Execute query with dataset type validation
         
@@ -181,6 +187,8 @@ class Scheduler:
             query: 用户查询
             decompose: 是否分解查询
             mode: 执行模式 "normal" | "expert"
+            callback: 可选的回调函数，用于实时发送数据（如DAG信息）
+                     签名: callback(data: Dict[str, Any])
         
         Returns:
             普通模式: 返回分析结果字符串
@@ -218,13 +226,19 @@ class Scheduler:
                 graph_nodes, graph_edges = flatten_graph(global_vertices, global_edges)
                 self.data_dependency_resolver.set_global_graph(graph_nodes, graph_edges)         
             
-            return await self._execute_graph(query, decompose=decompose, mode=mode)
+            return await self._execute_graph(query, decompose=decompose, mode=mode, callback=callback)
         
         # 3) General query
         return self.reasoner.general_query_response(query)
     
 
-    async def _execute_graph(self, query: str, decompose: bool = True, mode: str = "normal") -> Union[str, Dict[str, Any]]:
+    async def _execute_graph(
+        self, 
+        query: str, 
+        decompose: bool = True, 
+        mode: str = "normal",
+        callback: Optional[Callable[[Dict[str, Any]], None]] = None
+    ) -> Union[str, Dict[str, Any]]:
         """
         Execute graph analysis query
         
@@ -232,6 +246,8 @@ class Scheduler:
             query: 用户查询
             decompose: 是否分解查询
             mode: 执行模式 "normal" | "expert"
+            callback: 可选的回调函数，用于实时发送数据（如DAG信息）
+                     签名: callback(data: Dict[str, Any])
         
         Returns:
             普通模式: 返回分析结果字符串
@@ -265,8 +281,20 @@ class Scheduler:
         self.dag.refresh_data_dependency(self.reasoner)
         self.dag.print_data_dependency()
         print("✅ DAG 构建与算法选择完成，准备执行计算流程")
-          
-        return await self._run_algorithm_pipeline2()
+        
+        # 执行算法流程
+        analysis_result = await self._run_algorithm_pipeline2()
+        
+        # 如果提供了 callback（Web 调用），返回包含 DAG 信息的字典
+        # 否则返回字符串（保持终端兼容性）
+        if callback and mode == "normal":
+            dag_info = self.dag.get_dag_info()
+            return {
+                "analysis_result": analysis_result,
+                "dag_info": dag_info
+            }
+        
+        return analysis_result
 
     async def expert_modify_dag(self, modification_request: str) -> Dict[str, Any]:
         """

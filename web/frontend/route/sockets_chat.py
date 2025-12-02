@@ -130,7 +130,7 @@ def handle_chat_request(data):
             # 先选择数据集
             engine = chat_service.engine_service.get_engine()
             engine.specific_dataset(dataset)
-            logger.info(f"DAG确认，开始执行专家模式分析，使用数据集：{dataset}")
+            logger.info(f"DAG确认，开始执行专家模式分析")
             result = asyncio.run(chat_service.start_expert_analysis())
             
             if result.get("success"):
@@ -155,7 +155,7 @@ def handle_chat_request(data):
             engine = chat_service.engine_service.get_engine()
             engine.specific_dataset(dataset)
             modification_request = modifications or user_message
-            logger.info(f"收到DAG修改请求：{modification_request[:50]}...，使用数据集：{dataset}")
+            logger.info(f"收到DAG修改请求：{modification_request}")
             
             result = asyncio.run(chat_service.process_dag_modification(modification_request))
             

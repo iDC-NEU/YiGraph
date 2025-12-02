@@ -6,7 +6,7 @@ AAG Engine
 import os
 import time
 import yaml
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any, Union, Callable
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
@@ -62,19 +62,27 @@ class AAGEngine:
         print("Engine initialization completed!")
     
 
-    async def run(self, query: str, mode: str = "normal") -> Union[str, Dict[str, Any]]:
+    async def run(
+        self, 
+        query: str, 
+        mode: str = "normal",
+        callback: Optional[Callable[[Dict[str, Any]], None]] = None
+    ) -> Union[str, Dict[str, Any]]:
         """
         执行查询，支持普通模式和专家模式
         
         Args:
             query: 用户查询
             mode: 执行模式 "normal" | "expert"
+            callback: 可选的回调函数，用于实时发送数据（如DAG信息）
+                     签名: callback(data: Dict[str, Any])
+                     注意：仅在 Web 调用时使用，终端调用不传此参数
         
         Returns:
             普通模式: 返回分析结果字符串
             专家模式: 返回DAG信息字典（包含 dag_info, message 等）
         """
-        return await self.scheduler.execute(query, mode=mode)
+        return await self.scheduler.execute(query, mode=mode, callback=callback)
     
     async def expert_modify_dag(self, modification_request: str) -> Dict[str, Any]:
         """
