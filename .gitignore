@@ -143,3 +143,5 @@ docs/_build
 # VSCode
 .vscode
 
+# database
+*.db 
