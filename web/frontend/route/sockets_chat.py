@@ -210,20 +210,18 @@ def handle_chat_request(data):
     """
 
     if dag_confirm == "yes":
-        time.sleep(1)
-        test_data_key = "CNdag_new_confirmation"
+        test_data_key = "dag_new"
     elif not expert_mode:
-        time.sleep(1)
         test_data_key = "normal"
+    elif dag_confirm == "yes":
+        test_data_key = "dag_confirmation"
     elif is_dag_modification or (dag_confirm == "no" and modifications):
-        time.sleep(1)
-        test_data_key = "CNdag_new"
-    elif "Anna" in user_message.lower() or "javascript" in user_message.lower():
-        time.sleep(1)
-        test_data_key = "CNdag"
-    elif "推荐" in user_message:
-        time.sleep(1)
-        test_data_key = "CNdag"
+        logger.info(f"收到DAG修改请求：{user_message[:50]}...")
+        test_data_key = "dag_modification"
+    elif "dag" in user_message.lower() or "javascript" in user_message.lower():
+        test_data_key = "dag"
+    elif "test" in user_message.lower():
+        test_data_key = "dag"
     else:
         test_data_key = random.choice(list(TEST_DATA.keys()))
 
