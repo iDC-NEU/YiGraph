@@ -1140,11 +1140,11 @@
                                 <!-- Slogan：两行 -->
                                 <div class="block"> <!-- lg 断点以上显示（≥1024px）-->
                                     <div class="flex flex-col justify-center">
-                                        <h1 class="leading-tight text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+                                        <h1 id="slogan-title" class="leading-tight text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
                                             Analytics-Augmented Generation
                                         </h1>
                                         <p class="leading-none text-sm text-blue-600 dark:text-blue-400">
-                                            from <span class="font-semibold">iDC-NEU</span>
+                                            <span id="slogan-sub-text">from</span> <span class="font-semibold">iDC-NEU</span>
                                         </p>
                                     </div>
                                 </div>
@@ -1155,33 +1155,29 @@
             <!-- header-brand -->
             <div class="main-header peer fixed start-0 top-0 z-[1020] flex h-screen w-64 flex-shrink-0 -translate-x-full flex-col border-e border-slate-200 bg-white py-4 dark:border-slate-800 dark:bg-slate-950 max-xl:overflow-auto max-xl:transition-all xl:static xl:h-auto xl:w-auto xl:!translate-x-0 xl:border-e-0 xl:py-0 xl:transition-none rtl:translate-x-full [&.header-visible]:translate-x-0">
             <ul class="menu-head flex flex-col gap-x-4 px-4 xl:flex-row xl:items-center xl:space-x-6">
-    <!-- Chat Button -->
     <li class="menu-item group relative">
         <a href="/" class="menu-link flex items-center px-4 py-3 text-base font-bold text-slate-600 transition-all duration-200 group-hover:text-blue-600 hover:text-blue-600 dark:text-slate-300 hover:dark:text-blue-400 xl:rounded-lg xl:py-2.5 group-hover:xl:bg-slate-50 dark:group-hover:xl:bg-slate-800/50">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
-            <span>Chat</span>
+            <span id="nav-chat">Chat</span>
         </a>
     </li>
-    <!-- Dataset Button -->
     <li class="menu-item group relative">
         <a href="{{ url_for('pages.documents') }}" class="menu-link flex items-center px-4 py-3 text-base font-bold text-slate-600 transition-all duration-200 group-hover:text-blue-600 hover:text-blue-600 dark:text-slate-300 hover:dark:text-blue-400 xl:rounded-lg xl:py-2.5 group-hover:xl:bg-slate-50 dark:group-hover:xl:bg-slate-800/50">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span>Dataset</span>
+            <span id="nav-dataset">Dataset</span>
         </a>
     </li>
-    <!-- Manage Button - Active State -->
     <li class="menu-item group relative">
         <a href="{{ url_for('pages.manage_dataset_page') }}" class="menu-link flex items-center px-4 py-3 text-base font-bold text-blue-600 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400 transition-all duration-200 xl:rounded-lg xl:py-2.5 xl:shadow-sm">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span>File Management</span>
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-200 group-hover:w-full xl:hidden"></span>
+            <span id="nav-file">File Management</span>
         </a>
     </li>
 </ul>
@@ -1190,6 +1186,11 @@
             <div class="header-toggle pointer-events-none fixed inset-0 z-[1019] bg-slate-950 bg-opacity-50 opacity-0 peer-[.header-visible]:pointer-events-auto peer-[.header-visible]:opacity-100 xl:!opacity-0"></div>
             <!-- overlay -->
             <ul class="flex items-center gap-x-3 lg:gap-x-5">
+                <li class="relative inline-flex">
+                            <button id="lang-toggle-btn" class="inline-flex h-8 items-center justify-center overflow-hidden rounded-md px-3 text-xs font-bold text-slate-500 transition-all hover:bg-slate-200 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200" title="Switch Language">
+                                English 
+                            </button>
+                        </li>
                 <li class="relative inline-flex">
                     <button class="theme-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all *:pointer-events-none hover:bg-slate-200 hover:text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hidden h-4 dark:block">
@@ -1282,14 +1283,14 @@
                         <div class="left-panel">
                             <div class="rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 h-full">
                                 <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
-                                    <h3 class="text-lg font-bold text-slate-700 dark:text-white">Data Management</h3>
-                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Select a dataset to edit</p>
+                                    <h3 id="datamanage" class="text-lg font-bold text-slate-700 dark:text-white">Data Management</h3>
+                                    <p id="manage_select" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Select a dataset to edit</p>
                                 </div>
                                 
 
                                      <div class="p-4">
     <ul class="space-y-2" id="knowledgeBaseList">
-        <!-- 知识库列表将通过JavaScript动态生成 -->
+        <!-- 数据集列表将通过JavaScript动态生成 -->
     </ul>
 </div>
 
@@ -1307,14 +1308,14 @@
                                     <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
                                         <div class="flex items-center justify-between">
                                             <div>
-                                                <h3 class="text-lg font-bold text-slate-700 dark:text-white" id="knowledge-base-name">Files in "10 React Best practices"</h3>
-                                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage documents in this Dataset</p>
+                                                <h3 class="text-lg font-bold text-slate-700 dark:text-white" id="knowledge-base-name"></h3>
+                                                <p id="manage_managefiles" class="mt-1 text-sm text-slate-500 dark:text-slate-400"></p>
                                             </div>
                                             <button id="add-files-btn" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                                 </svg>
-                                                Add Files
+                                                <span id="maange_add">Add Files</span>
                                             </button>
                                         </div>
                                     </div>
@@ -1325,10 +1326,10 @@
                                             <table class="w-full table-auto border-collapse text-sm">
                                                 <thead class="bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-200">
     <tr>
-        <th class="py-3 px-4 text-start">Document</th>
-        <th class="py-3 px-4 text-start">Size</th>
-        <th class="py-3 px-4 text-start">Uploaded Time</th>
-        <th class="py-3 px-4 text-start">
+        <th id="manage_Document" class="py-3 px-4 text-start">Document</th>
+        <th id="manage_Size" class="py-3 px-4 text-start">Size</th>
+        <th id="manage_Upload" class="py-3 px-4 text-start">Uploaded Time</th>
+        <th id="manage_Parsing" class="py-3 px-4 text-start">
     <div class="flex items-center gap-2">
         <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Parsing Status</span>
         <button class="parse-control-btn" id="total-parse-control-btn" title="Start/Pause all">
@@ -1357,15 +1358,15 @@
                                     <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
                                         <div class="flex items-center justify-between">
                                             <div>
-                                                <h3 class="text-lg font-bold text-slate-700 dark:text-white">Document Relationship Graph</h3>
-                                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Visual representation of graph</p>
+                                                <h3 id="manage_DRG" class="text-lg font-bold text-slate-700 dark:text-white">Document Relationship Graph</h3>
+                                                <p id="manage_visual" class="mt-1 text-sm text-slate-500 dark:text-slate-400">Visual representation of graph</p>
                                             </div>
                                             <div class="flex gap-2">
                                                 <button id="generate-graph-btn" class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-all hover:bg-blue-800 generate-btn" disabled>
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                                                     </svg>
-                                                    Visualization
+                                                    <span id="manage_Visualization">Visualization</span> 
                                                 </button>
                                                 <button id="zoom-in-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
@@ -1383,14 +1384,14 @@
                                                     </svg>
                                                 </button>
                                                 <button id="fullscreen-btn" class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" title="Full Screen">
-                                                    Full Screen
+                                                    <span id="manage_full">Full Screen</span>
                                                 </button>
                                                 <!-- 修改了Export按钮的图标 -->
                                                 <button class="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-all hover:bg-blue-800">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12M12 16.5V3" />
                                                     </svg>
-                                                    Export
+                                                    <span id="manage_export">Export</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -1410,7 +1411,7 @@
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                                                 </svg>
-                                                <p class="mt-2 text-lg text-gray-500">Click "Visualization" to create knowledge graph</p>
+                                                <p id="manage_click" class="mt-2 text-lg text-gray-500">Click "Visualization" to create knowledge graph</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1428,7 +1429,7 @@
     <!-- 全屏图谱容器 -->
     <div id="fullscreen-graph-container">
         <div class="graph-controls-toolbar">
-            <h3 class="text-lg font-bold text-slate-700 dark:text-white">Document Relationship Graph (Fullscreen)</h3>
+            <h3 id="manage_DRG_fullscreen" class="text-lg font-bold text-slate-700 dark:text-white">Document Relationship Graph (Fullscreen)</h3>
             <div class="zoom-controls">
                 <button id="fullscreen-zoom-in">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
@@ -1449,7 +1450,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    Exit Full Screen
+                    
                 </button>
             </div>
         </div>
@@ -1465,7 +1466,7 @@
 <div id="upload-modal" class="modal">
     <div class="modal-content" style="max-width: 750px; width: 90%; height: 90vh;">
         <div class="modal-header">
-            <h3 class="modal-title">Upload Files to Dataset</h3>
+            <h3 id="manage_uploadfiles" class="modal-title">Upload Files to Dataset</h3>
             <button class="close-modal">&times;</button>
         </div>
 
@@ -1487,9 +1488,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                     </svg>
                 </div>
-                <p class="text-lg font-medium text-slate-700">Drag and drop files here</p>
-                <p class="text-sm text-slate-500 mt-2">or</p>
-                <button class="mt-4 inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">
+                <p id="manage_drag" class="text-lg font-medium text-slate-700">Drag and drop files here</p>
+                <p id="manage_or" class="text-sm text-slate-500 mt-2">or</p>
+                <button id="manage_browse" class="mt-4 inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">
                     Browse Files
                 </button>
                 <input type="file" id="file-input" multiple accept=".txt,.pdf,.doc,.docx,.md,.csv,.json">
@@ -1506,19 +1507,19 @@
                     <!-- 1. Graph基本信息 -->
                     <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
                         <h4 class="text-lg font-semibold text-slate-800 mb-4 pb-3 border-b border-slate-200">
-                            <span style="color: red;">*</span> Graph Information
+                            <span style="color: red;">*</span> <span id="graph_info_title">Graph Information</span>
                         </h4>
                         <div class="space-y-4">
                             <div>
                                 <label class="required-field-label">
-                                    <span style="color: red;">*</span> Graph Name
+                                    <span style="color: red;">*</span> <span id="graph_name_label">Graph Name</span>
                                 </label>
-                                <input type="text" id="graph-name" class="form-input" placeholder="Enter graph name" required>
+                                <input type="text" id="graph-name" class="form-input" placeholder="Enter graph name" data-placeholder-id="graph_name_placeholder" required>
                             </div>
                             <div>
                                 <br>
-                                <label class="field-label">Description</label>
-                                <textarea id="graph-description" rows="2" class="form-textarea" placeholder="Enter description"></textarea>
+                                <label class="field-label"><span id="graph_description_label">Description</span></label>
+                                <textarea id="graph-description" rows="2" class="form-textarea" placeholder="Enter description" data-placeholder-id="graph_description_placeholder"></textarea>
                             </div>
                         </div>
                     </div>
@@ -1526,17 +1527,17 @@
                     <!-- 2. Vertex Schema -->
                     <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
                         <h4 class="text-lg font-semibold text-slate-800 mb-4 pb-3 border-b border-slate-200">
-                            Vertex Schema (Optional)
+                            <span id="vertex_schema_title">Vertex Schema (Optional)</span>
                         </h4>
                         <div class="space-y-4">
                             <div>
-                                <label class="field-label">File name (Optional)</label>
-                                <input type="text" id="vertex-filename" class="form-input" placeholder="Vertex file name">
+                                <label class="field-label"><span id="vertex_filename_label">File name (Optional)</span></label>
+                                <input type="text" id="vertex-filename" class="form-input" placeholder="Vertex file name" data-placeholder-id="vertex_filename_placeholder">
                             </div>
                             <div>
                                 <br>
-                                <label class="field-label">Id Field (Optional)</label>
-                                <input type="text" id="vertex-id-field" class="form-input" placeholder="ID field name">
+                                <label class="field-label"><span id="vertex_id_field_label">Id Field (Optional)</span></label>
+                                <input type="text" id="vertex-id-field" class="form-input" placeholder="ID field name" data-placeholder-id="vertex_id_field_placeholder">
                             </div>
                         </div>
                     </div>
@@ -1544,35 +1545,35 @@
                     <!-- 3. Edge Schema -->
                     <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
                         <h4 class="text-lg font-semibold text-slate-800 mb-4 pb-3 border-b border-slate-200">
-                            <span style="color: red;">*</span> Edge Schema (Required)
+                            <span style="color: red;">*</span> <span id="edge_schema_title">Edge Schema (Required)</span>
                         </h4>
                         <div class="space-y-4">
                             <div>
                                 <label class="required-field-label">
-                                    <span style="color: red;">*</span> File name
+                                    <span style="color: red;">*</span> <span id="edge_filename_label">File name</span>
                                 </label>
-                                <input type="text" id="edge-filename" class="form-input" placeholder="Edge file name" required>
+                                <input type="text" id="edge-filename" class="form-input" placeholder="Edge file name" data-placeholder-id="edge_filename_placeholder" required>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="required-field-label">
                                         <br>
-                                        <span style="color: red;">*</span> Source Field
+                                        <span style="color: red;">*</span> <span id="edge_source_field_label">Source Field</span>
                                     </label>
-                                    <input type="text" id="edge-source-field" class="form-input" placeholder="Source field name" required>
+                                    <input type="text" id="edge-source-field" class="form-input" placeholder="Source field name" data-placeholder-id="edge_source_field_placeholder" required>
                                 </div>
                                 <div>
                                     <label class="required-field-label">
                                         <br>
-                                        <span style="color: red;">*</span> Target Field
+                                        <span style="color: red;">*</span> <span id="edge_target_field_label">Target Field</span>
                                     </label>
-                                    <input type="text" id="edge-target-field" class="form-input" placeholder="Target field name" required>
+                                    <input type="text" id="edge-target-field" class="form-input" placeholder="Target field name" data-placeholder-id="edge_target_field_placeholder" required>
                                 </div>
                             </div>
                             <div>
                                 <br>
-                                <label class="field-label">Weight Field</label>
-                                <input type="text" id="edge-weight-field" class="form-input" placeholder="Weight field name">
+                                <label class="field-label"><span id="edge_weight_field_label">Weight Field</span></label>
+                                <input type="text" id="edge-weight-field" class="form-input" placeholder="Weight field name" data-placeholder-id="edge_weight_field_placeholder">
                             </div>
                         </div>
                     </div>
@@ -1580,39 +1581,39 @@
                     <!-- 4. Graph Properties -->
                     <div class="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
                         <h4 class="text-lg font-semibold text-slate-800 mb-4 pb-3 border-b border-slate-200">
-                            Graph Properties
+                            <span id="graph_properties_title">Graph Properties</span>
                         </h4>
                         <div class="space-y-4">
                             <div>
-                                <label class="field-label">Is Directed</label>
+                                <label class="field-label"><span id="is_directed_label">Is Directed</span></label>
                                 <div class="flex space-x-6">
                                     <div class="flex items-center">
                                         <input type="radio" id="is-directed-true" name="is-directed" value="true" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300">
                                         &nbsp;
-                                        <label for="is-directed-true" class="ml-2 block text-sm text-slate-700">Yes</label>
+                                        <label for="is-directed-true" class="ml-2 block text-sm text-slate-700"><span class="option_yes">Yes</span></label>
                                     </div>
                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                     <div class="flex items-center">
                                         <input type="radio" id="is-directed-false" name="is-directed" value="false" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300">
                                         &nbsp;
-                                        <label for="is-directed-false" class="ml-2 block text-sm text-slate-700">No</label>
+                                        <label for="is-directed-false" class="ml-2 block text-sm text-slate-700"><span class="option_no">No</span></label>
                                     </div>
                                 </div>
                             </div>
                             <div>
                                 <br>
-                                <label class="field-label">Is Multi-Edge</label>
+                                <label class="field-label"><span id="is_multi_edge_label">Is Multi-Edge</span></label>
                                 <div class="flex space-x-6">
                                     <div class="flex items-center">
                                         <input type="radio" id="is-multi-edge-true" name="is-multi-edge" value="true" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300">
                                         &nbsp;
-                                        <label for="is-multi-edge-true" class="ml-2 block text-sm text-slate-700">Yes</label>
+                                        <label for="is-multi-edge-true" class="ml-2 block text-sm text-slate-700"><span class="option_yes">Yes</span></label>
                                     </div>
                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                     <div class="flex items-center">
                                         <input type="radio" id="is-multi-edge-false" name="is-multi-edge" value="false" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300">
                                         &nbsp;
-                                        <label for="is-multi-edge-false" class="ml-2 block text-sm text-slate-700">No</label>
+                                        <label for="is-multi-edge-false" class="ml-2 block text-sm text-slate-700"><span class="option_no">No</span></label>
                                     </div>
                                 </div>
                             </div>
@@ -1626,8 +1627,8 @@
                                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                             </svg>
                             <div>
-                                <p class="text-sm font-medium text-yellow-800">Important Notes</p>
-                                <p class="text-sm text-yellow-700 mt-1">
+                                <p class="text-sm font-medium text-yellow-800" id="important_notes_title">Important Notes</p>
+                                <p class="text-sm text-yellow-700 mt-1" id="important_notes_text">
                                     Fields marked with <span style="color: red;">*</span> are required. 
                                     For edge files, source and target fields must be specified to define relationships between vertices.
                                 </p>
@@ -1642,18 +1643,18 @@
         <div class="modal-footer mt-4 pt-4 border-t border-slate-200">
             <div class="upload-progress mb-4" id="upload-progress" style="display: none;">
                 <div class="flex justify-between items-center mb-1">
-                    <span class="text-sm font-medium text-slate-700">Upload Progress</span>
+                    <span class="text-sm font-medium text-slate-700" id="manage_upload_progress">Upload Progress</span>
                     <span class="text-sm text-slate-500" id="upload-percentage">0%</span>
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
-                <div class="upload-status mt-1 text-sm text-slate-500" id="upload-status">Preparing upload...</div>
+                <div class="upload-status mt-1 text-sm text-slate-500" id="upload-status" data-initial-text="manage_preparing_upload">Preparing upload...</div>
             </div>
             
             <div class="flex justify-end gap-3">
-                <button class="inline-flex items-center justify-center gap-3 rounded-md border border-slate-200 px-5 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" id="cancel-upload">Cancel</button>
-                <button class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800" id="start-upload">Upload Files</button>
+                <button class="inline-flex items-center justify-center gap-3 rounded-md border border-slate-200 px-5 py-2 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-800" id="cancel-upload"><span id="manage_cancel">Cancel</span></button>
+                <button class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800" id="start-upload"><span id="manage_upload_files">Upload Files</span></button>
             </div>
         </div>
     </div>
@@ -1683,12 +1684,229 @@
     <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
     <!-- 在Cytoscape.js库之后添加 -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="/static/assets/js/i18n.js"></script>
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='assets/js/bundle-app.js') }}"></script>
 <script src="{{ url_for('static', filename='assets/js/scripts.js') }}"></script>
     <script>
-        // 当前选中的知识库
-        let currentKnowledgeBase = 'react';
+
+// 初始化全局变量（如果i18n.js还没有加载）
+        if (!window.LANG) {
+            window.LANG = {};
+        }
+        
+        // 辅助函数：获取翻译文本
+        function getTranslation(id, defaultValue) {
+            if (window.HTML_MAP && window.HTML_MAP[id]) {
+                return window.HTML_MAP[id];
+            }
+            return defaultValue || id;
+        }
+
+        // 初始化 html_map 到全局变量（如果还没有设置）
+        if (!window.HTML_MAP) {
+            window.HTML_MAP = {};
+        }
+
+        // 监听语言切换事件，更新动态生成的文本和特殊元素
+        // 注意：按钮事件绑定由i18n.js处理，这里不需要重复绑定
+        document.addEventListener('languageLoaded', () => {
+            // 确保 HTML_MAP 已加载
+            if (!window.HTML_MAP || Object.keys(window.HTML_MAP).length === 0) {
+                console.warn('HTML_MAP not loaded yet, skipping language update');
+                return;
+            }
+            
+            // 重新更新所有通过 ID 映射的静态文本元素（包括动态创建的元素）
+            // 这样可以确保所有元素都能正确更新，即使是在语言切换后动态创建的
+            const htmlMap = window.HTML_MAP;
+            for (const [id, text] of Object.entries(htmlMap)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    // 跳过已经被特殊处理的元素类型（这些已经在 i18n.js 中处理了）
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.id === 'chat-input') {
+                        continue;
+                    }
+                    // 更新普通文本元素
+                    // 但跳过那些明确标记为动态内容的元素，以及已经被特殊处理的元素
+                    if (!el.hasAttribute('data-dynamic') && 
+                        !el.hasAttribute('data-no-i18n') &&
+                        !el.classList.contains('proceed-text') &&
+                        !el.classList.contains('parsing-text') &&
+                        !el.classList.contains('pending-text') &&
+                        el.id !== 'manage_files_in_prefix' &&
+                        el.id !== 'knowledge-base-name' &&
+                        el.id !== 'no-kb-message') {
+                        // 使用 innerText 而不是 textContent，以保留格式
+                        el.innerText = text;
+                    }
+                }
+            }
+            
+            // 更新所有解析状态文本
+            document.querySelectorAll('.proceed-text, .parsing-text, .pending-text').forEach(el => {
+                if (el.id === 'manage_proceed') {
+                    el.textContent = getTranslation('manage_proceed', 'proceed');
+                } else if (el.id === 'manage_parsing') {
+                    el.textContent = getTranslation('manage_parsing', 'parsing');
+                } else if (el.id === 'manage_pending') {
+                    el.textContent = getTranslation('manage_pending', 'pending');
+                }
+            });
+            
+            // 更新 "Files in" 文本
+            const knowledgeBaseName = document.getElementById('knowledge-base-name');
+            if (knowledgeBaseName) {
+                const prefix = knowledgeBaseName.querySelector('#manage_files_in_prefix');
+                if (prefix) {
+                    prefix.textContent = getTranslation('manage_files_in', 'Dataset:');
+                } else {
+                    // 如果不存在前缀，尝试从完整文本中提取数据集名称
+                    const fullText = knowledgeBaseName.textContent;
+                    const match = fullText.match(/"([^"]+)"/);
+                    if (match) {
+                        const kbName = match[1];
+                        const filesInText = getTranslation('manage_files_in', 'Files in');
+                        knowledgeBaseName.innerHTML = `<span id="manage_files_in_prefix">${filesInText}</span> "${kbName}"`;
+                    }
+                }
+            }
+            
+            // 更新左侧 "xxx files" 文本
+            document.querySelectorAll('.manage_files_suffix').forEach(el => {
+                el.textContent = getTranslation('manage_files', 'files');
+            });
+            
+            // 更新"暂无数据集，请先创建"文本
+            const noKbMessage = document.getElementById('no-kb-message');
+            if (noKbMessage) {
+                noKbMessage.textContent = getTranslation('manage_no_kb', 'No knowledge base, please create one first');
+            }
+            
+            // 更新数据集名称显示（根据是否有选中的数据集）
+            if (typeof updateKnowledgeBaseNameDisplay === 'function') {
+                const activeKb = document.querySelector('.knowledge-base-item.active');
+                if (activeKb) {
+                    const kbName = activeKb.querySelector('.text-sm.font-bold')?.textContent;
+                    updateKnowledgeBaseNameDisplay(kbName);
+                } else {
+                    updateKnowledgeBaseNameDisplay(null);
+                }
+            }
+            
+            // 更新全屏标题
+            const fullscreenTitle = document.getElementById('manage_DRG_fullscreen');
+            if (fullscreenTitle) {
+                fullscreenTitle.textContent = getTranslation('manage_DRG_fullscreen', 'Document Relationship Graph (Fullscreen)');
+            }
+            
+            // 更新上传进度相关文本
+            const uploadProgressText = document.getElementById('manage_upload_progress');
+            if (uploadProgressText) {
+                uploadProgressText.textContent = getTranslation('manage_upload_progress', 'Upload Progress');
+            }
+            
+            // 更新上传状态文本（如果显示的是初始文本）
+            const uploadStatus = document.getElementById('upload-status');
+            if (uploadStatus) {
+                const currentText = uploadStatus.textContent;
+                // 如果显示的是初始文本，更新它
+                if (currentText === 'Preparing upload...' || currentText === '准备上传...') {
+                    uploadStatus.textContent = getTranslation('manage_preparing_upload', 'Preparing upload...');
+                }
+            }
+            
+            // 更新图表单中所有带有 data-placeholder-id 的输入框的 placeholder
+            document.querySelectorAll('[data-placeholder-id]').forEach(input => {
+                const placeholderId = input.getAttribute('data-placeholder-id');
+                if (placeholderId && window.HTML_MAP && window.HTML_MAP[placeholderId]) {
+                    input.placeholder = window.HTML_MAP[placeholderId];
+                }
+            });
+            
+            // 更新所有 Yes/No 选项
+            document.querySelectorAll('.option_yes').forEach(el => {
+                el.textContent = getTranslation('option_yes', 'Yes');
+            });
+            document.querySelectorAll('.option_no').forEach(el => {
+                el.textContent = getTranslation('option_no', 'No');
+            });
+            
+            // 更新图数据集提示文本
+            const datasetTypeText = document.getElementById('dataset-type-text');
+            if (datasetTypeText) {
+                datasetTypeText.textContent = getTranslation('graph_dataset_info', 'Graph Dataset: Please provide the required information for graph configuration.');
+            }
+            
+            // 更新图谱容器中的"点击以创建知识图谱"文本
+            const manageClickGraph = document.getElementById('manage_click_graph');
+            if (manageClickGraph) {
+                manageClickGraph.textContent = getTranslation('manage_click', 'Click "Visualization" to create knowledge graph');
+            }
+            
+            // 更新 "No files selected" 文本
+            // 使用延迟执行，确保所有元素都已初始化
+            setTimeout(() => {
+                // 方法1: 如果 manage_noselected 元素存在，直接更新
+                const noSelectedElement = document.getElementById('manage_noselected');
+                if (noSelectedElement) {
+                    // 优先使用window.HTML_MAP，确保使用正确的翻译
+                    if (window.HTML_MAP && window.HTML_MAP['manage_noselected']) {
+                        noSelectedElement.textContent = window.HTML_MAP['manage_noselected'];
+                    } else {
+                        noSelectedElement.textContent = getTranslation('manage_noselected', 'No files selected');
+                    }
+                }
+                
+                // 方法2: 如果模态框已打开且没有选中文件，重新渲染整个显示
+                // 检查模态框是否打开（使用多种方式检查）
+                const modal = document.getElementById('upload-modal');
+                const isModalOpen = modal && (
+                    modal.style.display === 'flex' || 
+                    modal.style.display === '' ||
+                    window.getComputedStyle(modal).display === 'flex' ||
+                    !modal.classList.contains('hidden')
+                );
+                
+                // 如果模态框已打开且没有选中文件，重新渲染整个显示
+                if (isModalOpen && typeof selectedFilesContainer !== 'undefined' && selectedFilesContainer && 
+                    typeof selectedFiles !== 'undefined' && selectedFiles.length === 0 &&
+                    typeof updateSelectedFilesDisplay === 'function') {
+                    // 重新渲染整个显示，确保使用新的语言
+                    updateSelectedFilesDisplay();
+                }
+            }, 50);
+            
+            // 更新"No files uploaded yet"和"Click Add Files"文本
+            const noFilesUploaded = document.getElementById('manage_no_files_uploaded');
+            if (noFilesUploaded) {
+                noFilesUploaded.textContent = getTranslation('manage_no_files_uploaded', 'No files uploaded yet');
+            }
+            const clickAddFiles = document.getElementById('manage_click_add_files');
+            if (clickAddFiles) {
+                clickAddFiles.textContent = getTranslation('manage_click_add_files', 'Click "Add Files" to upload documents and start building your Dataset.');
+            }
+            
+            // 更新"请选择一个数据集以查看文件"文本
+            const selectDatasetTitle = document.getElementById('manage_select_dataset_title');
+            if (selectDatasetTitle) {
+                selectDatasetTitle.textContent = getTranslation('manage_select_dataset', 'Please select a dataset to view files');
+            }
+            const selectDatasetDesc = document.getElementById('manage_select_dataset_desc');
+            if (selectDatasetDesc) {
+                selectDatasetDesc.textContent = getTranslation('manage_select_prompt', 'Select a dataset from the left panel to get started');
+            }
+            
+            // 重新加载文件列表，以更新文件类型和日期格式
+            if (typeof loadFiles === 'function') {
+                setTimeout(() => {
+                    loadFiles();
+                }, 100);
+            }
+        });
+
+        // 当前选中的数据集
+        let currentKnowledgeBase = null;
         let selectedFiles = [];
         let selectedFileRow = null; // 用于跟踪选中的文件行
         
@@ -1704,9 +1922,9 @@
             intervalId: null
         };
 
-        // 从后端获取知识库列表
-// 从后端获取知识库列表
-// 从后端获取知识库列表
+        // 从后端获取数据集列表
+// 从后端获取数据集列表
+// 从后端获取数据集列表
 async function loadKnowledgeBases() {
     try {
         const response = await fetch('/api/knowledge_bases1');
@@ -1723,7 +1941,7 @@ async function loadKnowledgeBases() {
         return [
             {
                 "id": 1,
-                "名称": "人工智能知识库",
+                "名称": "人工智能数据集",
                 "文件类型": "text",
                 "文档个数": 128,
                 "创建时间": "2024-09-12 10:30:00",
@@ -1745,11 +1963,7 @@ async function loadKnowledgeBases() {
         ];
     }
 }
-// 渲染知识库列表
-// 渲染知识库列表
-// 渲染知识库列表
-// 渲染知识库列表
-// 渲染知识库列表
+// 渲染数据集列表
 async function renderKnowledgeBaseList() {
     const kbList = await loadKnowledgeBases();
     const kbListContainer = document.getElementById('knowledgeBaseList');
@@ -1758,11 +1972,15 @@ async function renderKnowledgeBaseList() {
     kbListContainer.innerHTML = '';
 
     if (kbList.length === 0) {
+        const noKbText = getTranslation('manage_no_kb', 'No knowledge base, please create one first');
         kbListContainer.innerHTML = `
-            <li class="p-3 text-center text-slate-500 text-sm">
-                暂无知识库，请先创建
+            <li class="p-3 text-center text-slate-500 text-sm" id="no-kb-message">
+                ${noKbText}
             </li>
         `;
+        // 如果没有数据集，重置当前选中的数据集并更新显示
+        currentKnowledgeBase = null;
+        updateKnowledgeBaseNameDisplay(null);
         return;
     }
 
@@ -1785,7 +2003,7 @@ async function renderKnowledgeBaseList() {
                 </span>
                 <div class="ms-3">
                     <div class="text-sm font-bold text-slate-600 dark:text-slate-200">${kb.名称}</div>
-                    <div class="block text-xs text-slate-500 dark:text-slate-400">${fileCount} files</div>
+                    <div class="block text-xs text-slate-500 dark:text-slate-400"><span data-kb-file-count="${kb.id}">${fileCount}</span> <span id="manage_files_suffix_${kb.id}" class="manage_files_suffix">${getTranslation('manage_files', 'files')}</span></div>
                 </div>
             </div>
         `;
@@ -1800,10 +2018,12 @@ async function renderKnowledgeBaseList() {
             });
             item.classList.add('active');
             
-            // 更新当前选中的知识库
+            // 更新当前选中的数据集
             currentKnowledgeBase = item.getAttribute('data-kb');
             const kbName = item.querySelector('.text-sm.font-bold').textContent;
-            document.getElementById('knowledge-base-name').textContent = `Files in "${kbName}"`;
+            
+            // 更新数据集名称显示
+            updateKnowledgeBaseNameDisplay(kbName);
             
             // 重新加载文件列表
             loadFiles();
@@ -1812,7 +2032,7 @@ async function renderKnowledgeBaseList() {
         });
     });
 
-    // 检查URL参数，如果有kb_id则选中对应的知识库
+    // 检查URL参数，如果有kb_id则选中对应的数据集
     const urlParams = new URLSearchParams(window.location.search);
     const kbId = urlParams.get('kb_id');
     if (kbId) {
@@ -1826,6 +2046,29 @@ async function renderKnowledgeBaseList() {
         if (firstKb) {
             firstKb.click();
         }
+    } else {
+        // 如果没有数据集，显示提示信息
+        updateKnowledgeBaseNameDisplay(null);
+    }
+}
+
+// 更新数据集名称显示的函数
+function updateKnowledgeBaseNameDisplay(kbName) {
+    const knowledgeBaseNameEl = document.getElementById('knowledge-base-name');
+    const manageFilesEl = document.getElementById('manage_managefiles');
+    
+    if (!knowledgeBaseNameEl || !manageFilesEl) return;
+    
+    if (kbName && currentKnowledgeBase) {
+        // 有选中的数据集，显示"数据集：[数据集名称]"
+        const filesInText = getTranslation('manage_files_in', 'Dataset:');
+        knowledgeBaseNameEl.innerHTML = `<span id="manage_files_in_prefix">${filesInText}</span>${kbName}`;
+        manageFilesEl.textContent = getTranslation('manage_managefiles', 'Manage files in this Dataset');
+    } else {
+        // 没有选中的数据集，显示提示信息
+        const selectPromptText = getTranslation('manage_select_dataset', 'Please select a dataset to view files');
+        knowledgeBaseNameEl.textContent = selectPromptText;
+        manageFilesEl.textContent = getTranslation('manage_select_prompt', 'Select a dataset from the left panel to get started');
     }
 }
 // 解析状态跟踪对象
@@ -1835,8 +2078,8 @@ async function renderKnowledgeBaseList() {
         let graphGenerated = false;
         let graphGenerationInterval = null;
 
-        // 从后端获取知识库列表
-        // 从后端获取知识库列表
+        // 从后端获取数据集列表
+        // 从后端获取数据集列表
 async function loadKnowledgeBases() {
     try {
         const response = await fetch('/api/knowledge_bases1');
@@ -1853,7 +2096,7 @@ async function loadKnowledgeBases() {
         return [
             {
                 "id": 1,
-                "名称": "人工智能知识库",
+                "名称": "人工智能数据集",
                 "文件类型": "text",
                 "文档个数": 128,
                 "创建时间": "2024-09-12 10:30:00",
@@ -1876,20 +2119,20 @@ async function loadKnowledgeBases() {
     }
 }
 
-        // 获取知识库的实际文件数量
+        // 获取数据集的实际文件数量
         function getKnowledgeBaseFileCount(kbId) {
             const files = JSON.parse(localStorage.getItem(`kb-files-${kbId}`) || '[]');
             return files.length;
         }
 
-        // 渲染知识库列表
-        // 渲染知识库列表
+        // 渲染数据集列表
+        // 渲染数据集列表
 
-        // 更新知识库文件数量显示
-        // 更新知识库文件数量显示
+        // 更新数据集文件数量显示
+        // 更新数据集文件数量显示
 async function updateKnowledgeBaseFileCount(kbId) {
     try {
-        // 重新加载知识库列表以获取最新文件数量
+        // 重新加载数据集列表以获取最新文件数量
         await renderKnowledgeBaseList();
     } catch (error) {
         console.error('Failed to update knowledge base file count:', error);
@@ -1947,7 +2190,7 @@ function initWebSocket() {
             loadFiles();
             // 重置图谱状态
             resetGraph();
-            // 更新知识库文件数量显示
+            // 更新数据集文件数量显示
             updateKnowledgeBaseFileCount(currentKnowledgeBase);
         }, 1500);
     });
@@ -2010,32 +2253,6 @@ function handleParseComplete(data) {
     }
 }
 
- document.querySelectorAll('.knowledge-base-item').forEach(item => {
-        item.addEventListener('click', () => {
-            document.querySelectorAll('.knowledge-base-item').forEach(kb => {
-                kb.classList.remove('active');
-            });
-            item.classList.add('active');
-            
-            // 更新当前选中的知识库
-            currentKnowledgeBase = item.getAttribute('data-kb');
-            const kbName = item.querySelector('.text-sm.font-bold').textContent;
-            document.getElementById('knowledge-base-name').textContent = `Files in "${kbName}"`;
-            
-            // 停止之前的检查
-            stopParsingStatusCheck();
-            
-            // 重新加载文件列表
-            loadFiles();
-            
-            // 启动新的检查
-            startParsingStatusCheck();
-            
-            // 重置图谱状态
-            resetGraph();
-        });
-    });
-
 function handleParseError(data) {
     const { file_name, error } = data;
     
@@ -2066,7 +2283,7 @@ function handleParseError(data) {
             progressFill = document.getElementById('progress-fill');
             uploadStatus = document.getElementById('upload-status');
 
-            // 知识库选择
+            // 数据集选择
             document.querySelectorAll('.knowledge-base-item').forEach(item => {
                 item.addEventListener('click', () => {
                     document.querySelectorAll('.knowledge-base-item').forEach(kb => {
@@ -2074,10 +2291,11 @@ function handleParseError(data) {
                     });
                     item.classList.add('active');
                     
-                    // 更新当前选中的知识库
+                    // 更新当前选中的数据集
                     currentKnowledgeBase = item.getAttribute('data-kb');
                     const kbName = item.querySelector('.text-sm.font-bold').textContent;
-                    document.getElementById('knowledge-base-name').textContent = `Files in "${kbName}"`;
+                    const filesInText = getTranslation('manage_files_in', 'Files in');
+                    document.getElementById('knowledge-base-name').innerHTML = `<span id="manage_files_in_prefix">${filesInText}</span> "${kbName}"`;
                     
                     // 重新加载文件列表
                     loadFiles();
@@ -2090,9 +2308,18 @@ function handleParseError(data) {
             // 在现有的initApp函数中，修改Add Files按钮的事件监听
 if (addFilesBtn) {
     addFilesBtn.addEventListener('click', async () => {
+        // 检查是否选中了数据集
+        if (!currentKnowledgeBase) {
+            const selectPromptText = getTranslation('manage_select_dataset', 'Please select a dataset to view files');
+            alert(selectPromptText);
+            return;
+        }
+        
         // 先获取当前数据集类型
         try {
+            console.log('Getting dataset type for kb_id:', currentKnowledgeBase);
             const datasetType = await getDatasetType(currentKnowledgeBase);
+            console.log('Received dataset type:', datasetType);
             showUploadModal(datasetType);
         } catch (error) {
             console.error('Failed to get dataset type:', error);
@@ -2105,11 +2332,24 @@ if (addFilesBtn) {
 // 添加获取数据集类型的函数
 async function getDatasetType(kbId) {
     try {
-        const response = await fetch(`/api/dataset_type?kb_id=${kbId}`);
+        console.log('=== 调试信息：获取数据集类型 ===');
+        console.log('Requesting dataset type for kb_id:', kbId);
+        const url = `/api/dataset_type?kb_id=${kbId}`;
+        console.log('Request URL:', url);
+        
+        const response = await fetch(url);
+        console.log('Response status:', response.status);
+        
         const result = await response.json();
+        console.log('API response:', JSON.stringify(result, null, 2));
+        
         if (result.success) {
-            return result.dataset_type; // 返回 "text" 或 "graph"
+            const datasetType = result.dataset_type; // 返回 "text" 或 "graph"
+            console.log('Dataset type received:', datasetType);
+            console.log('=== 调试信息结束 ===');
+            return datasetType;
         } else {
+            console.error('API returned error:', result.error);
             throw new Error(result.error);
         }
     } catch (error) {
@@ -2123,24 +2363,70 @@ function showUploadModal(datasetType) {
     if (uploadModal) {
         uploadModal.style.display = 'flex';
         selectedFiles = [];
-        updateSelectedFilesDisplay();
+        // 延迟执行，确保语言已加载
+        // 如果window.HTML_MAP还没有加载，等待更长时间
+        const checkAndUpdate = () => {
+            // 检查 window.HTML_MAP 是否存在且有内容
+            if (window.HTML_MAP && Object.keys(window.HTML_MAP).length > 0) {
+                updateSelectedFilesDisplay();
+            } else {
+                // 如果还没有加载，继续等待，最多等待2秒
+                setTimeout(checkAndUpdate, 50);
+            }
+        };
+        setTimeout(checkAndUpdate, 50);
         
         // 重置表单
         resetGraphForm();
         
-        // 显示数据集类型信息
+        // 显示数据集类型信息（立即执行，不使用setTimeout）
         const datasetTypeInfo = document.getElementById('dataset-type-info');
         const datasetTypeText = document.getElementById('dataset-type-text');
         const graphExtraInputs = document.getElementById('graph-extra-inputs');
         
-        if (datasetType === 'graph') {
-            datasetTypeInfo.classList.remove('hidden');
-            datasetTypeText.textContent = 'Graph Dataset: Please provide the required information for graph configuration.';
-            graphExtraInputs.classList.remove('hidden');
+        // 添加调试信息 - 这些会在浏览器控制台显示
+        // 如何打开控制台：按 F12 键，或者右键点击页面 -> 检查 -> Console（控制台）标签
+        console.log('=== 调试信息：显示上传模态框 ===');
+        console.log('Dataset type:', datasetType);
+        console.log('datasetTypeInfo element:', datasetTypeInfo);
+        console.log('graphExtraInputs element:', graphExtraInputs);
+        console.log('currentKnowledgeBase:', currentKnowledgeBase);
+        
+        // 使用 toLowerCase() 确保大小写不敏感的比较
+        const isGraphType = datasetType && datasetType.toLowerCase() === 'graph';
+        console.log('Is graph type?', isGraphType);
+        
+        if (isGraphType) {
+            if (datasetTypeInfo) {
+                datasetTypeInfo.classList.remove('hidden');
+                console.log('✓ datasetTypeInfo hidden class removed');
+            } else {
+                console.error('✗ datasetTypeInfo element not found!');
+            }
+            if (datasetTypeText) {
+                datasetTypeText.textContent = getTranslation('graph_dataset_info', 'Graph Dataset: Please provide the required information for graph configuration.');
+            }
+            if (graphExtraInputs) {
+                graphExtraInputs.classList.remove('hidden');
+                console.log('✓ Graph extra inputs shown');
+                console.log('  - classList:', graphExtraInputs.classList.toString());
+                console.log('  - computed style display:', window.getComputedStyle(graphExtraInputs).display);
+            } else {
+                console.error('✗ graphExtraInputs element not found!');
+                console.error('  请检查HTML中是否有 id="graph-extra-inputs" 的元素');
+            }
         } else {
-            datasetTypeInfo.classList.add('hidden');
-            graphExtraInputs.classList.add('hidden');
+            console.log('Dataset type is not "graph", hiding form');
+            if (datasetTypeInfo) {
+                datasetTypeInfo.classList.add('hidden');
+            }
+            if (graphExtraInputs) {
+                graphExtraInputs.classList.add('hidden');
+            }
         }
+        console.log('=== 调试信息结束 ===');
+    } else {
+        console.error('uploadModal element not found!');
     }
 }
 
@@ -2241,7 +2527,8 @@ function updateUploadProgress(current, total) {
     }
     
     if (uploadStatus) {
-        uploadStatus.textContent = `Uploading ${current} of ${total} files`;
+        const uploadingText = getTranslation('manage_uploading_files', `Uploading ${current} of ${total} files`);
+        uploadStatus.textContent = uploadingText.replace('{current}', current).replace('{total}', total);
     }
 }
             // 关闭模态框
@@ -2449,7 +2736,7 @@ function updateUploadProgressForFile(fileName, progress) {
 
 // 处理单个文件上传完成
 function handleFileUploadComplete(data) {
-    // 保存文件信息到本地存储
+    // 保存文件信息到本地存储（保持现有逻辑）
     const fileInfo = {
         name: data.file_name,
         size: data.file_size,
@@ -2457,7 +2744,7 @@ function handleFileUploadComplete(data) {
         uploadDate: data.upload_time,
         status: 'completed',
         path: data.file_path,
-        parsed: false  // 新上传的文件默认为未解析
+        parsed: false
     };
     
     // 获取现有文件列表
@@ -2465,22 +2752,7 @@ function handleFileUploadComplete(data) {
     existingFiles.push(fileInfo);
     localStorage.setItem(`kb-files-${currentKnowledgeBase}`, JSON.stringify(existingFiles));
     
-    // 立即初始化解析状态
-    if (!parsingStatus[data.file_name]) {
-        parsingStatus[data.file_name] = {
-            progress: 0,
-            isParsing: false,
-            intervalId: null,
-            isCompleted: false
-        };
-    }
-    
     console.log(`文件 ${data.file_name} 上传完成并保存`);
-    
-    // 重新加载文件列表以更新解析状态
-    setTimeout(() => {
-        loadFiles();
-    }, 1000);
 }
 ////////////////////////
             // 初始化全屏功能
@@ -2506,6 +2778,10 @@ function handleFileUploadComplete(data) {
         // 当DOM加载完成后初始化应用
         document.addEventListener('DOMContentLoaded', function() {
             initApp();
+            // 初始化时如果没有选中数据集，显示提示信息
+            if (!currentKnowledgeBase) {
+                updateKnowledgeBaseNameDisplay(null);
+            }
             loadFiles();
             // 等待DOM更新后再添加缩放控制
             setTimeout(() => {
@@ -2527,11 +2803,27 @@ function handleFileUploadComplete(data) {
 
         // 更新选中的文件显示
         function updateSelectedFilesDisplay() {
+            if (!selectedFilesContainer) {
+                selectedFilesContainer = document.getElementById('selected-files');
+            }
+            if (!selectedFilesContainer) return;
+            
             selectedFilesContainer.innerHTML = '';
             
             if (selectedFiles.length === 0) {
-                selectedFilesContainer.innerHTML = '<p class="text-slate-500 text-sm text-center py-4">No files selected</p>';
-                startUploadBtn.disabled = true;
+                // 确保语言已加载，优先使用window.HTML_MAP直接获取
+                let noSelectedText = 'No files selected';
+                if (window.HTML_MAP && window.HTML_MAP['manage_noselected']) {
+                    noSelectedText = window.HTML_MAP['manage_noselected'];
+                } else {
+                    // 如果window.HTML_MAP还没有，尝试使用getTranslation
+                    noSelectedText = getTranslation('manage_noselected', 'No files selected');
+                    // 如果getTranslation返回的还是默认值，说明语言还没加载，使用默认值
+                }
+                selectedFilesContainer.innerHTML = `<p id="manage_noselected" class="text-slate-500 text-sm text-center py-4">${noSelectedText}</p>`;
+                if (startUploadBtn) {
+                    startUploadBtn.disabled = true;
+                }
                 return;
             }
             
@@ -2568,7 +2860,7 @@ function handleFileUploadComplete(data) {
                 // 在实际应用中，这里应该发送到服务器
                 // 这里我们模拟保存到本地存储
                 
-                // 创建知识库文件夹路径
+                // 创建数据集文件夹路径
                 const kbFolder = `dataset/${currentKnowledgeBase}`;
                 
                 // 模拟保存文件
@@ -2596,57 +2888,30 @@ function handleFileUploadComplete(data) {
             });
         }
 
-
-let parsingCheckInterval = null;
-
-function startParsingStatusCheck() {
-    // 清除之前的检查
-    if (parsingCheckInterval) {
-        clearInterval(parsingCheckInterval);
-    }
-    
-    // 每10秒检查一次解析状态
-    parsingCheckInterval = setInterval(async () => {
-        if (currentKnowledgeBase) {
-            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || []);
-            if (existingFiles.length > 0) {
-                const fileNames = existingFiles.map(file => file.name);
-                const parsingStatusResult = await checkParsingStatus(currentKnowledgeBase, fileNames);
-                
-                // 强制更新Visualization按钮状态
-                console.log('定期检查解析状态 - 强制更新按钮:', parsingStatusResult.all_parsed);
-                updateVisualizationButton(parsingStatusResult.all_parsed);
-                
-                // 更新本地解析状态
-                let needsUpdate = false;
-                for (const [fileName, isParsed] of Object.entries(parsingStatusResult.file_status)) {
-                    if (parsingStatus[fileName]) {
-                        parsingStatus[fileName].isCompleted = isParsed;
-                        parsingStatus[fileName].progress = isParsed ? 100 : 0;
-                        needsUpdate = true;
-                    }
-                }
-                
-                // 如果解析状态有变化，强制检查所有文件
-                if (needsUpdate) {
-                    checkAllFilesParsed();
-                    updateTotalParseProgress();
-                }
-            }
-        }
-    }, 10000); // 每10秒检查一次
-}
-
-function stopParsingStatusCheck() {
-    if (parsingCheckInterval) {
-        clearInterval(parsingCheckInterval);
-        parsingCheckInterval = null;
-    }
-}
         // 加载文件列表
         // 加载文件列表
 async function loadFiles() {
     const fileListBody = document.getElementById('file-list-body');
+    
+    // 如果没有选中的数据集，显示提示信息
+    if (!currentKnowledgeBase) {
+        const selectPromptText = getTranslation('manage_select_dataset', 'Please select a dataset to view files');
+        const selectPromptDesc = getTranslation('manage_select_prompt', 'Select a dataset from the left panel to get started');
+        fileListBody.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="empty-state-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                        <h3 class="empty-state-title" id="manage_select_dataset_title">${selectPromptText}</h3>
+                        <p class="empty-state-description" id="manage_select_dataset_desc">${selectPromptDesc}</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
     
     try {
         // 从后端API获取文件列表
@@ -2656,29 +2921,24 @@ async function loadFiles() {
         if (result.success) {
             const existingFiles = result.data;
             
-            // 获取文件解析状态
-            const fileNames = existingFiles.map(file => file.name);
-            const parsingStatusResult = await checkParsingStatus(currentKnowledgeBase, fileNames);
-            
-            // 如果有文件，显示它们
+            // 如果有保存的文件，显示它们
             if (existingFiles.length > 0) {
                 fileListBody.innerHTML = existingFiles.map(file => {
-                    // 从后端获取真实的解析状态
-                    const isFileParsed = parsingStatusResult.file_status[file.name] || false;
-                    
+                    // 初始化解析状态（优先使用后端返回的解析状态，而不是缓存）
                     if (!parsingStatus[file.name]) {
-    parsingStatus[file.name] = {
-        progress: isFileParsed ? 100 : 0,
-        isParsing: false,
-        intervalId: null,
-        isCompleted: isFileParsed
-    };
-} else {
-    // 强制同步后端状态到前端
-    parsingStatus[file.name].isCompleted = isFileParsed;
-    parsingStatus[file.name].progress = isFileParsed ? 100 : 0;
-    parsingStatus[file.name].isParsing = false; // 重置解析状态
-}
+                        parsingStatus[file.name] = {
+                            progress: 0,
+                            isParsing: false,
+                            intervalId: null,
+                            isCompleted: file.parsed || false
+                        };
+                    } else {
+                        // 如果已有状态，但后端返回的解析状态不同，更新它（确保使用最新状态）
+                        if (file.parsed !== undefined && file.parsed !== parsingStatus[file.name].isCompleted) {
+                            parsingStatus[file.name].isCompleted = file.parsed;
+                            parsingStatus[file.name].progress = file.parsed ? 100 : parsingStatus[file.name].progress;
+                        }
+                    }
                     
                     // 确定文件行的状态类
                     let statusClass = 'uploaded'; // 默认灰色 - 刚上传
@@ -2706,19 +2966,20 @@ async function loadFiles() {
                         <td class="py-3 px-4">
                             <div class="parse-progress-container" data-filename="${file.name}">
                                 ${getStatusText(parsingStatus[file.name])}
-                                ${!parsingStatus[file.name].isCompleted ? 
-    `<button class="parse-control-btn" data-filename="${file.name}">
-        ${parsingStatus[file.name].isParsing ?
-            `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
-            </svg>` :
-            `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
-            </svg>`
-        }
-    </button>` : 
-    ''
-}
+                                <button class="parse-control-btn" data-filename="${file.name}">
+                                    ${parsingStatus[file.name].isCompleted ? 
+                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                        </svg>` :
+                                        parsingStatus[file.name].isParsing ?
+                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
+                                        </svg>` :
+                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+                                        </svg>`
+                                    }
+                                </button>
                                 <div class="parse-progress-bar">
                                     <div class="parse-progress-fill" style="width: ${parsingStatus[file.name].progress}%;"></div>
                                 </div>
@@ -2743,11 +3004,6 @@ async function loadFiles() {
                     </tr>
                 `;
                 }).join('');
-                
-                // 基于后端解析状态更新Visualization按钮
-               console.log('解析状态结果:', parsingStatusResult);
-                updateVisualizationButton(parsingStatusResult.all_parsed);
-                
             } else {
                 // 如果没有文件，显示优化的空状态
                 fileListBody.innerHTML = `
@@ -2757,15 +3013,12 @@ async function loadFiles() {
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="empty-state-icon">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                 </svg>
-                                <h3 class="empty-state-title">No files uploaded yet</h3>
-                                <p class="empty-state-description">Click "Add Files" to upload documents and start building your Dataset.</p>
+                                <h3 class="empty-state-title" id="manage_no_files_uploaded">${getTranslation('manage_no_files_uploaded', 'No files uploaded yet')}</h3>
+                                <p class="empty-state-description" id="manage_click_add_files">${getTranslation('manage_click_add_files', 'Click "Add Files" to upload documents and start building your Dataset.')}</p>
                             </div>
                         </td>
                     </tr>
                 `;
-                
-                // 没有文件时禁用Visualization按钮
-                updateVisualizationButton(false);
             }
         } else {
             throw new Error(result.error);
@@ -2781,10 +3034,8 @@ async function loadFiles() {
                 </td>
             </tr>
         `;
-        
-        // 加载失败时禁用Visualization按钮
-        updateVisualizationButton(false);
     }
+    
     // 添加文件行悬停和点击事件
     document.querySelectorAll('.file-item').forEach(row => {
         row.addEventListener('mouseenter', () => {
@@ -2868,103 +3119,6 @@ document.querySelectorAll('.delete-file-btn').forEach(button => {
     
     // 更新总解析进度
     updateTotalParseProgress();
-
-    // 在文件加载完成后，强制检查所有文件状态
-    setTimeout(() => {
-        checkAllFilesParsed();
-    }, 500);
-}
-
-// 修改 updateVisualizationButton 函数
-// 替换现有的 updateVisualizationButton 函数
-function updateVisualizationButton(isEnabled) {
-    const generateGraphBtn = document.getElementById('generate-graph-btn');
-    if (!generateGraphBtn) return;
-    
-    // 直接设置disabled属性
-    generateGraphBtn.disabled = !isEnabled;
-    
-    console.log('Visualization按钮状态更新:', {
-        isEnabled: isEnabled,
-        disabled: generateGraphBtn.disabled,
-        timestamp: new Date().toISOString()
-    });
-    
-    // 更新样式
-    if (isEnabled) {
-        generateGraphBtn.classList.remove('bg-blue-400', 'cursor-not-allowed');
-        generateGraphBtn.classList.add('bg-blue-600', 'hover:bg-blue-800', 'cursor-pointer');
-        generateGraphBtn.title = '点击生成知识图谱';
-        generateGraphBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-            Visualization
-        `;
-    } else {
-        generateGraphBtn.classList.remove('bg-blue-600', 'hover:bg-blue-800', 'cursor-pointer');
-        generateGraphBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
-        generateGraphBtn.title = '请先完成所有文件的解析';
-        generateGraphBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-            Visualization (等待解析完成)
-        `;
-    }
-}
-
-/////////调试用函数
-
-/////////调试用函数
-// 修改 checkParsingStatus 函数，确保正确获取解析状态
-// 修改 checkParsingStatus 函数，确保正确获取解析状态
-async function checkParsingStatus(kb_id, files) {
-    try {
-        const response = await fetch('/api/check_parsing_status', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                kb_id: kb_id,
-                files: files
-            })
-        });
-        
-        const result = await response.json();
-        if (result.success) {
-            console.log('解析状态检查结果:', {
-                all_parsed: result.all_parsed,
-                file_status: result.file_status,
-                dataset_type: result.dataset_type,
-                files_count: files.length,
-                parsed_count: Object.values(result.file_status).filter(status => status).length
-            });
-            
-            // 强制更新Visualization按钮状态
-            updateVisualizationButton(result.all_parsed);
-            
-            return result;
-        } else {
-            throw new Error(result.error);
-        }
-    } catch (error) {
-        console.error('检查解析状态失败:', error);
-        // 如果检查失败，默认所有文件都未解析
-        const fileStatus = {};
-        files.forEach(file => {
-            fileStatus[file] = false;
-        });
-        
-        // 强制更新Visualization按钮状态为禁用
-        updateVisualizationButton(false);
-        
-        return {
-            all_parsed: false,
-            file_status: fileStatus
-        };
-    }
 }
 
 function sendParseControlMessage(filename, action) {
@@ -3014,47 +3168,77 @@ function sendParseControlMessage(filename, action) {
         // 获取状态文本
         function getStatusText(status) {
             if (status.isCompleted) {
-                return `<span class="proceed-text">proceed</span>`;
-            } else if (status.isParsing) {
-                return `<span class="parsing-text">parsing</span>`;
+                const text = getTranslation('manage_proceed', 'proceed');
+                return `<span id="manage_proceed" class="proceed-text">${text}</span>`;
+            } else if (status.isParsing) { 
+                const text = getTranslation('manage_parsing', 'parsing');
+                return `<span id="manage_parsing" class="parsing-text">${text}</span>`;
             } else {
-                return `<span class="pending-text">pending</span>`;
+                const text = getTranslation('manage_pending', 'pending');
+                return `<span id="manage_pending" class="pending-text">${text}</span>`;
             }
         }
 
         // 检查是否所有文件都已解析完成
-        // 替换现有的 checkAllFilesParsed 函数
-function checkAllFilesParsed() {
-    const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || []);
-    const generateGraphBtn = document.getElementById('generate-graph-btn');
-    
-    if (existingFiles.length === 0) {
-        // 如果没有文件，禁用生成按钮
-        if (generateGraphBtn) {
-            generateGraphBtn.disabled = true;
+        function checkAllFilesParsed() {
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            
+            if (!generateGraphBtn) {
+                return;
+            }
+            
+            // 从DOM中获取当前显示的文件列表，而不是使用localStorage缓存
+            const fileRows = document.querySelectorAll('.file-item[data-filename]');
+            
+            if (fileRows.length === 0) {
+                // 如果没有文件，禁用生成按钮
+                generateGraphBtn.disabled = true;
+                return;
+            }
+            
+            // 检查是否所有文件都已解析完成
+            // 从DOM和parsingStatus中检查，确保使用最新状态
+            let allParsed = true;
+            let hasFiles = false;
+            
+            fileRows.forEach(row => {
+                const filename = row.getAttribute('data-filename');
+                if (filename) {
+                    hasFiles = true;
+                    // 检查parsingStatus中的状态
+                    if (parsingStatus[filename]) {
+                        if (!parsingStatus[filename].isCompleted) {
+                            allParsed = false;
+                        }
+                    } else {
+                        // 如果parsingStatus中没有该文件，检查DOM中的状态类
+                        if (!row.classList.contains('completed')) {
+                            allParsed = false;
+                        }
+                    }
+                }
+            });
+            
+            // 如果没有文件，禁用按钮
+            if (!hasFiles) {
+                generateGraphBtn.disabled = true;
+                return;
+            }
+            
+            // 更新生成按钮状态
+            generateGraphBtn.disabled = !allParsed;
+            
+            console.log('检查文件解析状态:', {
+                fileCount: fileRows.length,
+                allParsed: allParsed,
+                buttonDisabled: generateGraphBtn.disabled,
+                parsingStatus: Object.keys(parsingStatus).map(name => ({
+                    name,
+                    isCompleted: parsingStatus[name].isCompleted
+                }))
+            });
         }
-        return false;
-    }
-    
-    // 检查是否所有文件都已解析
-    const allParsed = existingFiles.every(file => {
-        return parsingStatus[file.name] && parsingStatus[file.name].isCompleted;
-    });
-    
-    console.log('检查所有文件解析状态:', {
-        totalFiles: existingFiles.length,
-        allParsed: allParsed,
-        fileStatuses: existingFiles.map(file => ({
-            name: file.name,
-            isCompleted: parsingStatus[file.name] ? parsingStatus[file.name].isCompleted : false
-        }))
-    });
-    
-    // 更新生成按钮状态
-    updateVisualizationButton(allParsed);
-    
-    return allParsed;
-}
+
         // 切换文件解析状态（开始/暂停）
         function toggleFileParsing(filename) {
     const status = parsingStatus[filename];
@@ -3101,7 +3285,7 @@ function checkAllFilesParsed() {
                     // 更新总解析进度
                     updateTotalParseProgress();
                 }
-            }, 200);
+            }, 600);
         }
 
         // 暂停文件解析
@@ -3143,11 +3327,6 @@ function checkAllFilesParsed() {
             
             // 更新总解析进度
             updateTotalParseProgress();
-
-            // 强制检查所有文件状态
-    setTimeout(() => {
-        checkAllFilesParsed();
-    }, 100);
         }
 
         // 重置文件解析状态
@@ -3189,31 +3368,31 @@ function checkAllFilesParsed() {
         }
 
         // 更新解析按钮显示
-        // 修改 updateParseButton 函数
-function updateParseButton(filename, isParsing, isCompleted = false) {
-    const button = document.querySelector(`.parse-control-btn[data-filename="${filename}"]`);
-    if (!button) return;
-    
-    // 如果解析完成，隐藏按钮
-    if (isCompleted) {
-        button.style.display = 'none';
-    } else {
-        button.style.display = 'flex';
-        if (isParsing) {
-            button.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
-                </svg>
-            `;
-        } else {
-            button.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
-                </svg>
-            `;
+        function updateParseButton(filename, isParsing, isCompleted = false) {
+            const button = document.querySelector(`.parse-control-btn[data-filename="${filename}"]`);
+            if (!button) return;
+            
+            if (isCompleted) {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                `;
+            } else if (isParsing) {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
+                    </svg>
+                `;
+            } else {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+                    </svg>
+                `;
+            }
         }
-    }
-}
+
         // 更新进度显示
         function updateProgressDisplay(filename, progress, isParsing, isCompleted) {
             const progressContainer = document.querySelector(`.parse-progress-container[data-filename="${filename}"]`);
@@ -3233,11 +3412,25 @@ function updateParseButton(filename, isParsing, isCompleted = false) {
             // 更新状态文本
             const statusText = progressContainer.querySelector('.proceed-text, .parsing-text, .pending-text');
             if (statusText) {
-                statusText.remove();
+                // 更新现有文本而不是移除，以保持 id 以便语言切换
+                const status = parsingStatus[filename];
+                if (status.isCompleted) {
+                    statusText.id = 'manage_proceed';
+                    statusText.className = 'proceed-text';
+                    statusText.textContent = getTranslation('manage_proceed', 'proceed');
+                } else if (status.isParsing) {
+                    statusText.id = 'manage_parsing';
+                    statusText.className = 'parsing-text';
+                    statusText.textContent = getTranslation('manage_parsing', 'parsing');
+                } else {
+                    statusText.id = 'manage_pending';
+                    statusText.className = 'pending-text';
+                    statusText.textContent = getTranslation('manage_pending', 'pending');
+                }
+            } else {
+                // 如果不存在，添加新的状态文本
+                progressContainer.insertAdjacentHTML('afterbegin', getStatusText(parsingStatus[filename]));
             }
-            
-            // 添加新的状态文本
-            progressContainer.insertAdjacentHTML('afterbegin', getStatusText(parsingStatus[filename]));
         }
 
         // 更新文件解析状态
@@ -3418,7 +3611,11 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
         // 删除文件
         // 删除文件
 function deleteFile(fileName) {
-    if (confirm(`Are you sure you want to delete ${fileName}?`)) {
+    // 获取删除确认消息的翻译
+    const confirmMsg = getTranslation('deleteFileConfirm', `Are you sure you want to delete ${fileName}?`)
+        .replace('{filename}', fileName);
+    
+    if (confirm(confirmMsg)) {
         console.log(`发送删除请求: ${fileName} in kb ${currentKnowledgeBase}`);
         
         // 显示加载状态
@@ -3484,19 +3681,30 @@ function showNotification(message, type = 'info') {
             graphGenerated = false;
             const generateGraphBtn = document.getElementById('generate-graph-btn');
             if (generateGraphBtn) {
-                generateGraphBtn.textContent = 'Visualization';
+                // 只更新 span 的文本，保留 SVG 图标
+                const visualizationSpan = document.getElementById('manage_Visualization');
+                if (visualizationSpan) {
+                    visualizationSpan.textContent = getTranslation('manage_Visualization', 'Visualization');
+                }
                 generateGraphBtn.disabled = true;
             }
             
             const graphContainer = document.getElementById('graph-container');
             if (graphContainer) {
+                // 确保语言已加载，如果还没有加载，使用window.HTML_MAP直接获取
+                let clickText = 'Click "Visualization" to create knowledge graph';
+                if (window.HTML_MAP && window.HTML_MAP['manage_click']) {
+                    clickText = window.HTML_MAP['manage_click'];
+                } else {
+                    clickText = getTranslation('manage_click', 'Click "Visualization" to create knowledge graph');
+                }
                 graphContainer.innerHTML = `
                     <div class="flex items-center justify-center h-full">
                         <div class="text-center">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                             </svg>
-                            <p class="mt-2 text-lg text-gray-500">Click "Visualization" to create knowledge graph</p>
+                            <p class="mt-2 text-lg text-gray-500" id="manage_click_graph">${clickText}</p>
                         </div>
                     </div>
                 `;
@@ -3535,146 +3743,595 @@ function showNotification(message, type = 'info') {
         }
 
         // 图谱生成函数
-        // 图谱生成函数 - 修改为调用后端API
-// 图谱生成函数 - 修改为调用后端API
-function generateGraph() {
-    const graphContainer = document.getElementById('graph-container');
-    const generateGraphBtn = document.getElementById('generate-graph-btn');
-    const graphProgressContainer = document.getElementById('graph-progress-container');
-    const graphProgressFill = document.getElementById('graph-progress-fill');
-    const graphProgressText = document.getElementById('graph-progress-text');
-    
-    // 禁用生成按钮
-    if (generateGraphBtn) {
-        generateGraphBtn.disabled = true;
-    }
-    
-    // 重置进度条
-    if (graphProgressFill) {
-        graphProgressFill.style.width = '0%';
-    }
-    if (graphProgressText) {
-        graphProgressText.textContent = '0%';
-    }
-    
-    // 显示进度条
-    if (graphProgressContainer) {
-        graphProgressContainer.style.display = 'flex';
-    }
-    
-    // 显示生成中状态
-    graphContainer.innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-lg text-gray-500">正在生成知识图谱...</div></div>';
-    
-    // 获取当前文件列表
-    const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
-    const fileNames = existingFiles.map(file => file.name);
-    
-    // 向后端发送生成图谱请求
-    fetch('/api/generate_graph', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            kb_id: currentKnowledgeBase,
-            kb_name: document.querySelector('.knowledge-base-item.active .text-sm.font-bold')?.textContent || 'Unknown Dataset',
-            files: fileNames
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // 使用后端返回的三元组数据生成图谱
-            completeGraphGeneration(data.triplets);
-        } else {
-            throw new Error(data.error || '生成图谱失败');
-        }
-    })
-    .catch(error => {
-        console.error('生成图谱失败:', error);
-        
-        // 检查是否是未解析文件导致的错误
-        if (error.message.includes('尚未解析')) {
-            // 显示未解析文件的错误信息
-            graphContainer.innerHTML = `
-                <div class="flex items-center justify-center h-full">
-                    <div class="text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-yellow-500">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                        </svg>
-                        <p class="mt-2 text-lg text-yellow-600">无法生成图谱</p>
-                        <p class="text-sm text-gray-500 mt-2">${error.message}</p>
-                        <p class="text-sm text-gray-500 mt-1">请先完成文件解析</p>
-                    </div>
-                </div>
-            `;
-        } else {
-            // 显示其他错误信息
-            graphContainer.innerHTML = `
-                <div class="flex items-center justify-center h-full">
-                    <div class="text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-red-400">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                        </svg>
-                        <p class="mt-2 text-lg text-red-500">生成图谱失败</p>
-                        <p class="text-sm text-gray-500">${error.message}</p>
-                    </div>
-                </div>
-            `;
+        function generateGraph() {
+            const graphContainer = document.getElementById('graph-container');
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            const graphProgressContainer = document.getElementById('graph-progress-container');
+            const graphProgressFill = document.getElementById('graph-progress-fill');
+            const graphProgressText = document.getElementById('graph-progress-text');
+            
+            // 禁用生成按钮
+            if (generateGraphBtn) {
+                generateGraphBtn.disabled = true;
+            }
+            
+            // 重置进度条
+            if (graphProgressFill) {
+                graphProgressFill.style.width = '0%';
+            }
+            if (graphProgressText) {
+                graphProgressText.textContent = '0%';
+            }
+            
+            // 显示进度条
+            if (graphProgressContainer) {
+                graphProgressContainer.style.display = 'flex';
+            }
+            
+            // 显示生成中状态
+            const generatingText = getTranslation('manage_generating_graph', 'Generating knowledge graph...');
+            graphContainer.innerHTML = `<div class="flex items-center justify-center h-full"><div class="text-lg text-gray-500">${generatingText}</div></div>`;
+            
+            // 模拟生成进度
+            let progress = 0;
+            graphGenerationInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(graphGenerationInterval);
+                    graphGenerationInterval = null;
+                    
+                    // 生成完成
+                    completeGraphGeneration();
+                }
+                
+                // 更新进度条
+                if (graphProgressFill) {
+                    graphProgressFill.style.width = `${progress}%`;
+                }
+                
+                if (graphProgressText) {
+                    graphProgressText.textContent = `${Math.round(progress)}%`;
+                }
+            }, 200);
         }
         
-        // 重新启用生成按钮
-        if (generateGraphBtn) {
-            generateGraphBtn.disabled = false;
+        // 完成图谱生成
+        function completeGraphGeneration() {
+            graphGenerated = true;
+            
+            const generateGraphBtn = document.getElementById('generate-graph-btn');
+            if (generateGraphBtn) {
+                // 只更新 span 的文本，保留 SVG 图标
+                const visualizationSpan = document.getElementById('manage_Visualization');
+                if (visualizationSpan) {
+                    visualizationSpan.textContent = getTranslation('manage_Visualization', 'Visualization');
+                }
+                generateGraphBtn.disabled = false;
+            }
+            
+            // 隐藏进度条
+            const graphProgressContainer = document.getElementById('graph-progress-container');
+            if (graphProgressContainer) {
+                graphProgressContainer.style.display = 'none';
+            }
+            
+            // 模拟从后端获取数据
+            setTimeout(() => {
+                // 使用你提供的三元组数据
+                // 使用new.xlsx中的三元组数据（修改后的格式）
+const triplets = [
+['Maureen Alvarado', '2025-05-01T00:00:00Z: 545.88', 'Paul Baird'],
+['Elizabeth Mack', '2025-05-01T00:00:00Z: 732.75', 'Shelly Morrison'],
+['Robert Boyd', '2025-05-01T00:00:00Z: 799.7', 'Daniel Gonzalez'],
+['Kenneth Salazar', '2025-05-01T00:00:00Z: 370.13', 'Scott Thompson'],
+['Donald Bradley', '2025-05-01T00:00:00Z: 659.66', 'Rebecca Lee'],
+['Chad Mcintosh', '2025-05-01T00:00:00Z: 734.74', 'Daniel Miller'],
+['Katherine Collins', '2025-05-01T00:00:00Z: 316.18', 'Lindsey Foster'],
+['Michelle Steele', '2025-05-01T00:00:00Z: 724.95', 'Deanna Jones'],
+['Brandon Huffman', '2025-05-02T00:00:00Z: 163.16', 'Gregory Marquez'],
+['Kyle Daniels', '2025-05-02T00:00:00Z: 387.11', 'Andrew Sullivan'],
+['Jessica Miller', '2025-05-02T00:00:00Z: 320.45', 'Daniel Miller'],
+['Natalie Rangel', '2025-05-02T00:00:00Z: 913.79', 'Daniel Miller'],
+['Curtis Kramer', '2025-05-02T00:00:00Z: 199.86', 'John Allen'],
+['Alex Lee', '2025-05-02T00:00:00Z: 902.47', 'Daniel Miller'],
+['Suzanne Lawson', '2025-05-02T00:00:00Z: 542.57', 'Mark White'],
+['Robert Bennett', '2025-05-03T00:00:00Z: 612.62', 'Daniel Miller'],
+['Sara Lane', '2025-05-03T00:00:00Z: 505.62', 'Mary Smith'],
+['Hector Cain', '2025-05-03T00:00:00Z: 499.57', 'Daniel Miller'],
+['Stephanie Jones', '2025-05-03T00:00:00Z: 880.04', 'Dylan Carr'],
+['Morgan Smith', '2025-05-04T00:00:00Z: 109.16', 'Bryan Lowery'],
+['Lauren Gomez', '2025-05-04T00:00:00Z: 199.57', 'Bryan Hall'],
+['Eric Jones', '2025-05-04T00:00:00Z: 527.36', 'Willie Delacruz'],
+['Daniel Miller', '2025-05-04T00:00:00Z: 249.89', 'Michael Hancock'],
+['Anthony Reeves', '2025-05-05T00:00:00Z: 757.78', 'Daniel Miller'],
+['Norman Tucker', '2025-05-05T00:00:00Z: 674.83', 'Dennis Gross'],
+['Joseph Roberts', '2025-05-05T00:00:00Z: 626.85', 'Daniel Miller'],
+['Alex Lee', '2025-05-05T00:00:00Z: 830.62', 'Daniel Miller'],
+['Julia Reed', '2025-05-05T00:00:00Z: 160.34', 'Daniel Miller'],
+['William Zimmerman', '2025-05-06T00:00:00Z: 965.86', 'Daniel Miller'],
+['Daniel Miller', '2025-05-06T00:00:00Z: 223.58', 'Sean Hodges'],
+['Daniel Miller', '2025-05-06T00:00:00Z: 887.84', 'Michael Hancock'],
+['Mitchell Hodges', '2025-05-06T00:00:00Z: 242.51', 'Daniel Miller'],
+['Susan Oneill', '2025-05-06T00:00:00Z: 821.88', 'Daniel Miller'],
+['Johnny Harvey', '2025-05-06T00:00:00Z: 108.68', 'Kyle Daniels'],
+['Christopher Bush', '2025-05-06T00:00:00Z: 153.04', 'Brenda Berry'],
+['Jane Russell', '2025-05-07T00:00:00Z: 740.31', 'Daniel Miller'],
+['Bobby Harrell', '2025-05-07T00:00:00Z: 746.07', 'Aaron Martin'],
+['Kimberly Young', '2025-05-07T00:00:00Z: 244.71', 'Jennifer Robinson'],
+['Cindy Washington', '2025-05-07T00:00:00Z: 210.51', 'Daniel Miller'],
+['Douglas Hall', '2025-05-07T00:00:00Z: 343.4', 'Daniel Miller'],
+['Douglas Hall', '2025-05-07T00:00:00Z: 158.48', 'Daniel Miller'],
+['Chad Mcintosh', '2025-05-08T00:00:00Z: 632.36', 'Daniel Miller'],
+['Emily Diaz', '2025-05-08T00:00:00Z: 697.16', 'Eric Murphy'],
+['Michelle Steele', '2025-05-08T00:00:00Z: 156.46', 'Mitchell Nunez'],
+['Craig Dennis', '2025-05-08T00:00:00Z: 230.77', 'Daniel Miller'],
+['Samuel Vaughn', '2025-05-09T00:00:00Z: 939.33', 'Sheila Cohen'],
+['Jessica Miller', '2025-05-09T00:00:00Z: 403.35', 'Daniel Miller'],
+['Kyle Daniels', '2025-05-09T00:00:00Z: 930.78', 'Ashlee Sanchez'],
+['Cynthia Murphy', '2025-05-09T00:00:00Z: 405.34', 'Tonya Young'],
+['Michael Yang', '2025-05-09T00:00:00Z: 923.47', 'Joseph Parker'],
+['Lisa Morgan', '2025-05-09T00:00:00Z: 285.53', 'Christopher Wong'],
+['Tara Doyle', '2025-05-09T00:00:00Z: 632.2', 'Mary Smith'],
+['Jessica Underwood', '2025-05-09T00:00:00Z: 701.2', 'Robert Mclaughlin'],
+['Robert Bennett', '2025-05-10T00:00:00Z: 986.64', 'Daniel Miller'],
+['Lauren Powell', '2025-05-10T00:00:00Z: 779.84', 'Brenda Berry'],
+['Stephanie Jones', '2025-05-10T00:00:00Z: 403.1', 'Robert Mclaughlin'],
+['Kristen Wright', '2025-05-10T00:00:00Z: 439.13', 'Anthony Daugherty'],
+['Hector Cain', '2025-05-10T00:00:00Z: 368.13', 'Daniel Miller'],
+['Tammie Jordan', '2025-05-10T00:00:00Z: 174.72', 'Dylan Williams'],
+['Mitchell Nunez', '2025-05-11T00:00:00Z: 269.52', 'Kenneth Beasley'],
+['Deborah Miles', '2025-05-11T00:00:00Z: 528.09', 'Matthew Perez'],
+['Nathan Lynch', '2025-05-11T00:00:00Z: 677.6', 'Daniel Miller'],
+['Gary Long', '2025-05-11T00:00:00Z: 427.33', 'Marcus Garcia'],
+['Jared Ward', '2025-05-11T00:00:00Z: 712.24', 'Destiny Grant'],
+['Ryan Moore', '2025-05-11T00:00:00Z: 376.13', 'Matthew Perez'],
+['Deborah Macdonald', '2025-05-11T00:00:00Z: 423.65', 'Kyle Daniels'],
+['Daniel Miller', '2025-05-11T00:00:00Z: 924.33', 'Mark White'],
+['Julie Webster', '2025-05-11T00:00:00Z: 972.89', 'Zachary Ferguson'],
+['John Smith', '2025-05-11T00:00:00Z: 459.39', 'Todd Martinez'],
+['Thomas Jordan', '2025-05-12T00:00:00Z: 363.79', 'Daniel Miller'],
+['Julie Webster', '2025-05-12T00:00:00Z: 560.28', 'Thomas Torres'],
+['Joseph Roberts', '2025-05-12T00:00:00Z: 971.26', 'Daniel Miller'],
+['Michael Combs', '2025-05-12T00:00:00Z: 604.55', 'Daniel Miller'],
+['Anthony Reeves', '2025-05-12T00:00:00Z: 742.88', 'Daniel Miller'],
+['Julia Reed', '2025-05-12T00:00:00Z: 974.19', 'Daniel Miller'],
+['Valerie Singleton', '2025-05-12T00:00:00Z: 935.41', 'Sean Murray'],
+['Krystal Smith', '2025-05-13T00:00:00Z: 641.73', 'Luke Kelley'],
+['Johnny Harvey', '2025-05-13T00:00:00Z: 628.96', 'Kyle Daniels'],
+['Susan Oneill', '2025-05-13T00:00:00Z: 144.28', 'Daniel Miller'],
+['Susan Oneill', '2025-05-13T00:00:00Z: 965.85', 'Daniel Miller'],
+['Beverly Rosales', '2025-05-13T00:00:00Z: 109.14', 'Daniel Miller'],
+['Cameron Huffman', '2025-05-13T00:00:00Z: 607.23', 'Betty Jackson'],
+['Heidi Fisher', '2025-05-13T00:00:00Z: 846.73', 'Kathleen Hernandez'],
+['Lindsay Phillips', '2025-05-13T00:00:00Z: 768.95', 'Michael Estrada'],
+['Daniel Miller', '2025-05-13T00:00:00Z: 613.52', 'Mark White'],
+['Tony House', '2025-05-13T00:00:00Z: 765.3', 'Tara Doyle'],
+['Pam Bell', '2025-05-14T00:00:00Z: 591.17', 'Daniel Miller'],
+['Cindy Washington', '2025-05-14T00:00:00Z: 234.94', 'Daniel Miller'],
+['Douglas Hall', '2025-05-14T00:00:00Z: 814.4', 'Daniel Miller'],
+['Michael French', '2025-05-14T00:00:00Z: 434.08', 'Destiny Grant'],
+['Jane Russell', '2025-05-14T00:00:00Z: 983.71', 'Daniel Miller'],
+['Christopher Wheeler', '2025-05-15T00:00:00Z: 292.12', 'Cheryl Schwartz'],
+['Paul Mcdaniel', '2025-05-15T00:00:00Z: 699.03', 'Taylor Joyce'],
+['Cindy Willis', '2025-05-15T00:00:00Z: 221.15', 'Todd Martinez'],
+['Michelle Steele', '2025-05-15T00:00:00Z: 224.1', 'Deanna Jones'],
+['Chad Mcintosh', '2025-05-15T00:00:00Z: 414.02', 'Daniel Miller'],
+['Tiffany Moore', '2025-05-15T00:00:00Z: 457.99', 'Chad Clark'],
+['David Smith', '2025-05-15T00:00:00Z: 999.52', 'Dominique Lee'],
+['Valerie Barnes', '2025-05-16T00:00:00Z: 401.5', 'Lauren Gomez'],
+['Michael Bryant', '2025-05-16T00:00:00Z: 336.32', 'Richard Anderson'],
+['Kyle Daniels', '2025-05-16T00:00:00Z: 857.79', 'Susan Allen'],
+['Zachary Sutton', '2025-05-16T00:00:00Z: 239.9', 'Michael Moore'],
+['Jessica Miller', '2025-05-16T00:00:00Z: 149.19', 'Daniel Miller'],
+['Hector Cain', '2025-05-17T00:00:00Z: 663.62', 'Daniel Miller'],
+['David Robinson', '2025-05-17T00:00:00Z: 896.92', 'Daniel Miller'],
+['Ryan Krause', '2025-05-17T00:00:00Z: 135.01', 'Daniel Morris'],
+['Ian Hunt', '2025-05-17T00:00:00Z: 290.68', 'Paul Weber'],
+['Robert Bennett', '2025-05-17T00:00:00Z: 326.47', 'Daniel Miller'],
+['Carmen Osborn', '2025-05-17T00:00:00Z: 949.63', 'Charles Melton'],
+['Deborah Glover', '2025-05-17T00:00:00Z: 662.99', 'Mark Rocha'],
+['Keith Gomez', '2025-05-17T00:00:00Z: 601.85', 'Seth Chambers'],
+['Melissa Torres', '2025-05-17T00:00:00Z: 729.39', 'Jacob Fuller'],
+['Chad Mcintosh', '2025-05-18T00:00:00Z: 903.47', 'Daniel Miller'],
+['Stacey Sanchez', '2025-05-18T00:00:00Z: 583.67', 'Shaun Lowery'],
+['Eric Jones', '2025-05-18T00:00:00Z: 538.14', 'Willie Delacruz'],
+['Sean Hodges', '2025-05-18T00:00:00Z: 155.55', 'Michelle Steele'],
+['Michelle Steele', '2025-05-18T00:00:00Z: 684.22', 'Deborah Macdonald'],
+['Kyle Daniels', '2025-05-18T00:00:00Z: 289.4', 'Daniel Miller'],
+['Daniel Miller', '2025-05-18T00:00:00Z: 552.29', 'David Robinson'],
+['Aaron Martin', '2025-05-18T00:00:00Z: 371.29', 'Shannon Nichols'],
+['Anthony Reeves', '2025-05-19T00:00:00Z: 360.92', 'Daniel Miller'],
+['Susan Allen', '2025-05-19T00:00:00Z: 643.81', 'Marcus Moore'],
+['Joseph Roberts', '2025-05-19T00:00:00Z: 595.78', 'Daniel Miller'],
+['Jessica Cooper', '2025-05-19T00:00:00Z: 114.34', 'Catherine Gordon'],
+['Julia Reed', '2025-05-19T00:00:00Z: 199.02', 'Daniel Miller'],
+['Pamela Jackson', '2025-05-20T00:00:00Z: 612.51', 'John Allen'],
+['Anna Griffin', '2025-05-20T00:00:00Z: 662.56', 'Laura Brown'],
+['Susan Oneill', '2025-05-20T00:00:00Z: 447.97', 'Daniel Miller'],
+['Julie Porter', '2025-05-20T00:00:00Z: 682.83', 'Cindy Clayton'],
+['Daniel Miller', '2025-05-20T00:00:00Z: 158.06', 'David Robinson'],
+['Victoria Delgado', '2025-05-20T00:00:00Z: 472.58', 'Brandy Welch'],
+['Johnny Harvey', '2025-05-20T00:00:00Z: 505.76', 'Kyle Daniels'],
+['William Zimmerman', '2025-05-20T00:00:00Z: 168.31', 'Daniel Miller'],
+['Jason Goodman', '2025-05-20T00:00:00Z: 330.02', 'Patricia Thompson'],
+['Donald Jacobson', '2025-05-21T00:00:00Z: 414.05', 'Todd Martinez'],
+['Matthew Perez', '2025-05-21T00:00:00Z: 669.53', 'Arthur Fowler'],
+['Douglas Hall', '2025-05-21T00:00:00Z: 533.31', 'Daniel Miller'],
+['Douglas Hall', '2025-05-21T00:00:00Z: 457.64', 'Daniel Miller'],
+['Michael Edwards', '2025-05-21T00:00:00Z: 224.69', 'Michael Nguyen'],
+['David Robinson', '2025-05-21T00:00:00Z: 909.81', 'Daniel Miller'],
+['Tanner Lambert', '2025-05-21T00:00:00Z: 862', 'Kristen Terry'],
+['Cindy Washington', '2025-05-21T00:00:00Z: 698.1', 'Daniel Miller'],
+['Jane Russell', '2025-05-21T00:00:00Z: 224.68', 'Daniel Miller'],
+['Curtis Soto', '2025-05-21T00:00:00Z: 375.69', 'Bryan Davis'],
+['Joshua Jones', '2025-05-21T00:00:00Z: 610.54', 'Jesse Morgan'],
+['Chad Mcintosh', '2025-05-22T00:00:00Z: 391.75', 'Daniel Miller'],
+['Michelle Steele', '2025-05-22T00:00:00Z: 653.42', 'Mitchell Nunez'],
+['Julie Stewart', '2025-05-23T00:00:00Z: 857.58', 'Austin Miles'],
+['James Newman', '2025-05-23T00:00:00Z: 573.47', 'Daniel Miller'],
+['Natalie Rangel', '2025-05-23T00:00:00Z: 869.32', 'Daniel Miller'],
+['Jessica Miller', '2025-05-23T00:00:00Z: 486.72', 'Daniel Miller'],
+['Brittany Sheppard', '2025-05-23T00:00:00Z: 473.2', 'Jeffrey Butler'],
+['Hector Cain', '2025-05-24T00:00:00Z: 244.31', 'Daniel Miller'],
+['Robert Bennett', '2025-05-24T00:00:00Z: 597.95', 'Daniel Miller'],
+['Tammy Love', '2025-05-24T00:00:00Z: 578.71', 'Chad Clark'],
+['Ebony Simon', '2025-05-24T00:00:00Z: 142.55', 'Deborah Glover'],
+['Susan Allen', '2025-05-24T00:00:00Z: 442.25', 'Carol Williams'],
+['Aaron Martin', '2025-05-24T00:00:00Z: 997.37', 'Shannon Nichols'],
+['Curtis Soto', '2025-05-25T00:00:00Z: 666.97', 'Gregory Marquez'],
+['Joseph Roberts', '2025-05-25T00:00:00Z: 156.58', 'Daniel Miller'],
+['Nathan Lynch', '2025-05-25T00:00:00Z: 597.48', 'Daniel Miller'],
+['Zachary Murray', '2025-05-25T00:00:00Z: 488.31', 'Mark White'],
+['Jennifer Hall', '2025-05-25T00:00:00Z: 975.95', 'Elizabeth Mack'],
+['James Newman', '2025-05-25T00:00:00Z: 127.44', 'Daniel Miller'],
+['Danielle Hubbard', '2025-05-25T00:00:00Z: 132.03', 'Austin Miles'],
+['Stephen Dennis', '2025-05-25T00:00:00Z: 757.58', 'Sean Murray'],
+['Kelly Shelton', '2025-05-25T00:00:00Z: 751.15', 'Destiny Grant'],
+['Douglas Orozco', '2025-05-25T00:00:00Z: 862.67', 'Robert Mclaughlin'],
+['Jacob Morgan', '2025-05-25T00:00:00Z: 726.78', 'Erica Patton'],
+['Daniel Miller', '2025-05-25T00:00:00Z: 334.47', 'Jacob Fuller'],
+['Tommy Taylor', '2025-05-26T00:00:00Z: 485.85', 'Timothy Santos'],
+['Anthony Reeves', '2025-05-26T00:00:00Z: 708.07', 'Daniel Miller'],
+['Joseph Roberts', '2025-05-26T00:00:00Z: 349.68', 'Daniel Miller'],
+['Johnny Lowe', '2025-05-26T00:00:00Z: 522.59', 'Paul Baird'],
+['Shannon Nichols', '2025-05-26T00:00:00Z: 961.77', 'Seth Chambers'],
+['Tina Ibarra', '2025-05-26T00:00:00Z: 125.83', 'Daniel Miller'],
+['Julia Reed', '2025-05-26T00:00:00Z: 411.18', 'Daniel Miller'],
+['Thomas Jordan', '2025-05-26T00:00:00Z: 516.01', 'Daniel Miller'],
+['Krystal Smith', '2025-05-27T00:00:00Z: 587.7', 'Brianna Patton'],
+['Daniel Miller', '2025-05-27T00:00:00Z: 647.76', 'Jacob Fuller'],
+['Mitchell Hodges', '2025-05-27T00:00:00Z: 118.92', 'Daniel Miller'],
+['Morgan Reyes', '2025-05-27T00:00:00Z: 728.89', 'Katelyn Santana'],
+['Joshua Jones', '2025-05-27T00:00:00Z: 714.06', 'David Peterson'],
+['Johnny Harvey', '2025-05-27T00:00:00Z: 555.33', 'Kyle Daniels'],
+['Susan Oneill', '2025-05-27T00:00:00Z: 189.94', 'Daniel Miller'],
+['Susan Oneill', '2025-05-27T00:00:00Z: 568.73', 'Daniel Miller'],
+['Erin Carpenter', '2025-05-27T00:00:00Z: 836.1', 'Sierra Davis'],
+['Garrett Torres', '2025-05-27T00:00:00Z: 937.31', 'Erica Patton'],
+['Beverly Rosales', '2025-05-27T00:00:00Z: 141.84', 'Daniel Miller'],
+['Shannon Simon', '2025-05-27T00:00:00Z: 801.04', 'Deanna Jones'],
+['Douglas Hall', '2025-05-28T00:00:00Z: 351.15', 'Daniel Miller'],
+['Pam Bell', '2025-05-28T00:00:00Z: 642.43', 'Daniel Miller'],
+['Brandon Miller', '2025-05-28T00:00:00Z: 377.62', 'Scott Thompson'],
+['Brenda Mccullough', '2025-05-28T00:00:00Z: 590.79', 'Jonathan Flores'],
+['Cindy Washington', '2025-05-28T00:00:00Z: 359.23', 'Daniel Miller'],
+['Jane Russell', '2025-05-28T00:00:00Z: 615', 'Daniel Miller'],
+['Elizabeth Oliver', '2025-05-28T00:00:00Z: 494.78', 'Andrew Todd'],
+['Tina Ibarra', '2025-05-28T00:00:00Z: 490.46', 'Daniel Miller'],
+['Julia Reed', '2025-05-29T00:00:00Z: 248.21', 'Daniel Miller'],
+['Michael Butler', '2025-05-29T00:00:00Z: 898.16', 'Heidi Melton'],
+['Michelle Steele', '2025-05-29T00:00:00Z: 381.03', 'Deanna Jones'],
+['Daniel Mitchell', '2025-05-29T00:00:00Z: 989.37', 'Dakota Romero'],
+['Chad Mcintosh', '2025-05-29T00:00:00Z: 904.74', 'Daniel Miller'],
+['Mary Smith', '2025-05-29T00:00:00Z: 417.03', 'Sean Mata'],
+['Craig Dennis', '2025-05-29T00:00:00Z: 548.49', 'Daniel Miller'],
+['Brandon Hughes', '2025-05-30T00:00:00Z: 491.85', 'Anthony Gutierrez'],
+['Jessica Miller', '2025-05-30T00:00:00Z: 792.92', 'Daniel Miller'],
+['Dakota Romero', '2025-05-30T00:00:00Z: 493.41', 'Kyle Daniels'],
+['Kyle Daniels', '2025-05-30T00:00:00Z: 271.35', 'Andrew Sullivan'],
+['Tammie Jordan', '2025-05-30T00:00:00Z: 616.41', 'Dylan Williams'],
+['Hector Cain', '2025-05-31T00:00:00Z: 743.49', 'Daniel Miller'],
+['Robert Bennett', '2025-05-31T00:00:00Z: 378.65', 'Daniel Miller'],
+['Ashley Simon', '2025-05-31T00:00:00Z: 932', 'Elizabeth Mack'],
+['Sara Lane', '2025-05-31T00:00:00Z: 880.99', 'Mary Smith'],
+['Keith Duncan', '2025-06-01T00:00:00Z: 834.47', 'Karen Swanson'],
+['Daniel Miller', '2025-06-01T00:00:00Z: 772.23', 'Dakota Romero'],
+['Eric Baxter', '2025-06-01T00:00:00Z: 705.43', 'Arthur Fowler'],
+['Michael Combs', '2025-06-02T00:00:00Z: 752.31', 'Daniel Miller'],
+['Destiny Grant', '2025-06-02T00:00:00Z: 309.45', 'Amanda Peterson'],
+['Joseph Roberts', '2025-06-02T00:00:00Z: 294.73', 'Daniel Miller'],
+['Julia Reed', '2025-06-02T00:00:00Z: 241.27', 'Daniel Miller'],
+['Anthony Reeves', '2025-06-02T00:00:00Z: 809.75', 'Daniel Miller'],
+['Ashley Griffin', '2025-06-02T00:00:00Z: 483.63', 'Jennifer Robinson'],
+['Louis Ramirez', '2025-06-03T00:00:00Z: 641.94', 'Chad Clark'],
+['Susan Oneill', '2025-06-03T00:00:00Z: 476.19', 'Daniel Miller'],
+['William Zimmerman', '2025-06-03T00:00:00Z: 215.36', 'Daniel Miller'],
+['Johnny Harvey', '2025-06-03T00:00:00Z: 295.47', 'Kyle Daniels'],
+['Daniel Miller', '2025-06-03T00:00:00Z: 632.51', 'Dakota Romero'],
+['Donald Peterson', '2025-06-03T00:00:00Z: 745.67', 'Zachary Gill'],
+['Margaret Watkins', '2025-06-03T00:00:00Z: 889.56', 'Jesse Morgan'],
+['Maureen Conner', '2025-06-04T00:00:00Z: 314.16', 'Carla Moyer'],
+['David Robinson', '2025-06-04T00:00:00Z: 674.21', 'Amy Terry'],
+['Dakota Romero', '2025-06-04T00:00:00Z: 493.51', 'Kyle Daniels'],
+['Sarah Short', '2025-06-04T00:00:00Z: 867.95', 'Elizabeth Mack'],
+['Leon Lee', '2025-06-04T00:00:00Z: 120.44', 'James Perry'],
+['Cindy Washington', '2025-06-04T00:00:00Z: 321.5', 'Daniel Miller'],
+['Jane Russell', '2025-06-04T00:00:00Z: 948.97', 'Daniel Miller'],
+['Johnny Harvey', '2025-06-04T00:00:00Z: 379.21', 'Kyle Daniels'],
+['Douglas Hall', '2025-06-04T00:00:00Z: 241.81', 'Daniel Miller'],
+['Douglas Hall', '2025-06-04T00:00:00Z: 931.54', 'Daniel Miller'],
+['Lydia Powell', '2025-06-04T00:00:00Z: 271.57', 'Jeffrey Butler'],
+['Christopher Clark', '2025-06-04T00:00:00Z: 215.19', 'Chad Clark'],
+['Michelle Steele', '2025-06-05T00:00:00Z: 221.77', 'Mitchell Nunez'],
+['Brandi Meyer', '2025-06-05T00:00:00Z: 317.9', 'Deborah Macdonald'],
+['Chad Mcintosh', '2025-06-05T00:00:00Z: 761.88', 'Daniel Miller'],
+['Jessica Bishop', '2025-06-05T00:00:00Z: 403.21', 'Jacob Fuller'],
+['Sharon Elliott', '2025-06-05T00:00:00Z: 348.42', 'Sean Murray'],
+['Marcus Boyd', '2025-06-05T00:00:00Z: 987.64', 'Michaela Anderson'],
+['Katelyn Santana', '2025-06-05T00:00:00Z: 955.56', 'Daniel Miller'],
+['Michelle Weber', '2025-06-05T00:00:00Z: 270.05', 'Timothy Santos'],
+['Shawn Hernandez', '2025-06-05T00:00:00Z: 489.48', 'Paul Baird'],
+['Debra Charles', '2025-06-05T00:00:00Z: 614.03', 'Michael Jenkins'],
+['Debra Charles', '2025-06-05T00:00:00Z: 944.67', 'Carlos Potter'],
+['Barbara Howard', '2025-06-06T00:00:00Z: 918.73', 'Christine Carr'],
+['Daniel Wilson', '2025-06-06T00:00:00Z: 704.75', 'Destiny Grant'],
+['Mark Williams', '2025-06-06T00:00:00Z: 722.2', 'Robert Boyd'],
+['Tara Doyle', '2025-06-06T00:00:00Z: 272.84', 'Mary Smith'],
+['Kyle Daniels', '2025-06-06T00:00:00Z: 631.14', 'Ashlee Sanchez'],
+['Samuel Vaughn', '2025-06-06T00:00:00Z: 400.67', 'Sheila Cohen'],
+['Gwendolyn Lamb', '2025-06-06T00:00:00Z: 294.4', 'Chad Clark'],
+['Jessica Miller', '2025-06-06T00:00:00Z: 791.97', 'Daniel Miller'],
+['Maria Wilson', '2025-06-07T00:00:00Z: 979.13', 'Dakota Romero'],
+['Robert Bennett', '2025-06-07T00:00:00Z: 650.08', 'Daniel Miller'],
+['Hector Cain', '2025-06-07T00:00:00Z: 177.59', 'Daniel Miller'],
+['Ronnie Olson', '2025-06-08T00:00:00Z: 220.35', 'Sean Murray'],
+['Carol Wagner', '2025-06-08T00:00:00Z: 903.52', 'Timothy Santos'],
+['Melinda Moore', '2025-06-08T00:00:00Z: 147.57', 'Daniel Miller'],
+['Cory Sanchez', '2025-06-08T00:00:00Z: 458.24', 'Marcus Garcia'],
+['Sean Murray', '2025-06-08T00:00:00Z: 613.86', 'Lauren Johnson'],
+['Katelyn Santana', '2025-06-08T00:00:00Z: 783.81', 'Daniel Miller'],
+['Nathan Lynch', '2025-06-08T00:00:00Z: 647.31', 'Daniel Miller'],
+['Robert Richardson', '2025-06-08T00:00:00Z: 259.73', 'Shannon Nichols'],
+['Daniel Miller', '2025-06-08T00:00:00Z: 910.44', 'Karen Perry'],
+['Thomas Jordan', '2025-06-09T00:00:00Z: 170.37', 'Daniel Miller'],
+['Denise Henson', '2025-06-09T00:00:00Z: 187.11', 'Robert Mclaughlin'],
+['Joseph Roberts', '2025-06-09T00:00:00Z: 884.83', 'Daniel Miller'],
+['Julia Reed', '2025-06-09T00:00:00Z: 841.19', 'Daniel Miller'],
+['Anthony Reeves', '2025-06-09T00:00:00Z: 857.78', 'Daniel Miller'],
+['Beverly Rosales', '2025-06-10T00:00:00Z: 293.34', 'Daniel Miller'],
+['William Dean', '2025-06-10T00:00:00Z: 290.83', 'Amy Terry'],
+['Susan Oneill', '2025-06-10T00:00:00Z: 838.51', 'Daniel Miller'],
+['Susan Oneill', '2025-06-10T00:00:00Z: 777.73', 'Daniel Miller'],
+['Daniel Miller', '2025-06-10T00:00:00Z: 584.32', 'Karen Perry'],
+['John Nelson', '2025-06-10T00:00:00Z: 417', 'Sean Murray'],
+['Melinda Moore', '2025-06-10T00:00:00Z: 555.28', 'Daniel Miller'],
+['Johnny Harvey', '2025-06-10T00:00:00Z: 545.66', 'Kyle Daniels'],
+['Debra Brewer', '2025-06-10T00:00:00Z: 474.01', 'Brenda Berry'],
+['Brandi Meyer', '2025-06-10T00:00:00Z: 724.59', 'Deborah Macdonald'],
+['Thomas Alvarado', '2025-06-11T00:00:00Z: 880.27', 'Robert Lynch'],
+['Douglas Hall', '2025-06-11T00:00:00Z: 678.34', 'Daniel Miller'],
+['Cindy Washington', '2025-06-11T00:00:00Z: 565.16', 'Daniel Miller'],
+['Patricia Thompson', '2025-06-11T00:00:00Z: 251.56', 'Eric Murphy'],
+['Pam Bell', '2025-06-11T00:00:00Z: 380.25', 'Daniel Miller'],
+['Tina Ibarra', '2025-06-11T00:00:00Z: 253.88', 'Natasha Lee'],
+['Jane Russell', '2025-06-11T00:00:00Z: 969.76', 'Daniel Miller'],
+['Tommy Taylor', '2025-06-12T00:00:00Z: 760.62', 'Timothy Santos'],
+['Amanda Cooper', '2025-06-12T00:00:00Z: 566.67', 'Alison Carr'],
+['Courtney Richardson', '2025-06-12T00:00:00Z: 221.87', 'Daniel Miller'],
+['Brett Walters', '2025-06-12T00:00:00Z: 358.12', 'Ashlee Sanchez'],
+['Chad Mcintosh', '2025-06-12T00:00:00Z: 828.21', 'Daniel Miller'],
+['Cory Sanchez', '2025-06-12T00:00:00Z: 710.31', 'Dylan Carr'],
+['Frank Bradford', '2025-06-12T00:00:00Z: 505.07', 'Jeremy Ward'],
+['Sharon Elliott', '2025-06-12T00:00:00Z: 955.26', 'Sean Murray'],
+['Michelle Steele', '2025-06-12T00:00:00Z: 488.63', 'Deanna Jones'],
+['Kelly Evans', '2025-06-13T00:00:00Z: 321.03', 'Jeffrey Butler'],
+['Matthew Nelson', '2025-06-13T00:00:00Z: 598.14', 'Daniel Miller'],
+['Christopher Wong', '2025-06-13T00:00:00Z: 227.39', 'Sean Murray'],
+['Kyle Daniels', '2025-06-13T00:00:00Z: 944.08', 'Susan Allen'],
+['Natalie Rangel', '2025-06-13T00:00:00Z: 829.88', 'Daniel Miller'],
+['Jessica Miller', '2025-06-13T00:00:00Z: 222.36', 'Daniel Miller'],
+['Patricia Thompson', '2025-06-13T00:00:00Z: 997.41', 'Daniel Miller'],
+['Patricia Erickson', '2025-06-13T00:00:00Z: 785.33', 'Yvonne Clements'],
+['Cory Scott', '2025-06-13T00:00:00Z: 959.2', 'Kyle Daniels'],
+['Laura Baker', '2025-06-13T00:00:00Z: 974.17', 'Alex Mcbride'],
+['Sue Horne', '2025-06-13T00:00:00Z: 705.45', 'Daniel Miller'],
+['Sue Horne', '2025-06-13T00:00:00Z: 632.52', 'Daniel Miller'],
+['Hector Cain', '2025-06-14T00:00:00Z: 996.88', 'Daniel Miller'],
+['Ruth Brennan', '2025-06-14T00:00:00Z: 613.86', 'Marcus Smith'],
+['Robert Bennett', '2025-06-14T00:00:00Z: 620.54', 'Daniel Miller'],
+['Matthew Nelson', '2025-06-14T00:00:00Z: 294', 'Daniel Miller'],
+['Robert Mcdonald', '2025-06-14T00:00:00Z: 138.5', 'Paul Baird'],
+['Emily Diaz', '2025-06-14T00:00:00Z: 843.39', 'Stacy Fernandez'],
+['Sean Brown', '2025-06-15T00:00:00Z: 816.35', 'Tiffany Estrada'],
+['Kelly Bell', '2025-06-15T00:00:00Z: 477.08', 'Lauren Simmons'],
+['Aaron Martin', '2025-06-15T00:00:00Z: 182.2', 'Shannon Nichols'],
+['Jorge Arnold', '2025-06-15T00:00:00Z: 844.81', 'Lisa Myers'],
+['Alisha Garcia', '2025-06-15T00:00:00Z: 813.26', 'William Bradley'],
+['Daniel Miller', '2025-06-15T00:00:00Z: 720.83', 'Danielle Nielsen'],
+['Amber Guzman', '2025-06-15T00:00:00Z: 910.38', 'Sean Mata'],
+['Julia Reed', '2025-06-16T00:00:00Z: 593.48', 'Daniel Miller'],
+['Michael Peters', '2025-06-16T00:00:00Z: 181.37', 'Michelle Grant'],
+['Joseph Roberts', '2025-06-16T00:00:00Z: 381.94', 'Daniel Miller'],
+['Curtis Soto', '2025-06-16T00:00:00Z: 864.74', 'Gregory Marquez'],
+['Kevin Gillespie', '2025-06-16T00:00:00Z: 366.7', 'Brenda Berry'],
+['Jessica Miller', '2025-06-16T00:00:00Z: 630.28', 'Daniel Miller'],
+['Jacob Fuller', '2025-06-16T00:00:00Z: 960.84', 'Dominique Lee'],
+['Kayla Finley', '2025-06-16T00:00:00Z: 716.22', 'Tony House'],
+['Anthony Reeves', '2025-06-16T00:00:00Z: 374.99', 'Daniel Miller'],
+['Cory Scott', '2025-06-16T00:00:00Z: 932.78', 'Kyle Daniels'],
+['Courtney Richardson', '2025-06-16T00:00:00Z: 327.53', 'Daniel Miller'],
+['Brittney Chavez', '2025-06-17T00:00:00Z: 875.8', 'Richard Miles'],
+['Daniel Miller', '2025-06-17T00:00:00Z: 121.87', 'Danielle Nielsen'],
+['William Zimmerman', '2025-06-17T00:00:00Z: 259.64', 'Daniel Miller'],
+['Allen Spencer', '2025-06-17T00:00:00Z: 427.3', 'Daniel Brown'],
+['Susan Oneill', '2025-06-17T00:00:00Z: 684.67', 'Daniel Miller'],
+['Thomas Gonzalez', '2025-06-17T00:00:00Z: 169.99', 'Shelly Morrison'],
+['Anthony Nelson', '2025-06-17T00:00:00Z: 590.54', 'Mary Smith'],
+['Johnny Harvey', '2025-06-17T00:00:00Z: 627.63', 'Kyle Daniels'],
+['Mitchell Hodges', '2025-06-17T00:00:00Z: 723.69', 'Daniel Miller'],
+['Cindy Washington', '2025-06-18T00:00:00Z: 325', 'Daniel Miller'],
+['Jane Russell', '2025-06-18T00:00:00Z: 398.88', 'Daniel Miller'],
+['Douglas Hall', '2025-06-18T00:00:00Z: 444.23', 'Daniel Miller'],
+['Douglas Hall', '2025-06-18T00:00:00Z: 761.29', 'Daniel Miller'],
+['Hector Cain', '2025-06-18T00:00:00Z: 497.25', 'Daniel Miller'],
+['Maureen Conner', '2025-06-18T00:00:00Z: 650.08', 'Carla Moyer'],
+['Patricia Thompson', '2025-06-18T00:00:00Z: 772.2', 'Daniel Miller'],
+['Tammy Williams', '2025-06-19T00:00:00Z: 188.83', 'Gregory Marquez'],
+['Michelle Steele', '2025-06-19T00:00:00Z: 119.41', 'Mitchell Nunez'],
+['Briana Chavez', '2025-06-19T00:00:00Z: 934.23', 'Daniel Miller'],
+['Briana Chavez', '2025-06-19T00:00:00Z: 724.13', 'Daniel Miller'],
+['Craig Dennis', '2025-06-19T00:00:00Z: 821.69', 'Daniel Miller'],
+['Chad Mcintosh', '2025-06-19T00:00:00Z: 289.77', 'Daniel Miller'],
+['Jasmine Gilmore', '2025-06-20T00:00:00Z: 523.57', 'Nicholas Reed'],
+['Jessica Miller', '2025-06-20T00:00:00Z: 516.38', 'Daniel Miller'],
+['Robert Smith', '2025-06-20T00:00:00Z: 218.31', 'Daniel Gonzalez'],
+['Tammie Jordan', '2025-06-20T00:00:00Z: 117.7', 'Sean Murray'],
+['Jason Pena', '2025-06-20T00:00:00Z: 235.5', 'Todd Martinez'],
+['Whitney Gutierrez', '2025-06-20T00:00:00Z: 277.91', 'Brandi Meyer'],
+['Robert Bennett', '2025-06-21T00:00:00Z: 358.32', 'Daniel Miller'],
+['Susan Miller', '2025-06-21T00:00:00Z: 193', 'Matthew Perez'],
+['Karen Swanson', '2025-06-21T00:00:00Z: 528.03', 'Daniel Miller'],
+['Jeff Evans', '2025-06-21T00:00:00Z: 940.52', 'Brandi Meyer'],
+['Hector Cain', '2025-06-21T00:00:00Z: 271.74', 'Daniel Miller'],
+['Bryan Lowery', '2025-06-22T00:00:00Z: 840.1', 'Mitchell Nunez'],
+['Nathan Lynch', '2025-06-22T00:00:00Z: 630.73', 'Daniel Miller'],
+['Karen Swanson', '2025-06-22T00:00:00Z: 693.69', 'Daniel Miller'],
+['Daniel Miller', '2025-06-22T00:00:00Z: 979.52', 'Catherine Gordon'],
+['Thomas Jordan', '2025-06-23T00:00:00Z: 291.93', 'Daniel Miller'],
+['Michael Combs', '2025-06-23T00:00:00Z: 592.29', 'Daniel Miller'],
+['Cheryl Smith', '2025-06-23T00:00:00Z: 892.57', 'Gavin Silva'],
+['Joseph Roberts', '2025-06-23T00:00:00Z: 522.8', 'Daniel Miller'],
+['Julia Reed', '2025-06-23T00:00:00Z: 905.23', 'Daniel Miller'],
+['Anthony Reeves', '2025-06-23T00:00:00Z: 837.41', 'Daniel Miller'],
+['Beverly Rosales', '2025-06-24T00:00:00Z: 568.15', 'Daniel Miller'],
+['Anthony Reeves', '2025-06-24T00:00:00Z: 970.55', 'Daniel Miller'],
+['Stephen Duncan', '2025-06-24T00:00:00Z: 843.37', 'Matthew Perez'],
+['Daniel Miller', '2025-06-24T00:00:00Z: 284.21', 'Catherine Gordon'],
+['Susan Oneill', '2025-06-24T00:00:00Z: 800.57', 'Daniel Miller'],
+['Susan Oneill', '2025-06-24T00:00:00Z: 242.53', 'Daniel Miller'],
+['Johnny Harvey', '2025-06-24T00:00:00Z: 934.86', 'Kyle Daniels'],
+['Carrie Paul', '2025-06-24T00:00:00Z: 866.26', 'Gregory Marquez'],
+['Cindy Washington', '2025-06-25T00:00:00Z: 139.18', 'Daniel Miller'],
+['Jane Russell', '2025-06-25T00:00:00Z: 483.64', 'Daniel Miller'],
+['Ashley Jacobs', '2025-06-25T00:00:00Z: 727.8', 'Tara Doyle'],
+['Pam Bell', '2025-06-25T00:00:00Z: 313.23', 'Daniel Miller'],
+['Douglas Hall', '2025-06-25T00:00:00Z: 780.49', 'Daniel Miller'],
+['Andrew Mason', '2025-06-25T00:00:00Z: 229.61', 'Elizabeth Osborne'],
+['Brittany Sheppard', '2025-06-25T00:00:00Z: 374.81', 'John Allen'],
+['Dennis Gross', '2025-06-25T00:00:00Z: 233.31', 'Shelly Morrison'],
+['Michelle Steele', '2025-06-26T00:00:00Z: 859.75', 'Deanna Jones'],
+['Brandi Meyer', '2025-06-26T00:00:00Z: 352.38', 'Charles Simpson'],
+['Chad Mcintosh', '2025-06-26T00:00:00Z: 419.61', 'Daniel Miller'],
+['Kyle Daniels', '2025-06-27T00:00:00Z: 376.6', 'Andrew Sullivan'],
+['Elaine Davis', '2025-06-27T00:00:00Z: 120', 'Marcus Garcia'],
+['Andrea Mendez', '2025-06-27T00:00:00Z: 293.96', 'Martin Casey'],
+['Austin Miles', '2025-06-27T00:00:00Z: 611.59', 'Debra Brewer'],
+['Jessica Miller', '2025-06-27T00:00:00Z: 724.57', 'Daniel Miller'],
+['Eric Rojas', '2025-06-27T00:00:00Z: 393.41', 'Mary Smith'],
+['Hector Cain', '2025-06-28T00:00:00Z: 703.6', 'Daniel Miller'],
+['Robert Bennett', '2025-06-28T00:00:00Z: 479.72', 'Daniel Miller'],
+['Tammy Williams', '2025-06-28T00:00:00Z: 744.11', 'Mary Smith'],
+['Daniel Miller', '2025-06-29T00:00:00Z: 577.19', 'Jennifer Davis'],
+['Frederick Malone', '2025-06-30T00:00:00Z: 285.87', 'Mary Smith'],
+['Julia Reed', '2025-06-30T00:00:00Z: 128.05', 'Daniel Miller'],
+['John Watson', '2025-06-30T00:00:00Z: 444.46', 'John Allen'],
+['Cheryl Smith', '2025-06-30T00:00:00Z: 181.58', 'Gavin Silva'],
+['Jessica French', '2025-06-30T00:00:00Z: 571.5', 'Shelly Morrison'],
+['Joseph Roberts', '2025-06-30T00:00:00Z: 683.17', 'Daniel Miller'],
+['William Dean', '2025-06-30T00:00:00Z: 572.49', 'Amy Terry'],
+['Michael Chapman', '2025-06-30T00:00:00Z: 255.19', 'Alison Carr'],
+['Anthony Reeves', '2025-06-30T00:00:00Z: 381.65', 'Daniel Miller'],
+['Johnny Harvey', '2025-07-01T00:00:00Z: 512.26', 'Kyle Daniels'],
+['Daniel Miller', '2025-07-01T00:00:00Z: 218.37', 'Jennifer Davis'],
+['Carrie Paul', '2025-07-01T00:00:00Z: 887.66', 'Shannon Nichols'],
+['Stephen Duncan', '2025-07-01T00:00:00Z: 639.1', 'Victoria Delgado'],
+['Sierra Davis', '2025-07-01T00:00:00Z: 445.87', 'Erin Carpenter'],
+['Douglas Hall', '2025-07-01T00:00:00Z: 253.61', 'Lindsey Foster'],
+['Martin Bennett', '2025-07-01T00:00:00Z: 939.43', 'Crystal Guerrero'],
+['Susan Oneill', '2025-07-01T00:00:00Z: 556.96', 'Daniel Miller'],
+['William Zimmerman', '2025-07-01T00:00:00Z: 888.54', 'Daniel Miller'],
+['Joshua Jones', '2025-07-01T00:00:00Z: 655.68', 'Daniel Miller'],
+['Megan Avery', '2025-07-02T00:00:00Z: 413.24', 'Chad Clark'],
+['Robert Smith', '2025-07-02T00:00:00Z: 319.88', 'Andrea Brown'],
+['Douglas Hall', '2025-07-02T00:00:00Z: 676.41', 'Daniel Miller'],
+['Douglas Hall', '2025-07-02T00:00:00Z: 679.42', 'Daniel Miller'],
+['Paul Baird', '2025-07-02T00:00:00Z: 421.04', 'Elizabeth Mack'],
+['Krista Madden', '2025-07-02T00:00:00Z: 732.84', 'Jennifer Davis'],
+['Jane Russell', '2025-07-02T00:00:00Z: 658.44', 'Daniel Miller'],
+['Joshua Jones', '2025-07-02T00:00:00Z: 788.78', 'Daniel Miller'],
+['Marie Owens', '2025-07-02T00:00:00Z: 429.62', 'Sean Murray'],
+['Cindy Washington', '2025-07-02T00:00:00Z: 856.25', 'Daniel Miller'],
+['Paul Mcdaniel', '2025-07-02T00:00:00Z: 692.75', 'Carol Williams'],
+['Madison Newman', '2025-07-03T00:00:00Z: 774.83', 'Jesse Morgan'],
+['Maureen Conrad', '2025-07-03T00:00:00Z: 118.71', 'Donna Stanley'],
+['Robert Boyd', '2025-07-03T00:00:00Z: 392.32', 'Mary Smith'],
+['Michelle Steele', '2025-07-03T00:00:00Z: 473.96', 'Mitchell Nunez'],
+['Jessica Clark', '2025-07-03T00:00:00Z: 766.82', 'Eric Murphy'],
+['Brian Hunter', '2025-07-03T00:00:00Z: 923.52', 'Sean Mata'],
+['Chad Mcintosh', '2025-07-03T00:00:00Z: 870.68', 'Daniel Miller'],
+['Natalie Rangel', '2025-07-04T00:00:00Z: 564.55', 'Daniel Miller'],
+['Felicia White', '2025-07-04T00:00:00Z: 217.24', 'Luke Johnson'],
+['Victoria Delgado', '2025-07-04T00:00:00Z: 272.78', 'Krista Madden'],
+['Jessica Miller', '2025-07-04T00:00:00Z: 503.01', 'Daniel Miller'],
+['Chad Brady', '2025-07-04T00:00:00Z: 336.56', 'Jamie Russo'],
+['Kathleen Hernandez', '2025-07-04T00:00:00Z: 611.84', 'Michelle Steele'],
+['Eugene Martin', '2025-07-04T00:00:00Z: 616.11', 'Ryan Zimmerman'],
+['Kyle Daniels', '2025-07-04T00:00:00Z: 217.33', 'Ashlee Sanchez'],
+['Hector Cain', '2025-07-05T00:00:00Z: 418.67', 'Daniel Miller'],
+['Derek Moore', '2025-07-05T00:00:00Z: 865.34', 'Donna Stanley'],
+['Jeff Evans', '2025-07-05T00:00:00Z: 674.86', 'Brandi Meyer'],
+['Hannah Greene', '2025-07-05T00:00:00Z: 915.12', 'Shelly Morrison'],
+['Thomas Smith', '2025-07-05T00:00:00Z: 591.74', 'Anthony Gutierrez'],
+['Robert Bennett', '2025-07-05T00:00:00Z: 841.61', 'Daniel Miller'],
+['Katrina Weaver', '2025-07-06T00:00:00Z: 156.98', 'Robert Carter'],
+['Kathleen Hernandez', '2025-07-06T00:00:00Z: 392.15', 'Michelle Steele'],
+['Daniel Miller', '2025-07-06T00:00:00Z: 997.67', 'Shaun Lowery'],
+['Nathan Lynch', '2025-07-06T00:00:00Z: 149.3', 'Daniel Miller'],
+['Tammy Brown', '2025-07-06T00:00:00Z: 679.07', 'Brenda Berry'],
+['Anthony Reeves', '2025-07-07T00:00:00Z: 816.18', 'Daniel Miller'],
+['Pamela Summers', '2025-07-07T00:00:00Z: 842.46', 'Mitchell Nunez'],
+['Elizabeth Lynch', '2025-07-07T00:00:00Z: 389.73', 'Kristen Wright'],
+['Luis Fry', '2025-07-07T00:00:00Z: 525.72', 'Lauren Gomez'],
+['Thomas Jordan', '2025-07-07T00:00:00Z: 308.41', 'Daniel Miller'],
+['Julia Reed', '2025-07-07T00:00:00Z: 334.73', 'Daniel Miller'],
+['Joseph Roberts', '2025-07-07T00:00:00Z: 958.67', 'Daniel Miller'],
+['Anna Griffin', '2025-07-08T00:00:00Z: 778.34', 'Jonathan Lopez'],
+['Rebecca Torres', '2025-07-08T00:00:00Z: 935.38', 'Paul Baird'],
+['Beverly Rosales', '2025-07-08T00:00:00Z: 466.62', 'Daniel Miller'],
+['Daniel Miller', '2025-07-08T00:00:00Z: 175.53', 'Shaun Lowery'],
+['Susan Oneill', '2025-07-08T00:00:00Z: 395.77', 'Daniel Miller'],
+['Susan Oneill', '2025-07-08T00:00:00Z: 231.54', 'Daniel Miller'],
+['Mitchell Hodges', '2025-07-08T00:00:00Z: 368.78', 'Daniel Miller'],
+['Johnny Harvey', '2025-07-08T00:00:00Z: 299.66', 'Kyle Daniels'],
+['Cindy Washington', '2025-07-09T00:00:00Z: 272.52', 'Daniel Miller'],
+['Pam Bell', '2025-07-09T00:00:00Z: 565.45', 'Daniel Miller'],
+['Jane Russell', '2025-07-09T00:00:00Z: 240.66', 'Daniel Miller'],
+['Douglas Hall', '2025-07-09T00:00:00Z: 767.89', 'Daniel Miller'],
+['Brian Olson', '2025-07-09T00:00:00Z: 260.5', 'Jacob Fuller'],
+['Sarah Brown', '2025-07-09T00:00:00Z: 123.01', 'Jacob Fuller'],
+['Chad Mcintosh', '2025-07-10T00:00:00Z: 133.14', 'Daniel Miller'],
+['Michelle Steele', '2025-07-10T00:00:00Z: 575.43', 'Deanna Jones'],
+['Craig Dennis', '2025-07-10T00:00:00Z: 717.9', 'Daniel Miller'],
+['Kathleen Hernandez', '2025-07-11T00:00:00Z: 248.09', 'Daniel Miller'],
+['Kelly Schultz', '2025-07-11T00:00:00Z: 676.83', 'Daniel Miller'],
+['Kyle Daniels', '2025-07-11T00:00:00Z: 321.78', 'Susan Allen'],
+['Jessica Miller', '2025-07-11T00:00:00Z: 490.85', 'Daniel Miller'],
+['John Johnson', '2025-07-11T00:00:00Z: 892.56', 'Eric Murphy'],
+['Alan Medina', '2025-07-11T00:00:00Z: 350.6', 'John Allen']
+]
+                
+                // 将三元组转换为图数据
+                const graphData = convertTripletsToGraphData(triplets);
+                
+                // 保存图数据供全屏使用
+                window.currentGraphData = graphData;
+                
+                // 渲染图谱
+                renderKnowledgeGraph(graphData);
+            }, 500);
         }
-        
-        // 隐藏进度条
-        if (graphProgressContainer) {
-            graphProgressContainer.style.display = 'none';
-        }
-    });
-}
-        // 完成图谱生成 - 使用真实数据
-function completeGraphGeneration(triplets) {
-    graphGenerated = true;
-    
-    const generateGraphBtn = document.getElementById('generate-graph-btn');
-    if (generateGraphBtn) {
-        generateGraphBtn.textContent = 'Visualization';
-        generateGraphBtn.disabled = false;
-    }
-    
-    // 隐藏进度条
-    const graphProgressContainer = document.getElementById('graph-progress-container');
-    if (graphProgressContainer) {
-        graphProgressContainer.style.display = 'none';
-    }
-    
-    // 使用后端返回的三元组数据
-    if (triplets && triplets.length > 0) {
-        // 将三元组转换为图数据
-        const graphData = convertTripletsToGraphData(triplets);
-        
-        // 保存图数据供全屏使用
-        window.currentGraphData = graphData;
-        
-        // 渲染图谱
-        renderKnowledgeGraph(graphData);
-    } else {
-        // 如果没有数据，显示空状态
-        const graphContainer = document.getElementById('graph-container');
-        graphContainer.innerHTML = `
-            <div class="flex items-center justify-center h-full">
-                <div class="text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                    </svg>
-                    <p class="mt-2 text-lg text-gray-500">未生成有效的图谱数据</p>
-                </div>
-            </div>
-        `;
-    }
-}
+
         // 高亮图谱中与选中文件相关的节点
         function highlightGraphNodes(filename) {
             if (!window.currentCytoscapeInstance) return;
@@ -4073,21 +4730,68 @@ function completeGraphGeneration(triplets) {
 
         function formatDate(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            const currentLang = localStorage.getItem('app_lang') || 'zh-CN';
+            
+            if (currentLang === 'zh-CN') {
+                // 中文格式：2024年12月6日
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1; // 0-11 -> 1-12
+                const day = date.getDate();
+                
+                // 获取月份翻译
+                const monthKeys = ['month_jan', 'month_feb', 'month_mar', 'month_apr', 'month_may', 'month_jun',
+                                  'month_jul', 'month_aug', 'month_sep', 'month_oct', 'month_nov', 'month_dec'];
+                let monthText = month.toString();
+                if (window.HTML_MAP && window.HTML_MAP[monthKeys[month - 1]]) {
+                    monthText = window.HTML_MAP[monthKeys[month - 1]];
+                } else {
+                    // 如果翻译还没加载，使用默认格式
+                    monthText = month.toString();
+                }
+                
+                return `${year}年${monthText}${day}日`;
+            } else {
+                // 英文格式：Dec 6, 2024
+                // 获取月份翻译
+                const month = date.getMonth(); // 0-11
+                const monthKeys = ['month_jan', 'month_feb', 'month_mar', 'month_apr', 'month_may', 'month_jun',
+                                  'month_jul', 'month_aug', 'month_sep', 'month_oct', 'month_nov', 'month_dec'];
+                let monthText = date.toLocaleDateString('en-US', { month: 'short' });
+                if (window.HTML_MAP && window.HTML_MAP[monthKeys[month]]) {
+                    monthText = window.HTML_MAP[monthKeys[month]];
+                }
+                const day = date.getDate();
+                const year = date.getFullYear();
+                return `${monthText} ${day}, ${year}`;
+            }
         }
 
         function getFileType(filename) {
             const ext = filename.split('.').pop().toLowerCase();
-            const types = {
-                'txt': 'Text',
-                'pdf': 'PDF',
-                'doc': 'Word',
-                'docx': 'Word',
-                'md': 'Markdown',
-                'json': 'JSON',
-                'csv': 'CSV'
+            const typeMap = {
+                'txt': 'file_type_text',
+                'pdf': 'file_type_pdf',
+                'doc': 'file_type_word',
+                'docx': 'file_type_word',
+                'md': 'file_type_markdown',
+                'json': 'file_type_json',
+                'csv': 'file_type_csv'
             };
-            return types[ext] || 'File';
+            
+            const typeKey = typeMap[ext] || 'file_type_file';
+            
+            // 优先使用window.HTML_MAP获取翻译
+            if (window.HTML_MAP && window.HTML_MAP[typeKey]) {
+                return window.HTML_MAP[typeKey];
+            }
+            
+            // 如果还没有加载，使用getTranslation
+            return getTranslation(typeKey, typeKey === 'file_type_text' ? 'Text' : 
+                                 typeKey === 'file_type_pdf' ? 'PDF' :
+                                 typeKey === 'file_type_word' ? 'Word' :
+                                 typeKey === 'file_type_markdown' ? 'Markdown' :
+                                 typeKey === 'file_type_json' ? 'JSON' :
+                                 typeKey === 'file_type_csv' ? 'CSV' : 'File');
         }
 
         // 将三元组转换为图数据

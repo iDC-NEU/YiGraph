@@ -5,8 +5,6 @@ import os
 import json
 import asyncio
 import base64
-import yaml
-
 from flask import Blueprint, jsonify, request
 from flask_socketio import emit, join_room, leave_room
 sys.path.append("../../")
@@ -18,20 +16,9 @@ from document_schema import (
     count_files_in_knowledge_base,
     update_all_knowledge_bases_file_count
 )
-#from document_schema import load_knowledge_bases
+from document_schema import load_knowledge_bases
 
 from .config import knowledge_bases
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# 在文件开头添加YAML文件路径
-GRAPH_SCHEMAS_PATH = os.path.join(
-    current_dir, 
-    "../../../aag/data_pipeline/data_transformer/dataset_schemas/graph_schemas.yaml"
-)
-TEXT_SCHEMAS_PATH = os.path.join(
-    current_dir,
-    "../../../aag/data_pipeline/data_transformer/dataset_schemas/text_schemas.yaml"
-)
 
 logger = logging.getLogger(__name__)
 
@@ -40,150 +27,6 @@ bp = Blueprint("manage", __name__)
 # 确保上传目录存在 - 修改为前一个目录下的debug/files
 UPLOAD_BASE_DIR = os.path.join(os.path.dirname(__file__), "..", "debug", "files")
 os.makedirs(UPLOAD_BASE_DIR, exist_ok=True)
-
-def load_yaml_file(file_path):
-    """加载YAML文件"""
-    try:
-        if os.path.exists(file_path):
-            with open(file_path, 'r', encoding='utf-8') as f:
-                return yaml.safe_load(f)
-        return None
-    except Exception as e:
-        logger.error(f"加载YAML文件失败 {file_path}: {str(e)}")
-        return None
-
-def check_file_parsed_status(file_name, dataset_type):
-    """
-    检查文件是否已解析
-    返回: True(已解析)/False(未解析)
-    """
-    try:
-        # 从文件名提取基础名称（去掉扩展名）
-        base_name = file_name.split('.')[0]
-        
-        if dataset_type == 'graph':
-            # 检查graph_schemas.yaml
-            if os.path.exists(TEXT_SCHEMAS_PATH):
-                print(f"路径存在: {TEXT_SCHEMAS_PATH}")
-            else:
-                print(f"路径不存在: {TEXT_SCHEMAS_PATH}")
-            graph_data = load_yaml_file(GRAPH_SCHEMAS_PATH)
-            logger.info(f"这里可以")
-            logger.info(GRAPH_SCHEMAS_PATH)
-            if graph_data in graph_data:
-                logger.info(graph_data)
-                logger.info(f"找到yaml文件")
-                for dataset in graph_data['datasets']:
-                    logger.info(dataset.get('name'))
-                    if dataset.get('name') == base_name:
-                        
-                        logger.info(f"文件 {file_name} 在graph_schemas.yaml中找到，解析状态: 已解析")
-                        return True
-        
-        elif dataset_type == 'text':
-            # 检查text_schemas.yaml
-            if os.path.exists(TEXT_SCHEMAS_PATH):
-                logger.info(f"路径存在: {TEXT_SCHEMAS_PATH}")
-            else:
-                logger.info(f"路径不存在: {TEXT_SCHEMAS_PATH}")
-            text_data = load_yaml_file(GRAPH_SCHEMAS_PATH)
-            logger.info(f"这里可以")
-            logger.info(TEXT_SCHEMAS_PATH)
-            if True:
-                logger.info(text_data)
-                logger.info(f"找到yaml文件")
-                for dataset in text_data['datasets']:
-                    logger.info("#########",dataset.get('name'))
-                    if dataset.get('name') == base_name:
-                        logger.info(f"文件 {file_name} 在text_schemas.yaml中找到，解析状态: 已解析")
-                        return True
-        
-        logger.info(f"文件 {file_name} 未在YAML文件中找到，解析状态: 未解析")
-        return False
-        
-    except Exception as e:
-        logger.error(f"检查文件解析状态失败 {file_name}: {str(e)}")
-        return False
-
-def get_all_files_parsed_status(kb_id, files):
-    """
-    获取数据集所有文件的解析状态
-    返回: {
-        'all_parsed': True/False,
-        'file_status': {
-            'file1.txt': True,
-            'file2.pdf': False,
-            ...
-        }
-    }
-    """
-    try:
-        # 获取数据集类型
-        dataset_type = get_dataset_type_from_json(kb_id)
-        
-        file_status = {}
-        all_parsed = True
-        
-        for file_name in files:
-            is_parsed = check_file_parsed_status(file_name, dataset_type)
-            file_status[file_name] = is_parsed
-            if not is_parsed:
-                all_parsed = False
-        logger.info({
-            'all_parsed': all_parsed,
-            'file_status': file_status,
-            'dataset_type': dataset_type
-        })
-        return {
-            'all_parsed': all_parsed,
-            'file_status': file_status,
-            'dataset_type': dataset_type
-        }
-        
-    except Exception as e:
-        logger.error(f"获取文件解析状态失败: {str(e)}")
-        return {
-            'all_parsed': False,
-            'file_status': {},
-            'dataset_type': 'unknown'
-        }
-
-# 添加新的API端点来检查解析状态
-@bp.route('/api/check_parsing_status', methods=['POST'])
-def api_check_parsing_status():
-    """检查数据集所有文件的解析状态"""
-    try:
-        data = request.get_json()
-        kb_id = data.get('kb_id')
-        files = data.get('files', [])
-        
-        if not kb_id:
-            return jsonify({
-                'success': False,
-                'error': 'Missing kb_id'
-            }), 400
-        
-        logger.info(f"检查解析状态请求: 知识库 {kb_id}, 文件数 {len(files)}")
-        
-        # 获取解析状态
-        parsing_status = get_all_files_parsed_status(kb_id, files)
-        
-        return jsonify({
-            'success': True,
-            'kb_id': kb_id,
-            'all_parsed': parsing_status['all_parsed'],
-            'file_status': parsing_status['file_status'],
-            'dataset_type': parsing_status['dataset_type'],
-            'message': f"解析状态: {len(files)}个文件中{sum(parsing_status['file_status'].values())}个已解析"
-        })
-        
-    except Exception as e:
-        logger.error(f"检查解析状态失败: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
 
 def get_knowledge_base_name(kb_id):
     """根据知识库ID获取知识库名称"""
@@ -252,29 +95,8 @@ def get_files_for_knowledge_base(kb_id):
         logger.error(f"获取知识库 {kb_id} 文件列表错误: {str(e)}")
         return []
 
-def get_dataset_type_from_json(kb_id):
-    """从knowledge_bases_data.json文件中获取知识库类型"""
-    try:
-        # 构建knowledge_bases_data.json文件的路径
-        json_path = os.path.join(os.path.dirname(__file__), "..", "knowledge_bases_data.json")
-        
-        with open(json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        # 查找匹配的知识库
-        for kb in data.get("knowledge_bases", []):
-            if str(kb["id"]) == str(kb_id):
-                return kb["文件类型"]  # 返回 "text" 或 "graph"
-        
-        # 如果没有找到，返回默认类型
-        return "text"
-    except Exception as e:
-        logger.error(f"从JSON文件获取数据集类型失败: {str(e)}")
-        return "text"  # 出错时返回默认类型
-
 @bp.route('/api/knowledge_bases/<kb_id>/files', methods=['GET'])
 def get_knowledge_base_files(kb_id):
-    update_all_knowledge_bases_file_count()
     """获取指定知识库的文件列表"""
     try:
         files = get_files_for_knowledge_base(kb_id)
@@ -599,30 +421,56 @@ def get_knowledge_bases1():
             'error': str(e)
         }), 500
 
+
 @bp.route('/api/dataset_type', methods=['GET'])
 def get_dataset_type():
-    """获取数据集类型 - 从JSON文件动态获取"""
+    """获取数据集类型"""
     kb_id = request.args.get('kb_id')
     
     if not kb_id:
         return jsonify({
             'success': False,
-            'error': 'Missing kb_id parameter'
+            'error': '缺少kb_id参数',
+            'dataset_type': 'text'
         }), 400
     
     try:
-        # 从JSON文件获取真实的数据集类型
-        dataset_type = get_dataset_type_from_json(kb_id)
+        # 从实际数据源读取知识库类型
+        knowledge_bases = load_knowledge_bases()
+        kb_id_int = int(kb_id)
         
+        # 遍历查找匹配的知识库
+        for kb in knowledge_bases:
+            if kb.get("id") == kb_id_int:
+                dataset_type = kb.get("文件类型", "text")  # 默认为text
+                logger.info(f"找到知识库 {kb_id}: 类型 = {dataset_type}")
+                return jsonify({
+                    'success': True,
+                    'dataset_type': dataset_type,
+                    'kb_id': kb_id
+                })
+        
+        # 如果没有找到，返回默认值
+        logger.warning(f"未找到知识库 {kb_id}，返回默认类型 'text'")
         return jsonify({
             'success': True,
-            'dataset_type': dataset_type
+            'dataset_type': 'text',
+            'kb_id': kb_id
         })
-    except Exception as e:
-        logger.error(f"获取数据集类型失败: {str(e)}")
+        
+    except (ValueError, TypeError) as e:
+        logger.error(f"kb_id 转换错误: {str(e)}")
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': f'Invalid kb_id: {kb_id}',
+            'dataset_type': 'text'
+        }), 400
+    except Exception as e:
+        logger.error(f"获取数据集类型错误: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'dataset_type': 'text'
         }), 500
 
 
@@ -734,14 +582,14 @@ def api_parse_control():
         print(name_without_ext)
         #a1=(i for i in )
 
-        socketserver = DummySocket([json.dumps(
-            {"action":"create_kb",
-            "file_path":file_path,
-            "graph_name":name_without_ext,
-            "db_name":kb_name}
+        # socketserver = DummySocket([json.dumps(
+        #     {"action":"create_kb",
+        #     "file_path":file_path,
+        #     "graph_name":name_without_ext,
+        #     "db_name":kb_name}
 
-        )])
-        asyncio.run(server_Test.handler(socketserver))
+        # )])
+        # asyncio.run(server_Test.handler(socketserver))
 
         # ============================================
         # 在这里添加您的解析逻辑
@@ -778,87 +626,6 @@ def api_parse_control():
         
     except Exception as e:
         logger.error(f"解析控制处理错误: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-@bp.route('/api/generate_graph', methods=['POST'])
-def api_generate_graph():
-    """HTTP API: 生成知识图谱"""
-    try:
-        data = request.get_json()
-        kb_id = data.get('kb_id')
-        kb_name = data.get('kb_name')
-        files = data.get('files', [])
-        
-        logger.info(f"=== 生成图谱请求 ===")
-        logger.info(f"知识库ID: {kb_id}")
-        logger.info(f"知识库名称: {kb_name}")
-        logger.info(f"文件列表: {files}")
-        graph_name1 = files[0].split('.')[0]
-        logger.info(graph_name1)
-        if not kb_id:
-            return jsonify({
-                'success': False,
-                'error': 'Missing kb_id'
-            }), 400
-        
-        # 首先检查所有文件是否已解析
-        parsing_status = get_all_files_parsed_status(kb_id, files)
-        if not parsing_status['all_parsed']:
-            unparsed_files = [f for f, status in parsing_status['file_status'].items() if not status]
-            return jsonify({
-                'success': False,
-                'error': f'以下文件尚未解析: {", ".join(unparsed_files)}',
-                'unparsed_files': unparsed_files
-            }), 400
-        
-        # 获取知识库名称
-        kb_real_name = get_knowledge_base_name(kb_id)
-        
-        # ============================================
-        # 在这里调用您的三元组生成逻辑
-        # ============================================
-        
-        logger.info(f"=== 图谱生成请求信息 ===")
-        logger.info(f"知识库ID: {kb_id}")
-        logger.info(f"知识库显示名称: {kb_name}")
-        logger.info(f"知识库实际名称: {kb_real_name}")
-        logger.info(f"文件数量: {len(files)}")
-        for file in files:
-            logger.info(f"  - {file}")
-        logger.info(f"===================")
-        
-        # ============================================
-        # 这里是您需要实现的三元组生成逻辑
-        # 请替换下面的示例代码
-        # ============================================
-        
-       
-         # 示例三元组数据 - 请替换为您的实际逻辑
-        msg12 = [json.dumps({"action": "get_triplets", 
-                    "graph_name": graph_name1,
-                    "db_name": "debug_file"})]
-        a33 = DummySocket(msg12)
-        asyncio.run(server_Test.handler(a33))
-        triplets = server_Test.triplets111
-        # ============================================
-        # 三元组生成逻辑结束
-        # ============================================
-        
-        # 返回成功响应
-        return jsonify({
-            'success': True,
-            'kb_id': kb_id,
-            'kb_name': kb_name,
-            'file_count': len(files),
-            'triplets': triplets,
-            'message': f'成功生成知识图谱，包含 {len(triplets)} 个三元组'
-        })
-        
-    except Exception as e:
-        logger.error(f"生成图谱处理错误: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)

@@ -1,8 +1,5 @@
 from flask import Blueprint, request, jsonify
 import logging
-import sys
-import json
-import asyncio
 from document_schema import (
     load_knowledge_bases, 
     create_knowledge_base, 
@@ -10,8 +7,6 @@ from document_schema import (
     count_files_in_knowledge_base,
     update_all_knowledge_bases_file_count
 )
-sys.path.append("../../")
-from aag.api.DocumentAPI import server_Test,DummySocket
 
 # 创建蓝图
 bp = Blueprint('documents', __name__, url_prefix='/api')
@@ -70,13 +65,6 @@ def create_knowledge_base_route():
             file_type=file_type
         )
 
-
-        msg12 = [json.dumps({"action": "create", 
-                    "name": data.get("名称"),
-                    "type": file_type})]
-        a33 = DummySocket(msg12)
-        asyncio.run(server_Test.handler(a33))
-
         if new_kb:
             logger.info(f"成功创建知识库: {new_kb['名称']}, 文件类型: {file_type}")
             return jsonify({
@@ -97,41 +85,17 @@ def create_knowledge_base_route():
             "message": str(e)
         }), 500
 
+# 删除知识库
 @bp.route("/knowledge_bases/<int:kb_id>", methods=["DELETE"])
 def delete_knowledge_base_route(kb_id):
     """删除知识库"""
     try:
         logger.info(f"收到删除知识库请求，ID: {kb_id}")
         
-        # 获取要删除的知识库名称，用于后续调用 
-        knowledge_bases = load_knowledge_bases()
-        kb_to_delete = None
-        for kb in knowledge_bases:
-            if kb.get("id") == kb_id:
-                kb_to_delete = kb
-                break
-        
-        if not kb_to_delete:
-            logger.warning(f"未找到指定的知识库 ID: {kb_id}")
-            return jsonify({
-                "success": False,
-                "error": "未找到指定的知识库"
-            }), 404
-        
-        kb_name = kb_to_delete.get("名称")
-        
         success = delete_knowledge_base(kb_id)
         
         if success:
-           
-            msg12 = [json.dumps({
-                "action": "delete_kb", 
-                "graph_name": kb_name  
-            })]
-            a33 = DummySocket(msg12)
-            asyncio.run(server_Test.handler(a33))
-            
-            logger.info(f"成功删除知识库 ID: {kb_id}, 名称: {kb_name}")
+            logger.info(f"成功删除知识库 ID: {kb_id}")
             return jsonify({
                 "success": True,
                 "message": f"成功删除知识库"
@@ -150,7 +114,6 @@ def delete_knowledge_base_route(kb_id):
             "error": "删除知识库失败",
             "message": str(e)
         }), 500
-        
 
 # 获取知识库文件个数（实时统计，不更新JSON）
 @bp.route("/knowledge_bases/<int:kb_id>/file_count", methods=["GET"])

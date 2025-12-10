@@ -1,6 +1,71 @@
 document.addEventListener('DOMContentLoaded', function() {
     const socket = io(); 
 
+    // --- 国际化辅助函数 ---
+    // 获取翻译文本，如果未加载则返回默认值
+    function t(key, defaultVal) {
+        if (window.LANG && window.LANG[key]) {
+            return window.LANG[key];
+        }
+        return defaultVal || key;
+    }
+
+    // 更新当前页面上已存在的 JS 生成元素的文本
+    function updateJSTranslations() {
+        // 1. 更新带有 data-i18n 属性的常规元素 (如按钮、提示文本)
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (key) {
+                // 如果是 INPUT，更新 placeholder
+                if (el.tagName === 'INPUT') {
+                    el.placeholder = t(key, el.placeholder);
+                } 
+                // 如果是 ContentEditable DIV (聊天输入框)
+                else if (el.id === 'chat-input') {
+                    el.setAttribute('placeholder', t(key, el.getAttribute('placeholder')));
+                }
+                // 普通文本
+                else {
+                    el.innerText = t(key, el.innerText);
+                }
+            }
+        });
+
+        // 2. 更新聊天记录中的名字和状态
+        // 这里的元素没有 data-i18n 属性，所以需要通过类名 .sender-name 单独选取
+        document.querySelectorAll('.sender-name').forEach(el => {
+            const senderKey = el.dataset.senderKey; // 'sender_you' 或 'sender_ai'
+            const isThinking = el.dataset.thinking === 'true';
+            
+            // 获取名字翻译
+            // 如果 t() 返回 key 本身 (说明没找到翻译)，且 key 是 sender_ai，强制显示 'AAG'
+            let displayName = t(senderKey);
+            if (displayName === senderKey && senderKey === 'sender_ai') {
+                displayName = 'AAG';
+            }
+
+            // 获取状态后缀翻译
+            const thinkingSuffix = isThinking ? t('status_thinking', ' (Thinking...)') : '';
+            
+            // 更新 HTML
+            el.innerHTML = displayName + thinkingSuffix;
+        });
+
+        // 3. 更新输入框 Placeholder (兜底)
+        const chatInput = document.getElementById('chat-input');
+        if(chatInput) {
+            chatInput.setAttribute('placeholder', t('input_placeholder', 'Type your message...'));
+        }
+    }
+
+    // 监听 HTML 页面发出的语言加载完成事件
+    document.addEventListener('languageLoaded', () => {
+        updateJSTranslations();
+        // 重新渲染侧边栏标题（如果是默认标题）
+        // 这里略过，保持用户输入的一致性
+    });
+    // -----------------------
+
     mermaid.initialize({
         startOnLoad: false,
         theme: 'neutral',
@@ -18,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatContainer = document.getElementById('chat-container');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
-    const modelRadios = document.querySelectorAll('input[name="language-model"]');
     const conversationList = document.querySelector('#chatAside ul');
 
     // Storage Keys
@@ -52,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Session Management Functions
     function saveState() {
-        if (isProcessing) return; // 避免在流传输最频繁的时候保存，通常在结束时保存
+        if (isProcessing) return; 
         
         const sessionData = {};
         for (const [id, session] of Object.entries(chatSessions)) {
@@ -69,7 +133,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 强制保存（用于流结束时）
     function forceSaveState() {
         const sessionData = {};
         for (const [id, session] of Object.entries(chatSessions)) {
@@ -143,6 +206,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function populateModelDropdown(models) {
         const dropdown = document.getElementById('model-dropdown');
         dropdown.innerHTML = '';
+        
+        // 1. 渲染现有的模型列表
         models.forEach(model => {
             const option = document.createElement('div');
             option.className = 'px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-sm';
@@ -154,8 +219,36 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             dropdown.appendChild(option);
         });
+
+        // 2. 添加分隔线 (美观)
+        const separator = document.createElement('div');
+        separator.className = 'border-t border-slate-200 dark:border-slate-800 my-1 mx-2';
+        dropdown.appendChild(separator);
+
+        // 3. 添加配置跳转按钮 (+)
+        const configBtn = document.createElement('div');
+        // 使用 text-blue-600 让它看起来像是一个操作按钮，而不是普通选项
+        configBtn.className = 'px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-sm text-blue-600 dark:text-blue-400 flex items-center gap-2 font-medium';
+        
+        // 使用 t() 函数支持国际化，如果没找到翻译则显示 'Configure Models'
+        const btnText = typeof t === 'function' ? t('btn_config_models', 'Configure Models') : 'Configure Models';
+        
+        configBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>${btnText}</span>
+        `;
+        
+        configBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            window.location.href = "/model_manager";
+        });
+
+        dropdown.appendChild(configBtn);
     }
 
+    
     function populateDatasetDropdown(datasets) {
         const dropdown = document.getElementById('dataset-dropdown');
         dropdown.innerHTML = '';
@@ -206,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             if (data.error) {
                 console.error('WebSocket Error:', data.error);
-                alert('Server Error: ' + data.error);
+                alert(t('server_error', 'Server Error: ') + data.error);
                 resetSendButton();
                 return;
             }
@@ -226,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     exitDagModificationMode();
                 }
                 isDagReviewMode = false;
-                chatInput.setAttribute('placeholder', 'Type your message...');
+                chatInput.setAttribute('placeholder', t('input_placeholder', 'Type your message...'));
                 
                 forceSaveState();
                 return;
@@ -255,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Modified createMessageBlock to support State Restoration
+    // Modified createMessageBlock to support State Restoration and i18n
     function createMessageBlock(sender, isThinking = false, content = '', saveToHistory = true) {
         if (!activeSessionId) {
              createNewConversation();
@@ -282,15 +375,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 sender: sender,
                 isThinking: isThinking,
                 content: content,
-                contentType: 'text', // Default, will update
+                contentType: 'text', 
                 timestamp: new Date().toISOString()
             };
             if (!currentSession.messages) currentSession.messages = [];
             currentSession.messages.push(msgData);
             block.dataset.msgIndex = currentSession.messages.length - 1;
-        } else if (!saveToHistory && block.dataset.msgIndex === undefined) {
-             // If restoring, we might want to set index manually? 
-             // Currently handled by restore logic loop
         }
 
         let contentArea = '';
@@ -331,13 +421,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const avatarMargin = sender === 'user' ? 'ml-2' : 'mr-2';
         const userNameAlign = sender === 'user' ? 'text-right' : '';
         
+        // i18n logic for Name
+        const senderKey = sender === 'user' ? 'sender_you' : 'sender_ai';
+        const senderName = t(senderKey);
+        const thinkingSuffix = isThinking ? t('status_thinking', ' (thinking...)') : '';
+        
         block.innerHTML = `
             <div class="flex ${flexDirection} items-center gap-x-2">
                 <div class="inline-flex flex-shrink-0 h-8 w-8 rounded-full overflow-hidden border-2 border-white dark:border-slate-700 ${avatarMargin}">
                     <img src="${sender === 'user' ? '/static/images/avatar/human.jpeg' : '/static/images/avatar/bots/AAG.png'}" alt="" />
                 </div>
-                <h6 class="font-bold text-sm capitalize text-slate-600 dark:text-slate-100 ${userNameAlign}">
-                    ${sender === 'user' ? 'you' : 'AAG'}${isThinking ? ' (thinking)' : ''}
+                <h6 class="sender-name font-bold text-sm capitalize text-slate-600 dark:text-slate-100 ${userNameAlign}" 
+                    data-i18n-dynamic="true" 
+                    data-sender-key="${senderKey}" 
+                    data-thinking="${isThinking}">
+                    ${senderName}${thinkingSuffix}
                 </h6>
             </div>
             <div class="${contentContainerClass} w-full">
@@ -352,7 +450,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 21h15" />
                         </svg>
                     </button>
-                    <!-- Other buttons omitted for brevity but preserved in functionality -->
                 </div>
                 ` : ''}
             </div>
@@ -376,7 +473,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (sender === 'ai' && !isThinking) {
             currentResultBlock = block;
             if (!saveToHistory) {
-                 // Show actions immediately for restored blocks
                  const actions = block.querySelector('.result-actions');
                  if (actions) actions.classList.remove('opacity-0');
             }
@@ -386,19 +482,20 @@ document.addEventListener('DOMContentLoaded', function() {
         return block;
     }
 
-    // Helper to toggle thinking state specifically (useful for restore)
+    // Helper to toggle thinking state specifically
     function toggleThinkingBlockState(block, forceCollapse = false) {
         const thinkingText = block.querySelector('.thinking-text');
         const collapseBtn = block.querySelector('.collapse-thinking-btn');
         if (!thinkingText || !collapseBtn) return;
 
         const originalContent = thinkingText.innerHTML;
-        if (!originalContent) return; // Don't collapse empty
+        if (!originalContent) return; 
 
         if (forceCollapse) {
              const summary = document.createElement('div');
              summary.className = 'text-blue-600 dark:text-blue-400 cursor-pointer hover:underline';
-             summary.textContent = 'Show thinking process...';
+             summary.textContent = t('show_thinking', 'Show thinking process...'); // i18n
+             summary.setAttribute('data-i18n', 'show_thinking'); // Add marker
              summary.dataset.originalContent = originalContent;
              
              thinkingText.innerHTML = '';
@@ -452,10 +549,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const tooltipElement = document.createElement('div');
         tooltipElement.className = 'dag-modification-tooltip';
+        // i18n applied here
         tooltipElement.innerHTML = `
             <div class="tooltip-content">
                 <div class="tooltip-arrow"></div>
-                <p class="tooltip-text">Please enter your dag modification suggestions here(You can press ESC to cancel)</p>
+                <p class="tooltip-text" data-i18n="tooltip_dag_mod_input">${t('tooltip_dag_mod_input', 'Please enter your dag modification suggestions here (You can press ESC to cancel)')}</p>
                 <button class="tooltip-close">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -504,7 +602,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function exitDagModificationMode() {
         isDagReviewMode = false;
-        chatInput.setAttribute('placeholder', 'Type your message...');
+        chatInput.setAttribute('placeholder', t('input_placeholder', 'Type your message...'));
         
         const tooltip = document.querySelector('.dag-modification-tooltip');
         if (tooltip) {
@@ -556,6 +654,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!fullLabel) fullLabel = 'Untitled Task';
 
             let shortContent = fullLabel;
+            
             const sentenceEnd = fullLabel.search(/[。？！?.！;；]/);
             if (sentenceEnd > 10 && sentenceEnd < 60) {
                 shortContent = fullLabel.substring(0, sentenceEnd + 1);
@@ -563,14 +662,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const words = fullLabel.split(/\s+/);
                 if (words.length > 4) {
                     shortContent = words.slice(0, 4).join(' ') + '...';
+                } else if (fullLabel.length > 15) {
+                    shortContent = fullLabel.substring(0, 15) + '...';
                 }
             }
 
             const MAX_LABEL_LENGTH = 40; 
             let finalLabel = `${nodeId}: ${shortContent}`;
+            
             if (finalLabel.length > MAX_LABEL_LENGTH) {
-                const available = MAX_LABEL_LENGTH - nodeId.length - 3; 
-                shortContent = shortContent.substring(0, available - 3) + '...';
+                const available = Math.max(0, MAX_LABEL_LENGTH - nodeId.length - 2); 
+                if (shortContent.length > available) {
+                    const cutLength = Math.max(0, available - 3);
+                    shortContent = shortContent.substring(0, cutLength) + '...';
+                }
                 finalLabel = `${nodeId}: ${shortContent}`;
             }
 
@@ -585,22 +690,22 @@ document.addEventListener('DOMContentLoaded', function() {
         mermaidContainer.textContent = mermaidCode;
         dagWrapper.appendChild(mermaidContainer);
         
-        // 按钮和示例代码部分保持不变
         if (isDagModeEnabled) {
             const buttonContainer = document.createElement('div');
             buttonContainer.className = 'mt-6 flex gap-4 justify-center';
+            // Added data-i18n and t() calls
             buttonContainer.innerHTML = `
                 <button class="dag-yes-btn px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium shadow-md transition-all duration-200 flex items-center gap-2 transform hover:scale-105">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
-                    Start Analysing
+                    <span data-i18n="btn_start_analysis">${t('btn_start_analysis', 'Start Analysing')}</span>
                 </button>
                 <button class="dag-no-btn px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-md transition-all duration-200 flex items-center gap-2 transform hover:scale-105">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
                     </svg>
-                    Modify DAG
+                    <span data-i18n="btn_modify_dag">${t('btn_modify_dag', 'Modify DAG')}</span>
                 </button>
             `;
             dagWrapper.appendChild(buttonContainer);
@@ -609,24 +714,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
             const exampleDiv = document.createElement('div');
             exampleDiv.className = 'mt-6 p-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50 text-left w-full max-w-2xl mx-auto';
+            // Added data-i18n and t() calls for Help Text
             exampleDiv.innerHTML = `
                 <div class="w-full text-left" style="text-align: left !important;">
                     <div class="bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
                         <h4 class="font-semibold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2 text-left">
-                            <span class="text-blue-500 text-lg">✨Edit the DAG by typing these commands directly in the chat box:</span>
+                            <span class="text-blue-500 text-lg" data-i18n="dag_tooltip_edit">${t('dag_tooltip_edit', '✨Edit the DAG by typing these commands directly in the chat box:')}</span>
                         </h4>
                         <div class="space-y-4 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                             <div class="flex items-start gap-3">
                                 <span class="text-blue-500 mt-0.5 flex-shrink-0">•</span>
-                                <div class="text-left"><strong class="text-blue-600 dark:text-blue-400">Add a node:</strong><span class="block mt-1">Insert a new node between node X and node Y: [new content]</span></div>
+                                <div class="text-left"><strong class="text-blue-600 dark:text-blue-400" data-i18n="dag_help_add">${t('dag_help_add', 'Add a node:')}</strong><span class="block mt-1" data-i18n="dag_help_add_desc">${t('dag_help_add_desc', 'Insert a new node between node X and node Y: [new content]')}</span></div>
                             </div>
                             <div class="flex items-start gap-3">
                                 <span class="text-blue-500 mt-0.5 flex-shrink-0">•</span>
-                                <div class="text-left"><strong class="text-blue-600 dark:text-blue-400">Modify a node:</strong><span class="block mt-1">Change node X to: [new full content]</span></div>
+                                <div class="text-left"><strong class="text-blue-600 dark:text-blue-400" data-i18n="dag_help_mod">${t('dag_help_mod', 'Modify a node:')}</strong><span class="block mt-1" data-i18n="dag_help_mod_desc">${t('dag_help_mod_desc', 'Change node X to: [new full content]')}</span></div>
                             </div>
                             <div class="flex items-start gap-3">
                                 <span class="text-blue-500 mt-0.5 flex-shrink-0">•</span>
-                                <div class="text-left"><strong class="text-blue-600 dark:text-blue-400">Delete a node:</strong><span class="block mt-1">Delete node X</span></div>
+                                <div class="text-left"><strong class="text-blue-600 dark:text-blue-400" data-i18n="dag_help_del">${t('dag_help_del', 'Delete a node:')}</strong><span class="block mt-1" data-i18n="dag_help_del_desc">${t('dag_help_del_desc', 'Delete node X')}</span></div>
                             </div>
                         </div>
                     </div>
@@ -637,7 +743,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         parentContainer.appendChild(dagWrapper);
 
-        // Tooltip logic 保持不变
         let tooltip = document.querySelector('.dag-tooltip');
         if (!tooltip) {
              tooltip = document.createElement('div');
@@ -651,14 +756,11 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.appendChild(tooltip);
         }
 
-        // --- 核心修复：延迟渲染逻辑 ---
-        // 定义渲染函数，包含了原本的 mermaid.init 和所有的 hover 事件绑定
         const runMermaidRender = () => {
             mermaid.init(undefined, `#${mermaidId}`).then(() => {
                 const svgElement = document.querySelector(`#${mermaidId} svg`);
                 if (!svgElement) return;
                 
-                // 渲染成功，显示容器
                 mermaidContainer.style.opacity = '1';
                 svgElement.style.margin = '0 auto';
                 svgElement.style.display = 'block';
@@ -666,7 +768,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const nodeMap = {};
                 dagData.nodes.forEach(node => { nodeMap[node.id] = node; });
                 
-                // 这里是原本的 applyPreciseHoverEffects 逻辑
                 const defs = svgElement.querySelector('defs') || document.createElementNS('http://www.w3.org/2000/svg', 'defs');
                 if (!svgElement.querySelector('defs')) svgElement.insertBefore(defs, svgElement.firstChild);
                 
@@ -709,9 +810,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                     return result.join('<br>');
                                 }
 
+                                // i18n applied to tooltip
                                 tooltip.innerHTML = `
-                                    <span class="font-bold text-blue-300 drop-shadow-md">Content:</span> ${wrapText(escapeHtml(node.label || 'No content available'), 55)}</span><br>
-                                    <span class="font-bold text-emerald-400 drop-shadow-md">Task Type:</span> ${escapeHtml(node.tasktype || 'Unknown')}        
+                                    <span class="font-bold text-blue-300 drop-shadow-md">${t('tooltip_content', 'Content:')}</span> ${wrapText(escapeHtml(node.label || 'No content available'), 55)}</span><br>
+                                    <span class="font-bold text-emerald-400 drop-shadow-md">${t('tooltip_task_type', 'Task Type:')}</span> ${escapeHtml(node.tasktype || 'Unknown')}        
                                 `.trim();
                                 tooltip.style.left = `${e.pageX + 10}px`;
                                 tooltip.style.top = `${e.pageY + 10}px`;
@@ -746,13 +848,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }).catch(err => {
                 console.error('DAG渲染失败:', err);
-                // 就算失败也显示出来，方便调试，或者显示错误信息
                 mermaidContainer.style.opacity = '1'; 
-                mermaidContainer.innerHTML = '<p class="text-red-500">Render Failed</p>';
+                mermaidContainer.innerHTML = `<p class="text-red-500" data-i18n="error_render">${t('error_render', 'Render Failed')}</p>`;
             });
         };
 
-        // 辅助函数：从 Group 获取 ID
         function getNodeIdFromGroup(nodeGroup, nodeMap) {
             const nodeGId = nodeGroup.id || '';
             let matchedNodeId = null;
@@ -767,14 +867,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.body.contains(dagWrapper)) {
             runMermaidRender();
         } else {
-            // 标记这个 mermaid 容器需要稍后渲染，并保存闭包函数
             mermaidContainer._pendingRender = runMermaidRender;
         }
         
         scrollToBottom();
     }
 
-    // Modified appendContentToBlock to Update State
     function appendContentToBlock(block, contentType, content) {
         let targetContainer;
         if (block.dataset.isThinking === 'true') {
@@ -796,7 +894,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (contentType === 'text') {
                     msg.content = (msg.content || '') + content;
                 } else if (contentType === 'dag') {
-                    msg.content = content; // Store the DAG object
+                    msg.content = content; 
                     if (content.id) msg.dagId = content.id;
                 }
             }
@@ -835,6 +933,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
+            .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
 
@@ -843,7 +942,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const thinkingText = currentThinkingBlock.querySelector('.thinking-text');
         const collapseBtn = currentThinkingBlock.querySelector('.collapse-thinking-btn');
         if (thinkingText && collapseBtn) {
-            // Find parent block if this was triggered from an inner element
             const block = thinkingText.closest('.message-block');
             const isCollapsed = thinkingText.querySelector('.text-blue-600') !== null;
             
@@ -856,8 +954,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     `;
                 }
             } else {
-                // When collapsing, the 'block' variable might not be currentThinkingBlock if triggered via event
-                // so we pass 'block' to helper or do it inline
                 toggleThinkingBlockState(block, true);
             }
         }
@@ -879,10 +975,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function collectAiResponseContent(resultBlock) {
         const contentContainer = resultBlock.querySelector('.result-content');
-        if (!contentContainer) return '（无内容）';
+        if (!contentContainer) return '（No content）';
         let text = contentContainer.innerText || contentContainer.textContent;
         const now = new Date();
-        const header = `=== AI 分析报告 ===\n生成时间: ${now.toLocaleString()}\n\n`;
+        const header = `=== AI Analysis Report ===\nTime: ${now.toLocaleString()}\n\n`;
         return header + text.trim();
     }
 
@@ -916,7 +1012,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             createMessageBlock('user', false, message);
             const currentSession = chatSessions[activeSessionId];
-            // 确保 updateCurrentSidebarTitle 逻辑依然有效
             if (currentSession && currentSession.messages && currentSession.messages.length === 1 && !isDagReviewMode) {
                 updateCurrentSidebarTitle(message);
             }
@@ -943,7 +1038,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (isDagReviewMode) {
             isDagReviewMode = false;
-            chatInput.setAttribute('placeholder', 'Type your message...');
+            chatInput.setAttribute('placeholder', t('input_placeholder', 'Type your message...'));
         }
     }
 
@@ -978,9 +1073,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
         if (e.target.closest('.collapse-thinking-btn')) {
             e.preventDefault();
-            // We need to identify which block
             const block = e.target.closest('.message-block');
-            currentThinkingBlock = block; // Update pointer for toggle function
+            currentThinkingBlock = block; 
             toggleThinkingBlock();
             return;
         }
@@ -991,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const textToCopy = codeElement.textContent;
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const originalText = e.target.textContent;
-                e.target.textContent = 'Copied!';
+                e.target.textContent = t('btn_copied', 'Copied!');
                 e.target.classList.add('success');
                 setTimeout(() => {
                     e.target.textContent = originalText;
@@ -1037,19 +1131,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         chatContainer.appendChild(newSession.container);
 
-        // --- 新增修复代码：检查并执行挂起的 Mermaid 渲染 ---
-        // 使用 requestAnimationFrame 确保 DOM 已经更新
         requestAnimationFrame(() => {
             const pendingMermaids = newSession.container.querySelectorAll('.mermaid');
             pendingMermaids.forEach(el => {
-                // 如果存在我们刚才挂载的 _pendingRender 函数，说明它还没渲染
                 if (el._pendingRender && typeof el._pendingRender === 'function') {
-                    el._pendingRender(); // 执行渲染（此时元素已在 DOM 中，Mermaid 可以正常计算）
-                    delete el._pendingRender; // 清除引用，防止重复
+                    el._pendingRender(); 
+                    delete el._pendingRender; 
                 }
             });
         });
-        // ------------------------------------------------
 
         currentThinkingBlock = null;
         currentResultBlock = null;
@@ -1072,16 +1162,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const sessionDiv = document.createElement('div');
         sessionDiv.className = 'session-wrapper w-full h-full flex flex-col justify-end'; 
         sessionDiv.id = sessionId;
+        
+        // i18n for default title
+        const defaultTitle = t('new_chat_default_title', 'New Conversation');
 
         chatSessions[sessionId] = {
             id: sessionId,
             container: sessionDiv,
             timestamp: new Date(),
-            title: 'New Conversation',
+            title: defaultTitle,
             messages: [] 
         };
 
-        addNewSidebarItem(sessionId);
+        addNewSidebarItem(sessionId, defaultTitle);
         switchSession(sessionId);
         
         chatInput.textContent = '';
@@ -1103,7 +1196,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function addNewSidebarItem(sessionId, customTitle = null) {
         if (!sessionId) return; 
 
-        const newTitle = customTitle || "New Chat " + new Date().toLocaleTimeString();
+        const newTitle = customTitle || t('new_chat_default_title', 'New Conversation') + " " + new Date().toLocaleTimeString();
         
         const li = document.createElement('li');
         li.className = 'group flex items-center justify-stretch max-w-full relative';
@@ -1120,7 +1213,6 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         if (conversationList) {
-            // Prevent duplicate insertion
             if (!conversationList.querySelector(`a[data-session-id="${sessionId}"]`)) {
                 conversationList.insertBefore(li, conversationList.firstChild);
             }
@@ -1145,7 +1237,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if(chatSessions[activeSessionId]) {
                     chatSessions[activeSessionId].title = titleText;
-                    saveState(); // Save title change
+                    saveState(); 
                 }
             }
         }
@@ -1211,5 +1303,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     loadState();
-    console.log('聊天界面初始化完成 (With Session Persistence)');
+    console.log('聊天界面初始化完成 (With i18n & Persistence)');
 });

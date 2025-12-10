@@ -25,3 +25,7 @@ def documents():
 @bp.route("/manage_dataset")
 def manage_dataset_page():
     return render_template("manage_dataset.html")
+
+@bp.route("/model_manager")
+def model_manager_page():
+    return render_template("model-manager.html")

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" id="pageroot">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="tongzhewang">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Model Manager Dashboard">
+    <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+    <title>Model Manager - Scribbler.AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/app.css') }}">
+</head>
+
+<body class="min-w-[320px] bg-slate-100 dark:bg-slate-900">
+    <div id="root">
+        <div class="flex min-h-screen max-w-full flex-col overflow-x-hidden pt-[calc(theme(space.16)+theme(space.1))]" id="#pagecontent">
+            <div class="fixed start-0 top-0 isolate z-[1020] w-full border-b border-slate-200 bg-white px-3 py-4 dark:border-slate-800 dark:bg-slate-950 xl:py-3">
+                <div class="container px-3">
+                    <div class="w-100 flex items-center justify-between">
+                        <div class="flex items-center gap-x-2">
+                            <div class="flex items-center gap-x-5">
+                                <a href="overview.html" class="flex-shrink-0">
+                                    <div class="flex items-center">
+                                        <img class="h-16 dark:hidden" src="/static/images/IDC-NEUNEW.jpg" alt="logo" />
+                                        <img class="hidden h-16 dark:block" src="/static/images/IDC-NEUNEW.jpg" alt="logo" />
+                                    </div>
+                                </a>
+                                <div class="hidden lg:block">
+                                    <div class="flex flex-col justify-center">
+                                        <h1 id="slogan-title" class="leading-tight text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+                                            Analytics-Augmented Generation
+                                        </h1>
+                                        <p class="leading-none text-sm text-blue-600 dark:text-blue-400">
+                                            <span id="slogan-sub-text">from</span> <span class="font-semibold">iDC-NEU</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="main-header peer fixed start-0 top-0 z-[1020] flex h-screen w-64 flex-shrink-0 -translate-x-full flex-col border-e border-slate-200 bg-white py-4 dark:border-slate-800 dark:bg-slate-950 max-xl:overflow-auto max-xl:transition-all xl:static xl:h-auto xl:w-auto xl:!translate-x-0 xl:border-e-0 xl:py-0 xl:transition-none rtl:translate-x-full [&.header-visible]:translate-x-0">
+                            <ul class="menu-head flex flex-col gap-x-4 px-4 xl:flex-row xl:items-center xl:space-x-6">
+                                <li class="menu-item group relative">
+                                    <a href="/" class="menu-link flex items-center px-4 py-3 text-base font-bold text-slate-600 transition-all duration-200 group-hover:text-blue-600 hover:text-blue-600 dark:text-slate-300 hover:dark:text-blue-400 xl:rounded-lg xl:py-2.5 group-hover:xl:bg-slate-50 dark:group-hover:xl:bg-slate-800/50">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+                                        <span id="nav-chat">Chat</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item group relative">
+                                    <a href="{{ url_for('pages.documents') }}" class="menu-link flex items-center px-4 py-3 text-base font-bold text-slate-600 transition-all duration-200 group-hover:text-blue-600 hover:text-blue-600 dark:text-slate-300 hover:dark:text-blue-400 xl:rounded-lg xl:py-2.5 group-hover:xl:bg-slate-50 dark:group-hover:xl:bg-slate-800/50">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <span id="nav-dataset">Dataset</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item group relative">
+                                    <a href="{{ url_for('pages.manage_dataset_page') }}" class="menu-link flex items-center px-4 py-3 text-base font-bold text-slate-600 transition-all duration-200 group-hover:text-blue-600 hover:text-blue-600 dark:text-slate-300 hover:dark:text-blue-400 xl:rounded-lg xl:py-2.5 group-hover:xl:bg-slate-50 dark:group-hover:xl:bg-slate-800/50">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        <span id="nav-file">File Management</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="header-toggle pointer-events-none fixed inset-0 z-[1019] bg-slate-950 bg-opacity-50 opacity-0 peer-[.header-visible]:pointer-events-auto peer-[.header-visible]:opacity-100 xl:!opacity-0"></div>
+                        
+                        <ul class="flex items-center gap-x-3 lg:gap-x-5">
+                            <li class="relative inline-flex">
+                                <button id="lang-toggle-btn" class="inline-flex h-8 items-center justify-center overflow-hidden rounded-md px-3 text-xs font-bold text-slate-500 transition-all hover:bg-slate-200 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200" title="Switch Language">
+                                    English 
+                                </button>
+                            </li>
+                            <li class="relative inline-flex">
+                                <button class="theme-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all *:pointer-events-none hover:bg-slate-200 hover:text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                    <i class="fas fa-sun hidden h-4 dark:block"></i>
+                                     <i class="fas fa-moon h-4 dark:hidden"></i>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative px-3 py-10">
+                <div class="container px-3">
+                    <div class="-mx-3 mb-7 flex items-center justify-between">
+                        <div class="px-3">
+                            <h2 id="model-page-title" class="mb-2 text-xl font-bold text-slate-700 dark:text-white"> All Models </h2>
+                            <ul class="inline-flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-300">
+                                <li>
+                                    <a href="{{ url_for('pages.overview') }}" id="breadcrumb-home" class="text-blue-500 hover:text-blue-700"> Home </a>
+                                </li>
+                                <li class="mt-0.5 inline-flex items-center">
+                                    <i class="fas fa-chevron-right text-[8px]"></i>
+                                </li>
+                                <li id="breadcrumb-models">Models</li>
+                            </ul>
+                        </div>
+                        <div class="px-3">
+                            <button id="createModelBtn" class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">
+                                Create New
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="rounded-md border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+                        <div class="flex items-center justify-between gap-3 px-5 py-5">
+                            <div class="w-full xs:w-64">
+                                <div class="relative isolate flex w-full">
+                                    <input id="searchPlaceholderM" placeholder="Search models..." class="z-10 w-full rounded-md border-slate-200 bg-white py-2 text-sm/[1.125rem] text-slate-600 placeholder:text-slate-400 focus:border-slate-200 focus:shadow-none focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200" type="text" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto scrollbar-thin scrollbar-track-slate-200 scrollbar-thumb-slate-600 dark:scrollbar-track-slate-800">
+                            <table class="w-full table-auto border-collapse border-b border-t border-slate-200 text-sm dark:border-slate-800">
+                                <thead class="text-slate-600 dark:text-slate-200">
+                                    <tr>
+                                        <th id="th-model-name" class="py-2 pe-5 ps-5 text-start last:sticky last:end-0 last:bg-white last:ps-2 last:dark:bg-slate-950"> Model Name </th>
+                                        <th id="th-base-url" class="py-2 pe-5 ps-5 text-start last:sticky last:end-0 last:bg-white last:ps-2 last:dark:bg-slate-950"> API Base URL </th>
+                                        <th id="th-created-at" class="py-2 pe-5 ps-5 text-start last:sticky last:end-0 last:bg-white last:ps-2 last:dark:bg-slate-950"> Created At </th>
+                                        <th class="py-2 pe-5 ps-5 text-start last:sticky last:end-0 last:bg-white last:ps-2 last:dark:bg-slate-950"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modelTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+
+                        <div class="flex flex-col justify-between gap-4 px-5 py-5 sm:flex-row sm:items-center">
+                            <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm ml-auto">
+                                <button class="relative z-20 inline-flex items-center border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white first:rounded-s-md last:rounded-e-md"> 1 </button>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <div id="createModelModal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black bg-opacity-50">
+                        <div class="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-slate-900">
+                            <div class="mb-4 flex items-center justify-between">
+                                <h3 id="modalCreateTitleM" class="text-lg font-bold text-slate-700 dark:text-white">Add New Model</h3>
+                                <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <form id="createModelForm">
+                                <div class="mb-4">
+                                    <label id="label-model-name" for="modelName" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                        Model Name
+                                    </label>
+                                    <input type="text" id="ph-model-name" name="modelName" placeholder="e.g., GPT-4-Turbo"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                                        required />
+                                </div>
+
+                                <div class="mb-4">
+                                    <label id="label-model-url" for="modelUrl" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                        Base URL
+                                    </label>
+                                    <input type="url" id="ph-model-url" name="modelUrl" placeholder="https://api.openai.com/v1"
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                                        required />
+                                </div>
+
+                                <div class="mb-4">
+                                    <label id="label-api-key" for="modelApiKey" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                        API Key
+                                    </label>
+                                    <input type="password" id="ph-api-key" name="modelApiKey" placeholder="sk-..."
+                                        class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                                        required />
+                                </div>
+
+                                <div class="flex justify-end space-x-3">
+                                    <button type="button" id="cancelCreateBtnM"
+                                        class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" id="btn-submit-model"
+                                        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        Add Model
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='assets/js/bundle-app.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/scripts.js') }}"></script>
+    <script src="/static/assets/js/i18n.js"></script>
+    
+    <script>
+        const API_BASE = "/api";
+
+        // ==========================================
+        // 辅助：获取当前语言文本 (防止未加载时报错)
+        // ==========================================
+        function getLang(key, fallback) {
+            if (window.LANG && window.LANG[key]) {
+                return window.LANG[key];
+            }
+            return fallback;
+        }
+
+        // ==========================================
+        // 1. 获取模型列表
+        // ==========================================
+        async function getModels() {
+            try {
+                const response = await fetch(`${API_BASE}/models`);
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error || `API Error: ${response.status}`);
+                }
+                const result = await response.json();
+                return result.data || [];
+            } catch (error) {
+                console.error('Failed to fetch models:', error);
+                return [];
+            }
+        }
+
+        // ==========================================
+        // 2. 渲染表格 (修改部分：使用 i18n 文本)
+        // ==========================================
+        async function renderModels() {
+            console.log('Rendering models table...');
+            const tbody = document.getElementById('modelTableBody');
+            if (!tbody) return;
+
+            // 修改：使用 msg_loading_models
+            const loadingText = getLang('msg_loading_models', 'Loading models...');
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-slate-400">${loadingText}</td></tr>`;
+
+            const models = await getModels();
+            tbody.innerHTML = '';
+
+            if (models.length === 0) {
+                // 修改：使用 msg_no_models
+                const noModelText = getLang('msg_no_models', 'No models found. Click "Create New" to add one.');
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-slate-500">${noModelText}</td></tr>`;
+                return;
+            }
+
+            models.forEach(model => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border-t border-slate-200 py-3 pe-5 ps-5 last:sticky last:end-0 last:bg-white last:ps-2 dark:border-slate-800 last:dark:bg-slate-950">
+                        <div class="flex items-center">
+                            <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3 dark:bg-blue-900/50 dark:text-blue-400">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <span class="font-bold text-slate-700 dark:text-slate-200">${model.name}</span>
+                        </div>
+                    </td>
+                    <td class="border-t border-slate-200 py-3 pe-5 ps-5 last:sticky last:end-0 last:bg-white last:ps-2 dark:border-slate-800 last:dark:bg-slate-950">
+                        <span class="font-mono text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded dark:bg-slate-800 dark:text-slate-400">
+                            ${model.base_url}
+                        </span>
+                    </td>
+                    <td class="border-t border-slate-200 py-3 pe-5 ps-5 last:sticky last:end-0 last:bg-white last:ps-2 dark:border-slate-800 last:dark:bg-slate-950">
+                        <span class="text-xs text-slate-500 dark:text-slate-400">${model.created_at || 'Just now'}</span>
+                    </td>
+                    <td class="border-t border-slate-200 py-3 pe-5 ps-5 text-end last:sticky last:end-0 last:bg-white last:ps-2 dark:border-slate-800 last:dark:bg-slate-950">
+                        <button onclick="deleteModel(${model.id})" class="text-slate-400 hover:text-red-600 transition-colors" title="Delete Model">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // ==========================================
+        // 3. 创建模型
+        // ==========================================
+        async function createModel(name, url, apiKey) {
+            const response = await fetch(`${API_BASE}/models`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, base_url: url, api_key: apiKey })
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || result.error || 'Unknown error');
+            }
+            return result;
+        }
+
+        // ==========================================
+        // 4. 删除模型 (修改部分：使用 i18n 文本)
+        // ==========================================
+        async function deleteModel(id) {
+            // 修改：使用 msg_confirm_delete
+            const confirmMsg = getLang('msg_confirm_delete', 'Are you sure you want to delete this model?');
+            if(!confirm(confirmMsg)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/models/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    // 修改：使用 msg_delete_success
+                    alert(getLang('msg_delete_success', 'Model deleted successfully'));
+                    await renderModels(); 
+                } else {
+                    // 修改：使用 msg_delete_fail
+                    const failMsg = getLang('msg_delete_fail', 'Failed to delete: ');
+                    alert(failMsg + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                // 修改：使用 msg_sys_error
+                alert(getLang('msg_sys_error', 'System error while deleting model.'));
+            }
+        }
+
+        // ==========================================
+        // 5. 模态框逻辑 (修改部分：使用 i18n 文本 + ID 变更)
+        // ==========================================
+        function setupModal() {
+            const modal = document.getElementById('createModelModal');
+            const openBtn = document.getElementById('createModelBtn');
+            const closeBtn = document.getElementById('closeModalBtn');
+            const cancelBtn = document.getElementById('cancelCreateBtnM');
+            const form = document.getElementById('createModelForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            const showModal = () => {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            };
+
+            const hideModal = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                form.reset();
+            };
+
+            if(openBtn) openBtn.addEventListener('click', showModal);
+            if(closeBtn) closeBtn.addEventListener('click', hideModal);
+            if(cancelBtn) cancelBtn.addEventListener('click', hideModal);
+
+            if(modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) hideModal();
+                });
+            }
+
+            if(form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    // 修改：因为我们在 HTML 中更改了 input 的 ID 以匹配 JSON 映射
+                    // 所以这里获取值时要用新的 ID (ph-model-name 等)
+                    const name = document.getElementById('ph-model-name').value;
+                    const url = document.getElementById('ph-model-url').value;
+                    const key = document.getElementById('ph-api-key').value;
+
+                    const originalBtnText = submitBtn.innerText;
+                    // 修改：使用 msg_verifying
+                    submitBtn.innerText = getLang('msg_verifying', "Verifying...");
+                    submitBtn.disabled = true;
+
+                    try {
+                        await createModel(name, url, key);
+                        
+                        // 修改：使用 msg_add_success
+                        alert(getLang('msg_add_success', 'Model Verified & Added Successfully!'));
+                        hideModal();
+                        await renderModels(); 
+                        
+                    } catch (err) {
+                        // 修改：使用 msg_add_fail
+                        const failMsg = getLang('msg_add_fail', 'Failed to add model:\n');
+                        alert(failMsg + err.message);
+                    } finally {
+                        submitBtn.innerText = originalBtnText; // 这里如果不希望恢复成 "Add Model" (英文)，可能需要重新从 html 元素获取原始文本，或者重新调用一次 loadLanguage。但最简单的就是恢复原始文本。
+                        // 如果希望按钮文字也恢复成翻译后的，可以这样：
+                        const btnLangId = 'btn-submit-model'; 
+                        // 尝试重新读取 DOM 的 innerText 或者从 LANG 获取
+                        if(window.LANG && window.LANG[btnLangId]) {
+                             submitBtn.innerText = window.LANG[btnLangId]; // 如果是中文环境，这会是"添加模型"
+                        } else {
+                             submitBtn.innerText = "Add Model";
+                        }
+                        
+                        submitBtn.disabled = false;
+                    }
+                });
+            }
+        }
+
+        // ==========================================
+        // 6. 监听语言切换事件
+        // ==========================================
+        // i18n.js 会在语言加载完成后触发 'languageLoaded' 事件
+        // 我们需要监听这个事件来重新渲染表格（因为表格里的 "Loading" 或 "No data" 是动态生成的）
+        document.addEventListener('languageLoaded', () => {
+            renderModels();
+            // 可以在这里更新其他动态内容
+        });
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', () => {
+            setupModal();
+            // renderModels 会由 i18n.js 初始化时的 languageLoaded 或者下面的手动调用触发
+            // 为了保险起见，稍微延时或直接调用
+            renderModels(); 
+        });
+    </script>
+</body>
+</html>

@@ -29,17 +29,17 @@ def create_app():
     CORS(app)
 
     # ====== 注册各个蓝图（路由模块） ======
-    from .routes_pages import bp as pages_bp
-    from .routes_chat import bp as chat_bp         
+    from .routes_pages import bp as pages_bp      
     from .routes_health import bp as health_bp
     from .routes_documents import bp as documents_bp
     from .routes_manage_dataset import bp as manage_bp
+    from .routes_models import bp as models_bp
 
     app.register_blueprint(pages_bp)
-    app.register_blueprint(chat_bp)      
     app.register_blueprint(health_bp)
     app.register_blueprint(documents_bp)
     app.register_blueprint(manage_bp)
+    app.register_blueprint(models_bp)
 
     # ====== 初始化 SocketIO ======
     socketio.init_app(app)
