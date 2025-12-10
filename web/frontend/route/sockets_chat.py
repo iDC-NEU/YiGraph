@@ -1,7 +1,6 @@
 import json
 import time
 from . import socketio
-from .config import TEST_DATA
 import os
 import json
 import logging
@@ -225,7 +224,6 @@ def handle_chat_request(data):
     else:
         test_data_key = random.choice(list(TEST_DATA.keys()))
 
-    test_data = TEST_DATA[test_data_key]
     logger.info(f"WS处理请求：模型={selected_model}，消息={user_message[:20]}...，ExpertMode={expert_mode}，KEY={test_data_key}")
 
     # 4. 流式推送数据
@@ -252,8 +250,6 @@ def handle_chat_request(data):
 
                 if not thinking_done:
                     thinking_done = True
-                    logger.info("思考过程完成，延时10秒...")
-                    socketio.sleep(10)
 
             elif item["type"] == "result":
                 if thinking_done:
@@ -275,7 +271,6 @@ def handle_chat_request(data):
                         'contentType': 'dag',
                         'content': item['content']
                     })
-                    socketio.sleep(2)
         
         # 5. 发送结束信号
         emit('chat_response', {'type': 'stream_end'})
