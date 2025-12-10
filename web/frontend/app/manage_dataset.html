@@ -1709,7 +1709,7 @@
 // 从后端获取知识库列表
 async function loadKnowledgeBases() {
     try {
-        const response = await fetch('/api/knowledge_bases');
+        const response = await fetch('/api/knowledge_bases1');
         const result = await response.json();
         if (result.success) {
             console.log('Loaded knowledge bases:', result.data); // 添加这行来调试
@@ -1839,7 +1839,7 @@ async function renderKnowledgeBaseList() {
         // 从后端获取知识库列表
 async function loadKnowledgeBases() {
     try {
-        const response = await fetch('/api/knowledge_bases');
+        const response = await fetch('/api/knowledge_bases1');
         const result = await response.json();
         if (result.success) {
             console.log('Loaded knowledge bases:', result.data); // 添加这行来调试
@@ -2009,6 +2009,32 @@ function handleParseComplete(data) {
         showNotification(`文件 ${file_name} 解析完成`, 'success');
     }
 }
+
+ document.querySelectorAll('.knowledge-base-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.knowledge-base-item').forEach(kb => {
+                kb.classList.remove('active');
+            });
+            item.classList.add('active');
+            
+            // 更新当前选中的知识库
+            currentKnowledgeBase = item.getAttribute('data-kb');
+            const kbName = item.querySelector('.text-sm.font-bold').textContent;
+            document.getElementById('knowledge-base-name').textContent = `Files in "${kbName}"`;
+            
+            // 停止之前的检查
+            stopParsingStatusCheck();
+            
+            // 重新加载文件列表
+            loadFiles();
+            
+            // 启动新的检查
+            startParsingStatusCheck();
+            
+            // 重置图谱状态
+            resetGraph();
+        });
+    });
 
 function handleParseError(data) {
     const { file_name, error } = data;
@@ -2423,7 +2449,7 @@ function updateUploadProgressForFile(fileName, progress) {
 
 // 处理单个文件上传完成
 function handleFileUploadComplete(data) {
-    // 保存文件信息到本地存储（保持现有逻辑）
+    // 保存文件信息到本地存储
     const fileInfo = {
         name: data.file_name,
         size: data.file_size,
@@ -2431,7 +2457,7 @@ function handleFileUploadComplete(data) {
         uploadDate: data.upload_time,
         status: 'completed',
         path: data.file_path,
-        parsed: false
+        parsed: false  // 新上传的文件默认为未解析
     };
     
     // 获取现有文件列表
@@ -2439,7 +2465,22 @@ function handleFileUploadComplete(data) {
     existingFiles.push(fileInfo);
     localStorage.setItem(`kb-files-${currentKnowledgeBase}`, JSON.stringify(existingFiles));
     
+    // 立即初始化解析状态
+    if (!parsingStatus[data.file_name]) {
+        parsingStatus[data.file_name] = {
+            progress: 0,
+            isParsing: false,
+            intervalId: null,
+            isCompleted: false
+        };
+    }
+    
     console.log(`文件 ${data.file_name} 上传完成并保存`);
+    
+    // 重新加载文件列表以更新解析状态
+    setTimeout(() => {
+        loadFiles();
+    }, 1000);
 }
 ////////////////////////
             // 初始化全屏功能
@@ -2555,6 +2596,53 @@ function handleFileUploadComplete(data) {
             });
         }
 
+
+let parsingCheckInterval = null;
+
+function startParsingStatusCheck() {
+    // 清除之前的检查
+    if (parsingCheckInterval) {
+        clearInterval(parsingCheckInterval);
+    }
+    
+    // 每10秒检查一次解析状态
+    parsingCheckInterval = setInterval(async () => {
+        if (currentKnowledgeBase) {
+            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || []);
+            if (existingFiles.length > 0) {
+                const fileNames = existingFiles.map(file => file.name);
+                const parsingStatusResult = await checkParsingStatus(currentKnowledgeBase, fileNames);
+                
+                // 强制更新Visualization按钮状态
+                console.log('定期检查解析状态 - 强制更新按钮:', parsingStatusResult.all_parsed);
+                updateVisualizationButton(parsingStatusResult.all_parsed);
+                
+                // 更新本地解析状态
+                let needsUpdate = false;
+                for (const [fileName, isParsed] of Object.entries(parsingStatusResult.file_status)) {
+                    if (parsingStatus[fileName]) {
+                        parsingStatus[fileName].isCompleted = isParsed;
+                        parsingStatus[fileName].progress = isParsed ? 100 : 0;
+                        needsUpdate = true;
+                    }
+                }
+                
+                // 如果解析状态有变化，强制检查所有文件
+                if (needsUpdate) {
+                    checkAllFilesParsed();
+                    updateTotalParseProgress();
+                }
+            }
+        }
+    }, 10000); // 每10秒检查一次
+}
+
+function stopParsingStatusCheck() {
+    if (parsingCheckInterval) {
+        clearInterval(parsingCheckInterval);
+        parsingCheckInterval = null;
+    }
+}
         // 加载文件列表
         // 加载文件列表
 async function loadFiles() {
@@ -2568,18 +2656,29 @@ async function loadFiles() {
         if (result.success) {
             const existingFiles = result.data;
             
-            // 如果有保存的文件，显示它们
+            // 获取文件解析状态
+            const fileNames = existingFiles.map(file => file.name);
+            const parsingStatusResult = await checkParsingStatus(currentKnowledgeBase, fileNames);
+            
+            // 如果有文件，显示它们
             if (existingFiles.length > 0) {
                 fileListBody.innerHTML = existingFiles.map(file => {
-                    // 初始化解析状态
+                    // 从后端获取真实的解析状态
+                    const isFileParsed = parsingStatusResult.file_status[file.name] || false;
+                    
                     if (!parsingStatus[file.name]) {
-                        parsingStatus[file.name] = {
-                            progress: 0,
-                            isParsing: false,
-                            intervalId: null,
-                            isCompleted: file.parsed || false
-                        };
-                    }
+    parsingStatus[file.name] = {
+        progress: isFileParsed ? 100 : 0,
+        isParsing: false,
+        intervalId: null,
+        isCompleted: isFileParsed
+    };
+} else {
+    // 强制同步后端状态到前端
+    parsingStatus[file.name].isCompleted = isFileParsed;
+    parsingStatus[file.name].progress = isFileParsed ? 100 : 0;
+    parsingStatus[file.name].isParsing = false; // 重置解析状态
+}
                     
                     // 确定文件行的状态类
                     let statusClass = 'uploaded'; // 默认灰色 - 刚上传
@@ -2607,20 +2706,19 @@ async function loadFiles() {
                         <td class="py-3 px-4">
                             <div class="parse-progress-container" data-filename="${file.name}">
                                 ${getStatusText(parsingStatus[file.name])}
-                                <button class="parse-control-btn" data-filename="${file.name}">
-                                    ${parsingStatus[file.name].isCompleted ? 
-                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                                        </svg>` :
-                                        parsingStatus[file.name].isParsing ?
-                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
-                                        </svg>` :
-                                        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
-                                        </svg>`
-                                    }
-                                </button>
+                                ${!parsingStatus[file.name].isCompleted ? 
+    `<button class="parse-control-btn" data-filename="${file.name}">
+        ${parsingStatus[file.name].isParsing ?
+            `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
+            </svg>` :
+            `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+            </svg>`
+        }
+    </button>` : 
+    ''
+}
                                 <div class="parse-progress-bar">
                                     <div class="parse-progress-fill" style="width: ${parsingStatus[file.name].progress}%;"></div>
                                 </div>
@@ -2645,6 +2743,11 @@ async function loadFiles() {
                     </tr>
                 `;
                 }).join('');
+                
+                // 基于后端解析状态更新Visualization按钮
+               console.log('解析状态结果:', parsingStatusResult);
+                updateVisualizationButton(parsingStatusResult.all_parsed);
+                
             } else {
                 // 如果没有文件，显示优化的空状态
                 fileListBody.innerHTML = `
@@ -2660,6 +2763,9 @@ async function loadFiles() {
                         </td>
                     </tr>
                 `;
+                
+                // 没有文件时禁用Visualization按钮
+                updateVisualizationButton(false);
             }
         } else {
             throw new Error(result.error);
@@ -2675,8 +2781,10 @@ async function loadFiles() {
                 </td>
             </tr>
         `;
+        
+        // 加载失败时禁用Visualization按钮
+        updateVisualizationButton(false);
     }
-    
     // 添加文件行悬停和点击事件
     document.querySelectorAll('.file-item').forEach(row => {
         row.addEventListener('mouseenter', () => {
@@ -2760,6 +2868,103 @@ document.querySelectorAll('.delete-file-btn').forEach(button => {
     
     // 更新总解析进度
     updateTotalParseProgress();
+
+    // 在文件加载完成后，强制检查所有文件状态
+    setTimeout(() => {
+        checkAllFilesParsed();
+    }, 500);
+}
+
+// 修改 updateVisualizationButton 函数
+// 替换现有的 updateVisualizationButton 函数
+function updateVisualizationButton(isEnabled) {
+    const generateGraphBtn = document.getElementById('generate-graph-btn');
+    if (!generateGraphBtn) return;
+    
+    // 直接设置disabled属性
+    generateGraphBtn.disabled = !isEnabled;
+    
+    console.log('Visualization按钮状态更新:', {
+        isEnabled: isEnabled,
+        disabled: generateGraphBtn.disabled,
+        timestamp: new Date().toISOString()
+    });
+    
+    // 更新样式
+    if (isEnabled) {
+        generateGraphBtn.classList.remove('bg-blue-400', 'cursor-not-allowed');
+        generateGraphBtn.classList.add('bg-blue-600', 'hover:bg-blue-800', 'cursor-pointer');
+        generateGraphBtn.title = '点击生成知识图谱';
+        generateGraphBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            Visualization
+        `;
+    } else {
+        generateGraphBtn.classList.remove('bg-blue-600', 'hover:bg-blue-800', 'cursor-pointer');
+        generateGraphBtn.classList.add('bg-blue-400', 'cursor-not-allowed');
+        generateGraphBtn.title = '请先完成所有文件的解析';
+        generateGraphBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            Visualization (等待解析完成)
+        `;
+    }
+}
+
+/////////调试用函数
+
+/////////调试用函数
+// 修改 checkParsingStatus 函数，确保正确获取解析状态
+// 修改 checkParsingStatus 函数，确保正确获取解析状态
+async function checkParsingStatus(kb_id, files) {
+    try {
+        const response = await fetch('/api/check_parsing_status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                kb_id: kb_id,
+                files: files
+            })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            console.log('解析状态检查结果:', {
+                all_parsed: result.all_parsed,
+                file_status: result.file_status,
+                dataset_type: result.dataset_type,
+                files_count: files.length,
+                parsed_count: Object.values(result.file_status).filter(status => status).length
+            });
+            
+            // 强制更新Visualization按钮状态
+            updateVisualizationButton(result.all_parsed);
+            
+            return result;
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        console.error('检查解析状态失败:', error);
+        // 如果检查失败，默认所有文件都未解析
+        const fileStatus = {};
+        files.forEach(file => {
+            fileStatus[file] = false;
+        });
+        
+        // 强制更新Visualization按钮状态为禁用
+        updateVisualizationButton(false);
+        
+        return {
+            all_parsed: false,
+            file_status: fileStatus
+        };
+    }
 }
 
 function sendParseControlMessage(filename, action) {
@@ -2818,29 +3023,38 @@ function sendParseControlMessage(filename, action) {
         }
 
         // 检查是否所有文件都已解析完成
-        function checkAllFilesParsed() {
-            const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
-            const generateGraphBtn = document.getElementById('generate-graph-btn');
-            
-            if (existingFiles.length === 0) {
-                // 如果没有文件，禁用生成按钮
-                if (generateGraphBtn) {
-                    generateGraphBtn.disabled = true;
-                }
-                return;
-            }
-            
-            // 检查是否所有文件都已解析
-            const allParsed = existingFiles.every(file => {
-                return parsingStatus[file.name] && parsingStatus[file.name].isCompleted;
-            });
-            
-            // 更新生成按钮状态
-            if (generateGraphBtn) {
-                generateGraphBtn.disabled = !allParsed;
-            }
+        // 替换现有的 checkAllFilesParsed 函数
+function checkAllFilesParsed() {
+    const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || []);
+    const generateGraphBtn = document.getElementById('generate-graph-btn');
+    
+    if (existingFiles.length === 0) {
+        // 如果没有文件，禁用生成按钮
+        if (generateGraphBtn) {
+            generateGraphBtn.disabled = true;
         }
-
+        return false;
+    }
+    
+    // 检查是否所有文件都已解析
+    const allParsed = existingFiles.every(file => {
+        return parsingStatus[file.name] && parsingStatus[file.name].isCompleted;
+    });
+    
+    console.log('检查所有文件解析状态:', {
+        totalFiles: existingFiles.length,
+        allParsed: allParsed,
+        fileStatuses: existingFiles.map(file => ({
+            name: file.name,
+            isCompleted: parsingStatus[file.name] ? parsingStatus[file.name].isCompleted : false
+        }))
+    });
+    
+    // 更新生成按钮状态
+    updateVisualizationButton(allParsed);
+    
+    return allParsed;
+}
         // 切换文件解析状态（开始/暂停）
         function toggleFileParsing(filename) {
     const status = parsingStatus[filename];
@@ -2929,6 +3143,11 @@ function sendParseControlMessage(filename, action) {
             
             // 更新总解析进度
             updateTotalParseProgress();
+
+            // 强制检查所有文件状态
+    setTimeout(() => {
+        checkAllFilesParsed();
+    }, 100);
         }
 
         // 重置文件解析状态
@@ -2970,31 +3189,31 @@ function sendParseControlMessage(filename, action) {
         }
 
         // 更新解析按钮显示
-        function updateParseButton(filename, isParsing, isCompleted = false) {
-            const button = document.querySelector(`.parse-control-btn[data-filename="${filename}"]`);
-            if (!button) return;
-            
-            if (isCompleted) {
-                button.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                    </svg>
-                `;
-            } else if (isParsing) {
-                button.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
-                    </svg>
-                `;
-            } else {
-                button.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
-                    </svg>
-                `;
-            }
+        // 修改 updateParseButton 函数
+function updateParseButton(filename, isParsing, isCompleted = false) {
+    const button = document.querySelector(`.parse-control-btn[data-filename="${filename}"]`);
+    if (!button) return;
+    
+    // 如果解析完成，隐藏按钮
+    if (isCompleted) {
+        button.style.display = 'none';
+    } else {
+        button.style.display = 'flex';
+        if (isParsing) {
+            button.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" />
+                </svg>
+            `;
+        } else {
+            button.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" />
+                </svg>
+            `;
         }
-
+    }
+}
         // 更新进度显示
         function updateProgressDisplay(filename, progress, isParsing, isCompleted) {
             const progressContainer = document.querySelector(`.parse-progress-container[data-filename="${filename}"]`);
@@ -3316,96 +3535,146 @@ function showNotification(message, type = 'info') {
         }
 
         // 图谱生成函数
-        function generateGraph() {
-            const graphContainer = document.getElementById('graph-container');
-            const generateGraphBtn = document.getElementById('generate-graph-btn');
-            const graphProgressContainer = document.getElementById('graph-progress-container');
-            const graphProgressFill = document.getElementById('graph-progress-fill');
-            const graphProgressText = document.getElementById('graph-progress-text');
-            
-            // 禁用生成按钮
-            if (generateGraphBtn) {
-                generateGraphBtn.disabled = true;
-            }
-            
-            // 重置进度条
-            if (graphProgressFill) {
-                graphProgressFill.style.width = '0%';
-            }
-            if (graphProgressText) {
-                graphProgressText.textContent = '0%';
-            }
-            
-            // 显示进度条
-            if (graphProgressContainer) {
-                graphProgressContainer.style.display = 'flex';
-            }
-            
-            // 显示生成中状态
-            graphContainer.innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-lg text-gray-500">Generating knowledge graph...</div></div>';
-            
-            // 模拟生成进度
-            let progress = 0;
-            graphGenerationInterval = setInterval(() => {
-                progress += Math.random() * 10;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(graphGenerationInterval);
-                    graphGenerationInterval = null;
-                    
-                    // 生成完成
-                    completeGraphGeneration();
-                }
-                
-                // 更新进度条
-                if (graphProgressFill) {
-                    graphProgressFill.style.width = `${progress}%`;
-                }
-                
-                if (graphProgressText) {
-                    graphProgressText.textContent = `${Math.round(progress)}%`;
-                }
-            }, 200);
+        // 图谱生成函数 - 修改为调用后端API
+// 图谱生成函数 - 修改为调用后端API
+function generateGraph() {
+    const graphContainer = document.getElementById('graph-container');
+    const generateGraphBtn = document.getElementById('generate-graph-btn');
+    const graphProgressContainer = document.getElementById('graph-progress-container');
+    const graphProgressFill = document.getElementById('graph-progress-fill');
+    const graphProgressText = document.getElementById('graph-progress-text');
+    
+    // 禁用生成按钮
+    if (generateGraphBtn) {
+        generateGraphBtn.disabled = true;
+    }
+    
+    // 重置进度条
+    if (graphProgressFill) {
+        graphProgressFill.style.width = '0%';
+    }
+    if (graphProgressText) {
+        graphProgressText.textContent = '0%';
+    }
+    
+    // 显示进度条
+    if (graphProgressContainer) {
+        graphProgressContainer.style.display = 'flex';
+    }
+    
+    // 显示生成中状态
+    graphContainer.innerHTML = '<div class="flex items-center justify-center h-full"><div class="text-lg text-gray-500">正在生成知识图谱...</div></div>';
+    
+    // 获取当前文件列表
+    const existingFiles = JSON.parse(localStorage.getItem(`kb-files-${currentKnowledgeBase}`) || '[]');
+    const fileNames = existingFiles.map(file => file.name);
+    
+    // 向后端发送生成图谱请求
+    fetch('/api/generate_graph', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            kb_id: currentKnowledgeBase,
+            kb_name: document.querySelector('.knowledge-base-item.active .text-sm.font-bold')?.textContent || 'Unknown Dataset',
+            files: fileNames
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 使用后端返回的三元组数据生成图谱
+            completeGraphGeneration(data.triplets);
+        } else {
+            throw new Error(data.error || '生成图谱失败');
+        }
+    })
+    .catch(error => {
+        console.error('生成图谱失败:', error);
+        
+        // 检查是否是未解析文件导致的错误
+        if (error.message.includes('尚未解析')) {
+            // 显示未解析文件的错误信息
+            graphContainer.innerHTML = `
+                <div class="flex items-center justify-center h-full">
+                    <div class="text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-yellow-500">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                        <p class="mt-2 text-lg text-yellow-600">无法生成图谱</p>
+                        <p class="text-sm text-gray-500 mt-2">${error.message}</p>
+                        <p class="text-sm text-gray-500 mt-1">请先完成文件解析</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            // 显示其他错误信息
+            graphContainer.innerHTML = `
+                <div class="flex items-center justify-center h-full">
+                    <div class="text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-red-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                        <p class="mt-2 text-lg text-red-500">生成图谱失败</p>
+                        <p class="text-sm text-gray-500">${error.message}</p>
+                    </div>
+                </div>
+            `;
         }
         
-        // 完成图谱生成
-        function completeGraphGeneration() {
-            graphGenerated = true;
-            
-            const generateGraphBtn = document.getElementById('generate-graph-btn');
-            if (generateGraphBtn) {
-                generateGraphBtn.textContent = 'Visualization';
-                generateGraphBtn.disabled = false;
-            }
-            
-            // 隐藏进度条
-            const graphProgressContainer = document.getElementById('graph-progress-container');
-            if (graphProgressContainer) {
-                graphProgressContainer.style.display = 'none';
-            }
-            
-            // 模拟从后端获取数据
-            setTimeout(() => {
-                // 使用你提供的三元组数据
-                // 使用new.xlsx中的三元组数据（修改后的格式）
-const triplets = [
-    ['Maureen Alvarado', '2025-05-01T00:00:00Z: 545.88', 'Paul Baird'],
-    ['Jessica Miller', '2025-07-11T00:00:00Z: 490.85', 'Daniel Miller'],
-    ['John Johnson', '2025-07-11T00:00:00Z: 892.56', 'Eric Murphy'],
-    ['Alan Medina', '2025-07-11T00:00:00Z: 350.6', 'John Allen']
-];
-                
-                // 将三元组转换为图数据
-                const graphData = convertTripletsToGraphData(triplets);
-                
-                // 保存图数据供全屏使用
-                window.currentGraphData = graphData;
-                
-                // 渲染图谱
-                renderKnowledgeGraph(graphData);
-            }, 500);
+        // 重新启用生成按钮
+        if (generateGraphBtn) {
+            generateGraphBtn.disabled = false;
         }
-
+        
+        // 隐藏进度条
+        if (graphProgressContainer) {
+            graphProgressContainer.style.display = 'none';
+        }
+    });
+}
+        // 完成图谱生成 - 使用真实数据
+function completeGraphGeneration(triplets) {
+    graphGenerated = true;
+    
+    const generateGraphBtn = document.getElementById('generate-graph-btn');
+    if (generateGraphBtn) {
+        generateGraphBtn.textContent = 'Visualization';
+        generateGraphBtn.disabled = false;
+    }
+    
+    // 隐藏进度条
+    const graphProgressContainer = document.getElementById('graph-progress-container');
+    if (graphProgressContainer) {
+        graphProgressContainer.style.display = 'none';
+    }
+    
+    // 使用后端返回的三元组数据
+    if (triplets && triplets.length > 0) {
+        // 将三元组转换为图数据
+        const graphData = convertTripletsToGraphData(triplets);
+        
+        // 保存图数据供全屏使用
+        window.currentGraphData = graphData;
+        
+        // 渲染图谱
+        renderKnowledgeGraph(graphData);
+    } else {
+        // 如果没有数据，显示空状态
+        const graphContainer = document.getElementById('graph-container');
+        graphContainer.innerHTML = `
+            <div class="flex items-center justify-center h-full">
+                <div class="text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-16 w-16 mx-auto text-gray-400">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                    </svg>
+                    <p class="mt-2 text-lg text-gray-500">未生成有效的图谱数据</p>
+                </div>
+            </div>
+        `;
+    }
+}
         // 高亮图谱中与选中文件相关的节点
         function highlightGraphNodes(filename) {
             if (!window.currentCytoscapeInstance) return;

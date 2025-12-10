@@ -288,39 +288,45 @@
                             </table>
                         </div>
                         <!-- body -->
-                        <div class="flex flex-col justify-between gap-4 px-5 py-5 sm:flex-row sm:items-center">
+
+
+
+
+
                            
                         
-<!-- 修改分页导航配色为最初方案 -->
-<nav class="isolate inline-flex -space-x-px rounded-md shadow-sm">
-    <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"></path>
-        </svg>
-    </button>
-    <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
-        </svg>
-    </button>
-    <!-- 只保留第一页按钮 -->
-    <button class="relative z-20 inline-flex items-center border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white first:rounded-s-md last:rounded-e-md hover:bg-blue-600 focus:z-20"> 1 </button>
-    <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
-        </svg>
-    </button>
-    <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"></path>
-        </svg>
-    </button>
-</nav>
+<div class="flex justify-end px-5 py-5 w-full">
+    <!-- 分页导航 -->
+    <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm">
+        <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"></path>
+            </svg>
+        </button>
+        <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+            </svg>
+        </button>
+        <!-- 只保留第一页按钮 -->
+        <button class="relative z-20 inline-flex items-center border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white first:rounded-s-md last:rounded-e-md hover:bg-blue-600 focus:z-20"> 1 </button>
+        <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+            </svg>
+        </button>
+        <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"></path>
+            </svg>
+        </button>
+    </nav>
+</div>
 
 
 
-                            <!-- pagination -->
-                        </div>
+
+
                     </div>
                     <!-- card -->
 
@@ -484,6 +490,9 @@ async function renderKnowledgeBases() {
     console.log('Number of knowledge bases fetched:', knowledgeBases.length);
     console.log('Sample knowledge base data:', knowledgeBases[0]); // 添加这行来调试
     tbody.innerHTML = '';
+
+    existingKnowledgeBaseNames = knowledgeBases.map(kb => kb.名称);
+    console.log('Existing knowledge base names:', existingKnowledgeBaseNames);
     
     if (knowledgeBases.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-500">No data available</td></tr>';
@@ -584,18 +593,18 @@ function setupModal() {
     const cancelBtn = document.getElementById('cancelCreateBtn');
     const form = document.getElementById('createDatasetForm');
     const nameInput = document.getElementById('datasetName');
-    const fileTypeSelect = document.getElementById('fileType'); // 新增
+    const fileTypeSelect = document.getElementById('fileType');
     const nameError = document.getElementById('nameError');
-    const fileTypeError = document.getElementById('fileTypeError'); // 新增
+    const fileTypeError = document.getElementById('fileTypeError');
 
     // 显示模态框
     function showModal() {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         nameInput.value = '';
-        fileTypeSelect.value = ''; // 重置文件类型选择
+        fileTypeSelect.value = '';
         nameError.classList.add('hidden');
-        fileTypeError.classList.add('hidden'); // 隐藏文件类型错误
+        fileTypeError.classList.add('hidden');
         nameInput.focus();
     }
 
@@ -604,6 +613,36 @@ function setupModal() {
         modal.classList.remove('flex');
         modal.classList.add('hidden');
     }
+
+    // === 新增：检查名称是否重复的函数 ===
+    function checkDuplicateName(name) {
+        const nameLower = name.trim().toLowerCase();
+        return existingKnowledgeBaseNames.some(existingName => 
+            existingName.toLowerCase() === nameLower
+        );
+    }
+    // === 新增结束 ===
+
+    // === 新增：实时输入检查 ===
+    nameInput.addEventListener('input', function() {
+        const name = nameInput.value.trim();
+        
+        // 如果错误信息是关于重复的，就清除它
+        if (nameError.textContent.includes('already exists')) {
+            nameError.classList.add('hidden');
+        }
+    });
+
+    // === 新增：失去焦点时检查 ===
+    nameInput.addEventListener('blur', function() {
+        const name = nameInput.value.trim();
+        
+        if (name && checkDuplicateName(name)) {
+            nameError.textContent = 'Dataset name already exists';
+            nameError.classList.remove('hidden');
+        }
+    });
+    // === 新增结束 ===
 
     // 事件监听器
     createBtn.addEventListener('click', showModal);
@@ -617,15 +656,16 @@ function setupModal() {
         }
     });
 
-    // 表单提交
+    // 表单提交 - 修改这部分
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
         
         const datasetName = nameInput.value.trim();
-        const fileType = fileTypeSelect.value; // 获取文件类型
+        const fileType = fileTypeSelect.value;
         
         // 验证名称
         if (!datasetName) {
+            nameError.textContent = 'Please enter a dataset name';
             nameError.classList.remove('hidden');
             nameInput.focus();
             return;
@@ -633,8 +673,18 @@ function setupModal() {
             nameError.classList.add('hidden');
         }
         
+        // === 新增：检查名称重复 ===
+        if (checkDuplicateName(datasetName)) {
+            nameError.textContent = 'Dataset name already exists';
+            nameError.classList.remove('hidden');
+            nameInput.focus();
+            return;
+        }
+        // === 新增结束 ===
+        
         // 验证文件类型
         if (!fileType) {
+            fileTypeError.textContent = 'Please select a file type';
             fileTypeError.classList.remove('hidden');
             fileTypeSelect.focus();
             return;
@@ -649,7 +699,7 @@ function setupModal() {
             submitBtn.textContent = 'Creating...';
             submitBtn.disabled = true;
             
-            // 调用创建API，现在包含文件类型
+            // 调用创建API
             const newDataset = await createKnowledgeBase(datasetName, fileType);
             console.log('Created successfully:', newDataset);
             
@@ -664,7 +714,14 @@ function setupModal() {
             
         } catch (error) {
             console.error('Creation failed:', error);
-            alert(`Creation failed: ${error.message}`);
+            // === 改进错误处理：检查是否是名称重复错误 ===
+            if (error.message.includes('already exists') || error.message.includes('名称已存在')) {
+                nameError.textContent = 'Dataset name already exists';
+                nameError.classList.remove('hidden');
+                nameInput.focus();
+            } else {
+                alert(`Creation failed: ${error.message}`);
+            }
         } finally {
             // 恢复按钮状态
             const submitBtn = form.querySelector('button[type="submit"]');
