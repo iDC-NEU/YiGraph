@@ -1,9 +1,12 @@
 import logging
 import os
+import atexit
 
 from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO 
+
+from aag.api.async_runtime import start_async_runtime, stop_async_runtime
 
 # 日志配置（全局一次即可）
 logging.basicConfig(
@@ -43,6 +46,8 @@ def create_app():
 
     # ====== 初始化 SocketIO ======
     socketio.init_app(app)
+    start_async_runtime()
+    atexit.register(stop_async_runtime)
  
     # ====== 注册 WebSocket 事件处理 ======
     try:
