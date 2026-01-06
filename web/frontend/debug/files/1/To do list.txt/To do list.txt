@@ -1,0 +1,32 @@
+GPU node1 四张A5000 
+202.199.6.34
+
+GPU node2 三张A6000  
+202.199.13.67
+
+GPU node3
+219.216.65.118
+
+账号：liuhy@{端口}
+密码：123
+
+SPSSPRO：数据分析网站
+https://www.spsspro.com/
+
+UIverse：UI
+https://uiverse.io
+
+
+算法（csp）【蓝桥】
+六级
+数据库翻转课堂
+备战南湖杯
+
+
+高木 四
+
+
+
+
+
+

@@ -1,0 +1,25 @@
+
+// 中文例子
+
+{
+    "pageTitle": "首页",
+    "welcomeText": "欢迎来到管理后台",
+    "searchPlaceholder": "请输入关键词",
+    "submitButton": "提交",
+    "cancelButton": "取消",
+    "emptyTip": "暂无数据",
+    "errorTip": "请求失败，请稍后重试"
+}
+
+// 英文例子
+
+
+{
+    "pageTitle": "Home",
+    "welcomeText": "Welcome to the Admin Panel",
+    "searchPlaceholder": "Please enter keywords",
+    "submitButton": "Submit",
+    "cancelButton": "Cancel",
+    "emptyTip": "No data available",
+    "errorTip": "Request failed, please try again later"
+}

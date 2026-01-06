@@ -21,7 +21,6 @@ class GraphComputationProcessor(GraphProcessor):
         self.is_directed = False
         self.is_multiedge = False
         self.query_vertices = None
-        self.query_vertices =  15
     
     def create_graph_from_edges(self, vertices: List[VertexData], edges: List[EdgeData], directed: bool = True, multiedge: bool = False):
         """
@@ -61,7 +60,7 @@ class GraphComputationProcessor(GraphProcessor):
                 else:
                     self.graph.add_edge(e.src, e.dst, **edge_attrs)
 
-            print(f"✅ 图构建完成: {self.graph.number_of_nodes()} 个节点，{self.graph.number_of_edges()} 条边")
+            logger.debug(f"✅ 图构建完成: {self.graph.number_of_nodes()} 个节点，{self.graph.number_of_edges()} 条边")
             return self.graph
             
         except Exception as e:

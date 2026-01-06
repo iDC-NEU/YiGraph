@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN" id="pageroot">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="tongzhewang">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A powerful and conceptual apps base dashboard template that especially build for developers and programmers.">
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    <title>Chat Bot - Scribbler.AI</title>
+    <link rel="stylesheet" href="/static/assets/css/app.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js">
+        const mermaidScript = document.querySelector('script[src*="mermaid"]');
+        if (mermaidScript) {
+            mermaidScript.src = 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js?t=' + Date.now();
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="/static/assets/js/i18n.js"></script>
+</head>
+
+<body class="min-w-[320px] bg-slate-100 dark:bg-slate-900">
+
+    <div class="flex min-h-screen max-w-full flex-col overflow-x-hidden pt-[calc(theme(space.16)+theme(space.1))]" id="#pagecontent">
+        <div class="fixed start-0 top-0 isolate z-[1020] w-full border-b border-slate-200 bg-white px-3 py-4 dark:border-slate-800 dark:bg-slate-950 xl:py-3">
+            <div class="container px-3">
+                <div class="w-100 flex items-center justify-between">
+                    <div class="flex items-center gap-x-2">
+                        <div class="-ms-1.5 xl:hidden">
+                            <button class="header-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all hover:bg-slate-200 hover:text-slate-600 hover:dark:bg-slate-800 hover:dark:text-slate-200 [&.active]:bg-slate-200 [&.active]:text-slate-600 [&.active]:dark:bg-slate-800 [&.active]:dark:text-slate-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-x-5">
+                            <a href="overview.html" class="flex-shrink-0">
+                                <div class="flex items-center">
+                                    <img class="h-16 dark:hidden" src="/static/images/IDC-NEUNEW.jpg" alt="logo" />
+                                    <img class="hidden h-16 dark:block" src="/static/images/IDC-NEUNEW.jpg" alt="logo" />
+                                </div>
+                            </a>
+                            <div class="hidden lg:block">
+                                <div class="flex flex-col justify-center">
+                                    <h1 id="slogan-title" class="leading-tight text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+                                        Analytics-Augmented Generation
+                                    </h1>
+                                    <p class="leading-none text-sm text-blue-600 dark:text-blue-400">
+                                        <span id="slogan-sub-text">from</span> <span class="font-semibold">iDC-NEU</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="main-header peer fixed start-0 top-0 z-[1020] flex h-screen w-64 flex-shrink-0 -translate-x-full flex-col border-e border-slate-200 bg-white py-4 dark:border-slate-800 dark:bg-slate-950 max-xl:overflow-auto max-xl:transition-all xl:static xl:h-auto xl:w-auto xl:!translate-x-0 xl:border-e-0 xl:py-0 xl:transition-none rtl:translate-x-full [&.header-visible]:translate-x-0">
+                        <ul class="menu-head flex flex-col gap-x-4 px-4 xl:flex-row xl:items-center xl:space-x-6">
+                            <li class="menu-item group relative">
+                                <a href="/" class="menu-link flex items-center px-4 py-3 text-base font-bold text-blue-600 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400 transition-all duration-200 xl:rounded-lg xl:py-2.5 xl:shadow-sm">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    <span id="nav-chat">Chat</span>
+                                </a>
+                            </li>
+                            <li class="menu-item group relative">
+                                <a href="{{ url_for('pages.documents') }}" class="menu-link flex items-center px-4 py-3 text-base font-bold text-slate-600 transition-all duration-200 group-hover:text-blue-600 hover:text-blue-600 dark:text-slate-300 hover:dark:text-blue-400 xl:rounded-lg xl:py-2.5 group-hover:xl:bg-slate-50 dark:group-hover:xl:bg-slate-800/50">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <span id="nav-dataset">Dataset</span>
+                                </a>
+                            </li>
+                            <li class="menu-item group relative">
+                                <a href="{{ url_for('pages.manage_dataset_page') }}" class="menu-link flex items-center px-4 py-3 text-base font-bold text-slate-600 transition-all duration-200 group-hover:text-blue-600 hover:text-blue-600 dark:text-slate-300 hover:dark:text-blue-400 xl:rounded-lg xl:py-2.5 group-hover:xl:bg-slate-50 dark:group-hover:xl:bg-slate-800/50">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span id="nav-file">File Management</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="header-toggle pointer-events-none fixed inset-0 z-[1019] bg-slate-950 bg-opacity-50 opacity-0 peer-[.header-visible]:pointer-events-auto peer-[.header-visible]:opacity-100 xl:!opacity-0"></div>
+                    
+                    <ul class="flex items-center gap-x-3 lg:gap-x-5">
+                         <li class="relative inline-flex">
+                            <button id="lang-toggle-btn" class="inline-flex h-8 items-center justify-center overflow-hidden rounded-md px-3 text-xs font-bold text-slate-500 transition-all hover:bg-slate-200 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200" title="Switch Language">
+                                English 
+                            </button>
+                        </li>
+
+                        <li class="relative inline-flex">
+                            <button class="theme-toggle inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-slate-400 transition-all *:pointer-events-none hover:bg-slate-200 hover:text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hidden h-4 dark:block">
+                                    <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z" clip-rule="evenodd" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 dark:hidden">
+                                    <path d="M12 2.25a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V3a.75.75 0 0 1 .75-.75ZM7.5 12a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM18.894 6.166a.75.75 0 0 0-1.06-1.06l-1.591 1.59a.75.75 0 1 0 1.06 1.061l1.591-1.59ZM21.75 12a.75.75 0 0 1-.75.75h-2.25a.75.75 0 0 1 0-1.5H21a.75.75 0 0 1 .75.75ZM17.834 18.894a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 1 0-1.061 1.06l1.59 1.591ZM12 18a.75.75 0 0 1 .75.75V21a.75.75 0 0 1-1.5 0v-2.25A.75.75 0 0 1 12 18ZM7.758 17.303a.75.75 0 0 0-1.061-1.06l-1.591 1.59a.75.75 0 0 0 1.06 1.061l1.591-1.59ZM6 12a.75.75 0 0 1-.75.75H3a.75.75 0 0 1 0-1.5h2.25A.75.75 0 0 1 6 12ZM6.697 7.757a.75.75 0 0 0 1.06-1.06l-1.59-1.591a.75.75 0 0 0-1.061 1.06l1.59 1.591Z" />
+                                </svg>
+                            </button>
+                        </li>
+
+                        <li class="relative inline-flex">
+                            <button data-offset="0,8" data-placement="bottom-end" data-rtl-placement="bottom-start" class="dropdown-toggle peer inline-flex h-9 w-9 overflow-hidden rounded-full outline outline-2 outline-offset-2 outline-slate-300 *:pointer-events-none dark:outline-slate-700">
+                                <img src="static/images/avatar/human.jpeg" alt="" />
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="relative py-5 xl:py-10">
+            <div class="container px-3">
+                <div class="flex flex-wrap gap-x-8 xl:flex-nowrap min-h-[calc(100vh-theme(space.52))] max-h-[calc(100vh-theme(space.52))] max-xl:max-h-[calc(100vh-theme(space.40)-theme(space.2))] max-xl:min-h-[calc(100vh-theme(space.40)-theme(space.2))]">
+                    <div id="chatAside" class="fixed peer start-0 z-[1020] top-[calc(theme(space.16)+theme(space.1))] bottom-0 w-[calc(100%-40px)] max-xl:max-w-80 xl:w-[360px] xl:static flex-shrink-0 xl:!translate-x-0 ltr:-translate-x-full rtl:translate-x-full [&.active]:translate-x-0 max-xl:transition-transform">
+                        <div class="flex flex-col justify-stretch h-full xl:rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                            <div class="px-7 pt-7">
+                                <a id="btn-new-conversation" href="#" class="flex items-center gap-x-2 text-blue-600 text-sm hover:text-blue-800 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-11.25a.75.75 0 0 0-1.5 0v2.5h-2.5a.75.75 0 0 0 0 1.5h2.5v2.5a.75.75 0 0 0 1.5 0v-2.5h2.5a.75.75 0 0 0 0-1.5h-2.5v-2.5Z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span id="btn-new-chat">New Conversation</span>
+                                </a>
+                            </div>
+                            <div class="p-7 h-full overflow-auto flex-grow" data-simplebar>
+                                <ul class="flex flex-col -mx-4 -my-3">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div data-target="#chatAside" class="class-toggle fixed inset-0 bg-slate-950 bg-opacity-50 z-[1019] xl:hidden hidden peer-[.active]:block"></div>
+                    <div class="w-full xl:w-[calc(100%-theme(space.8)-360px)] max-xl:h-[calc(100vh-theme(space.40)-theme(space.2))] relative">
+                        <button data-target="#chatAside" class="class-toggle inline-flex items-center justify-center h-8 w-8 rounded overflow-hidden transition-all text-slate-500 dark:text-slate-300 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 hover:dark:bg-slate-700 hover:text-slate-600 hover:dark:text-slate-200 ui-open:bg-slate-200 ui-open:dark:bg-slate-800 ui-open:text-slate-600 ui-open:dark:text-slate-200 xl:hidden absolute top-4 end-4 z-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25" />
+                            </svg>
+                        </button>
+                        <div class="flex flex-col justify-stretch h-full">
+                            <div data-simplebar class="h-full overflow-auto flex-grow rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                                <div id="chat-container" class="flex flex-col justify-end h-full p-4 sm:p-6 -my-2.5">
+                                </div>
+                            </div>
+                            <div class="pt-3">
+                                <div class="flex gap-x-3 mb-3">
+                                    <div class="relative">
+                                        <button id="model-select-btn" class="bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1 flex items-center justify-between w-32">
+                                            <span id="model-display-text"><span id="model-label">Model</span></span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 ml-1">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                        <div id="model-dropdown" class="hidden absolute z-20 mt-1 w-48 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md shadow-lg max-h-60 overflow-y-auto"></div>
+                                    </div>
+                                    
+                                    <div class="relative">
+                                        <button id="dataset-select-btn" class="bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1 flex items-center justify-between w-32">
+                                            <span id="dataset-display-text"><span id="dataset-label">Dataset</span></span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 ml-1">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </button>
+                                        <div id="dataset-dropdown" class="hidden absolute z-20 mt-1 w-48 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md shadow-lg max-h-60 overflow-y-auto"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start gap-4 mt-3">
+                                    <div class="relative w-full">
+                                        <div id="chat-input" contentEditable placeholder="Type your message here..." class="py-2.5 px-4 z-10 w-full rounded-md text-sm/[1.125rem] bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-200 placeholder:text-slate-400 placeholder:dark:text-slate-500 border border-slate-200 dark:border-slate-800 disabled:bg-slate-100 disabled:text-slate-400 focus:border-blue-200 focus:shadow-none focus:outline-none"></div>
+                                        <div class="absolute bottom-2 left-3 flex items-center gap-x-2 z-10">
+                                            <input type="checkbox" id="dag-mode-toggle" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+                                            <label for="dag-mode-toggle" id="label-expert-mode" class="text-xm text-slate-500 dark:text-slate-400">Expert Mode</label>
+                                        </div>
+                                    </div>
+                                    <button id="send-btn" class="inline-flex justify-center items-center transition-all p-3 rounded-md bg-blue-600 text-white hover:bg-blue-800">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="relative isolate mt-auto border-t border-slate-200 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-950">
+            <div class="container px-3">
+                <div class="flex items-center justify-between">
+                    <ul class="-mx-3 flex flex-wrap">
+                        <li>
+                            <a href="#" id="footer-terms" class="px-3 text-sm font-medium text-slate-600 transition-all hover:text-blue-600 dark:text-slate-100 hover:dark:text-blue-600"> Terms </a>
+                        </li>
+                        <li>
+                            <a target="_blank" href="../about.html" id="footer-about" class="px-3 text-sm font-medium text-slate-600 transition-all hover:text-blue-600 dark:text-slate-100 hover:dark:text-blue-600"> About </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/assets/js/bundle-app.js"></script>
+    <script src="/static/assets/js/scripts.js"></script>
+    <script src="/static/assets/js/chat.js"></script>
+</body>
+</html>

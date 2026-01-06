@@ -32,7 +32,7 @@ class VertexData:
 class EdgeData:
     src: str
     dst: str
-    rank: Optional[int] = None  # Optional rank value
+    rank: Optional[str] = None  # Optional rank value
     properties: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:

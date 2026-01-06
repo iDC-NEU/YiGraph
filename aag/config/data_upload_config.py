@@ -24,6 +24,7 @@ class EdgeSchemaConfig:
     target_field: str
     label_field: Optional[str] = None
     weight_field: Optional[str] = None
+    rank_field: Optional[str] = None  # for multiple edges with the same source and target
     attribute_fields: List[str] = field(default_factory=list)  # 边属性字段列表
 
 @dataclass
