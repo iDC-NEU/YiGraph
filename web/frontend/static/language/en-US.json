@@ -31,7 +31,8 @@
         "msg_verifying": "Verifying...",
         "msg_add_success": "Model Verified & Added Successfully!",
         "msg_add_fail": "Failed to add model:\n",
-        "msg_sys_error": "System error"
+        "msg_sys_error": "System error",
+        "alert_graph_required_fields": "Please fill in all required fields (marked with *) for Graph dataset."
     },
     "html_map": {
         "slogan-title": "Easy Graph",
@@ -91,6 +92,10 @@
         "vertex_filename_placeholder": "Vertex file name",
         "vertex_id_field_label": "Id Field (Optional)",
         "vertex_id_field_placeholder": "ID field name",
+        "vertex_name_field_label": "Display Name Field (Optional)",
+        "vertex_name_field_placeholder": "Display name field",
+        "vertex_properties_field_label": "Vertex Properties (Optional)",
+        "vertex_properties_field_placeholder": "Vertex properties field (separated by English commas)",
         "edge_schema_title": "Edge Schema (Required)",
         "edge_filename_label": "File name",
         "edge_filename_placeholder": "Edge file name",
@@ -98,8 +103,8 @@
         "edge_source_field_placeholder": "Source field name",
         "edge_target_field_label": "Target Field",
         "edge_target_field_placeholder": "Target field name",
-        "edge_weight_field_label": "Weight Field",
-        "edge_weight_field_placeholder": "Weight field name",
+        "edge_relation_field_label": "Edge Properties (Optional)",
+        "edge_relation_field_placeholder": "Edge properties field (separated by English commas)",
         "graph_properties_title": "Graph Properties",
         "is_directed_label": "Is Directed",
         "is_multi_edge_label": "Is Multi-Edge",
@@ -116,7 +121,7 @@
         "datasetsTitle": "All Datasets",
         "breadcrumbDatasets": "Datasets",
         "createDatasetBtn": "Create New",
-        "searchPlaceholder": "Search all columns...",
+        "searchPlaceholder": "Search all datasets...",
         "columnDatasets": "Datasets",
         "columnFiles": "Files numbers",
         "columnCreatedAt": "Created At",
@@ -162,7 +167,7 @@
         "month_oct": "Oct",
         "month_nov": "Nov",
         "month_dec": "Dec",
-        "createSuccess": "Successfully created knowledge base: {name} ({type})",
+        "createSuccess": "Successfully created dataset: {name} ({type})",
         "model-page-title": "All Models",
         "breadcrumb-home": "Home",
         "breadcrumb-models": "Models",
@@ -179,7 +184,9 @@
         "label-api-key": "API Key",
         "ph-api-key": "sk-...",
         "cancelCreateBtnM": "Cancel",
-        "btn-submit-model": "Add Model"
+        "btn-submit-model": "Add Model",
+        "preview_label": "Preview",
+        "preview_loading_file": "Loading file..."
        
 }
     }
