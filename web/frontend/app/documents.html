@@ -243,17 +243,6 @@
                     <div class="-mx-3 mb-7 flex items-center justify-between">
                         <div class="px-3">
                             <h2 id="datasetsTitle" class="mb-2 text-xl font-bold text-slate-700 dark:text-white"> All Datasets </h2>
-                            <ul class="inline-flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-300">
-                                <li>
-                                    <a href="{{ url_for('pages.overview') }}" id="breadcrumbHome" class="text-blue-500 hover:text-blue-700"> Home </a>
-                                </li>
-                                <li  class="mt-0.5 inline-flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="h-2 w-2">
-                                        <path fill="currentColor" d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z" />
-                                    </svg>
-                                </li>
-                                <li id="breadcrumbDatasets">Datasets</li>
-                            </ul>
                         </div>
                         <div class="px-3">
                            <button id="createDatasetBtn" class="inline-flex items-center justify-center gap-3 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-800">
@@ -292,30 +281,9 @@
                         <div class="flex flex-col justify-between gap-4 px-5 py-5 sm:flex-row sm:items-center">
                            
                         
-<!-- 修改分页导航配色为最初方案 -->
-<nav class="isolate inline-flex -space-x-px rounded-md shadow-sm"  style = "margin-left:1000px">
-    <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"></path>
-        </svg>
-    </button>
-    <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
-        </svg>
-    </button>
-    <!-- 只保留第一页按钮 -->
-    <button class="relative z-20 inline-flex items-center border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white first:rounded-s-md last:rounded-e-md hover:bg-blue-600 focus:z-20"> 1 </button>
-    <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
-        </svg>
-    </button>
-    <button class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"></path>
-        </svg>
-    </button>
+<!-- 分页导航 -->
+<nav id="paginationNav" class="isolate inline-flex -space-x-px rounded-md shadow-sm" style="margin-left: auto;">
+    <!-- 分页按钮将在这里动态生成 -->
 </nav>
 
 
@@ -427,12 +395,62 @@ const API_BASE = "/api";
         let renderTimeout = null;
         window.isCreatingDataset = false; // 使用全局变量，标记是否正在创建数据集
         
+        // 快速更新文件单位（不重新渲染整个表格）
+        function updateFileUnits() {
+            const tbody = document.getElementById('knowledgeBaseTableBody');
+            if (!tbody) return;
+            
+            const rows = tbody.querySelectorAll('tr');
+            if (rows.length === 0) return;
+            
+            // 检查是否是"无数据"行
+            const firstRow = rows[0];
+            if (firstRow.querySelector('td[colspan="4"]')) {
+                return; // 如果是无数据行，不需要更新
+            }
+            
+            // 获取文件单位翻译
+            let filesUnit = 'files';
+            if (window.HTML_MAP && window.HTML_MAP['files_unit']) {
+                filesUnit = window.HTML_MAP['files_unit'];
+            } else {
+                filesUnit = getTranslation('files_unit', 'files');
+            }
+            
+            // 更新每一行的文件单位
+            rows.forEach(row => {
+                // 第二列是文件个数列
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 2) {
+                    const fileCountCell = cells[1]; // 第二列（索引为1）
+                    const strongTag = fileCountCell.querySelector('strong');
+                    if (strongTag) {
+                        const fileCount = strongTag.textContent.trim();
+                        // 只更新文件单位部分，保持原有结构
+                        const span = fileCountCell.querySelector('span');
+                        if (span) {
+                            span.innerHTML = `<strong>${fileCount}</strong> ${filesUnit}`;
+                        } else {
+                            fileCountCell.innerHTML = `
+                                <span class="text-xs text-slate-500 dark:text-slate-400">
+                                    <strong>${fileCount}</strong> ${filesUnit}
+                                </span>
+                            `;
+                        }
+                    }
+                }
+            });
+        }
+        
         document.addEventListener('languageLoaded', () => {
             // 立即更新 "No data available" 文本（如果存在），不等待 renderKnowledgeBases
             const noDataElement = document.getElementById('no-data-available');
             if (noDataElement) {
                 noDataElement.textContent = getTranslation('noDataAvailable', 'No data available');
             }
+            
+            // 立即更新文件单位，无需延迟 - 这是同步执行，确保用户看到即时更新
+            updateFileUnits();
             
             // 如果正在创建数据集，延迟重新渲染，避免数据丢失
             if (window.isCreatingDataset) {
@@ -454,14 +472,14 @@ const API_BASE = "/api";
                 if (renderTimeout) {
                     clearTimeout(renderTimeout);
                 }
-                // 延迟重新渲染表格，确保数据已保存
-                // 使用较长的延迟，确保API数据已更新，同时避免频繁渲染
+                // 对于其他文本更新，使用很短的延迟或立即执行
+                // 文件单位已经通过 updateFileUnits() 立即更新了
                 renderTimeout = setTimeout(() => {
                     if (typeof renderKnowledgeBases === 'function') {
                         renderKnowledgeBases();
                     }
                     renderTimeout = null;
-                }, 500);
+                }, 100); // 减少延迟到100ms，主要用于更新其他文本
             }
         });
 /////
@@ -523,6 +541,13 @@ async function deleteKnowledgeBase(id) {
             if (result.success) {
                 const successMsg = getTranslation('deleteSuccess', 'Successfully deleted');
                 alert(successMsg);
+                
+                // 检查删除后当前页是否还有数据
+                const totalPages = Math.ceil((filteredKnowledgeBases.length - 1) / itemsPerPage);
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                }
+                
                 await renderKnowledgeBases();
             } else {
                 const errorMsg = getTranslation('deleteFailed', `Deletion failed: {error}`)
@@ -538,11 +563,20 @@ async function deleteKnowledgeBase(id) {
     }
 }
 
-// 渲染知识库表格
+// 分页状态管理
+let currentPage = 1;
+const itemsPerPage = 8;
+let allKnowledgeBases = [];
+let filteredKnowledgeBases = []; // 用于存储过滤后的数据集
 
+// 渲染知识库表格
 async function renderKnowledgeBases() {
     console.log('Rendering knowledge base table...');
-    const knowledgeBases = await getKnowledgeBases();
+    allKnowledgeBases = await getKnowledgeBases();
+    
+    // 应用搜索过滤
+    applySearchFilter();
+    
     const tbody = document.getElementById('knowledgeBaseTableBody');
     
     if (!tbody) {
@@ -550,17 +584,34 @@ async function renderKnowledgeBases() {
         return;
     }
     
-    console.log('Number of knowledge bases fetched:', knowledgeBases.length);
-    console.log('Sample knowledge base data:', knowledgeBases[0]); // 添加这行来调试
+    console.log('Number of knowledge bases fetched:', allKnowledgeBases.length);
+    console.log('Number of filtered knowledge bases:', filteredKnowledgeBases.length);
+    console.log('Sample knowledge base data:', allKnowledgeBases[0]); // 添加这行来调试
+    
+    // 使用过滤后的数据进行分页
+    const totalPages = Math.ceil(filteredKnowledgeBases.length / itemsPerPage);
+    
+    // 如果当前页超出范围，重置到第一页
+    if (currentPage > totalPages && totalPages > 0) {
+        currentPage = 1;
+    }
+    
+    // 计算当前页的数据范围
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentPageData = filteredKnowledgeBases.slice(startIndex, endIndex);
+    
     tbody.innerHTML = '';
     
-    if (knowledgeBases.length === 0) {
+    if (filteredKnowledgeBases.length === 0) {
         const noDataText = getTranslation('noDataAvailable', 'No data available');
         tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-slate-500"><span id="no-data-available">${noDataText}</span></td></tr>`;
+        renderPagination(0);
         return;
     }
     
-    knowledgeBases.forEach(kb => {
+    // 只渲染当前页的数据
+    currentPageData.forEach(kb => {
         const row = document.createElement('tr');
         
         // 根据文件类型选择图标
@@ -569,7 +620,7 @@ async function renderKnowledgeBases() {
         : `<i class="fas fa-file-alt text-blue-400 mr-2" style="font-size: 1.3rem;"></i>`;
         
         // 修复：使用正确的字段名 "文件个数" 而不是 "文档个数"
-        const fileCount = kb.文件个数 !== undefined ? kb.文件个数 : 0;
+        const fileCount = kb.文档个数 !== undefined ? kb.文档个数 : 0;
         
         // 获取文件单位翻译
         // 确保语言已加载，如果还没有加载，使用window.HTML_MAP直接获取
@@ -621,6 +672,174 @@ async function renderKnowledgeBases() {
         `;
         tbody.appendChild(row);
     });
+    
+    // 渲染分页导航（使用过滤后的数据）
+    renderPagination(filteredKnowledgeBases.length);
+}
+
+// 应用搜索过滤
+function applySearchFilter() {
+    const searchInput = document.getElementById('searchPlaceholder');
+    const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    
+    if (searchTerm === '') {
+        // 如果没有搜索词，显示所有数据集
+        filteredKnowledgeBases = [...allKnowledgeBases];
+    } else {
+        // 根据数据集名称进行搜索（不区分大小写）
+        filteredKnowledgeBases = allKnowledgeBases.filter(kb => {
+            const name = kb.名称 ? kb.名称.toLowerCase() : '';
+            return name.includes(searchTerm);
+        });
+    }
+}
+
+// 渲染分页导航
+function renderPagination(totalItems) {
+    const paginationNav = document.getElementById('paginationNav');
+    if (!paginationNav) {
+        console.error('Could not find pagination nav element');
+        return;
+    }
+    
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    // 如果没有数据或只有一页，不显示分页
+    if (totalPages <= 1) {
+        paginationNav.innerHTML = '';
+        return;
+    }
+    
+    let paginationHTML = '';
+    
+    // 第一页按钮（跳转到首页）
+    paginationHTML += `
+        <button 
+            onclick="goToPage(1)" 
+            class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}"
+            ${currentPage === 1 ? 'disabled' : ''}
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"></path>
+            </svg>
+        </button>
+    `;
+    
+    // 上一页按钮
+    paginationHTML += `
+        <button 
+            onclick="goToPage(${currentPage - 1})" 
+            class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}"
+            ${currentPage === 1 ? 'disabled' : ''}
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+            </svg>
+        </button>
+    `;
+    
+    // 页码按钮
+    // 显示当前页前后各2页，最多显示7个页码按钮
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+    
+    // 如果当前页靠近开头，显示更多后面的页码
+    if (currentPage <= 3) {
+        endPage = Math.min(5, totalPages);
+    }
+    
+    // 如果当前页靠近结尾，显示更多前面的页码
+    if (currentPage >= totalPages - 2) {
+        startPage = Math.max(1, totalPages - 4);
+    }
+    
+    // 如果不在第一页，显示第一页
+    if (startPage > 1) {
+        paginationHTML += `
+            <button 
+                onclick="goToPage(1)" 
+                class="relative inline-flex items-center border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900"
+            >
+                1
+            </button>
+        `;
+        if (startPage > 2) {
+            paginationHTML += `
+                <span class="relative inline-flex items-center border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">
+                    ...
+                </span>
+            `;
+        }
+    }
+    
+    // 显示页码范围
+    for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `
+            <button 
+                onclick="goToPage(${i})" 
+                class="relative z-20 inline-flex items-center border ${i === currentPage ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900'} px-4 py-2 text-sm font-semibold first:rounded-s-md last:rounded-e-md focus:z-20"
+            >
+                ${i}
+            </button>
+        `;
+    }
+    
+    // 如果不在最后一页，显示最后一页
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationHTML += `
+                <span class="relative inline-flex items-center border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">
+                    ...
+                </span>
+            `;
+        }
+        paginationHTML += `
+            <button 
+                onclick="goToPage(${totalPages})" 
+                class="relative inline-flex items-center border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900"
+            >
+                ${totalPages}
+            </button>
+        `;
+    }
+    
+    // 下一页按钮
+    paginationHTML += `
+        <button 
+            onclick="goToPage(${currentPage + 1})" 
+            class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}"
+            ${currentPage === totalPages ? 'disabled' : ''}
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+            </svg>
+        </button>
+    `;
+    
+    // 最后一页按钮（跳转到末页）
+    paginationHTML += `
+        <button 
+            onclick="goToPage(${totalPages})" 
+            class="relative inline-flex items-center border border-slate-200 px-2.5 py-2 text-sm font-semibold text-slate-600 first:rounded-s-md last:rounded-e-md hover:bg-slate-100 focus:z-20 dark:border-slate-800 dark:text-slate-200 hover:dark:bg-slate-900 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}"
+            ${currentPage === totalPages ? 'disabled' : ''}
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"></path>
+            </svg>
+        </button>
+    `;
+    
+    paginationNav.innerHTML = paginationHTML;
+}
+
+// 跳转到指定页码
+function goToPage(page) {
+    const totalPages = Math.ceil(filteredKnowledgeBases.length / itemsPerPage);
+    if (page < 1 || page > totalPages) {
+        return;
+    }
+    currentPage = page;
+    renderKnowledgeBases();
 }
 
 // 创建知识库
@@ -787,12 +1006,43 @@ function viewKnowledgeBase(id) {
     window.location.href = "{{ url_for('pages.manage_dataset_page') }}?kb_id=" + id;
 }
 
+// 设置搜索功能
+function setupSearch() {
+    const searchInput = document.getElementById('searchPlaceholder');
+    if (!searchInput) {
+        console.error('Search input not found');
+        return;
+    }
+    
+    // 监听输入事件，实现实时搜索
+    let searchTimeout = null;
+    searchInput.addEventListener('input', function() {
+        // 使用防抖，避免频繁触发搜索
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentPage = 1; // 搜索时重置到第一页
+            renderKnowledgeBases();
+        }, 300); // 300ms 防抖延迟
+    });
+    
+    // 监听回车键，立即搜索
+    searchInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            clearTimeout(searchTimeout);
+            currentPage = 1; // 搜索时重置到第一页
+            renderKnowledgeBases();
+        }
+    });
+}
+
 // 页面加载完成后初始化
 // 注意：这个初始化会在语言加载的DOMContentLoaded之后执行
 // 但为了确保语言已加载，我们监听languageLoaded事件
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Page loaded, initializing...');
     setupModal();
+    setupSearch(); // 初始化搜索功能
     
     // 注意：按钮事件绑定由i18n.js处理，这里不需要重复绑定
     // 如果i18n.js加载失败，可以在这里添加备用绑定

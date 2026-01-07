@@ -1,18 +1,18 @@
-
-import sys
-import os
-import re
-import logging
-import asyncio
-from flask_socketio import emit
+import json
+import time
 from . import socketio
-# 添加项目路径以导入AAG服务
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-from aag.api.async_runtime import get_background_loop, get_chat_service
+from .config import TEST_DATA
+import os
+import json
+import logging
+import random
+from flask_cors import CORS
+from flask_socketio import emit
 
 
 logger = logging.getLogger(__name__)
 
+import re
 
 def split_into_sentences(text: str, max_len: int = 80):
     if not text:
@@ -192,7 +192,6 @@ def handle_chat_request(data):
         dag_id = data.get("dag_id", "")
         modifications = data.get("modifications", "")
         expert_mode = data.get("expert_mode", False)
-        dataset = data.get("dataset", "AMLSim1K")  # 数据集名称，默认使用AMLSim1K
     except Exception as e:
         logger.error(f"解析参数失败：{str(e)}")
         emit('chat_response', {"error": "请求格式错误，请检查参数"})
@@ -203,91 +202,88 @@ def handle_chat_request(data):
         emit('chat_response', {"error": "消息内容不能为空"})
         return
     
+    """
 
+        这里是写死的读取config 模板
+        3. 选择测试数据
+
+    """
+
+    if dag_confirm == "yes":
+        time.sleep(1)
+        test_data_key = "CNdag_new_confirmation"
+    elif not expert_mode:
+        time.sleep(1)
+        test_data_key = "normal"
+    elif is_dag_modification or (dag_confirm == "no" and modifications):
+        time.sleep(1)
+        test_data_key = "CNdag_new"
+    elif "Anna" in user_message.lower() or "javascript" in user_message.lower():
+        time.sleep(1)
+        test_data_key = "CNdag"
+    elif "推荐" in user_message:
+        time.sleep(1)
+        test_data_key = "CNdag"
+    else:
+        test_data_key = random.choice(list(TEST_DATA.keys()))
+
+    test_data = TEST_DATA[test_data_key]
+    logger.info(f"WS处理请求：模型={selected_model}，消息={user_message[:20]}...，ExpertMode={expert_mode}，KEY={test_data_key}")
+
+    # 4. 流式推送数据
     try:
-        # 确保使用默认数据集AMLSim1K（如果前端没有指定）
-        if not dataset:
-            dataset = "AMLSim1K"
+        thinking_done = False
+        
+        for item in test_data:
+            if item["type"] == "thinking":
+                content = item["content"]
+                sentences = split_into_sentences(content)
+                for i, sentence in enumerate(sentences):
+                    clean_sentence = sentence.strip()
+                    if not clean_sentence:
+                        continue
+                    
+                    # 发送思考片段
+                    emit('chat_response', {
+                        'type': 'thinking',
+                        'contentType': 'text',
+                        'content': clean_sentence
+                    })
+                    # 非阻塞休眠
+                    socketio.sleep(1 if i < len(sentences)-1 else 0.8)
 
-        chat_service = get_chat_service()
-        loop = get_background_loop()
+                if not thinking_done:
+                    thinking_done = True
+                    logger.info("思考过程完成，延时10秒...")
+                    socketio.sleep(10)
 
-        # 定义回调函数用于发送流式数据（在后台事件循环线程中调用）
-        def send_response(data_chunk):
-            """发送响应数据到前端"""
-            socketio.emit('chat_response', data_chunk)
-
-        # 确定模式
-        mode = "expert" if expert_mode else "normal"
-        logger.info(f"WS处理请求：模型={selected_model}，数据集={dataset}，消息={user_message[:20]}...，ExpertMode={expert_mode}，Mode={mode}")
-
-        async def process_request():
-            try:
-                if dag_confirm == "yes":
-                    engine = chat_service.engine_service.get_engine()
-                    engine.specific_dataset(dataset)
-                    logger.info("DAG确认，开始执行专家模式分析")
-                    result = await chat_service.start_expert_analysis()
-
-                    if result.get("success"):
-                        result_text = result.get("result", "")
-                        paragraphs = [p.strip() for p in result_text.split('\n') if p.strip()]
-                        for i, para in enumerate(paragraphs):
-                            send_response({
-                                'type': 'result',
-                                'contentType': 'text',
-                                'content': para
-                            })
-                            await asyncio.sleep(0.5 if i < len(paragraphs)-1 else 0.3)
-                    else:
-                        send_response({
-                            'error': result.get("error", "分析执行失败")
-                        })
-                    send_response({'type': 'stream_end'})
-                    return
-
-                if is_dag_modification or (dag_confirm == "no" and modifications):
-                    engine = chat_service.engine_service.get_engine()
-                    engine.specific_dataset(dataset)
-                    modification_request = modifications or user_message
-                    logger.info(f"收到DAG修改请求：{modification_request}")
-
-                    result = await chat_service.process_dag_modification(modification_request)
-
-                    if result.get("success"):
-                        dag_content = chat_service._convert_dag_to_frontend_format(result)
-                        send_response({
+            elif item["type"] == "result":
+                if thinking_done:
+                    thinking_done = False
+                
+                if item["contentType"] == "text":
+                    paragraphs = [p.strip() for p in item["content"].split('\n') if p.strip()]
+                    for i, para in enumerate(paragraphs):
+                        emit('chat_response', {
                             'type': 'result',
-                            'contentType': 'dag',
-                            'content': dag_content
+                            'contentType': 'text',
+                            'content': para
                         })
-                    else:
-                        send_response({
-                            'error': result.get("error", "DAG修改失败")
-                        })
-                    send_response({'type': 'stream_end'})
-                    return
-
-                # 普通聊天请求 - 流式处理（内部会发送stream_end信号）
-                logger.info(f"处理普通聊天请求，模式={mode}")
-                await chat_service.process_streaming_chat(
-                    message=user_message,
-                    model=selected_model,
-                    dataset=dataset,
-                    mode=mode,
-                    expert_mode=expert_mode,
-                    callback=send_response
-                )
-            except Exception as exc:
-                logger.error(f"后台处理失败: {exc}", exc_info=True)
-                send_response({'error': f"处理失败：{str(exc)}"})
-
-        future = asyncio.run_coroutine_threadsafe(process_request(), loop)
-        future.result()
-
+                        socketio.sleep(2 if i < len(paragraphs)-1 else 1.8)
+                
+                elif item["contentType"] == "dag":
+                    emit('chat_response', {
+                        'type': 'result',
+                        'contentType': 'dag',
+                        'content': item['content']
+                    })
+                    socketio.sleep(2)
+        
+        # 5. 发送结束信号
+        emit('chat_response', {'type': 'stream_end'})
         logger.info("WS响应完成")
 
     except Exception as e:
         error_msg = f"处理失败：{str(e)}"
-        logger.error(error_msg, exc_info=True)
+        logger.error(error_msg)
         emit('chat_response', {'error': error_msg})
