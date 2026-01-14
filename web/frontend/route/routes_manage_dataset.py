@@ -10,8 +10,9 @@ import yaml
 from flask import Blueprint, jsonify, request
 from flask_socketio import emit, join_room, leave_room
 from DummySocket import DummySocket
-sys.path.append("../../")
+# sys.path.append("../../")
 from aag.api.DocumentAPI import server_Test
+from aag.utils.path_utils import DATASETS_DIR
 
 class MessageCollectingSocket:
     """包装DummySocket，收集所有消息，优先返回error消息"""
@@ -57,7 +58,7 @@ logger = logging.getLogger(__name__)
 bp = Blueprint("manage", __name__)
 
 # 确保上传目录存在 - 修改为前一个目录下的debug/files
-UPLOAD_BASE_DIR = "./../../../aag/datasets"
+UPLOAD_BASE_DIR =  DATASETS_DIR
 os.makedirs(UPLOAD_BASE_DIR, exist_ok=True)
 
 

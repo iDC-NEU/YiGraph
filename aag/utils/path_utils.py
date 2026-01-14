@@ -23,6 +23,7 @@ TEXT_SCHEMA_PATH = DATA_SCHEMA_PATH2 / "text_schemas.yaml"
 
 DEFAULT_CONFIG_SERVER_PATH =  PROJECT_ROOT / "computing_engine" / "config_servers.yaml"
 
-DATA_SCHEMA_PATH = PROJECT_ROOT / "datasets" / "dataset_schemas"
-DATASETS_INDEX_PATH = DATA_SCHEMA_PATH / "datasets.yaml"
-DATA_PATH = PROJECT_ROOT / "datasets" / "data"
+DATASETS_DIR = PROJECT_ROOT / "datasets"
+DATASETS_DATA_DIR = PROJECT_ROOT / "datasets" / "data"
+DATASETS_SCHEMA_DIR = DATASETS_DIR / "dataset_schemas"
+DATASETS_INDEX_PATH = DATASETS_SCHEMA_DIR / "datasets.yaml"

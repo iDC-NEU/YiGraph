@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from aag.config.data_upload_config import *
 from aag.expert_search_engine.database.datatype import VertexData, EdgeData
 from aag.expert_search_engine.database.nebulagraph import  NebulaGraphClient
@@ -194,7 +194,7 @@ class GraphDataLoader:
         dst_field = edge_config[0].target_field
         rank_field = edge_config[0].rank_field  
         multigraph = dataset_config.schema.graph_structure.multigraph 
-        id_to_query = dict(zip(vertex_df[id_field], vertex_df[query_name]))
+        id_to_query = dict(zip[tuple](vertex_df[id_field], vertex_df[query_name]))
         for idx, (_, row) in enumerate(edge_df.iterrows()):
             src_raw = row[src_field]
             dst_raw = row[dst_field]
@@ -220,7 +220,7 @@ class GraphDataLoader:
             props = row.drop([src_field, dst_field] + ([rank_field] if rank_field else [])).to_dict()
 
             edges.append(EdgeData(src=src, dst=dst, rank=rank, properties=props))
-        
+    
         
         # print(f"{len(edges)=}")
         # print(edges[0])

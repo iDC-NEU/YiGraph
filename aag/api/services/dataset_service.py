@@ -13,7 +13,7 @@ from typing import Dict, Any, List, Optional
 # 添加项目路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
-from aag.api.DocumentAPI import DocumentAPIServer, DummySocket
+from aag.api.DocumentAPI import DocumentAPIServer
 
 logger = logging.getLogger(__name__)
 
