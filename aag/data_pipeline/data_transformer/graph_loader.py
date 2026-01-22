@@ -194,7 +194,7 @@ class GraphDataLoader:
         dst_field = edge_config[0].target_field
         rank_field = edge_config[0].rank_field  
         multigraph = dataset_config.schema.graph_structure.multigraph 
-        id_to_query = dict(zip[tuple](vertex_df[id_field], vertex_df[query_name]))
+        id_to_query = dict(zip(vertex_df[id_field], vertex_df[query_name]))
         for idx, (_, row) in enumerate(edge_df.iterrows()):
             src_raw = row[src_field]
             dst_raw = row[dst_field]

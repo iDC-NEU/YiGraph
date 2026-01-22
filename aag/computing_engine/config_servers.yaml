@@ -8,21 +8,306 @@ engine_supported_algorithms:
   networkx:
     initialize_graph:
       - tool: initialize_graph
+      
     get_graph_info:
       - tool: get_graph_info
-    pagerank:
-      - tool: pagerank
-    bfs:
-      - tool: bfs_edges
-    dfs:
-      - tool: find_cycle
-    dijkstra:
+
+    is_tree:
+      - tool: is_tree
+
+    is_forest:
+      - tool: is_forest
+
+    is_directed_acyclic_graph:
+      - tool: is_directed_acyclic_graph
+
+    bfs_tree:
+      - tool: bfs_tree
+
+    dfs_tree:
+      - tool: dfs_tree
+
+    topological_sort:
+      - tool: topological_sort
+
+    lexicographical_topological_sort:
+      - tool: lexicographical_topological_sort
+
+    all_topological_sorts:
+      - tool: all_topological_sorts
+
+    ancestors:
+      - tool: ancestors
+
+    descendants:
+      - tool: descendants
+
+    shortest_path:
+      - tool: shortest_path
+
+    dijkstra_path:
       - tool: dijkstra_path
-    a_star:
-      - tool: astar_path
-    louvain:
-      - tool: louvain_communities
+
+    dijkstra_path_length:
+      - tool: dijkstra_path_length
+
+    bellman_ford_path:
+      - tool: bellman_ford_path
+
+    floyd_warshall:
+      - tool: floyd_warshall
+
+    johnson:
+      - tool: johnson
+
+    average_shortest_path_length:
+      - tool: average_shortest_path_length
+
+    has_path:
+      - tool: has_path
+
+    dag_longest_path:
+      - tool: dag_longest_path
+
+    dag_longest_path_length:
+      - tool: dag_longest_path_length
+
+    is_eulerian:
+      - tool: is_eulerian
+
+    eulerian_path:
+      - tool: eulerian_path
+
+    eulerian_circuit:
+      - tool: eulerian_circuit
+
     degree_centrality:
       - tool: degree_centrality
+
+    in_degree_centrality:
+      - tool: in_degree_centrality
+
+    out_degree_centrality:
+      - tool: out_degree_centrality
+
+    closeness_centrality:
+      - tool: closeness_centrality
+
     betweenness_centrality:
       - tool: betweenness_centrality
+
+    edge_betweenness_centrality:
+      - tool: edge_betweenness_centrality
+
+    eigenvector_centrality:
+      - tool: eigenvector_centrality
+
+    katz_centrality:
+      - tool: katz_centrality
+
+    pagerank:
+      - tool: pagerank
+
+    hits:
+      - tool: hits
+
+    harmonic_centrality:
+      - tool: harmonic_centrality
+
+    load_centrality:
+      - tool: load_centrality
+
+    subgraph_centrality:
+      - tool: subgraph_centrality
+
+    voterank:
+      - tool: voterank
+
+    is_connected:
+      - tool: is_connected
+
+    connected_components:
+      - tool: connected_components
+
+    number_connected_components:
+      - tool: number_connected_components
+
+    is_strongly_connected:
+      - tool: is_strongly_connected
+
+    strongly_connected_components:
+      - tool: strongly_connected_components
+
+    is_weakly_connected:
+      - tool: is_weakly_connected
+
+    weakly_connected_components:
+      - tool: weakly_connected_components
+
+    node_connectivity:
+      - tool: node_connectivity
+
+    edge_connectivity:
+      - tool: edge_connectivity
+
+    minimum_node_cut:
+      - tool: minimum_node_cut
+
+    minimum_edge_cut:
+      - tool: minimum_edge_cut
+
+    articulation_points:
+      - tool: articulation_points
+
+    bridge_components:
+      - tool: bridge_components
+
+    clustering:
+      - tool: clustering
+
+    average_clustering:
+      - tool: average_clustering
+
+    transitivity:
+      - tool: transitivity
+
+    triangles:
+      - tool: triangles
+
+    square_clustering:
+      - tool: square_clustering
+
+    greedy_modularity_communities:
+      - tool: greedy_modularity_communities
+
+    girvan_newman:
+      - tool: girvan_newman
+
+    label_propagation_communities:
+      - tool: label_propagation_communities
+
+    asyn_lpa_communities:
+      - tool: asyn_lpa_communities
+
+    k_clique_communities:
+      - tool: k_clique_communities
+
+    louvain_communities:
+      - tool: louvain_communities
+
+    leiden_communities:
+      - tool: leiden_communities
+
+    simple_cycles:
+      - tool: simple_cycles
+
+    cycle_basis:
+      - tool: cycle_basis
+
+    modularity:
+      - tool: modularity
+
+    partition_quality:
+      - tool: partition_quality
+
+    is_partition:
+      - tool: is_partition
+
+    minimum_spanning_tree:
+      - tool: minimum_spanning_tree
+
+    maximum_spanning_tree:
+      - tool: maximum_spanning_tree
+
+    random_spanning_tree:
+      - tool: random_spanning_tree
+
+    edmonds_karp:
+      - tool: edmonds_karp
+
+    shortest_augmenting_path:
+      - tool: shortest_augmenting_path
+
+    preflow_push:
+      - tool: preflow_push
+
+    capacity_scaling:
+      - tool: capacity_scaling
+
+    gomory_hu_tree:
+      - tool: gomory_hu_tree
+
+    jaccard_coefficient:
+      - tool: jaccard_coefficient
+
+    adamic_adar_index:
+      - tool: adamic_adar_index
+
+    preferential_attachment:
+      - tool: preferential_attachment
+
+    resource_allocation_index:
+      - tool: resource_allocation_index
+
+    cn_soundarajan_hopcroft:
+      - tool: cn_soundarajan_hopcroft
+
+    ra_index_soundarajan_hopcroft:
+      - tool: ra_index_soundarajan_hopcroft
+
+    within_inter_cluster:
+      - tool: within_inter_cluster
+
+    max_weight_matching:
+      - tool: max_weight_matching
+
+    min_weight_matching:
+      - tool: min_weight_matching
+
+    maximal_matching:
+      - tool: maximal_matching
+
+    min_edge_cover:
+      - tool: min_edge_cover
+
+    is_matching:
+      - tool: is_matching
+
+    greedy_color:
+      - tool: greedy_color
+
+    find_cliques:
+      - tool: find_cliques
+
+    max_weight_clique:
+      - tool: max_weight_clique
+
+    k_core:
+      - tool: k_core
+
+    core_number:
+      - tool: core_number
+
+    diameter:
+      - tool: diameter
+
+    radius:
+      - tool: radius
+
+    center:
+      - tool: center
+
+    periphery:
+      - tool: periphery
+
+    eccentricity:
+      - tool: eccentricity
+
+    wiener_index:
+      - tool: wiener_index
+
+    degree_assortativity_coefficient:
+      - tool: degree_assortativity_coefficient
+
+    attribute_assortativity_coefficient:
+      - tool: attribute_assortativity_coefficient

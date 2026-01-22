@@ -168,7 +168,8 @@ class ExpertSearchEngine:
             task_type_list.append({
                 "id": task_type.get("id", ""),
                 "task_type": task_type.get("task_type", ""),
-                "description": task_type.get("description", "")
+                "description": task_type.get("description", ""),
+                "algorithm": task_type.get("algorithm", []),
             })
         return task_type_list
 
@@ -180,8 +181,9 @@ class ExpertSearchEngine:
         for algorithm_id in selected_algorithm_ids:
             algorithm_list.append({
                 "id": algorithm_id,
-                "description_principle": self.algo_index[algorithm_id].get("description").get("principle"),
-                "description_meaning": self.algo_index[algorithm_id].get("description").get("meaning"),
+                "Application_scenario": self.algo_index[algorithm_id].get("Application_scenario"),
+                "Deployment_method": self.algo_index[algorithm_id].get("Deployment_method"),
+                "Principles": self.algo_index[algorithm_id].get("Principles"),
             })
         return algorithm_list
         
