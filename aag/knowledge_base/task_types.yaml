@@ -1,27 +1,154 @@
-- id: traversal
-  task_type: "Traversal"
-  description: "Visit all nodes or edges in a graph sequentially, usually for exploring graph structures or serving as the foundation for other algorithms."
+- id: Basics
+  task_type: "Basics"
+  description: Basic graph structure checks and traversal algorithms
   algorithm:
-    - bfs
-    - dfs
+    - is_tree
+    - is_forest
+    - is_directed_acyclic_graph
+    - bfs_tree
+    - dfs_tree
+    - topological_sort
+    - lexicographical_topological_sort
+    - all_topological_sorts
+    - ancestors
+    - descendants
 
-- id: search
-  task_type: "Search"
-  description: "Find target nodes or paths in a graph, usually goal-oriented, such as shortest path or heuristic search."
+- id: Path
+  task_type: "Path"
+  description: Algorithms for finding shortest paths, Eulerian paths, and longest paths
   algorithm:
-    - dijkstra
-    - a_star
+    - shortest_path
+    - dijkstra_path
+    - dijkstra_path_length
+    - bellman_ford_path
+    - floyd_warshall
+    - johnson
+    - average_shortest_path_length
+    - has_path
+    - dag_longest_path
+    - dag_longest_path_length
+    - is_eulerian
+    - eulerian_path
+    - eulerian_circuit
 
-- id: community_detection
-  task_type: "Community Detection"
-  description: "Identify clusters or community structures in a graph, used to analyze aggregation patterns and network partitioning."
-  algorithm:
-    - louvain
-
-- id: centrality_importance
-  task_type: "Centrality and Importance Measures"
-  description: "Evaluate the importance or influence of nodes in a graph, used for ranking, identifying key nodes, and network analysis."
+- id: Centrality
+  task_type: "Centrality"
+  description: Measures of node and edge importance within the graph
   algorithm:
     - degree_centrality
+    - in_degree_centrality
+    - out_degree_centrality
+    - closeness_centrality
     - betweenness_centrality
+    - edge_betweenness_centrality
+    - eigenvector_centrality
+    - katz_centrality
     - pagerank
+    - hits
+    - harmonic_centrality
+    - load_centrality
+    - subgraph_centrality
+    - voterank
+
+- id: Connectivity & Components
+  task_type: "Connectivity & Components"
+  description: Analysis of graph connectivity, connected components, and cuts
+  algorithm:
+    - is_connected
+    - connected_components
+    - number_connected_components
+    - is_strongly_connected
+    - strongly_connected_components
+    - is_weakly_connected
+    - weakly_connected_components
+    - node_connectivity
+    - edge_connectivity
+    - minimum_node_cut
+    - minimum_edge_cut
+    - articulation_points
+    - bridge_components
+
+- id: Clustering & Community
+  task_type: "Clustering & Community"
+  description: Algorithms for clustering coefficients, community detection, and transitivity
+  algorithm:
+    - clustering
+    - average_clustering
+    - transitivity
+    - triangles
+    - square_clustering
+    - greedy_modularity_communities
+    - girvan_newman
+    - label_propagation_communities
+    - asyn_lpa_communities
+    - k_clique_communities
+    - louvain_communities
+    - leiden_communities
+    - simple_cycles
+    - cycle_basis
+    - modularity
+    - partition_quality
+    - is_partition
+
+- id: Tree & Spanning Tree
+  task_type: "Tree & Spanning Tree"
+  description: Algorithms related to minimum, maximum, and random spanning trees
+  algorithm:
+    - minimum_spanning_tree
+    - maximum_spanning_tree
+    - random_spanning_tree
+
+- id: Flow & Cut
+  task_type: "Flow & Cut"
+  description: Network flow algorithms and cut calculations
+  algorithm:
+    - edmonds_karp
+    - shortest_augmenting_path
+    - preflow_push
+    - capacity_scaling
+    - gomory_hu_tree
+
+- id: Link Prediction
+  task_type: "Link Prediction"
+  description: Algorithms to predict missing links or future connections
+  algorithm:
+    - jaccard_coefficient
+    - adamic_adar_index
+    - preferential_attachment
+    - resource_allocation_index
+    - cn_soundarajan_hopcroft
+    - ra_index_soundarajan_hopcroft
+    - within_inter_cluster
+
+- id: Matching & Coloring
+  task_type: "Matching & Coloring"
+  description: Algorithms for graph matching, edge covering, and vertex coloring
+  algorithm:
+    - max_weight_matching
+    - min_weight_matching
+    - maximal_matching
+    - min_edge_cover
+    - is_matching
+    - greedy_color
+
+- id: Cliques & Cores
+  task_type: "Cliques & Cores"
+  description: Detection of cliques and k-core decomposition
+  algorithm:
+    - find_cliques
+    - max_weight_clique
+    - k_core
+    - core_number
+
+- id: Distance & Measures
+  task_type: "Distance & Measures"
+  description: Global graph metrics related to distance and structural properties
+  algorithm:
+    - diameter
+    - radius
+    - center
+    - periphery
+    - eccentricity
+    - wiener_index
+    - degree_assortativity_coefficient
+    - attribute_assortativity_coefficient
