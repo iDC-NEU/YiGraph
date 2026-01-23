@@ -55,11 +55,18 @@ QUERY_TEMPLATES = {
         "example": "Collins Steven 和 Nunez Mitchell 的共同邻居"
     },
     "subgraph": {
-        "description": "抽取子图",
+        "description": "抽取子图（单中心节点）",
         "method": "subgraph_extract",
         "required_params": ["label", "key", "value"],
         "optional_params": ["hops", "rel_type", "direction", "limit_paths"],
         "example": "Collins Steven 周围2跳的子图"
+    },
+    "subgraph_by_nodes": {
+        "description": "基于节点列表抽取子图（多个指定节点及其相互关系）",
+        "method": "subgraph_extract_by_nodes",
+        "required_params": ["label", "key", "values"],
+        "optional_params": ["include_internal", "rel_type", "direction"],
+        "example": "提取账户 A、B、C 及其之间的转账关系"
     }
 }
 
@@ -196,7 +203,11 @@ Please determine which query type the user question belongs to. Return only the 
             return "common_neighbor"
         if any(kw in q for kw in ["路径", "怎么到", "到达"]):
             return "path_query"
+        # 检测多节点子图查询（包含多个节点名称或"之间"关键词）
         if "子图" in q:
+            # 检测是否包含多个节点标识（如 "A、B、C" 或 "之间"）
+            if any(kw in q for kw in ["、", "和", "及", "之间", "相互", "互相"]):
+                return "subgraph_by_nodes"
             return "subgraph"
         if any(kw in q for kw in ["邻居", "朋友", "关注", "关系"]):
             return "neighbor_query"
@@ -678,6 +689,9 @@ Begin:
         
         if query_type in ["node_lookup", "neighbor_query", "subgraph", "filter_query"]:
             params["value"] = values[0] if values else None
+        elif query_type == "subgraph_by_nodes":
+            # 多节点子图查询：提取所有节点值
+            params["values"] = values if values else []
         elif query_type in ["common_neighbor", "path_query"]:
             params["v1"] = values[0] if len(values) > 0 else None
             params["v2"] = values[1] if len(values) > 1 else None
@@ -886,6 +900,18 @@ class QueryExecutor:
                     direction=params.get("direction", "both"),
                     where=params.get("where"),
                     limit_paths=params.get("limit_paths", 200)
+                )
+                results = [result]
+            
+            elif query_type == "subgraph_by_nodes":
+                result = method(
+                    params["label"],
+                    params["key"],
+                    params["values"],
+                    include_internal=params.get("include_internal", True),
+                    rel_type=params.get("rel_type"),
+                    direction=params.get("direction", "both"),
+                    where=params.get("where")
                 )
                 results = [result]
             

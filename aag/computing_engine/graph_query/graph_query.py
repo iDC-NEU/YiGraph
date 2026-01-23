@@ -725,6 +725,142 @@ class Neo4jGraphClient:
         
         return {"nodes": [], "relationships": []}
 
+    def subgraph_extract_by_nodes(
+        self,
+        label: str,
+        key: str,
+        values: List[Any],
+        *,
+        include_internal: bool = True,
+        rel_type: Optional[str] = None,
+        direction: str = "both",
+        where: Optional[str] = None
+    ) -> JsonDict:
+        """
+        基于节点列表抽取子图（包含指定节点及其相互之间的关系）
+        
+        功能：
+        - 提取指定节点列表中所有节点
+        - 提取这些节点之间的所有关系
+        - 可选择是否包含节点内部的关系（如 A->A）
+        
+        应用场景：
+        1. 交易网络：提取账户 A、B、C 及其之间的转账记录
+        2. 社交网络：提取指定用户群体及其相互关系
+        3. 知识图谱：提取指定实体及其关联关系
+        
+        示例：
+            # 提取账户 A、B、C 及其之间的转账关系
+            subgraph = client.subgraph_extract_by_nodes(
+                "Account",
+                "node_key",
+                ["Collins Steven", "Nunez Mitchell", "Lee Alex"],
+                rel_type="TRANSFER",
+                direction="both"
+            )
+            
+            # 提取用户群体的社交关系
+            subgraph = client.subgraph_extract_by_nodes(
+                "User",
+                "userId",
+                ["u1", "u2", "u3", "u4"],
+                rel_type="FOLLOWS",
+                include_internal=False  # 不包含自环
+            )
+        
+        Args:
+            label: 节点标签
+            key: 节点属性键
+            values: 节点属性值列表（如 ["A", "B", "C"]）
+            include_internal: 是否包含节点内部关系（如 A->A），默认 True
+            rel_type: 关系类型（可选，None=任意类型）
+            direction: 方向 ("out"=单向, "in"=反向, "both"=双向)
+            where: WHERE 过滤条件（如 "r.amount > 1000"）
+            
+        Returns:
+            {
+                "nodes": [节点列表],
+                "relationships": [关系列表],
+                "node_count": 节点数量,
+                "relationship_count": 关系数量
+            }
+            
+        注意：
+            - 只返回指定节点之间的关系，不会扩展到其他节点
+            - 如果某个节点不存在，会在结果中忽略
+            - 如果节点之间没有关系，relationships 为空列表
+        """
+        label = self._sanitize_label(label)
+        key = self._sanitize_property_key(key)
+        
+        if not values or len(values) == 0:
+            raise ValueError("values list cannot be empty")
+        
+        if direction not in {"out", "in", "both"}:
+            raise ValueError("direction must be 'out', 'in', or 'both'")
+        
+        # 构建关系模式
+        rt = self._sanitize_rel_type(rel_type) if rel_type else ""
+        rel = f":`{rt}`" if rt else ""
+        
+        # 构建路径模式
+        if direction == "out":
+            pattern = f"(n1)-[r{rel}]->(n2)"
+        elif direction == "in":
+            pattern = f"(n1)<-[r{rel}]-(n2)"
+        else:
+            pattern = f"(n1)-[r{rel}]-(n2)"
+        
+        # 构建 WHERE 子句
+        where_parts = []
+        
+        # 节点必须在指定列表中
+        where_parts.append("n1.`" + key + "` IN $values")
+        where_parts.append("n2.`" + key + "` IN $values")
+        
+        # 是否排除自环
+        if not include_internal:
+            where_parts.append("n1 <> n2")
+        
+        # 用户自定义过滤条件
+        if where:
+            where_parts.append(f"({where})")
+        
+        where_clause = "WHERE " + " AND ".join(where_parts)
+        
+        # Cypher 查询
+        cypher = f"""
+        MATCH (n1:`{label}`)
+        WHERE n1.`{key}` IN $values
+        WITH collect(n1) AS allNodes
+        
+        MATCH {pattern}
+        {where_clause}
+        WITH allNodes, collect(DISTINCT r) AS allRels
+        
+        RETURN allNodes AS nodes,
+               allRels AS relationships,
+               size(allNodes) AS node_count,
+               size(allRels) AS relationship_count
+        """
+        
+        res = self.run(cypher, {"values": values})
+        
+        if res and res[0]:
+            return {
+                "nodes": res[0].get("nodes", []),
+                "relationships": res[0].get("relationships", []),
+                "node_count": res[0].get("node_count", 0),
+                "relationship_count": res[0].get("relationship_count", 0)
+            }
+        
+        return {
+            "nodes": [],
+            "relationships": [],
+            "node_count": 0,
+            "relationship_count": 0
+        }
+
     # =========================================================
     # 6. 指定路径模式查询
     # =========================================================
