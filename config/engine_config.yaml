@@ -31,6 +31,11 @@ retrieval:
       collection_name: "graphllm_collection"
       host: "localhost"
       port: 19530
+    neo4j:  # Neo4j 图查询配置
+      uri: "bolt://202.199.13.67:7687"
+      user: "neo4j"
+      password: "12345678"  # 请修改为实际密码
+      enabled: true  # 是否启用图查询功能
 
   embedding:
     model_name: "BAAI/bge-large-en-v1.5"

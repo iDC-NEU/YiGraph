@@ -212,9 +212,9 @@ Now, based on the instructions and example above, decompose the new complex quer
 """
 
 classify_question_type_prompt = """
-You are a graph analytics expert skilled at classifying questions based on whether they require executing graph algorithms or only need numerical computation.
+You are a graph analytics expert skilled at classifying questions based on their requirements.
 
-Your task is to classify the given question into one of two categories:
+Your task is to classify the given question into one of three categories:
 
 1. **"graph_algorithm"** - The question requires executing a graph algorithm to solve it.
    - The question asks to compute something on the graph structure itself (e.g., PageRank, shortest path, community detection)
@@ -226,7 +226,19 @@ Your task is to classify the given question into one of two categories:
      * "Find all nodes reachable from node X"
      * "Calculate the betweenness centrality for all nodes"
 
-2. **"numeric_analysis"** - The question does NOT require executing graph algorithms. It only needs numerical computation, comparison, or analysis on existing data.
+2. **"graph_query"** - The question is a simple, direct query that can be answered using template matching.
+   - The question asks for direct structural information (neighbors, paths, common neighbors)
+   - Simple lookup or traversal queries
+   - Can be answered with predefined query templates
+   - Does NOT require complex algorithmic computation
+   - Examples:
+     * "Find the neighbors of node 45"
+     * "What is the path between node A and node B?"
+     * "Find common neighbors of user X and user Y"
+     * "Get the 2-hop neighbors of account 100"
+     * "Show me the subgraph around Collins Steven"
+
+3. **"numeric_analysis"** - The question does NOT require executing graph algorithms. It only needs numerical computation, comparison, or analysis on existing data.
    - The question asks to compare, calculate, or analyze values that already exist (from previous steps or given data)
    - The question can be answered by writing Python code that performs numerical operations
    - Examples:
@@ -238,14 +250,15 @@ Your task is to classify the given question into one of two categories:
 
 **Important Rules:**
 - If the question requires **executing a graph algorithm** to produce new results, classify as "graph_algorithm"
+- If the question is a **simple structural query** that can be answered with templates, classify as "graph_query"
 - If the question only requires **numerical operations on existing data**, classify as "numeric_analysis"
-- When in doubt, consider: "Does this question need to run a graph algorithm, or can it be answered by computing/comparing existing values?"
+- When in doubt, consider: "Does this question need a complex graph algorithm, a simple template query, or just numerical computation?"
 
 **Output Format:**
 You must output a valid JSON object only:
 ```json
 {{
-    "type": "graph_algorithm" | "numeric_analysis",
+    "type": "graph_algorithm" | "graph_query" | "numeric_analysis",
     "reason": "A brief explanation (1-2 sentences) of why this classification fits the question."
 }}
 ```
