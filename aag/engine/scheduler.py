@@ -23,6 +23,8 @@ from aag.utils.graph_conversion import flatten_graph, reconstruct_graph
 from aag.utils.data_utils import take_sample
 from aag.rag_engine.vector_rag import VectorRAG
 from aag.reasoner.prompt_template.llm_prompt_en import rag_prompt
+from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine, LLMInterface
+from aag.computing_engine.graph_query.graph_query import Neo4jGraphClient, Neo4jConfig
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +42,7 @@ class Scheduler:
         self.dag: Optional[GraphWorkflowDAG] = None
         self.dataset_manager: Optional[DatasetManager] = None
         self.data_dependency_resolver: Optional[DataDependencyResolver] = None
+        self.nl_query_engine: Optional[NaturalLanguageQueryEngine] = None  # 图查询引擎
 
         self.current_dataset_name: Optional[str] = None  # Dataset-level name (for text datasets, this is the dataset name)
         self.current_dataset: Optional[List[DatasetConfig]] = None  # Original dataset config (text/graph, never changes)
@@ -71,6 +74,16 @@ class Scheduler:
         self._init_router()
 
         self._init_rag_engine()
+
+        # 初始化图查询引擎（如果配置中启用）
+        neo4j_config_dict = self.config.retrieval.database.neo4j
+        if neo4j_config_dict.get("enabled", False):
+            neo4j_config = Neo4jConfig(
+                uri=neo4j_config_dict.get("uri", "bolt://localhost:7687"),
+                user=neo4j_config_dict.get("user", "neo4j"),
+                password=neo4j_config_dict.get("password", "")
+            )
+            self._init_nl_query_engine(neo4j_config)
 
     
     def _init_reasoner(self):
@@ -133,6 +146,27 @@ class Scheduler:
         except Exception as e:
             print(f"✗ RAGEngineinitialization failed: {e}")
             raise
+
+    def _init_nl_query_engine(self, neo4j_config: Optional[Neo4jConfig] = None):
+        """初始化自然语言图查询引擎"""
+        try:
+            if neo4j_config is None:
+                # 使用默认配置（可以从config中读取）
+                neo4j_config = Neo4jConfig(
+                    uri="bolt://localhost:7687",
+                    user="neo4j",
+                    password="password"  # 需要配置实际密码
+                )
+            
+            db_client = Neo4jGraphClient(neo4j_config)
+            llm = LLMInterface()
+            self.nl_query_engine = NaturalLanguageQueryEngine(db_client, llm)
+            self.nl_query_engine.initialize()
+            print("✓ NaturalLanguageQueryEngine initialized")
+        except Exception as e:
+            print(f"✗ NaturalLanguageQueryEngine initialization failed: {e}")
+            # 不抛出异常，允许系统在没有图查询功能的情况下运行
+            self.nl_query_engine = None
 
     def list_datasets(self, dtype: Optional[str] = None) -> Dict[str, List[str]]:
         return self.dataset_manager.list_datasets(dtype)
@@ -211,8 +245,19 @@ class Scheduler:
             if original_type == "graph":
                 return "❌ 错误：当前数据集是图数据，不支持检索任务。图数据只能用于图分析任务。"
             return await self._execute_rag(query)
+
+        # 2) GRAPH_QUERY - 图查询（模板匹配查询）
+        elif decision.query_type == QueryType.GRAPH_QUERY:
+            if original_type != "graph":
+                # 检查是否有转换后的图数据
+                converted_graph_config = self.dataset_manager.get_converted_graph_dataset(self.current_dataset_name)
+                if not converted_graph_config:
+                    return "❌ 错误：图查询需要图数据，当前数据集不是图数据且未转换为图数据。"
+                self.current_graph_dataset = converted_graph_config
+            
+            return await self._execute_graph_query(query)
         
-        # 2) GRAPH query validation and graph dataset setup
+        # 3) GRAPH query validation and graph dataset setup
         elif decision.query_type == QueryType.GRAPH:
             if original_type == "text":
                 # Get converted graph dataset config (returns None if not converted)
@@ -365,7 +410,95 @@ class Scheduler:
 
         return self.reasoner.generate_response(prompt)
 
-
+    async def _execute_graph_query(self, query: str) -> str:
+        """
+        执行图查询（使用nl_query_engine）
+        
+        Args:
+            query: 用户查询
+            
+        Returns:
+            查询结果字符串
+        """
+        if not self.nl_query_engine:
+            return "❌ 错误：图查询引擎未初始化，请检查Neo4j配置"
+        
+        try:
+            # 使用nl_query_engine执行查询
+            result = self.nl_query_engine.ask(query)
+            
+            if result.get("success"):
+                # 格式化查询结果
+                results = result.get("results", [])
+                count = result.get("count", 0)
+                query_type = result.get("query_type", "unknown")
+                
+                response = f"✅ 图查询成功！\n"
+                response += f"查询类型: {query_type}\n"
+                response += f"返回结果数: {count}\n\n"
+                
+                if count > 0:
+                    response += "查询结果:\n"
+                    for i, item in enumerate(results[:10], 1):  # 最多显示10条
+                        # 将 Neo4j Node 对象转换为可序列化的字典
+                        serializable_item = self._convert_neo4j_to_dict(item)
+                        response += f"{i}. {json.dumps(serializable_item, ensure_ascii=False, indent=2)}\n"
+                    
+                    if count > 10:
+                        response += f"\n... 还有 {count - 10} 条结果未显示"
+                else:
+                    response += "未找到匹配的结果"
+                
+                return response
+            else:
+                error_msg = result.get("error", "未知错误")
+                return f"❌ 图查询失败: {error_msg}"
+                
+        except Exception as e:
+            logger.error(f"图查询执行失败: {e}", exc_info=True)
+            return f"❌ 图查询执行失败: {str(e)}"
+    
+    def _convert_neo4j_to_dict(self, obj):
+        """
+        将 Neo4j 对象转换为可 JSON 序列化的字典
+        
+        Args:
+            obj: Neo4j 对象（Node, Relationship, Path 等）或普通对象
+            
+        Returns:
+            可序列化的字典或原始对象
+        """
+        # 检查是否是 Neo4j Node 对象（通过检查是否有 labels 和 id 属性）
+        if hasattr(obj, 'labels') and hasattr(obj, 'id') and callable(getattr(obj, 'items', None)):
+            return {
+                'id': obj.id,
+                'labels': list(obj.labels),
+                'properties': dict(obj)
+            }
+        # 检查是否是 Neo4j Relationship 对象（通过检查是否有 type 和 id 属性）
+        elif hasattr(obj, 'type') and hasattr(obj, 'id') and callable(getattr(obj, 'items', None)):
+            return {
+                'id': obj.id,
+                'type': obj.type,
+                'start_node': obj.start_node.id if hasattr(obj, 'start_node') else None,
+                'end_node': obj.end_node.id if hasattr(obj, 'end_node') else None,
+                'properties': dict(obj)
+            }
+        # 检查是否是 Neo4j Path 对象（通过检查是否有 nodes 和 relationships 属性）
+        elif hasattr(obj, 'nodes') and hasattr(obj, 'relationships'):
+            return {
+                'nodes': [self._convert_neo4j_to_dict(node) for node in obj.nodes],
+                'relationships': [self._convert_neo4j_to_dict(rel) for rel in obj.relationships]
+            }
+        # 如果是字典，递归转换其值
+        elif isinstance(obj, dict):
+            return {k: self._convert_neo4j_to_dict(v) for k, v in obj.items()}
+        # 如果是列表，递归转换其元素
+        elif isinstance(obj, list):
+            return [self._convert_neo4j_to_dict(item) for item in obj]
+        # 其他类型直接返回
+        else:
+            return obj
 
     def build_dag_from_subquery_plan(self, subquery_plan: Dict[str, Any]) -> GraphWorkflowDAG:
         """
@@ -417,19 +550,80 @@ class Scheduler:
         for step in self.dag.steps.values():
             # Step 1: Classify question type (graph_algorithm or numeric_analysis)
             question_classification = self.reasoner.classify_question_type(step.question)
+            logger.info(f"🔍 问题分类结果: {question_classification}")
+
+            if question_classification is None:
+                error_msg = f"问题分类失败：返回了 None"
+                logger.error(f"❌ {error_msg} | 问题: {step.question}")
+                raise RuntimeError(error_msg)
+            
+            if "error" in question_classification:
+                error_msg = f"问题分类失败：{question_classification.get('error', 'Unknown error')}"
+                logger.error(f"❌ {error_msg} | 问题: {step.question} | 详情: {question_classification}")
+                raise RuntimeError(error_msg)
+            
             question_type = question_classification.get("type", "graph_algorithm")
             
-            if question_type == "numeric_analysis":
+            if question_type == "graph_query":
+                # 图查询类型：使用nl_query_engine
+                step.task_type = GraphAnalysisType.GRAPH_QUERY
+                step.graph_algorithm = None
+                logger.info(f"✅ 问题分类为图查询 | ❓ 问题:{step.question}, 🧩 任务类型: {step.task_type}, 原因: {question_classification.get('reason', '')}")
+            elif question_type == "numeric_analysis":
                 # If numeric analysis, set task type and skip graph algorithm selection
                 step.task_type = GraphAnalysisType.NUMERIC_ANALYSIS
                 step.graph_algorithm = None
                 logger.info(f"✅ 问题分类为数值分析 | ❓ 问题:{step.question}, 🧩 任务类型: {step.task_type}, 原因: {question_classification.get('reason', '')}")
             else:
                 # If graph algorithm, proceed with normal algorithm selection flow
+                logger.info(f"📋 开始任务类型选择 | 问题: {step.question}")
                 task_type_list = self.expert_search_engine.retrieve_task_type(step.question)
-                selected_task_type_id = self.reasoner.select_task_type(step.question, task_type_list).get("id")
+                logger.info(f"📋 检索到的任务类型列表: {task_type_list}")
+                
+                task_type_result = self.reasoner.select_task_type(step.question, task_type_list)
+                logger.info(f"📋 任务类型选择结果: {task_type_result}")
+                
+                # Check if task_type_result is None or contains error
+                if task_type_result is None:
+                    error_msg = f"任务类型选择失败：LLM 返回了 None"
+                    logger.error(f"❌ {error_msg} | 问题: {step.question}")
+                    raise RuntimeError(error_msg)
+                
+                if "error" in task_type_result:
+                    error_msg = f"任务类型选择失败：{task_type_result.get('error', 'Unknown error')}"
+                    logger.error(f"❌ {error_msg} | 问题: {step.question} | 详情: {task_type_result}")
+                    raise RuntimeError(error_msg)
+                
+                selected_task_type_id = task_type_result.get("id")
+                if not selected_task_type_id:
+                    error_msg = f"任务类型选择失败：返回结果中没有 'id' 字段"
+                    logger.error(f"❌ {error_msg} | 返回结果: {task_type_result}")
+                    raise RuntimeError(error_msg)
+                
+                logger.info(f"🔍 开始算法选择 | 任务类型: {selected_task_type_id}")
                 algorithm_list = self.expert_search_engine.retrieve_algorithm(step.question, selected_task_type_id)
-                selected_algorithm_id = self.reasoner.select_algorithm(step.question, algorithm_list).get("id")
+                logger.info(f"🔍 检索到的算法列表: {algorithm_list}")
+                
+                algorithm_result = self.reasoner.select_algorithm(step.question, algorithm_list)
+                logger.info(f"🔍 算法选择结果: {algorithm_result}")
+                
+                # Check if algorithm_result is None or contains error
+                if algorithm_result is None:
+                    error_msg = f"算法选择失败：LLM 返回了 None"
+                    logger.error(f"❌ {error_msg} | 问题: {step.question} | 任务类型: {selected_task_type_id}")
+                    raise RuntimeError(error_msg)
+                
+                if "error" in algorithm_result:
+                    error_msg = f"算法选择失败：{algorithm_result.get('error', 'Unknown error')}"
+                    logger.error(f"❌ {error_msg} | 问题: {step.question} | 任务类型: {selected_task_type_id} | 详情: {algorithm_result}")
+                    raise RuntimeError(error_msg)
+                
+                selected_algorithm_id = algorithm_result.get("id")
+                if not selected_algorithm_id:
+                    error_msg = f"算法选择失败：返回结果中没有 'id' 字段"
+                    logger.error(f"❌ {error_msg} | 返回结果: {algorithm_result}")
+                    raise RuntimeError(error_msg)
+                
                 step.task_type = GraphAnalysisType.GRAPH_ALGORITHM
                 step.graph_algorithm = selected_algorithm_id
                 logger.info(f"✅ 算法已选择 | ❓ 问题:{step.question}, 🧩 选择的任务类型: {selected_task_type_id}, 🔍 选择的算法: {step.graph_algorithm}")
@@ -508,7 +702,15 @@ class Scheduler:
                  # step 1. 获取算法描述（doc， tool_metadata)， doc 是 tool_metadata 的字符串形式
                 tool_description,  tool_metadata = await self.computing_engine.get_algorithm_description(
                     step.graph_algorithm
-                )   
+                )
+                
+                # 检查是否成功获取算法描述
+                if tool_metadata is None:
+                    error_msg = f"无法获取算法 '{step.graph_algorithm}' 的描述信息"
+                    logger.error(f"❌ {error_msg}")
+                    self.dag.set_failed(step_id, error_msg)
+                    raise RuntimeError(f"节点 {step_id}: {error_msg}")
+                
                 # logger.info(f"tool_description:{tool_description}")
 
             # step 2. 上游依赖解析
@@ -557,6 +759,13 @@ class Scheduler:
                     self.dag.set_failed(step_id, f"参数准备失败: {param_err}")
                     raise
 
+                # 检查 extraction_result 是否为 None
+                if extraction_result is None:
+                    error_msg = "参数提取返回了 None"
+                    logger.error(f"❌ {error_msg} | 问题: {step.question}")
+                    self.dag.set_failed(step_id, error_msg)
+                    raise RuntimeError(f"节点 {step_id}: {error_msg}")
+
                 logger.info(
                     "✅ LLM/依赖提取的参数: %s",
                     json.dumps(extraction_result.get("parameters", {}), ensure_ascii=False)
@@ -578,13 +787,24 @@ class Scheduler:
                     global_graph=self.global_graph
                 )
 
-                if tool_result.get("result").get("error"):
-                    error_msg = tool_result.get("result").get("error")
+                # 检查 tool_result 是否为 None
+                if tool_result is None:
+                    error_msg = "算法执行返回了 None"
+                    logger.error(f"❌ {error_msg} | 算法: {step.graph_algorithm}")
+                    self.dag.set_failed(step_id, error_msg)
+                    raise RuntimeError(f"节点 {step_id}: {step.question} 执行失败: {error_msg}")
+
+                # 安全地检查嵌套的 result.error
+                result_data = tool_result.get("result")
+                if result_data is not None and isinstance(result_data, dict) and "error" in result_data:
+                    error_msg = result_data.get("error")
+                    logger.error(f"❌ 算法执行错误 | 错误: {error_msg}")
                     self.dag.set_failed(step_id, error_msg)
                     raise RuntimeError(f"节点 {step_id}: {step.question} 执行失败: {error_msg}")
 
                 if not tool_result.get("success", False):
                     error_msg = tool_result.get("error", "算法执行失败")
+                    logger.error(f"❌ 算法执行失败 | 错误: {error_msg}")
                     self.dag.set_failed(step_id, error_msg)
                     raise RuntimeError(f"节点 {step_id} 执行失败：{error_msg}")
 
@@ -675,6 +895,70 @@ class Scheduler:
                     logger.error(error_msg, exc_info=True)
                     self.dag.set_failed(step_id, error_msg)
                     raise RuntimeError(f"节点 {step_id} 数值分析失败：{numeric_err}")
+
+            elif step.task_type == GraphAnalysisType.GRAPH_QUERY:
+                logger.info("🔍 当前任务类型：Graph Query")
+                try:
+                    if not self.nl_query_engine:
+                        error_msg = "图查询引擎未初始化"
+                        logger.error(f"❌ {error_msg}")
+                        self.dag.set_failed(step_id, error_msg)
+                        raise RuntimeError(f"节点 {step_id}: {error_msg}")
+                    
+                    # 使用nl_query_engine执行查询
+                    query_result = self.nl_query_engine.ask(step.question)
+                    
+                    if query_result.get("success"):
+                        # 将查询结果添加到step的输出
+                        step.add_output(
+                            task_type=GraphAnalysisSubType.SUBGRAPH_EXTRACTION,
+                            source="graph_query",
+                            output_schema=OutputSchema(
+                                description="图查询结果",
+                                type="list",
+                                fields={
+                                    "results": OutputField(
+                                        type="list",
+                                        field_description="查询返回的结果列表"
+                                    ),
+                                    "count": OutputField(
+                                        type="int",
+                                        field_description="结果数量"
+                                    ),
+                                    "query_type": OutputField(
+                                        type="str",
+                                        field_description="查询类型"
+                                    )
+                                }
+                            ),
+                            value={
+                                "results": query_result.get("results", []),
+                                "count": query_result.get("count", 0),
+                                "query_type": query_result.get("query_type", "unknown")
+                            },
+                            path=None,
+                            validate_schema=False
+                        )
+                        logger.info(f"✅ 图查询执行完成，返回 {query_result.get('count', 0)} 条结果")
+                        self.dag.set_success(step_id)
+                        
+                        # 设置tool_result用于后续的LLM分析
+                        tool_result = {
+                            "success": True,
+                            "result": query_result.get("results", []),
+                            "summary": f"图查询成功，返回 {query_result.get('count', 0)} 条结果"
+                        }
+                    else:
+                        error_msg = query_result.get("error", "图查询失败")
+                        logger.error(f"❌ 图查询失败 | 错误: {error_msg}")
+                        self.dag.set_failed(step_id, error_msg)
+                        raise RuntimeError(f"节点 {step_id} 图查询失败：{error_msg}")
+                        
+                except Exception as query_err:
+                    error_msg = f"图查询执行失败: {query_err}"
+                    logger.error(error_msg, exc_info=True)
+                    self.dag.set_failed(step_id, error_msg)
+                    raise RuntimeError(f"节点 {step_id} 图查询失败：{query_err}")
 
             llm_analysis = self.reasoner.generate_answer_from_algorithm_result(
                 question=step.question,

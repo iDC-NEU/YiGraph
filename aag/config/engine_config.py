@@ -17,6 +17,7 @@ class ReasonerConfig:
 class DatabaseConfig:
     graph: Dict[str, Any]
     vector: Dict[str, Any]
+    neo4j: Dict[str, Any]  # Neo4j 图查询配置
 
 @dataclass
 class RagConfig:
