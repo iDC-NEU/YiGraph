@@ -409,6 +409,51 @@ def _clean_docstring(doc: str) -> str:
     """清理并增强文档字符串 - 现在使用完整描述"""
     return _extract_full_description(doc)
 
+def _serialize_result(result: Any) -> Any:
+    """
+    将结果序列化为可JSON序列化的格式
+    特别处理 NetworkX 图对象（DiGraph, Graph, MultiDiGraph, MultiGraph）
+    """
+    if result is None:
+        return None
+    
+    # 处理 NetworkX 图对象
+    if isinstance(result, (nx.Graph, nx.DiGraph, nx.MultiGraph, nx.MultiDiGraph)):
+        # 转换为节点和边的列表格式
+        nodes = list(result.nodes())
+        edges = []
+        for u, v, data in result.edges(data=True):
+            edge_dict = {"src": str(u), "dst": str(v)}
+            # 添加边属性（排除不可序列化的对象）
+            for key, value in data.items():
+                try:
+                    # 尝试序列化值
+                    import json
+                    json.dumps(value)
+                    edge_dict[key] = value
+                except (TypeError, ValueError):
+                    # 如果无法序列化，跳过该属性或转换为字符串
+                    edge_dict[key] = str(value)
+            edges.append(edge_dict)
+        
+        return {
+            "type": "graph",
+            "graph_type": result.__class__.__name__,
+            "nodes": [str(n) for n in nodes],
+            "edges": edges,
+            "num_nodes": result.number_of_nodes(),
+            "num_edges": result.number_of_edges()
+        }
+    
+    # 处理其他不可序列化的类型
+    try:
+        import json
+        json.dumps(result)
+        return result
+    except (TypeError, ValueError):
+        # 如果无法序列化，转换为字符串
+        return str(result)
+    
 # ============================================================================
 # 13. 参数处理逻辑 (保持不变)
 # ============================================================================
@@ -521,10 +566,13 @@ def _create_tool_function(
 
             result = actual_func(**execution_kwargs)
             
-            # 5. 返回结果
+            # 5. 序列化结果（将 NetworkX 图对象转换为可序列化格式）
+            serializable_result = _serialize_result(result)
+            
+            # 6. 返回结果
             #from .models import GenericToolOutput
             logger.info(f"✅ '{tool_name}' completed successfully")
-            return GenericToolOutput(algorithm=tool_name, success=True, result=result, summary=f"'{tool_name}' executed successfully").model_dump_json()
+            return GenericToolOutput(algorithm=tool_name, success=True, result=serializable_result, summary=f"'{tool_name}' executed successfully").model_dump_json()
 
         except Exception as e:
             #from .models import GenericToolOutput
