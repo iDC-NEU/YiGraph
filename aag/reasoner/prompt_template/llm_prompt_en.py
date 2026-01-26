@@ -1,3 +1,4 @@
+#add gjq  加入了graph_query
 query_router_prompt = """
 You are the **query router** inside the AAG (Analytics Augmented Generation Engine) system.
 
@@ -14,6 +15,7 @@ You must classify each incoming question into **exactly one** of the following t
    - Mentions *graph, node, edge, path, shortest path, neighbors, connectivity, centrality, PageRank, community detection, subgraph, k-hop*, etc.
    - Asks to analyze or compute something **on the current dataset**.
    - Asks for structural properties or algorithmic results on the graph.
+   - Requires complex algorithmic computation (e.g., PageRank, community detection, centrality measures).
 
    Example questions for "graph":
    - "Find the shortest path between account 100 and 1000 in the current transaction graph."
@@ -21,7 +23,22 @@ You must classify each incoming question into **exactly one** of the following t
    - "Detect important communities in the AMLSim1K dataset."
    - "Analyze the most influential nodes based on centrality in the selected graph."
 
-2. "rag"    – Retrieval-Augmented Generation using the local knowledge base
+2. "graph_query" – Simple graph query using template matching
+   The question asks for direct structural information that can be answered with predefined query templates.
+   Typical cues:
+   - Simple lookup or traversal queries (neighbors, paths, common neighbors).
+   - Direct structural queries without complex algorithmic computation.
+   - Can be answered with template-based queries (e.g., "find neighbors", "get path", "common neighbors").
+   - Does NOT require running complex graph algorithms.
+
+   Example questions for "graph_query":
+   - "Find the neighbors of Collins Steven."
+   - "What is the path between Collins Steven and Nunez Mitchell?"
+   - "Find common neighbors of Collins Steven and Nunez Mitchell."
+   - "Get the 2-hop neighbors of account 100."
+   - "Show me the subgraph around Collins Steven."
+
+3. "rag"    – Retrieval-Augmented Generation using the local knowledge base
    The question requires consulting **user-provided datasets or documents** (e.g., CSV financial reports, PDFs, books, manuals, internal reports) stored in the local knowledge base.  
    The answer depends on **concrete facts, numbers, events, or relationships** that are only available in those files, not just in general model knowledge.
 
@@ -39,7 +56,7 @@ You must classify each incoming question into **exactly one** of the following t
    - "How is this documentation organized? Briefly describe the main sections and what each section covers."
 
 
-3. "general" – General LLM response (no graph computation or document retrieval needed)
+4. "general" – General LLM response (no graph computation or document retrieval needed)
    The question can be answered from general model knowledge or a short built-in description of the project, without running graph algorithms or retrieving local documents.
 
    Typical cues:
@@ -60,7 +77,7 @@ Important constraints:
 - The JSON structure must be:
 
 {
-  "type": "graph" | "rag" | "general",
+  "type": "graph" | "graph_query" | "rag" | "general",
   "reason": "A short explanation (1–2 sentences) of why this type fits the question."
 }
 """
@@ -2052,4 +2069,155 @@ Add a step between node 1 and node 2 to identify Anna's fraud community. Modify 
 Based on the user instructions below, revise the current plan. Output must be valid JSON only:
 Current Plan: {current_plan}
 User Request: {user_request}
+"""
+
+# add gjq
+# Prompt for classifying query type in natural language query engine
+nl_query_classify_type_prompt = """You are a Neo4j query assistant.
+User question: {question}
+Available query types and descriptions:
+{query_templates}
+Please determine which query type the user question belongs to. Return only the type name (e.g., "node_lookup"), with no additional content.
+"""
+
+# add gjq
+# Prompt for extracting parameters in natural language query engine
+nl_query_extract_params_prompt = """{schema_info}
+## Query Template Information
+Query type: {query_type}
+Description: {template_description}
+Invocation method: {template_method}
+Required parameters: {required_params}
+Query-specific optional parameters: {optional_params}
+## Universal Modifiers (Applicable to any query)
+{query_modifiers}
+## User Question
+{question}
+## Task
+**Important: You must strictly reference the Schema information (node types, properties, relationship types, etc.) provided above to fill in the parameters.**
+Based on the Schema information and query template requirements, extract parameter values from the user question and return them in JSON format.
+**Key improvement: You must clearly indicate which universal modifiers need to be used!**
+Requirements:
+1. Required parameters must be filled
+2. **label must be selected from the node types in the Schema** (refer to the "Node Types and Properties" section above)
+3. **key selection rules (important)**：
+   - **Check the property list for the label in the Schema**
+   - If the Schema has a `node_key` property, **must use node_key first**
+   - only consider other properties (like id, acct_id, etc.) if there is no node_key
+4. **value/v1/v2 extraction rules (important)**:
+   - **Extract based on the format of the key's corresponding Schema example values**
+   - If key is node_key, and Schema example is name format, extract full name from question
+   - Name format is typically "last_name first_name" (e.g., "Collins Steven", "Nunez Mitchell")
+   - For path_query and common_neighbor, extract two names as v1 and v2
+   - If question is "A to B" or "A and B", A is v1, B is v2
+   - Do not extract unrelated values (e.g., base_amt, amount, transaction)
+5. **rel_type selection rules**:
+   - **must be selected from the "Relationship Types and Properties" section of the Schema**
+   - Match relationship types based on keywords in the question (e.g., "transaction", "transfer")
+   - If the question does not explicitly specify a relationship type, do not set it (use default all relationships)
+6. **Universal modifier judgment rules (new, very important)**:
+   **You must include a "modifiers" field in the JSON, listing the modifiers to be used!**
+   a) **order_by and order_direction**:
+      - Only used when the question explicitly mentions sorting needs like "sort", "order by", "largest to smallest", "smallest to largest", "largest", "smallest", etc.
+      - If sorting is needed, must select the correct field name from the Schema
+      - **Field name format (based on query type)**：
+        * **neighbor_query**：
+          - Relationship property: firstRel.property_name (e.g., firstRel.base_amt)
+          - Node properties: `nbr.property_name` (e.g., `nbr.name`)
+        * **common_neighbor**：
+          - Relationship properties: `rA.property_name` or `rB.property_name` (e.g., `rA.base_amt`)
+          - Node properties: `C.property_name` (e.g., `C.node_key`)
+        * **path_query (path query)**:
+          - Path length: hops
+          - Node properties: need to use the node variables in the path
+      - order_direction: "ASC" (ascending) or "DESC" (descending)
+      - **If the question does not require sorting, do not include order_by in modifiers**
+   b) **limit**：
+      - Only used when the question explicitly mentions quantity limits (e.g., "first N", "at most N", "N items")
+      - If the question contains "all", "entire", etc., **do not use limit**
+      - If it's an aggregation query (just count/sum, etc.), **do not use limit**
+      - **If the question does not have a quantity limit, do not include limit in modifiers**
+   c) **where**：
+      - Only used when the question explicitly mentions filtering conditions (e.g., "amount greater than 1000", "balance over 500")
+      - **Condition format (varies by query type)**:
+        * **neighbor_query**：
+          - Node properties: `nbr.property_name operator value` (e.g., `nbr.balance > 1000`)
+          - Relationship properties: `firstRel.property_name operator value` (e.g., `firstRel.base_amt > 500`)
+        * **common_neighbor**：
+          - Node properties: `C.property_name operator value` (e.g., `C.balance > 1000`)
+          - Relationship properties: `rA.property_name operator value` or `rB.property_name operator value`
+        * **path_query**:
+          - Path length: `hops operator value` (e.g., `hops <= 3`)
+      - **If the question does not have filtering conditions, do not include where in modifiers**
+   d) **aggregate and aggregate_field**:
+      - Only used when the question contains aggregate keywords (e.g., "count", "number of", "how many", "sum", "average")
+      - aggregate 类型:count、sum、avg、max、min
+      - **If the question is not an aggregate query, do not include aggregate in modifiers**
+7. **JSON output format (important)**:
+   Must contain two top-level fields:
+   - "params": query parameters (required parameters + query-specific optional parameters)
+   - "modifiers": universal modifiers to be used (only include needed modifiers)
+Example Output 1 (Basic query - no modifiers):
+{{{{
+"params": {{{{
+"label": "Account",
+"key": "node_key",
+"value": "Lee Alex"
+}}}},
+"modifiers": {{{{}}}}
+}}}}
+Example Output 2 (With sorting and limit):
+{{{{
+"params": {{{{
+"label": "Account",
+"key": "node_key",
+"value": "Collins Steven",
+"hops": 1
+}}}},
+"modifiers": {{{{
+"order_by": "firstRel.base_amt",
+"order_direction": "DESC",
+"limit": 5
+}}}}
+}}}}
+Example Output 3 (With filtering condition):
+{{{{
+"params": {{{{
+"label": "Account",
+"key": "node_key",
+"value": "Collins Steven",
+"hops": 1
+}}}},
+"modifiers": {{{{
+"where": "firstRel.base_amt > 1000"
+}}}}
+}}}}
+Example Output 4 (Aggregate query):
+{{{{
+"params": {{{{
+"label": "Account",
+"key": "node_key",
+"value": "Collins Steven",
+"hops": 1
+}}}},
+"modifiers": {{{{
+"aggregate": "count"
+}}}}
+}}}}
+Example Output 5 (Combined modifiers):
+{{{{
+"params": {{{{
+"label": "Account",
+"key": "node_key",
+"value": "Collins Steven",
+"hops": 1
+}}}},
+"modifiers": {{{{
+"where": "firstRel.base_amt > 500",
+"order_by": "firstRel.base_amt",
+"order_direction": "DESC",
+"limit": 3
+}}}}
+}}}}
+Begin:
 """

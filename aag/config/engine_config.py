@@ -63,10 +63,11 @@ def load_config_from_yaml(config_path: str) -> EngineConfig:
         retrieval_section = (config_data or {}).get("retrieval", {})
         database_section = retrieval_section.get("database", {})
         rag_section = retrieval_section.get("rag", {})
-
+        #add gjq
         database_config = DatabaseConfig(
             graph=database_section.get("graph", {}) or {},
-            vector=database_section.get("vector", {}) or {}
+            vector=database_section.get("vector", {}) or {},
+            neo4j=database_section.get("neo4j", ) or {}
         )
         rag_config = RagConfig(
             graph=rag_section.get("graph", {}) or {},
@@ -153,6 +154,7 @@ def create_engine_config(
             "host": kwargs.get("vector_host", "localhost"),
             "port": kwargs.get("vector_port", 19530),
         },
+        neo4j=kwargs.get("neo4j", {}) or {},
     )
 
     rag = RagConfig(

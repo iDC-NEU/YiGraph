@@ -6,9 +6,10 @@ from aag.reasoner.model_deployment import Reasoner
 from aag.reasoner.prompt_template.llm_prompt_en import query_router_prompt
 
 class QueryType(str, Enum):
-    GRAPH = "graph"          
-    RAG = "rag"              
-    GENERAL = "general"      
+    GRAPH = "graph"
+    GRAPH_QUERY = "graph_query"  # 图查询（模板匹配查询）
+    RAG = "rag"
+    GENERAL = "general"
 
 
 @dataclass

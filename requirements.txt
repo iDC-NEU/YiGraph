@@ -76,6 +76,7 @@ weasel==0.4.1
 pymilvus==2.5.12
 milvus-lite==2.5.1
 nebula3-python==3.8.3
+neo4j==4.4.12
 
 # ============================================================================
 # LLM Framework (LlamaIndex)
