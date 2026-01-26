@@ -5030,3 +5030,64 @@
       all-pairs shortest paths, which is typically feasible for small to medium-sized
       graphs.
     time_complexity: O(V * (V + E))
+- id: get_node_attributes
+  task_type_id: Graph Query
+  Application_scenario: This algorithm is fundamental for retrieving detailed profile
+    information in knowledge graphs, social networks, or product catalogs.
+    For example, in a Customer 360 view, it is used to fetch specific user details
+     (age, location, account status) based on their unique User ID; in an e-commerce graph,
+      it retrieves product specifications given a product SKU.
+  Principles:
+    description: The algorithm performs a direct index lookup to retrieve the properties
+     or attributes associated with a specific node identifier. It acts as a key-value
+      retrieval operation within the graph database, returning the metadata stored on
+       the node rather than its structural connections.
+
+- id: k_hop_neighbors
+  task_type_id: Graph Query
+  Application_scenario: K-hop neighbor queries are widely used in recommendation systems,
+   risk analysis, and impact assessment. For instance, in social networks, querying 2-hop
+   neighbors helps suggest "Friends of Friends"; in supply chain management, it identifies
+    tier-2 and tier-3 suppliers to assess indirect risks; in cybersecurity, it analyzes the
+     "blast radius" of a compromised server by finding all connected devices within k steps.
+  Principles:
+    description: This algorithm traverses the graph starting from a seed node (or set of nodes)
+     and expands outwards to find all nodes reachable within exactly 'k' steps or up to 'k' steps.
+      It typically uses a Breadth-First Search (BFS) strategy to discover layers of neighbors,
+       effectively retrieving the local neighborhood structure around the target node.
+
+- id: common_neighbors
+  task_type_id: Graph Query
+  Application_scenario: Finding common neighbors is a key heuristic for Link Prediction and similarity
+   analysis. In social media, if two users share many mutual friends, the system recommends they connect;
+    in fraud detection, identifying that two seemingly unrelated accounts share the same IP address,
+     device ID, or phone number (common neighbors) can indicate a sybil attack or collusion.
+  Principles:
+    description: The algorithm identifies the set of nodes that have a direct connection to both node A and node B.
+     Mathematically, it computes the intersection of the neighbor set of node A and the neighbor set of node B.
+      It is a measure of structural proximity and is often used as a building block for more complex similarity metrics
+       like Jaccard Coefficient or Adamic-Adar.
+
+- id: extract_subgraph
+  task_type_id: Graph Query
+  Application_scenario: Subgraph extraction is essential for focused analysis, visualization, and machine learning training
+   (GNNs). Scenarios include extracting a specific community for visual inspection, isolating a transaction ring suspected
+    of money laundering for manual review, or creating an Ego Graph (a node and its immediate context) to train a localized
+     prediction model.
+  Principles:
+    description: This algorithm retrieves a subset of the original graph based on specific criteria, such
+     as a list of target nodes or a specific region. It typically returns an "induced subgraph," which
+      includes the selected nodes and all existing edges between them from the original graph. This
+       allows for analyzing specific structural patterns without processing the entire network.
+
+- id: get_paths_between_two_nodes
+  task_type_id: Graph Query
+  Application_scenario: Path queries are critical for tracing relationships, logistics, and root cause analysis.
+   In a knowledge graph, it answers "How is Person A related to Company B?"; in navigation apps, it finds routes
+    between locations; in network operations, it traces the physical or logical link between a user and a server
+     to diagnose connectivity issues.
+  Principles:
+    description: The algorithm searches for sequences of edges that connect a source node to a target node.
+     Depending on the specific variation, it can return all simple paths (paths with no repeated nodes),
+      the shortest path (minimum hops or weight), or paths constrained by max depth. It reveals the connectivity
+       and intermediate hops required to traverse from one entity to another.
