@@ -256,11 +256,26 @@ class OllamaEnv:
         return extract_json_from_response(response.text)
 
 
-    def select_algorithm(self, question: str, algorithm_list: list) -> dict:
+    def select_algorithm(self, question: str, algorithm_list: list, graph_schema: Optional[Dict[str, Any]] = None) -> dict:
+        schema_context = ""
+        if graph_schema:
+            schema_context = f"""
+
+Current Graph Dataset Schema:
+- Dataset: {graph_schema.get('dataset_name', 'Unknown')}
+- Graph Type: {'Directed' if graph_schema.get('graph_properties', {}).get('directed') else 'Undirected'}, {'Heterogeneous' if graph_schema.get('graph_properties', {}).get('heterogeneous') else 'Homogeneous'}, {'Multigraph' if graph_schema.get('graph_properties', {}).get('multigraph') else 'Simple'}, {'Weighted' if graph_schema.get('graph_properties', {}).get('weighted') else 'Unweighted'}
+- Vertex Types: {', '.join(graph_schema.get('vertex_types', []))}
+- Edge Types: {', '.join(graph_schema.get('edge_types', []))}
+- Vertex Configurations: {json.dumps(graph_schema.get('vertex_configs', []), ensure_ascii=False, indent=2)}
+- Edge Configurations: {json.dumps(graph_schema.get('edge_configs', []), ensure_ascii=False, indent=2)}
+
+Please consider this schema when selecting the algorithm to ensure compatibility.
+"""
+        
         response = self.llm.complete(select_algorithm_prompt.format(
                 question=question,
                 algorithm_list=algorithm_list
-            ))
+            ) + schema_context)
         return extract_json_from_response(response.text)
         
     
@@ -515,13 +530,28 @@ class OpenAIEnv:
         response = response.choices[0].message.content
         return json.loads(response)
     
-    def select_algorithm(self, question: str, algorithm_list: list) -> dict:
+    def select_algorithm(self, question: str, algorithm_list: list, graph_schema: Optional[Dict[str, Any]] = None) -> dict:
+        schema_context = ""
+        if graph_schema:
+            schema_context = f"""
+
+Current Graph Dataset Schema:
+- Dataset: {graph_schema.get('dataset_name', 'Unknown')}
+- Graph Type: {'Directed' if graph_schema.get('graph_properties', {}).get('directed') else 'Undirected'}, {'Heterogeneous' if graph_schema.get('graph_properties', {}).get('heterogeneous') else 'Homogeneous'}, {'Multigraph' if graph_schema.get('graph_properties', {}).get('multigraph') else 'Simple'}, {'Weighted' if graph_schema.get('graph_properties', {}).get('weighted') else 'Unweighted'}
+- Vertex Types: {', '.join(graph_schema.get('vertex_types', []))}
+- Edge Types: {', '.join(graph_schema.get('edge_types', []))}
+- Vertex Configurations: {json.dumps(graph_schema.get('vertex_configs', []), ensure_ascii=False, indent=2)}
+- Edge Configurations: {json.dumps(graph_schema.get('edge_configs', []), ensure_ascii=False, indent=2)}
+
+Please consider this schema when selecting the algorithm to ensure compatibility.
+"""
+        
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[{"role": "user", "content": select_algorithm_prompt.format(
                 question=question,
                 algorithm_list=algorithm_list
-            )}]
+            ) + schema_context}]
         )
         response = response.choices[0].message.content
         return json.loads(response)
@@ -808,8 +838,8 @@ class Reasoner:
     def select_task_type(self, question: str, task_type_list: list) -> dict:
         return self.env.select_task_type(question, task_type_list)
     
-    def select_algorithm(self, question: str, algorithm_list: list) -> dict:
-        return self.env.select_algorithm(question, algorithm_list)
+    def select_algorithm(self, question: str, algorithm_list: list, graph_schema: Optional[Dict[str, Any]] = None) -> dict:
+        return self.env.select_algorithm(question, algorithm_list, graph_schema)
     
     def extract_parameters_with_postprocess(self, question: str, tool_description: str) -> dict:
         return self.env.extract_parameters_with_postprocess(question, tool_description)
