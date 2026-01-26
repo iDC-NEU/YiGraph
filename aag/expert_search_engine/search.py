@@ -179,12 +179,26 @@ class ExpertSearchEngine:
         algorithm_list = []
         selected_algorithm_ids = self.task_index.get(task_type_id, {}).get("algorithm", [])
         for algorithm_id in selected_algorithm_ids:
-            algorithm_list.append({
-                "id": algorithm_id,
-                "Application_scenario": self.algo_index[algorithm_id].get("Application_scenario"),
-                "Deployment_method": self.algo_index[algorithm_id].get("Deployment_method"),
-                "Principles": self.algo_index[algorithm_id].get("Principles"),
-            })
+            algo_data = self.algo_index.get(algorithm_id, {})
+            
+            # 根据任务类型决定返回的字段
+            if task_type_id == "Graph Query":
+                # Graph Query 类型返回 solvable_questions 而不是 Deployment_method
+                algorithm_list.append({
+                    "id": algorithm_id,
+                    "Application_scenario": algo_data.get("Application_scenario"),
+                    "Principles": algo_data.get("Principles").get("description"),
+                    "solvable_questions": algo_data.get("solvable_questions"),
+                })
+            else:
+                # 其他类型返回 Deployment_method
+                algorithm_list.append({
+                    "id": algorithm_id,
+                    "Application_scenario": algo_data.get("Application_scenario"),
+                    "Deployment_method": algo_data.get("Deployment_method"),
+                    "Principles": algo_data.get("Principles"),
+                    "solvable_questions": algo_data.get("solvable_questions"),
+                })
         return algorithm_list
         
 

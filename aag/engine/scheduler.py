@@ -601,7 +601,26 @@ class Scheduler:
                 algorithm_list = self.expert_search_engine.retrieve_algorithm(step.question, selected_task_type_id)
                 logger.info(f"🔍 检索到的算法列表: {algorithm_list}")
                 
-                algorithm_result = self.reasoner.select_algorithm(step.question, algorithm_list)
+                # 获取当前数据集的完整schema信息
+                graph_schema_info = None
+                if self.current_graph_dataset:
+                    graph_schema_info = {
+                        "dataset_name": self.current_dataset_name,
+                        "graph_properties": {
+                            "directed": self.current_graph_dataset.schema.graph.directed if hasattr(self.current_graph_dataset.schema, 'graph') else True,
+                            "heterogeneous": self.current_graph_dataset.schema.graph.heterogeneous if hasattr(self.current_graph_dataset.schema, 'graph') else False,
+                            "multigraph": self.current_graph_dataset.schema.graph.multigraph if hasattr(self.current_graph_dataset.schema, 'graph') else False,
+                            "weighted": self.current_graph_dataset.schema.graph.weighted if hasattr(self.current_graph_dataset.schema, 'graph') else False,
+                        },
+                        "vertex_types": [v.type for v in self.current_graph_dataset.schema.vertex] if hasattr(self.current_graph_dataset.schema, 'vertex') else [],
+                        "edge_types": [e.type for e in self.current_graph_dataset.schema.edge] if hasattr(self.current_graph_dataset.schema, 'edge') else [],
+                        "vertex_configs": [{"type": v.type, "query_field": v.query_field, "attribute_fields": v.attribute_fields}
+                                          for v in self.current_graph_dataset.schema.vertex] if hasattr(self.current_graph_dataset.schema, 'vertex') else [],
+                        "edge_configs": [{"type": e.type, "source_field": e.source_field, "target_field": e.target_field, "weight_field": e.weight_field}
+                                        for e in self.current_graph_dataset.schema.edge] if hasattr(self.current_graph_dataset.schema, 'edge') else [],
+                    }
+                
+                algorithm_result = self.reasoner.select_algorithm(step.question, algorithm_list, graph_schema=graph_schema_info)
                 logger.info(f"🔍 算法选择结果: {algorithm_result}")
                 
                 # Check if algorithm_result is None or contains error
@@ -908,12 +927,6 @@ class Scheduler:
                             logger.error(f"❌ {error_msg}")
                             self.dag.set_failed(step_id, error_msg)
                             raise RuntimeError(f"节点 {step_id} 执行失败：{error_msg}") from alg_err
-                    
-                except Exception as alg_err:
-                    error_msg = f"算法执行失败: {alg_err}"
-                    logger.error(f"❌ {error_msg}")
-                    self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"节点 {step_id} 执行失败：{error_msg}") from alg_err
 
                 ## todo: 保存中间计算结果的模块: 如果图计算的结果规模特别大, 把结果写到一个文件里 
                 # 添加算法执行结果到 step
