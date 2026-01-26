@@ -23,15 +23,7 @@ from aag.utils.graph_conversion import flatten_graph, reconstruct_graph
 from aag.utils.data_utils import take_sample
 from aag.rag_engine.vector_rag import VectorRAG
 from aag.reasoner.prompt_template.llm_prompt_en import rag_prompt
-<<<<<<< HEAD
-# add gjq: 移除直接导入，改为通过 computing_engine 调用
-# from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine, LLMInterface
-# from aag.computing_engine.graph_query.graph_query import Neo4jGraphClient, Neo4jConfig
-=======
-from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine, LLMInterface
-from aag.computing_engine.graph_query.graph_query import Neo4jGraphClient, Neo4jConfig
 from aag.error_recovery import ErrorRecoveryModule, should_retry, prepare_error_info, classify_error_type
->>>>>>> c5b5e66 (add error recovery module)
 
 logger = logging.getLogger(__name__)
 
@@ -49,13 +41,7 @@ class Scheduler:
         self.dag: Optional[GraphWorkflowDAG] = None
         self.dataset_manager: Optional[DatasetManager] = None
         self.data_dependency_resolver: Optional[DataDependencyResolver] = None
-<<<<<<< HEAD
-        # add gjq: 移除 nl_query_engine 字段，改为通过 computing_engine 调用
-        # self.nl_query_engine: Optional[NaturalLanguageQueryEngine] = None  # 图查询引擎
-=======
-        self.nl_query_engine: Optional[NaturalLanguageQueryEngine] = None  # 图查询引擎
         self.error_recovery: Optional[ErrorRecoveryModule] = None  # 错误恢复模块
->>>>>>> c5b5e66 (add error recovery module)
 
         self.current_dataset_name: Optional[str] = None  # Dataset-level name (for text datasets, this is the dataset name)
         self.current_dataset: Optional[List[DatasetConfig]] = None  # Original dataset config (text/graph, never changes)
@@ -88,21 +74,7 @@ class Scheduler:
 
         self._init_rag_engine()
         
-<<<<<<< HEAD
-        # add gjq: 图查询引擎已在 _init_computing_engine 中初始化，无需单独调用
-=======
         self._init_error_recovery()
-
-        # 初始化图查询引擎（如果配置中启用）
-        neo4j_config_dict = self.config.retrieval.database.neo4j
-        if neo4j_config_dict.get("enabled", False):
-            neo4j_config = Neo4jConfig(
-                uri=neo4j_config_dict.get("uri", "bolt://localhost:7687"),
-                user=neo4j_config_dict.get("user", "neo4j"),
-                password=neo4j_config_dict.get("password", "")
-            )
-            self._init_nl_query_engine(neo4j_config)
->>>>>>> c5b5e66 (add error recovery module)
 
     
     def _init_reasoner(self):
@@ -176,29 +148,6 @@ class Scheduler:
             print(f"✗ RAGEngineinitialization failed: {e}")
             raise
 
-<<<<<<< HEAD
-=======
-    def _init_nl_query_engine(self, neo4j_config: Optional[Neo4jConfig] = None):
-        """初始化自然语言图查询引擎"""
-        try:
-            if neo4j_config is None:
-                # 使用默认配置（可以从config中读取）
-                neo4j_config = Neo4jConfig(
-                    uri="bolt://localhost:7687",
-                    user="neo4j",
-                    password="password"  # 需要配置实际密码
-                )
-            
-            db_client = Neo4jGraphClient(neo4j_config)
-            llm = LLMInterface()
-            self.nl_query_engine = NaturalLanguageQueryEngine(db_client, llm)
-            self.nl_query_engine.initialize()
-            print("✓ NaturalLanguageQueryEngine initialized")
-        except Exception as e:
-            print(f"✗ NaturalLanguageQueryEngine initialization failed: {e}")
-            # 不抛出异常，允许系统在没有图查询功能的情况下运行
-            self.nl_query_engine = None
-    
     def _init_error_recovery(self):
         """初始化错误恢复模块"""
         try:
@@ -210,7 +159,6 @@ class Scheduler:
             print(f"✗ ErrorRecoveryModule initialization failed: {e}")
             raise
 
->>>>>>> c5b5e66 (add error recovery module)
     def list_datasets(self, dtype: Optional[str] = None) -> Dict[str, List[str]]:
         return self.dataset_manager.list_datasets(dtype)
 
@@ -742,7 +690,7 @@ class Scheduler:
             step = self.dag.steps[step_id]
             tool_description = None
             tool_metadata = None
-            tool_result = None  # 初始化tool_result，避免在某些分支中未定义
+            tool_result = None 
 
             if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
                 if not step.graph_algorithm:
@@ -1076,30 +1024,6 @@ class Scheduler:
                                         "dependency_items": dependency_items
                                     }
                                 )
-<<<<<<< HEAD
-                                for name, info in output_schema.get("fields", {}).items()
-                            }
-                        ) if output_schema else None,
-                        value=code_result_value if isinstance(code_result_value, dict) else {"result": code_result_value},
-                        path=None,
-                        validate_schema=True
-                    )
-                    logger.info(f"✅ 数值分析执行完成")
-                    self.dag.set_success(step_id)
-                    
-                    # 设置tool_result用于后续的LLM分析
-                    tool_result = {
-                        "success": True,
-                        "result": code_result_value if isinstance(code_result_value, dict) else {"result": code_result_value},
-                        "summary": f"数值分析成功"
-                    }
-                    
-                except Exception as numeric_err:
-                    error_msg = f"数值分析执行失败: {numeric_err}"
-                    logger.error(error_msg, exc_info=True)
-                    self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"节点 {step_id} 数值分析失败：{numeric_err}")
-=======
                                 retry_count_numeric += 1
                                 continue
                             except Exception as recovery_err:
@@ -1111,9 +1035,7 @@ class Scheduler:
                             logger.error(error_msg, exc_info=True)
                             self.dag.set_failed(step_id, error_msg)
                             raise RuntimeError(f"节点 {step_id} 数值分析失败：{numeric_err}") from numeric_err
->>>>>>> c5b5e66 (add error recovery module)
 
-            # add gjq: 修改为通过 computing_engine 调用图查询
             elif step.task_type == GraphAnalysisType.GRAPH_QUERY:
                 logger.info("🔍 当前任务类型：Graph Query")
                 try:
