@@ -2,11 +2,18 @@ from typing import Dict, List, Optional
 from typing import Any, Tuple, Union
 from pathlib import Path
 import yaml
+# add gjq: 导入日志和dataclass工具
+import logging
+from dataclasses import asdict
 from aag.data_pipeline.data_transformer.graph_loader import GraphDataLoader
 from aag.data_pipeline.data_transformer.table_loader import TableDataLoader
 from aag.data_pipeline.data_transformer.text_loader import TextDataLoader
 from aag.config.data_upload_config import DataUploadConfig, DatasetConfig, load_data_upload_config
 from aag.utils.path_utils import  DATASETS_INDEX_PATH
+# add gjq: 导入Neo4j图数据加载器
+from aag.computing_engine.graph_query.load_data_into_neo4j import Neo4jGraphLoader
+
+logger = logging.getLogger(__name__)
 
 
 class DatasetManager:
@@ -382,3 +389,79 @@ class DatasetManager:
             print(f"[WARNING] Failed to load converted graph for {dataset_name}: {e}")
         
         return None
+    
+    # add gjq: 将图数据加载到Neo4j数据库
+    def load_graph_to_neo4j(self, graph_dataset_config: DatasetConfig, dataset_name: str, neo4j_config: Dict[str, Any]):
+        """
+        将图数据加载到Neo4j数据库
+        
+        Args:
+            graph_dataset_config: 图数据集配置（DatasetConfig类型）
+                - graph_dataset_config.schema 是 GraphSchemaConfig 类型
+                - GraphSchemaConfig.vertex 是 List[VertexSchemaConfig]
+                - GraphSchemaConfig.edge 是 List[EdgeSchemaConfig]
+            dataset_name: 数据集名称
+            neo4j_config: Neo4j配置字典，包含 uri, user, password, enabled 等字段
+        
+        Returns:
+            bool: 加载是否成功
+        """
+        try:
+            # add gjq: 检查是否启用neo4j
+            if not neo4j_config.get("enabled", False):
+                logger.info("ℹ Neo4j未启用，跳过图数据加载")
+                return False
+            
+            # add gjq: 从DatasetConfig中提取GraphSchemaConfig
+            schema_obj = graph_dataset_config.schema  # GraphSchemaConfig类型
+            
+            # add gjq: 将schema对象转换为字典格式
+            # schema_obj.vertex 是 List[VertexSchemaConfig]
+            # schema_obj.edge 是 List[EdgeSchemaConfig]
+            # 需要将这些dataclass对象转换为字典列表
+            if hasattr(schema_obj, 'vertex') and hasattr(schema_obj, 'edge'):
+                # 直接访问dataclass的属性
+                vertex_configs = schema_obj.vertex
+                edge_configs = schema_obj.edge
+                
+                # 将dataclass对象转换为字典
+                vertex_dicts = [asdict(v) if hasattr(v, '__dataclass_fields__') else v for v in vertex_configs]
+                edge_dicts = [asdict(e) if hasattr(e, '__dataclass_fields__') else e for e in edge_configs]
+            else:
+                # 降级方案：尝试使用__dict__
+                schema_dict = schema_obj.__dict__ if hasattr(schema_obj, '__dict__') else schema_obj
+                vertex_dicts = schema_dict.get('vertex', [])
+                edge_dicts = schema_dict.get('edge', [])
+            
+            # add gjq: 构建Neo4j加载器需要的schema格式
+            loader_schema = {
+                'vertex': vertex_dicts,
+                'edge': edge_dicts
+            }
+            
+            logger.info(f"🔄 开始将图数据集 {dataset_name} 加载到Neo4j...")
+            logger.info(f"   顶点配置数量: {len(vertex_dicts)}, 边配置数量: {len(edge_dicts)}")
+            
+            # add gjq: 创建Neo4j加载器
+            loader = Neo4jGraphLoader(
+                uri=neo4j_config.get("uri", "bolt://localhost:7687"),
+                username=neo4j_config.get("user", "neo4j"),
+                password=neo4j_config.get("password", ""),
+                schema=loader_schema
+            )
+            
+            # add gjq: 加载数据（清空现有数据）
+            success = loader.load_all_data(clear_existing=True)
+            
+            if success:
+                logger.info(f"✅ 图数据集 {dataset_name} 已成功加载到Neo4j")
+            else:
+                logger.warning(f"⚠️ 图数据集 {dataset_name} 加载到Neo4j失败")
+            
+            return success
+                
+        except Exception as e:
+            logger.warning(f"⚠️ 加载图数据到Neo4j时发生错误: {e}")
+            logger.exception(e)  # add gjq: 打印详细的异常堆栈信息
+            # 不抛出异常，允许系统在没有Neo4j的情况下继续运行
+            return False

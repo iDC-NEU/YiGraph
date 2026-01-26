@@ -23,8 +23,9 @@ from aag.utils.graph_conversion import flatten_graph, reconstruct_graph
 from aag.utils.data_utils import take_sample
 from aag.rag_engine.vector_rag import VectorRAG
 from aag.reasoner.prompt_template.llm_prompt_en import rag_prompt
-from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine, LLMInterface
-from aag.computing_engine.graph_query.graph_query import Neo4jGraphClient, Neo4jConfig
+# add gjq: 移除直接导入，改为通过 computing_engine 调用
+# from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine, LLMInterface
+# from aag.computing_engine.graph_query.graph_query import Neo4jGraphClient, Neo4jConfig
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +43,8 @@ class Scheduler:
         self.dag: Optional[GraphWorkflowDAG] = None
         self.dataset_manager: Optional[DatasetManager] = None
         self.data_dependency_resolver: Optional[DataDependencyResolver] = None
-        self.nl_query_engine: Optional[NaturalLanguageQueryEngine] = None  # 图查询引擎
+        # add gjq: 移除 nl_query_engine 字段，改为通过 computing_engine 调用
+        # self.nl_query_engine: Optional[NaturalLanguageQueryEngine] = None  # 图查询引擎
 
         self.current_dataset_name: Optional[str] = None  # Dataset-level name (for text datasets, this is the dataset name)
         self.current_dataset: Optional[List[DatasetConfig]] = None  # Original dataset config (text/graph, never changes)
@@ -74,16 +76,8 @@ class Scheduler:
         self._init_router()
 
         self._init_rag_engine()
-
-        # 初始化图查询引擎（如果配置中启用）
-        neo4j_config_dict = self.config.retrieval.database.neo4j
-        if neo4j_config_dict.get("enabled", False):
-            neo4j_config = Neo4jConfig(
-                uri=neo4j_config_dict.get("uri", "bolt://localhost:7687"),
-                user=neo4j_config_dict.get("user", "neo4j"),
-                password=neo4j_config_dict.get("password", "")
-            )
-            self._init_nl_query_engine(neo4j_config)
+        
+        # add gjq: 图查询引擎已在 _init_computing_engine 中初始化，无需单独调用
 
     
     def _init_reasoner(self):
@@ -99,7 +93,17 @@ class Scheduler:
         """初始化 computing engine 连接"""
         try:
             self.computing_engine = ComputingEngine()
-            print("✓ ComputingEngine initialized")
+            
+            # add gjq: 初始化computing_engine的图查询引擎
+            neo4j_config_dict = self.config.retrieval.database.neo4j
+            if neo4j_config_dict.get("enabled", False):
+                self.computing_engine.initialize_graph_query_engine(
+                    neo4j_config=neo4j_config_dict,
+                    reasoner=self.reasoner
+                )
+                print("✓ ComputingEngine with GraphQueryEngine initialized")
+            else:
+                print("✓ ComputingEngine initialized (GraphQueryEngine disabled)")
         except Exception as e:
             print(f"✗ ComputingEngine initialization failed: {e}")
             raise
@@ -147,31 +151,10 @@ class Scheduler:
             print(f"✗ RAGEngineinitialization failed: {e}")
             raise
 
-    def _init_nl_query_engine(self, neo4j_config: Optional[Neo4jConfig] = None):
-        """初始化自然语言图查询引擎"""
-        try:
-            if neo4j_config is None:
-                # 使用默认配置（可以从config中读取）
-                neo4j_config = Neo4jConfig(
-                    uri="bolt://localhost:7687",
-                    user="neo4j",
-                    password="password"  # 需要配置实际密码
-                )
-            
-            db_client = Neo4jGraphClient(neo4j_config)
-            llm = LLMInterface()
-            self.nl_query_engine = NaturalLanguageQueryEngine(db_client, llm)
-            self.nl_query_engine.initialize()
-            print("✓ NaturalLanguageQueryEngine initialized")
-        except Exception as e:
-            print(f"✗ NaturalLanguageQueryEngine initialization failed: {e}")
-            # 不抛出异常，允许系统在没有图查询功能的情况下运行
-            self.nl_query_engine = None
-
     def list_datasets(self, dtype: Optional[str] = None) -> Dict[str, List[str]]:
         return self.dataset_manager.list_datasets(dtype)
 
-    def specific_analysis_dataset(self, name: str, dtype: Optional[str] = None) -> Optional[List[DatasetConfig]]: 
+    def specific_analysis_dataset(self, name: str, dtype: Optional[str] = None) -> Optional[List[DatasetConfig]]:
         """
         Set the original dataset for analysis
         
@@ -200,6 +183,14 @@ class Scheduler:
             self.global_graph = GraphData(vertices=global_vertices, edges=global_edges)
             graph_nodes, graph_edges = flatten_graph(global_vertices, global_edges)
             self.data_dependency_resolver.set_global_graph(graph_nodes, graph_edges)
+            
+            # add gjq: 自动将图数据加载到Neo4j（调用DatasetManager的方法）
+            neo4j_config_dict = self.config.retrieval.database.neo4j
+            self.dataset_manager.load_graph_to_neo4j(
+                self.current_graph_dataset,
+                self.current_dataset_name,
+                neo4j_config_dict
+            )
         else:
             # Text/table dataset
             self.current_graph_dataset = None
@@ -410,9 +401,10 @@ class Scheduler:
 
         return self.reasoner.generate_response(prompt)
 
+    # add gjq: 修改为通过 computing_engine 调用图查询
     async def _execute_graph_query(self, query: str) -> str:
         """
-        执行图查询（使用nl_query_engine）
+        执行图查询（通过 computing_engine）
         
         Args:
             query: 用户查询
@@ -420,12 +412,9 @@ class Scheduler:
         Returns:
             查询结果字符串
         """
-        if not self.nl_query_engine:
-            return "❌ 错误：图查询引擎未初始化，请检查Neo4j配置"
-        
         try:
-            # 使用nl_query_engine执行查询
-            result = self.nl_query_engine.ask(query)
+            # 通过 computing_engine 执行图查询
+            result = self.computing_engine.execute_graph_query(query)
             
             if result.get("success"):
                 # 格式化查询结果
@@ -689,10 +678,11 @@ class Scheduler:
     async def _run_algorithm_pipeline2(self):
         analysis_result = ""
 
-        for step_id in self.dag.topological_order(): 
+        for step_id in self.dag.topological_order():
             step = self.dag.steps[step_id]
             tool_description = None
             tool_metadata = None
+            tool_result = None  # 初始化tool_result，避免在某些分支中未定义
 
             if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
                 if not step.graph_algorithm:
@@ -890,23 +880,25 @@ class Scheduler:
                     logger.info(f"✅ 数值分析执行完成")
                     self.dag.set_success(step_id)
                     
+                    # 设置tool_result用于后续的LLM分析
+                    tool_result = {
+                        "success": True,
+                        "result": code_result_value if isinstance(code_result_value, dict) else {"result": code_result_value},
+                        "summary": f"数值分析成功"
+                    }
+                    
                 except Exception as numeric_err:
                     error_msg = f"数值分析执行失败: {numeric_err}"
                     logger.error(error_msg, exc_info=True)
                     self.dag.set_failed(step_id, error_msg)
                     raise RuntimeError(f"节点 {step_id} 数值分析失败：{numeric_err}")
 
+            # add gjq: 修改为通过 computing_engine 调用图查询
             elif step.task_type == GraphAnalysisType.GRAPH_QUERY:
                 logger.info("🔍 当前任务类型：Graph Query")
                 try:
-                    if not self.nl_query_engine:
-                        error_msg = "图查询引擎未初始化"
-                        logger.error(f"❌ {error_msg}")
-                        self.dag.set_failed(step_id, error_msg)
-                        raise RuntimeError(f"节点 {step_id}: {error_msg}")
-                    
-                    # 使用nl_query_engine执行查询
-                    query_result = self.nl_query_engine.ask(step.question)
+                    # 通过 computing_engine 执行图查询
+                    query_result = self.computing_engine.execute_graph_query(step.question)
                     
                     if query_result.get("success"):
                         # 将查询结果添加到step的输出

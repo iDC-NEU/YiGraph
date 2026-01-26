@@ -3,6 +3,16 @@
 import json
 import re
 import os
+import sys
+
+# add gjq
+# Add project root directory to Python path to enable importing aag module
+# Get current file directory, then navigate up to find AAG directory
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+# project_root = os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))
+# if project_root not in sys.path:
+#     sys.path.insert(0, project_root)
+# add gjq
 from openai import OpenAI
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
@@ -11,120 +21,127 @@ import logging
 # 类型别名
 JsonDict = Dict[str, Any]
 
+# add gjq
+# Import Reasoner for LLM calls
+from aag.reasoner.model_deployment import Reasoner
+from aag.config.engine_config import ReasonerConfig
+
 # ===== 导入你的模板模块 =====
 from aag.computing_engine.graph_query.graph_query import Neo4jGraphClient, Neo4jConfig
 #from graph_query import Neo4jGraphClient, Neo4jConfig
-os.environ['OPENAI_API_KEY'] = 'sk-G30rFStBigqXtuyIOkOo7Zh4QNxO8ZAjfZQ5DYPCgMXbPv8q'
-os.environ['OPENAI_BASE_URL'] = 'https://gitaigc.com/v1/'
 
-client = OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
-    base_url=os.environ.get("OPENAI_BASE_URL")
-)
+# add gjq
+# Removed direct OpenAI client initialization
+# os.environ['OPENAI_API_KEY'] = 'sk-G30rFStBigqXtuyIOkOo7Zh4QNxO8ZAjfZQ5DYPCgMXbPv8q'
+# os.environ['OPENAI_BASE_URL'] = 'https://gitaigc.com/v1/'
+# client = OpenAI(
+#     api_key=os.environ.get("OPENAI_API_KEY"),
+#     base_url=os.environ.get("OPENAI_BASE_URL")
+# )
 
 # ==========================================
-# 1. 基础查询类型（核心查询逻辑）
+# 1. Basic Query Types (Core Query Logic)
 # ==========================================
 QUERY_TEMPLATES = {
     "node_lookup": {
-        "description": "根据唯一键查找单个节点",
+        "description": "Find a single node by unique key",
         "method": "get_node_by_unique_key",
         "required_params": ["label", "key", "value"],
         "optional_params": [],
-        "example": "找到用户 Collins Steven"
+        "example": "Find user Collins Steven"
     },
     "neighbor_query": {
-        "description": "查询节点的邻居或N跳关系",
+        "description": "Query neighbors or N-hop relationships of a node",
         "method": "neighbors_n_hop",
         "required_params": ["label", "key", "value"],
         "optional_params": ["hops", "rel_type", "direction"],
-        "example": "查询 Collins Steven 的邻居"
+        "example": "Query neighbors of Collins Steven"
     },
     "path_query": {
-        "description": "查询两点之间的路径",
+        "description": "Query paths between two nodes",
         "method": "paths_between",
         "required_params": ["label", "key", "v1", "v2"],
         "optional_params": ["rel_type", "direction", "min_hops", "max_hops"],
-        "example": "Collins Steven 到 Nunez Mitchell 的路径"
+        "example": "Path from Collins Steven to Nunez Mitchell"
     },
     "common_neighbor": {
-        "description": "查询两个节点的公共邻居",
+        "description": "Query common neighbors of two nodes",
         "method": "common_neighbors",
         "required_params": ["label", "key", "v1", "v2"],
         "optional_params": ["rel_type", "direction"],
-        "example": "Collins Steven 和 Nunez Mitchell 的共同邻居"
+        "example": "Common neighbors of Collins Steven and Nunez Mitchell"
     },
     "subgraph": {
-        "description": "抽取子图（单中心节点）",
+        "description": "Extract subgraph (single center node)",
         "method": "subgraph_extract",
         "required_params": ["label", "key", "value"],
         "optional_params": ["hops", "rel_type", "direction", "limit_paths"],
-        "example": "Collins Steven 周围2跳的子图"
+        "example": "Subgraph within 2 hops around Collins Steven"
     },
     "subgraph_by_nodes": {
-        "description": "基于节点列表抽取子图（多个指定节点及其相互关系）",
+        "description": "Extract subgraph based on node list (multiple specified nodes and their mutual relationships)",
         "method": "subgraph_extract_by_nodes",
         "required_params": ["label", "key", "values"],
         "optional_params": ["include_internal", "rel_type", "direction"],
-        "example": "提取账户 A、B、C 及其之间的转账关系"
+        "example": "Extract accounts A, B, C and their transfer relationships"
     }
 }
 
 # ==========================================
-# 2. 通用修饰符（可应用于任何查询）
+# 2. General Modifiers (Applicable to any query)
 # ==========================================
 QUERY_MODIFIERS = {
     "order_by": {
-        "description": "排序字段（关系属性或节点属性）",
-        "format": "firstRel.属性名 或 nbr.属性名",
+        "description": "Sort field (relationship property or node property)",
+        "format": "firstRel.property_name or nbr.property_name",
         "example": "firstRel.base_amt, nbr.name"
     },
     "order_direction": {
-        "description": "排序方向",
+        "description": "Sort direction",
         "values": ["ASC", "DESC"],
         "default": "ASC"
     },
     "limit": {
-        "description": "返回结果数量限制",
+        "description": "Limit on number of results returned",
         "type": "integer",
         "example": 10
     },
     "where": {
-        "description": "过滤条件（节点或关系属性）",
-        "format": "n.属性 操作符 值 或 r.属性 操作符 值",
+        "description": "Filter condition (node or relationship property)",
+        "format": "n.property operator value or r.property operator value",
         "example": "n.balance > 1000, r.amount > 500"
     },
     "aggregate": {
-        "description": "聚合函数",
+        "description": "Aggregation function",
         "values": ["COUNT", "SUM", "AVG", "MAX", "MIN"],
-        "note": "应用聚合后返回统计结果而非原始数据"
+        "note": "Returns statistical results instead of raw data after applying aggregation"
     },
     "aggregate_field": {
-        "description": "聚合字段（仅当 aggregate 不是 COUNT 时需要）",
-        "format": "rel.属性名 或 neighbor.属性名",
+        "description": "Aggregation field (required only when aggregate is not COUNT)",
+        "format": "rel.property_name or neighbor.property_name",
         "example": "rel.base_amt"
     }
 }
 
-# 标准 JSON 输出模板
+# Standard JSON output template
 STANDARD_OUTPUT_SCHEMA = {
     "type": "object",
     "required": ["params", "modifiers"],
     "properties": {
         "params": {
             "type": "object",
-            "description": "查询特定的必需和可选参数"
+            "description": "Query-specific required and optional parameters"
         },
         "modifiers": {
             "type": "object",
-            "description": "需要使用的通用修饰符（只包含需要的）",
+            "description": "General modifiers to use (only include those needed)",
             "properties": {
-                "order_by": {"type": "string", "description": "排序字段"},
+                "order_by": {"type": "string", "description": "Sort field"},
                 "order_direction": {"type": "string", "enum": ["ASC", "DESC"]},
-                "limit": {"type": "integer", "description": "结果数量限制"},
-                "where": {"type": "string", "description": "过滤条件"},
+                "limit": {"type": "integer", "description": "Result count limit"},
+                "where": {"type": "string", "description": "Filter condition"},
                 "aggregate": {"type": "string", "enum": ["count", "sum", "avg", "max", "min"]},
-                "aggregate_field": {"type": "string", "description": "聚合字段"}
+                "aggregate_field": {"type": "string", "description": "Aggregation field"}
             }
         }
     }
@@ -133,59 +150,56 @@ STANDARD_OUTPUT_SCHEMA = {
 # ==========================================
 # 2. LLM 接口抽象（你需要替换成真实实现）
 # ==========================================
+# add gjq
 class LLMInterface:
-    """LLM 调用接口（需要替换成你的实际 LLM API）"""
+    """LLM 调用接口（使用 Reasoner 统一调用）"""
     
-    @staticmethod
-    def call(prompt: str, **kwargs) -> str:
+    def __init__(self, reasoner: Reasoner):
+        """
+        初始化 LLM 接口
+        
+        Args:
+            reasoner: Reasoner 实例，用于统一调用不同的 LLM
+        """
+        self.reasoner = reasoner
+    
+    def call(self, prompt: str, **kwargs) -> str:
         """
         调用 LLM，返回文本响应
         
-        实际使用时替换成：
-        - OpenAI API
-        - Claude API
-        - 本地模型（vLLM、Ollama等）
+        使用 Reasoner 的 generate_response 方法
         """
-        # TODO: 替换成真实 LLM 调用
-        # 示例（使用 OpenAI 1.0+ 新版 API）：
-        client = OpenAI()  # 需要设置 OPENAI_API_KEY 环境变量
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            **kwargs
-        )
-        return response.choices[0].message.content
-        
-        # 暂时返回模拟响应（用于测试）
-        print(f"\n[模拟 LLM 调用]\n{prompt}\n")
-        return '{"query_type": "node_lookup"}'  # 需要替换
+        response = self.reasoner.generate_response(prompt)
+        if hasattr(response, 'text'):
+            return response.text
+        return str(response)
 
 
 # ==========================================
 # 3. LLM1：查询类型分类器
 # ==========================================
+# add gjq
 class QueryTypeClassifier:
     """使用 LLM 判断查询类型"""
     
-    def __init__(self, llm: LLMInterface):
-        self.llm = llm
+    def __init__(self, reasoner: Reasoner):
+        """
+        初始化查询类型分类器
+        
+        Args:
+            reasoner: Reasoner 实例，用于调用 LLM
+        """
+        self.reasoner = reasoner
     
     def classify(self, question: str) -> str:
         """
         返回查询类型（如 "node_lookup"）
         """
-        prompt = f"""You are a Neo4j query assistant.
-User question: {question}
-Available query types and descriptions:
-{json.dumps(QUERY_TEMPLATES, ensure_ascii=False, indent=2)}
-Please determine which query type the user question belongs to. Return only the type name (e.g., "node_lookup"), with no additional content.
-"""
+        # add gjq
+        # 使用 Reasoner 的 nl_query_classify_type 方法
+        query_type = self.reasoner.nl_query_classify_type(question, QUERY_TEMPLATES)
         
-        response = self.llm.call(prompt, temperature=0)
-        
-        # 提取类型名称
-        query_type = response.strip().strip('"').strip("'")
-        logging.info(f"LLM 分类响应: {response} -> {query_type}")
+        logging.info(f"LLM 分类响应: {query_type}")
         
         if query_type not in QUERY_TEMPLATES:
             # 降级到规则匹配
@@ -276,11 +290,19 @@ class SchemaAnalyzer:
 # ==========================================
 # 5. LLM2：参数填充器
 # ==========================================
+# add gjq
 class ParameterExtractor:
     """使用 LLM 根据模板要求和 Schema 填充参数"""
     
-    def __init__(self, llm: LLMInterface, schema_analyzer: SchemaAnalyzer):
-        self.llm = llm
+    def __init__(self, reasoner: Reasoner, schema_analyzer: SchemaAnalyzer):
+        """
+        初始化参数提取器
+        
+        Args:
+            reasoner: Reasoner 实例，用于调用 LLM
+            schema_analyzer: Schema 分析器
+        """
+        self.reasoner = reasoner
         self.schema_analyzer = schema_analyzer
     
     def extract(self, question: str, query_type: str) -> Dict:
@@ -292,170 +314,29 @@ class ParameterExtractor:
         schema_info = self.schema_analyzer.format_for_llm()
         logging.info(f"Schema 已加载{schema_info}")
         
-        prompt = f"""{schema_info}
-## Query Template Information
-Query type: {query_type}
-Description: {template['description']}
-Invocation method: {template['method']}
-Required parameters: {template['required_params']}
-Query-specific optional parameters: {template.get('optional_params', [])}
-## Universal Modifiers (Applicable to any query)
-{json.dumps(QUERY_MODIFIERS, ensure_ascii=False, indent=2)}
-## User Question
-{question}
-## Task
-**Important: You must strictly reference the Schema information (node types, properties, relationship types, etc.) provided above to fill in the parameters.**
-Based on the Schema information and query template requirements, extract parameter values from the user question and return them in JSON format.
-**Key improvement: You must clearly indicate which universal modifiers need to be used!**
-Requirements:
-1. Required parameters must be filled
-2. **label must be selected from the node types in the Schema** (refer to the "Node Types and Properties" section above)
-3. **key selection rules (important)**：
-   - **Check the property list for the label in the Schema**
-   - If the Schema has a `node_key` property, **must use node_key first**
-   - only consider other properties (like id, acct_id, etc.) if there is no node_key
-4. **value/v1/v2 extraction rules (important)**:
-   - **Extract based on the format of the key's corresponding Schema example values**
-   - If key is node_key, and Schema example is name format, extract full name from question
-   - Name format is typically "last_name first_name" (e.g., "Collins Steven", "Nunez Mitchell")
-   - For path_query and common_neighbor, extract two names as v1 and v2
-   - If question is "A to B" or "A and B", A is v1, B is v2
-   - Do not extract unrelated values (e.g., base_amt, amount, transaction)
-5. **rel_type selection rules**:
-   - **must be selected from the "Relationship Types and Properties" section of the Schema**
-   - Match relationship types based on keywords in the question (e.g., "transaction", "transfer")
-   - If the question does not explicitly specify a relationship type, do not set it (use default all relationships)
-6. **Universal modifier judgment rules (new, very important)**:
-   **You must include a "modifiers" field in the JSON, listing the modifiers to be used!**
-   a) **order_by and order_direction**:
-      - Only used when the question explicitly mentions sorting needs like "sort", "order by", "largest to smallest", "smallest to largest", "largest", "smallest", etc.
-      - If sorting is needed, must select the correct field name from the Schema
-      - **Field name format (based on query type)**：
-        * **neighbor_query**：
-          - Relationship property: firstRel.property_name (e.g., firstRel.base_amt)
-          - Node properties: `nbr.property_name` (e.g., `nbr.name`)
-        * **common_neighbor**：
-          - Relationship properties: `rA.property_name` or `rB.property_name` (e.g., `rA.base_amt`)
-          - Node properties: `C.property_name` (e.g., `C.node_key`)
-        * **path_query (path query)**:
-          - Path length: hops
-          - Node properties: need to use the node variables in the path
-      - order_direction: "ASC" (ascending) or "DESC" (descending)
-      - **If the question does not require sorting, do not include order_by in modifiers**
-   b) **limit**：
-      - Only used when the question explicitly mentions quantity limits (e.g., "first N", "at most N", "N items")
-      - If the question contains "all", "entire", etc., **do not use limit**
-      - If it's an aggregation query (just count/sum, etc.), **do not use limit**
-      - **If the question does not have a quantity limit, do not include limit in modifiers**
-   c) **where**：
-      - Only used when the question explicitly mentions filtering conditions (e.g., "amount greater than 1000", "balance over 500")
-      - **Condition format (varies by query type)**:
-        * **neighbor_query**：
-          - Node properties: `nbr.property_name operator value` (e.g., `nbr.balance > 1000`)
-          - Relationship properties: `firstRel.property_name operator value` (e.g., `firstRel.base_amt > 500`)
-        * **common_neighbor**：
-          - Node properties: `C.property_name operator value` (e.g., `C.balance > 1000`)
-          - Relationship properties: `rA.property_name operator value` or `rB.property_name operator value`
-        * **path_query**:
-          - Path length: `hops operator value` (e.g., `hops <= 3`)
-      - **If the question does not have filtering conditions, do not include where in modifiers**
-   d) **aggregate and aggregate_field**:
-      - Only used when the question contains aggregate keywords (e.g., "count", "number of", "how many", "sum", "average")
-      - aggregate 类型:count、sum、avg、max、min
-      - **If the question is not an aggregate query, do not include aggregate in modifiers**
-7. **JSON output format (important)**:
-   Must contain two top-level fields:
-   - "params": query parameters (required parameters + query-specific optional parameters)
-   - "modifiers": universal modifiers to be used (only include needed modifiers)
-Example Output 1 (Basic query - no modifiers):
-{{
-"params": {{
-"label": "Account",
-"key": "node_key",
-"value": "Lee Alex"
-}},
-"modifiers": {{}}
-}}
-Example Output 2 (With sorting and limit):
-{{
-"params": {{
-"label": "Account",
-"key": "node_key",
-"value": "Collins Steven",
-"hops": 1
-}},
-"modifiers": {{
-"order_by": "firstRel.base_amt",
-"order_direction": "DESC",
-"limit": 5
-}}
-}}
-Example Output 3 (With filtering condition):
-{{
-"params": {{
-"label": "Account",
-"key": "node_key",
-"value": "Collins Steven",
-"hops": 1
-}},
-"modifiers": {{
-"where": "firstRel.base_amt > 1000"
-}}
-}}
-Example Output 4 (Aggregate query):
-{{
-"params": {{
-"label": "Account",
-"key": "node_key",
-"value": "Collins Steven",
-"hops": 1
-}},
-"modifiers": {{
-"aggregate": "count"
-}}
-}}
-Example Output 5 (Combined modifiers):
-{{
-"params": {{
-"label": "Account",
-"key": "node_key",
-"value": "Collins Steven",
-"hops": 1
-}},
-"modifiers": {{
-"where": "firstRel.base_amt > 500",
-"order_by": "firstRel.base_amt",
-"order_direction": "DESC",
-"limit": 3
-}}
-}}
-Begin:
-"""
+        # add gjq
+        # 使用 Reasoner 的 nl_query_extract_params 方法
+        result = self.reasoner.nl_query_extract_params(
+            question=question,
+            query_type=query_type,
+            template=template,
+            schema_info=schema_info,
+            query_modifiers=QUERY_MODIFIERS
+        )
         
-        response = self.llm.call(prompt, temperature=0)
-        
-        # 提取 JSON
-        try:
-            # 尝试直接解析
-            result = json.loads(response)
-        except json.JSONDecodeError:
-            # 尝试提取 JSON 片段（支持嵌套的 JSON）
-            match = re.search(r'\{.*\}', response, re.DOTALL)
-            if match:
-                result = json.loads(match.group())
-            else:
-                # 降级到规则提取
-                result = self._fallback_extract(question, query_type)
-        
+        # add gjq
+        # Reasoner 已经返回解析好的 JSON，不需要再次解析
         # 解析新的 JSON 格式
         if isinstance(result, dict) and "params" in result and "modifiers" in result:
             # 新格式：{"params": {...}, "modifiers": {...}}
             params = result["params"]
             modifiers = result["modifiers"]
         else:
-            # 旧格式兼容：直接是参数字典
-            params = result
-            modifiers = {}
+            # 旧格式兼容或解析失败：降级到规则提取
+            logging.warning(f"LLM 返回格式不正确，使用规则提取降级")
+            result = self._fallback_extract(question, query_type)
+            params = result.get("params", result)
+            modifiers = result.get("modifiers", {})
         
         # 验证必需参数
         self._validate_params(params, template)
@@ -954,17 +835,25 @@ class QueryExecutor:
 # ==========================================
 # 7. 主引擎（双 LLM 架构）
 # ==========================================
+# add gjq
 class NaturalLanguageQueryEngine:
     """自然语言查询引擎（双 LLM + Schema 工具）"""
     
-    def __init__(self, db_client: Neo4jGraphClient, llm: LLMInterface):
+    def __init__(self, db_client: Neo4jGraphClient, reasoner: Reasoner):
+        """
+        初始化自然语言查询引擎
+        
+        Args:
+            db_client: Neo4j 数据库客户端
+            reasoner: Reasoner 实例，用于调用 LLM
+        """
         self.client = db_client
-        self.llm = llm
+        self.reasoner = reasoner
         
         # 初始化各组件
         self.schema_analyzer = SchemaAnalyzer(db_client)
-        self.type_classifier = QueryTypeClassifier(llm)
-        self.param_extractor = ParameterExtractor(llm, self.schema_analyzer)
+        self.type_classifier = QueryTypeClassifier(reasoner)
+        self.param_extractor = ParameterExtractor(reasoner, self.schema_analyzer)
         self.executor = QueryExecutor(db_client)
     
     def initialize(self):
@@ -1037,6 +926,7 @@ class NaturalLanguageQueryEngine:
 # ==========================================
 # 8. 交互式命令行
 # ==========================================
+# add gjq
 def main():
     """命令行入口"""
     print("=" * 80)
@@ -1053,11 +943,26 @@ def main():
         config = Neo4jConfig(uri=uri, user=user, password=password)
         db_client = Neo4jGraphClient(config)
         
-        # 初始化 LLM（需要替换成真实实现）
-        llm = LLMInterface()
+        # add gjq
+        # 初始化 Reasoner（使用配置文件或默认配置）
+        # 这里需要根据实际情况配置 ReasonerConfig
+        # 示例：使用 OpenAI
+        from aag.config.engine_config import LLMConfig
+        
+        llm_config = LLMConfig(
+            provider='openai',
+            ollama={},
+            openai={
+                'base_url': os.environ.get('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+                'api_key': os.environ.get('OPENAI_API_KEY'),
+                'model': 'gpt-4o-mini'
+            }
+        )
+        reasoner_config = ReasonerConfig(llm=llm_config)
+        reasoner = Reasoner(reasoner_config)
         
         # 创建查询引擎
-        engine = NaturalLanguageQueryEngine(db_client, llm)
+        engine = NaturalLanguageQueryEngine(db_client, reasoner)
         engine.initialize()
         
         print("\n✨ 已连接！输入 'exit' 退出，'help' 查看示例")

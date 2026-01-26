@@ -381,6 +381,31 @@ class OllamaEnv:
         )
         response = self.llm.complete(full_prompt)
         return extract_json_from_response(response.text)
+    
+    # add gjq
+    def nl_query_classify_type(self, question: str, query_templates: dict) -> str:
+        """Classify the query type for natural language query engine."""
+        response = self.llm.complete(nl_query_classify_type_prompt.format(
+            question=question,
+            query_templates=json.dumps(query_templates, ensure_ascii=False, indent=2)
+        ))
+        return response.text.strip().strip('"').strip("'")
+    
+    # add gjq
+    def nl_query_extract_params(self, question: str, query_type: str, template: dict,
+                                schema_info: str, query_modifiers: dict) -> dict:
+        """Extract parameters for natural language query engine."""
+        response = self.llm.complete(nl_query_extract_params_prompt.format(
+            schema_info=schema_info,
+            query_type=query_type,
+            template_description=template['description'],
+            template_method=template['method'],
+            required_params=template['required_params'],
+            optional_params=template.get('optional_params', []),
+            query_modifiers=json.dumps(query_modifiers, ensure_ascii=False, indent=2),
+            question=question
+        ))
+        return extract_json_from_response(response.text)
  
 
 
@@ -697,6 +722,38 @@ class OpenAIEnv:
         )
         response_text = response.choices[0].message.content
         return parse_openai_json_response(response_text, "generate_numeric_analysis_code")
+    
+    # add gjq
+    def nl_query_classify_type(self, question: str, query_templates: dict) -> str:
+        """Classify the query type for natural language query engine."""
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": nl_query_classify_type_prompt.format(
+                question=question,
+                query_templates=json.dumps(query_templates, ensure_ascii=False, indent=2)
+            )}]
+        )
+        return response.choices[0].message.content.strip().strip('"').strip("'")
+    
+    # add gjq
+    def nl_query_extract_params(self, question: str, query_type: str, template: dict,
+                                schema_info: str, query_modifiers: dict) -> dict:
+        """Extract parameters for natural language query engine."""
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": nl_query_extract_params_prompt.format(
+                schema_info=schema_info,
+                query_type=query_type,
+                template_description=template['description'],
+                template_method=template['method'],
+                required_params=template['required_params'],
+                optional_params=template.get('optional_params', []),
+                query_modifiers=json.dumps(query_modifiers, ensure_ascii=False, indent=2),
+                question=question
+            )}]
+        )
+        response_text = response.choices[0].message.content
+        return parse_openai_json_response(response_text, "nl_query_extract_params")
 
 
 # 写一个 reasoner 类， 根据传入的配置参数ReasonerConfig 来初始化参数， 要求实现 根据provider 来选择切换对应的大模型OllamaEnv 和  OpenAIEnv
@@ -839,6 +896,21 @@ class Reasoner:
             },
         ]
         return self.chat(messages)
+    
+    # add gjq
+    def nl_query_classify_type(self, question: str, query_templates: dict) -> str:
+        """Classify the query type for natural language query engine."""
+        if hasattr(self.env, "nl_query_classify_type"):
+            return self.env.nl_query_classify_type(question, query_templates)
+        raise NotImplementedError("Underlying environment does not support nl_query_classify_type")
+    
+    # add gjq
+    def nl_query_extract_params(self, question: str, query_type: str, template: dict,
+                                schema_info: str, query_modifiers: dict) -> dict:
+        """Extract parameters for natural language query engine."""
+        if hasattr(self.env, "nl_query_extract_params"):
+            return self.env.nl_query_extract_params(question, query_type, template, schema_info, query_modifiers)
+        raise NotImplementedError("Underlying environment does not support nl_query_extract_params")
 
 
 

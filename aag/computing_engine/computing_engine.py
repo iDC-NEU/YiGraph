@@ -9,6 +9,9 @@ from aag.utils.path_utils import DEFAULT_CONFIG_SERVER_PATH
 from aag.computing_engine.mcp_client import GraphMCPClient
 from aag.computing_engine.code_executor import DynamicCodeExecutor
 from aag.expert_search_engine.database.datatype import GraphData
+# add gjq: 导入图查询相关类
+from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine
+from aag.computing_engine.graph_query.graph_query import Neo4jGraphClient, Neo4jConfig
 
 
 logger = logging.getLogger(__name__)
@@ -31,6 +34,10 @@ class ComputingEngine:
         self.parameter_modules = {}
         self._initialized = False
         self.code_executor = DynamicCodeExecutor(timeout=120, auto_install=True)
+        # add gjq: 添加图查询引擎字段
+        self.nl_query_engine: Optional[NaturalLanguageQueryEngine] = None
+        self.neo4j_config: Optional[Dict[str, Any]] = None
+        self.reasoner = None  # 将在 initialize_graph_query_engine 中设置
 
     async def initialize(self):
         """初始化：加载配置并连接所有 MCP servers"""
@@ -284,6 +291,82 @@ class ComputingEngine:
             exec(code, namespace)
             # 假设代码会定义一个 result 变量
             return namespace.get("result", data)
+
+    # add gjq: 添加图查询引擎初始化方法
+    def initialize_graph_query_engine(self, neo4j_config: Dict[str, Any], reasoner):
+        """
+        初始化图查询引擎
+        
+        Args:
+            neo4j_config: Neo4j配置字典，包含 enabled, uri, user, password
+            reasoner: Reasoner实例，用于LLM调用
+        """
+        try:
+            self.neo4j_config = neo4j_config
+            self.reasoner = reasoner
+            
+            # add gjq: 添加调试日志
+            logger.info(f"📝 开始初始化图查询引擎，配置: {neo4j_config}")
+            
+            # 检查是否启用neo4j
+            if not neo4j_config.get("enabled", False):
+                logger.info("ℹ NaturalLanguageQueryEngine disabled in config")
+                self.nl_query_engine = None
+                return
+            
+            # add gjq: 添加调试日志
+            logger.info(f"📝 Neo4j已启用，开始创建连接...")
+            
+            # 从config中构建Neo4jConfig对象
+            config = Neo4jConfig(
+                uri=neo4j_config.get("uri", "bolt://localhost:7687"),
+                user=neo4j_config.get("user", "neo4j"),
+                password=neo4j_config.get("password", "")
+            )
+            
+            # add gjq: 添加调试日志
+            logger.info(f"📝 创建Neo4jGraphClient，uri={config.uri}")
+            
+            # 创建数据库客户端和查询引擎
+            db_client = Neo4jGraphClient(config)
+            
+            # add gjq: 添加调试日志
+            logger.info(f"📝 创建NaturalLanguageQueryEngine")
+            
+            self.nl_query_engine = NaturalLanguageQueryEngine(db_client, reasoner)
+            self.nl_query_engine.initialize()
+            logger.info("✓ NaturalLanguageQueryEngine initialized in ComputingEngine")
+        except Exception as e:
+            logger.error(f"✗ NaturalLanguageQueryEngine initialization failed: {e}", exc_info=True)
+            # 不抛出异常，允许系统在没有图查询功能的情况下运行
+            self.nl_query_engine = None
+    
+    # add gjq: 添加图查询执行方法
+    def execute_graph_query(self, query: str) -> Dict[str, Any]:
+        """
+        执行图查询
+        
+        Args:
+            query: 用户查询
+            
+        Returns:
+            查询结果字典，包含 success, results, count, query_type 等字段
+        """
+        if not self.nl_query_engine:
+            return {
+                "success": False,
+                "error": "图查询引擎未初始化，请检查Neo4j配置"
+            }
+        
+        try:
+            result = self.nl_query_engine.ask(query)
+            return result
+        except Exception as e:
+            logger.error(f"图查询执行失败: {e}", exc_info=True)
+            return {
+                "success": False,
+                "error": f"图查询执行失败: {str(e)}"
+            }
 
     async def shutdown(self):
         """断开所有引擎连接"""
