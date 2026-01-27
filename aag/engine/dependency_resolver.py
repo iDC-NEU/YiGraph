@@ -476,5 +476,3 @@ class DataDependencyResolver:
             "mapping_raw": mapping_result,           # LLM 原始 mapping 输出
             "reasoning": mapping_result.get("explanation", "")
         }
-
-

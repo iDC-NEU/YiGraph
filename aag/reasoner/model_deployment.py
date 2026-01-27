@@ -16,6 +16,7 @@ from aag.config.engine_config import ReasonerConfig
 from aag.reasoner.prompt_template.llm_prompt_en import *
 from aag.reasoner.prompt_template.llm_prompt_zh import *
 from aag.utils.parse_json import extract_json_from_response, parse_openai_json_response
+from aag.error_recovery import ErrorRecovery
 
 EMBEDD_DIMS = {
     "BAAI/bge-large-en-v1.5": 1024,
@@ -195,6 +196,22 @@ class OllamaEnv:
     def generate_response(self, query: str):
         response = self.llm.complete(query)
         return response
+    
+    def execute_prompt(self, full_prompt: str, parse_json: bool = True, response_format: Optional[Dict] = None) -> Any:
+        """Execute a formatted prompt and return the response.
+        
+        Args:
+            full_prompt: The fully formatted prompt string
+            parse_json: Whether to parse the response as JSON
+            response_format: Optional response format dict (for OpenAI compatibility)
+        
+        Returns:
+            Parsed JSON dict if parse_json=True, otherwise raw response text
+        """
+        response = self.llm.complete(full_prompt)
+        if parse_json:
+            return extract_json_from_response(response.text)
+        return response.text
         
     def check_data_dependency(
             self,
@@ -204,13 +221,13 @@ class OllamaEnv:
             q2_algorithm: str) -> bool:
         """Determine whether Q2 depends on the result of Q1 using the LLM."""
         try:
-            response = self.llm.complete( check_data_dependency_prompt.format(
-                    q1_question=q1_question,
-                    q1_algorithm=q1_algorithm,
-                    q2_question=q2_question,
-                    q2_algorithm=q2_algorithm
-                ))
-            result = extract_json_from_response(response.text)
+            full_prompt = check_data_dependency_prompt.format(
+                q1_question=q1_question,
+                q1_algorithm=q1_algorithm,
+                q2_question=q2_question,
+                q2_algorithm=q2_algorithm
+            )
+            result = self.execute_prompt(full_prompt, parse_json=True)
             depends = result.get("q2_depends_on_q1")
             if isinstance(depends, bool):
                 return depends
@@ -232,28 +249,28 @@ class OllamaEnv:
                         "query": query,
                         "depends_on": []
                     }]}  
-        response = self.llm.complete(plan_subqueries_prompt.format(query=query))
-        return extract_json_from_response(response.text)
+        full_prompt = plan_subqueries_prompt.format(query=query)
+        return self.execute_prompt(full_prompt, parse_json=True)
 
     def classify_question_type(self, question: str) -> dict:
         """Classify whether a question requires graph algorithm or numeric analysis."""
-        response = self.llm.complete(classify_question_type_prompt.format(question=question))
-        return extract_json_from_response(response.text)
+        full_prompt = classify_question_type_prompt.format(question=question)
+        return self.execute_prompt(full_prompt, parse_json=True)
 
 
     def revise_subquery_plan(self, current_plan: Dict[str, Any], user_request: str) -> Dict[str, Any]:
-        response = self.llm.complete(revise_subquery_plan_prompt.format(
+        full_prompt = revise_subquery_plan_prompt.format(
             current_plan=json.dumps(current_plan, ensure_ascii=False),
             user_request=user_request
-        ))
-        return extract_json_from_response(response.text)
+        )
+        return self.execute_prompt(full_prompt, parse_json=True)
 
     def select_task_type(self, question: str, task_type_list: list) -> dict:
-        response = self.llm.complete(select_task_type_prompt.format(
+        full_prompt = select_task_type_prompt.format(
             question=question,
             task_type_list=task_type_list
-        ))
-        return extract_json_from_response(response.text)
+        )
+        return self.execute_prompt(full_prompt, parse_json=True)
 
 
     def select_algorithm(self, question: str, algorithm_list: list, graph_schema: Optional[Dict[str, Any]] = None) -> dict:
@@ -280,11 +297,11 @@ Please consider this schema when selecting the algorithm to ensure compatibility
         
     
     def extract_parameters_with_postprocess(self, question: str, tool_description: str) -> dict:
-        response = self.llm.complete(extract_parameters_with_postprocess_promt.format(
+        full_prompt = extract_parameters_with_postprocess_promt.format(
             question=question,
             tool_description=tool_description
-        ))
-        return extract_json_from_response(response.text)
+        )
+        return self.execute_prompt(full_prompt, parse_json=True)
     
     def extract_parameters_with_postprocess_new(self, question: str, tool_description: str, vertex_schema: Dict[str, str], edge_schema: Dict[str, str]) -> dict:
         """Extract parameters and generate post-processing code with vertex and edge schema information."""
@@ -305,14 +322,14 @@ Please consider this schema when selecting the algorithm to ensure compatibility
         dependency_parameters: Dict[str, Any]
     ) -> dict:
         """Merge dependency parameters with extracted parameters and generate post-processing code."""
-        response = self.llm.complete(merge_parameters_with_dependencies_prompt.format(
+        full_prompt = merge_parameters_with_dependencies_prompt.format(
             question=question,
             tool_description=tool_description,
             dependency_parameters=json.dumps(dependency_parameters, indent=2),
             vetrix_schema=json.dumps(vertex_schema, indent=2),
             edge_schema=json.dumps(edge_schema, indent=2)
-        ))
-        return extract_json_from_response(response.text)
+        )
+        return self.execute_prompt(full_prompt, parse_json=True)
         
 
     def generate_answer_from_algorithm_result(self, question: str, tool_description: str, tool_result: Dict[str, Any]) -> str:
@@ -361,8 +378,7 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             parent_question=parent_question,
             parent_outputs_meta=parent_outputs_meta
         )
-        response = self.llm.complete(full_prompt)
-        return extract_json_from_response(response.text)
+        return self.execute_prompt(full_prompt, parse_json=True)
  
     def map_parameters(self, current_question: str, current_algo_desc: str, dependency_items: List[Dict[str, Any]]) -> Dict[str, Any]:
         full_prompt = map_parameters_prompt.format(
@@ -370,16 +386,14 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             algo_desc=current_algo_desc,
             dependency_items=json.dumps(dependency_items, ensure_ascii=False, indent=2)
         )
-        response = self.llm.complete(full_prompt)
-        return extract_json_from_response(response.text)
+        return self.execute_prompt(full_prompt, parse_json=True)
     
     def generate_graph_conversion_code(self, current_question: str, dependency_items: List[Dict[str, Any]])-> Dict[str, Any]:
         full_prompt = generate_graph_conversion_code_prompt.format(
             current_question=current_question,
             dependency_items=json.dumps(dependency_items, ensure_ascii=False, indent=2)
         )
-        response = self.llm.complete(full_prompt)
-        return extract_json_from_response(response.text)
+        return self.execute_prompt(full_prompt, parse_json=True)
     
     def generate_numeric_analysis_code(
         self, 
@@ -394,23 +408,23 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             vertex_schema=json.dumps(vertex_schema, ensure_ascii=False, indent=2),
             edge_schema=json.dumps(edge_schema, ensure_ascii=False, indent=2)
         )
-        response = self.llm.complete(full_prompt)
-        return extract_json_from_response(response.text)
+        return self.execute_prompt(full_prompt, parse_json=True)
     
     # add gjq
     def nl_query_classify_type(self, question: str, query_templates: dict) -> str:
         """Classify the query type for natural language query engine."""
-        response = self.llm.complete(nl_query_classify_type_prompt.format(
+        full_prompt = nl_query_classify_type_prompt.format(
             question=question,
             query_templates=json.dumps(query_templates, ensure_ascii=False, indent=2)
-        ))
-        return response.text.strip().strip('"').strip("'")
+        )
+        response_text = self.execute_prompt(full_prompt, parse_json=False)
+        return response_text.strip().strip('"').strip("'")
     
     # add gjq
     def nl_query_extract_params(self, question: str, query_type: str, template: dict,
                                 schema_info: str, query_modifiers: dict) -> dict:
         """Extract parameters for natural language query engine."""
-        response = self.llm.complete(nl_query_extract_params_prompt.format(
+        full_prompt = nl_query_extract_params_prompt.format(
             schema_info=schema_info,
             query_type=query_type,
             template_description=template['description'],
@@ -419,8 +433,8 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             optional_params=template.get('optional_params', []),
             query_modifiers=json.dumps(query_modifiers, ensure_ascii=False, indent=2),
             question=question
-        ))
-        return extract_json_from_response(response.text)
+        )
+        return self.execute_prompt(full_prompt, parse_json=True)
  
 
 
@@ -438,6 +452,33 @@ class OpenAIEnv:
         openai.base_url = self.base_url
         self.client = openai
 
+    def execute_prompt(self, full_prompt: str, parse_json: bool = True, response_format: Optional[Dict] = None) -> Any:
+        """Execute a formatted prompt and return the response.
+        
+        Args:
+            full_prompt: The fully formatted prompt string
+            parse_json: Whether to parse the response as JSON
+            response_format: Optional response format dict (for OpenAI compatibility)
+        
+        Returns:
+            Parsed JSON dict if parse_json=True, otherwise raw response text
+        """
+        messages = [{"role": "user", "content": full_prompt}]
+        request_kwargs = {"model": self.model, "messages": messages}
+        
+        if response_format:
+            request_kwargs["response_format"] = response_format
+        elif parse_json:
+            # Use JSON mode for better JSON parsing
+            request_kwargs["response_format"] = {"type": "json_object"}
+        
+        response = self.client.chat.completions.create(**request_kwargs)
+        response_text = response.choices[0].message.content
+        
+        if parse_json:
+            return parse_openai_json_response(response_text, "execute_prompt")
+        return response_text
+
     def check_data_dependency(
             self,
             q1_question: str,
@@ -446,18 +487,13 @@ class OpenAIEnv:
             q2_algorithm: str) -> bool:
         """Use the llm to assess whether Q2 depends on Q1."""
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[{"role": "user", "content": check_data_dependency_prompt.format(
-                    q1_question=q1_question,
-                    q1_algorithm=q1_algorithm,
-                    q2_question=q2_question,
-                    q2_algorithm=q2_algorithm
-                )}],
-                response_format={"type": "json_object"}
+            full_prompt = check_data_dependency_prompt.format(
+                q1_question=q1_question,
+                q1_algorithm=q1_algorithm,
+                q2_question=q2_question,
+                q2_algorithm=q2_algorithm
             )
-            content = response.choices[0].message.content
-            result = json.loads(content)
+            result = self.execute_prompt(full_prompt, parse_json=True, response_format={"type": "json_object"})
             depends = result.get("q2_depends_on_q1")
             if isinstance(depends, bool):
                 return depends
@@ -491,44 +527,30 @@ class OpenAIEnv:
                         "query": query,
                         "depends_on": []
                     }]}  
-
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": plan_subqueries_prompt.format(query=query)}]
-        )
-        response = response.choices[0].message.content
-        return json.loads(response)
+        full_prompt = plan_subqueries_prompt.format(query=query)
+        return self.execute_prompt(full_prompt, parse_json=True)
 
     def revise_subquery_plan(
             self,
             current_plan: Dict[str, Any],
             user_request: str) -> Dict[str, Any]:
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": revise_subquery_plan_prompt.format(current_plan=json.dumps(current_plan, ensure_ascii=False), user_request=user_request)}]
+        full_prompt = revise_subquery_plan_prompt.format(
+            current_plan=json.dumps(current_plan, ensure_ascii=False), 
+            user_request=user_request
         )
-        content = response.choices[0].message.content
-        return parse_openai_json_response(content, "revise_subquery_plan")
+        return self.execute_prompt(full_prompt, parse_json=True)
 
     def classify_question_type(self, question: str) -> dict:
         """Classify whether a question requires graph algorithm or numeric analysis."""
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": classify_question_type_prompt.format(question=question)}]
-        )
-        response_text = response.choices[0].message.content
-        return parse_openai_json_response(response_text, "classify_question_type")
+        full_prompt = classify_question_type_prompt.format(question=question)
+        return self.execute_prompt(full_prompt, parse_json=True)
     
     def select_task_type(self, question: str, task_type_list: list) -> dict:
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": select_task_type_prompt.format(
+        full_prompt = select_task_type_prompt.format(
             question=question,
             task_type_list=task_type_list
-        )}]
         )
-        response = response.choices[0].message.content
-        return json.loads(response)
+        return self.execute_prompt(full_prompt, parse_json=True)
     
     def select_algorithm(self, question: str, algorithm_list: list, graph_schema: Optional[Dict[str, Any]] = None) -> dict:
         schema_context = ""
@@ -553,33 +575,25 @@ Please consider this schema when selecting the algorithm to ensure compatibility
                 algorithm_list=algorithm_list
             ) + schema_context}]
         )
-        response = response.choices[0].message.content
-        return json.loads(response)
+        return self.execute_prompt(full_prompt, parse_json=True)
     
     def extract_parameters_with_postprocess(self, question: str, tool_description: str) -> dict:
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": extract_parameters_with_postprocess_promt.format(
-                question=question,
-                tool_description=tool_description
-            )}]
+        full_prompt = extract_parameters_with_postprocess_promt.format(
+            question=question,
+            tool_description=tool_description
         )
-        response_text = response.choices[0].message.content
-        return parse_openai_json_response(response_text, "extract_parameters_with_postprocess")
+        return self.execute_prompt(full_prompt, parse_json=True)
     
     def extract_parameters_with_postprocess_new(self, question: str, tool_description: str, vertex_schema: Dict[str, str], edge_schema: Dict[str, str]) -> dict:
         """Extract parameters and generate post-processing code with vertex and edge schema information."""
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": extract_parameters_with_postprocess_promt_new.format(
-                question=question,
-                tool_description=tool_description,
-                vetrix_schema=json.dumps(vertex_schema, indent=2),
-                edge_schema=json.dumps(edge_schema, indent=2)
-            )}]
+        full_prompt = extract_parameters_with_postprocess_promt_new.format(
+            question=question,
+            tool_description=tool_description,
+            vetrix_schema=json.dumps(vertex_schema, indent=2),
+            edge_schema=json.dumps(edge_schema, indent=2)
         )
-        response_text = response.choices[0].message.content
-        return parse_openai_json_response(response_text, "extract_parameters_with_postprocess_new")
+        return self.execute_prompt(full_prompt, parse_json=True)
+
     
     def merge_parameters_from_dependencies(
         self, 
@@ -590,18 +604,14 @@ Please consider this schema when selecting the algorithm to ensure compatibility
         dependency_parameters: Dict[str, Any]
     ) -> dict:
         """Merge dependency parameters with extracted parameters and generate post-processing code."""
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": merge_parameters_with_dependencies_prompt.format(
-                question=question,
-                tool_description=tool_description,
-                dependency_parameters=json.dumps(dependency_parameters, indent=2),
-                vetrix_schema=json.dumps(vertex_schema, indent=2),
-                edge_schema=json.dumps(edge_schema, indent=2)
-            )}]
+        full_prompt = merge_parameters_with_dependencies_prompt.format(
+            question=question,
+            tool_description=tool_description,
+            dependency_parameters=json.dumps(dependency_parameters, indent=2),
+            vetrix_schema=json.dumps(vertex_schema, indent=2),
+            edge_schema=json.dumps(edge_schema, indent=2)
         )
-        response_text = response.choices[0].message.content
-        return parse_openai_json_response(response_text, "merge_parameters_from_dependencies")
+        return self.execute_prompt(full_prompt, parse_json=True)
 
     def generate_answer_from_algorithm_result(self, question: str, tool_description: str, tool_result: Dict[str, Any]) -> str:
         # prompt = f"""
@@ -700,12 +710,7 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             parent_question=parent_question,
             parent_outputs_meta=parent_outputs_meta
         )
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": full_prompt}]
-        )
-        response_text = response.choices[0].message.content
-        return parse_openai_json_response(response_text, "analyze_dependency_type_and_locate_dependency_data")
+        return self.execute_prompt(full_prompt, parse_json=True)
 
 
     def map_parameters(self, current_question: str, current_algo_desc: str, dependency_items: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -714,24 +719,14 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             algo_desc=current_algo_desc,
             dependency_items=json.dumps(dependency_items, ensure_ascii=False, indent=2)
         )
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": full_prompt}]
-        )
-        response_text = response.choices[0].message.content
-        return parse_openai_json_response(response_text, "map_parameters")
+        return self.execute_prompt(full_prompt, parse_json=True)
 
     def generate_graph_conversion_code(self, current_question: str, dependency_items: List[Dict[str, Any]])-> Dict[str, Any]:
         full_prompt = generate_graph_conversion_code_prompt.format(
             current_question=current_question,
             dependency_items=json.dumps(dependency_items, ensure_ascii=False, indent=2)
         )
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": full_prompt}]
-        )
-        response_text = response.choices[0].message.content
-        return parse_openai_json_response(response_text, "generate_graph_conversion_code")
+        return self.execute_prompt(full_prompt, parse_json=True)
     
     def generate_numeric_analysis_code(
         self, 
@@ -746,44 +741,33 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             vertex_schema=json.dumps(vertex_schema, ensure_ascii=False, indent=2),
             edge_schema=json.dumps(edge_schema, ensure_ascii=False, indent=2)
         )
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": full_prompt}]
-        )
-        response_text = response.choices[0].message.content
-        return parse_openai_json_response(response_text, "generate_numeric_analysis_code")
+        return self.execute_prompt(full_prompt, parse_json=True)
     
     # add gjq
     def nl_query_classify_type(self, question: str, query_templates: dict) -> str:
         """Classify the query type for natural language query engine."""
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": nl_query_classify_type_prompt.format(
-                question=question,
-                query_templates=json.dumps(query_templates, ensure_ascii=False, indent=2)
-            )}]
+        full_prompt = nl_query_classify_type_prompt.format(
+            question=question,
+            query_templates=json.dumps(query_templates, ensure_ascii=False, indent=2)
         )
-        return response.choices[0].message.content.strip().strip('"').strip("'")
+        response_text = self.execute_prompt(full_prompt, parse_json=False)
+        return response_text.strip().strip('"').strip("'")
     
     # add gjq
     def nl_query_extract_params(self, question: str, query_type: str, template: dict,
                                 schema_info: str, query_modifiers: dict) -> dict:
         """Extract parameters for natural language query engine."""
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": nl_query_extract_params_prompt.format(
-                schema_info=schema_info,
-                query_type=query_type,
-                template_description=template['description'],
-                template_method=template['method'],
-                required_params=template['required_params'],
-                optional_params=template.get('optional_params', []),
-                query_modifiers=json.dumps(query_modifiers, ensure_ascii=False, indent=2),
-                question=question
-            )}]
+        full_prompt = nl_query_extract_params_prompt.format(
+            schema_info=schema_info,
+            query_type=query_type,
+            template_description=template['description'],
+            template_method=template['method'],
+            required_params=template['required_params'],
+            optional_params=template.get('optional_params', []),
+            query_modifiers=json.dumps(query_modifiers, ensure_ascii=False, indent=2),
+            question=question
         )
-        response_text = response.choices[0].message.content
-        return parse_openai_json_response(response_text, "nl_query_extract_params")
+        return self.execute_prompt(full_prompt, parse_json=True)
 
 
 # 写一个 reasoner 类， 根据传入的配置参数ReasonerConfig 来初始化参数， 要求实现 根据provider 来选择切换对应的大模型OllamaEnv 和  OpenAIEnv
@@ -829,44 +813,95 @@ class Reasoner:
         else:
             raise ValueError(f"Unsupported provider: {provider}")
 
+
     def plan_subqueries(self, decompose: bool, query: str) -> dict:
-        return self.env.plan_subqueries(decompose, query)
+        if decompose == False: 
+            # Do not decompose, treat as a single question
+            return{"subqueries": [{
+                        "id": "q1",
+                        "query": query,
+                        "depends_on": []
+                    }]}  
+        full_prompt = plan_subqueries_prompt.format(query=query)
+        return self.env.execute_prompt(full_prompt, parse_json=True)
     
     def revise_subquery_plan(self, current_plan: Dict[str, Any], user_request: str) -> Dict[str, Any]:
-        return self.env.revise_subquery_plan(current_plan, user_request)
+        full_prompt = revise_subquery_plan_prompt.format(
+            current_plan=json.dumps(current_plan, ensure_ascii=False),
+            user_request=user_request
+        )
+        return self.env.execute_prompt(full_prompt, parse_json=True)
     
     def select_task_type(self, question: str, task_type_list: list) -> dict:
-        return self.env.select_task_type(question, task_type_list)
+        full_prompt = select_task_type_prompt.format(
+            question=question,
+            task_type_list=task_type_list
+        )
+        return self.env.execute_prompt(full_prompt, parse_json=True)
     
     def select_algorithm(self, question: str, algorithm_list: list, graph_schema: Optional[Dict[str, Any]] = None) -> dict:
         return self.env.select_algorithm(question, algorithm_list, graph_schema)
     
     def extract_parameters_with_postprocess(self, question: str, tool_description: str) -> dict:
-        return self.env.extract_parameters_with_postprocess(question, tool_description)
+        full_prompt = extract_parameters_with_postprocess_promt.format(
+            question=question,
+            tool_description=tool_description
+        )
+        return self.env.execute_prompt(full_prompt, parse_json=True)
     
     def check_data_dependency(self,  q1_question: str, q1_algorithm: str, q2_question: str, q2_algorithm: str) -> bool:
-        return self.env.check_data_dependency(q1_question=q1_question, q1_algorithm=q1_algorithm, q2_question=q2_question, q2_algorithm=q2_algorithm)
+        try:
+            full_prompt = check_data_dependency_prompt.format(
+                q1_question=q1_question,
+                q1_algorithm=q1_algorithm,
+                q2_question=q2_question,
+                q2_algorithm=q2_algorithm
+            )
+            result = self.env.execute_prompt(full_prompt, parse_json=True)
+            depends = result.get("q2_depends_on_q1")
+            if isinstance(depends, bool):
+                return depends
+            if isinstance(depends, str):
+                normalized = depends.strip().lower()
+                if normalized in {"true", "yes"}:
+                    return True
+                if normalized in {"false", "no"}:
+                    return False
+        except Exception as e:
+            print(f"Error determining data dependency: {e}")
+        return False
 
     def generate_answer_from_algorithm_result(self, question: str, tool_description: str, tool_result: Dict[str, Any]):
         return self.env.generate_answer_from_algorithm_result(question, tool_description, tool_result)
 
     def analyze_dependency_type_and_locate_dependency_data(self, current_question:str, task_type:str, current_algo_desc:str, parent_question: str,  parent_outputs_meta:list) -> dict:
-        return self.env.analyze_dependency_type_and_locate_dependency_data(
-                current_question=current_question,
-                task_type=task_type,
-                current_algo_desc=current_algo_desc,
-                parent_question=parent_question,
-                parent_outputs_meta=parent_outputs_meta
-            )
+        full_prompt = analyze_dependency_type_and_locate_dependency_data_prompt.format(
+            current_question=current_question,
+            task_type=task_type,
+            current_algo_desc=current_algo_desc,
+            parent_question=parent_question,
+            parent_outputs_meta=parent_outputs_meta
+        )
+        return self.env.execute_prompt(full_prompt, parse_json=True)
 
     def classify_question_type(self, question: str) -> Dict[str, Any]:
-        return self.env.classify_question_type(question)
+        full_prompt = classify_question_type_prompt.format(question=question)
+        return self.env.execute_prompt(full_prompt, parse_json=True)
 
     def map_parameters(self, current_question: str, current_algo_desc: str, dependency_items: List[Dict[str, Any]]) -> Dict[str, Any]:
-        return self.env.map_parameters(current_question, current_algo_desc, dependency_items)
+        full_prompt = map_parameters_prompt.format(
+            current_question=current_question,
+            algo_desc=current_algo_desc,
+            dependency_items=json.dumps(dependency_items, ensure_ascii=False, indent=2)
+        )
+        return self.env.execute_prompt(full_prompt, parse_json=True)
 
     def generate_graph_conversion_code(self, current_question: str, dependency_items: List[Dict[str, Any]])-> Dict[str, Any]:
-        return self.env.generate_graph_conversion_code(current_question, dependency_items)
+        full_prompt = generate_graph_conversion_code_prompt.format(
+            current_question=current_question,
+            dependency_items=json.dumps(dependency_items, ensure_ascii=False, indent=2)
+        )
+        return self.env.execute_prompt(full_prompt, parse_json=True)
 
     def generate_numeric_analysis_code(
         self, 
@@ -875,7 +910,13 @@ class Reasoner:
         vertex_schema: Dict[str, str], 
         edge_schema: Dict[str, str]
     ) -> Dict[str, Any]:
-        return self.env.generate_numeric_analysis_code(question, dependency_items, vertex_schema, edge_schema)
+        full_prompt = generate_numeric_analysis_code_prompt.format(
+            question=question,
+            dependency_data_items=json.dumps(dependency_items, ensure_ascii=False, indent=2),
+            vertex_schema=json.dumps(vertex_schema, ensure_ascii=False, indent=2),
+            edge_schema=json.dumps(edge_schema, ensure_ascii=False, indent=2)
+        )
+        return self.env.execute_prompt(full_prompt, parse_json=True)
 
     def get_question_entity(self, question, language="en"):
         if hasattr(self.env, "get_question_entity"):
@@ -892,25 +933,68 @@ class Reasoner:
             return self.env.generate_response(prompt)
         raise NotImplementedError("Underlying environment does not support generate_response/complete")
 
-    def extract_parameters_with_postprocess_new(self, question: str, tool_description: str, vertex_schema: Dict[str, str], edge_schema: Dict[str, str]) -> dict:
-        if hasattr(self.env, "extract_parameters_with_postprocess_new"):
-            return self.env.extract_parameters_with_postprocess_new(question, tool_description, vertex_schema, edge_schema)
-        raise NotImplementedError("Underlying environment does not support extract_parameters_with_postprocess_new")
-    
+    def extract_parameters_with_postprocess_new(
+        self, 
+        question: str, 
+        tool_description: str, 
+        vertex_schema: Dict[str, str], 
+        edge_schema: Dict[str, str],
+        error_history: Optional[List[Dict[str, Any]]] = None,
+        error_recovery: Optional[Any] = None,   
+        trace: Optional[Dict[str, Any]] = None, # 用于记录step_id等
+    ) -> dict:
+        full_prompt = extract_parameters_with_postprocess_promt.format(
+            question=question,
+            tool_description=tool_description,
+            vertex_schema=json.dumps(vertex_schema, ensure_ascii=False, indent=2),
+            edge_schema=json.dumps(edge_schema, ensure_ascii=False, indent=2)
+        )
+
+        if error_recovery is not None and error_history:
+            full_prompt = error_recovery.enhance_prompt(
+                op="extract_parameters_with_postprocess_new",
+                base_prompt=full_prompt,
+                error_history=error_history,
+                context={
+                    "question": question,
+                    "trace": trace or {},
+                },
+            )
+
+        return self.env.execute_prompt(full_prompt, parse_json=True)
+
     def merge_parameters_from_dependencies(
         self, 
         question: str, 
         tool_description: str, 
         vertex_schema: Dict[str, str], 
         edge_schema: Dict[str, str],
-        dependency_parameters: Dict[str, Any]
+        dependency_parameters: Dict[str, Any],
+        error_history: Optional[List[Dict[str, Any]]] = None,
+        error_recovery: Optional[Any] = None,   
+        trace: Optional[Dict[str, Any]] = None, # 用于记录step_id等
     ) -> dict:
         """Merge dependency parameters with extracted parameters and generate post-processing code."""
-        if hasattr(self.env, "merge_parameters_from_dependencies"):
-            return self.env.merge_parameters_from_dependencies(
-                question, tool_description, vertex_schema, edge_schema, dependency_parameters
+        full_prompt = merge_parameters_with_dependencies_prompt.format(
+            question=question,
+            tool_description=tool_description,
+            dependency_parameters=json.dumps(dependency_parameters, indent=2),
+            vetrix_schema=json.dumps(vertex_schema, indent=2),
+            edge_schema=json.dumps(edge_schema, indent=2)
+        )
+
+        if error_recovery is not None and error_history:
+            full_prompt = error_recovery.enhance_prompt(
+                op="merge_parameters_from_dependencies",
+                base_prompt=full_prompt,
+                error_history=error_history,
+                context={
+                    "question": question,
+                    "trace": trace or {},
+                },
             )
-        raise NotImplementedError("Underlying environment does not support merge_parameters_from_dependencies")
+
+        return self.env.execute_prompt(full_prompt, parse_json=True)
 
     def chat(self, messages: list):
         if hasattr(self.env, "chat"):
@@ -930,17 +1014,28 @@ class Reasoner:
     # add gjq
     def nl_query_classify_type(self, question: str, query_templates: dict) -> str:
         """Classify the query type for natural language query engine."""
-        if hasattr(self.env, "nl_query_classify_type"):
-            return self.env.nl_query_classify_type(question, query_templates)
-        raise NotImplementedError("Underlying environment does not support nl_query_classify_type")
+        full_prompt = nl_query_classify_type_prompt.format(
+            question=question,
+            query_templates=json.dumps(query_templates, ensure_ascii=False, indent=2)
+        )
+        response_text = self.env.execute_prompt(full_prompt, parse_json=False)
+        return response_text.strip().strip('"').strip("'")
     
     # add gjq
     def nl_query_extract_params(self, question: str, query_type: str, template: dict,
                                 schema_info: str, query_modifiers: dict) -> dict:
         """Extract parameters for natural language query engine."""
-        if hasattr(self.env, "nl_query_extract_params"):
-            return self.env.nl_query_extract_params(question, query_type, template, schema_info, query_modifiers)
-        raise NotImplementedError("Underlying environment does not support nl_query_extract_params")
+        full_prompt = nl_query_extract_params_prompt.format(
+            schema_info=schema_info,
+            query_type=query_type,
+            template_description=template['description'],
+            template_method=template['method'],
+            required_params=template['required_params'],
+            optional_params=template.get('optional_params', []),
+            query_modifiers=json.dumps(query_modifiers, ensure_ascii=False, indent=2),
+            question=question
+        )
+        return self.env.execute_prompt(full_prompt, parse_json=True)
 
 
 

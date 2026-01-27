@@ -23,7 +23,7 @@ from aag.utils.graph_conversion import flatten_graph, reconstruct_graph
 from aag.utils.data_utils import take_sample
 from aag.rag_engine.vector_rag import VectorRAG
 from aag.reasoner.prompt_template.llm_prompt_en import rag_prompt
-from aag.error_recovery import ErrorRecoveryModule, should_retry, prepare_error_info, classify_error_type
+from aag.error_recovery.error_manager import ErrorRecovery
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class Scheduler:
         self.dag: Optional[GraphWorkflowDAG] = None
         self.dataset_manager: Optional[DatasetManager] = None
         self.data_dependency_resolver: Optional[DataDependencyResolver] = None
-        self.error_recovery: Optional[ErrorRecoveryModule] = None  # 错误恢复模块
+        self.error_recovery: Optional[ErrorRecovery] = None  # 错误恢复模块
 
         self.current_dataset_name: Optional[str] = None  # Dataset-level name (for text datasets, this is the dataset name)
         self.current_dataset: Optional[List[DatasetConfig]] = None  # Original dataset config (text/graph, never changes)
@@ -151,9 +151,7 @@ class Scheduler:
     def _init_error_recovery(self):
         """初始化错误恢复模块"""
         try:
-            if self.reasoner is None:
-                raise ValueError("Reasoner must be initialized before ErrorRecoveryModule")
-            self.error_recovery = ErrorRecoveryModule(self.reasoner, max_retries=3)
+            self.error_recovery = ErrorRecovery()
             print("✓ ErrorRecoveryModule initialized")
         except Exception as e:
             print(f"✗ ErrorRecoveryModule initialization failed: {e}")
@@ -741,50 +739,17 @@ class Scheduler:
             }
             
             if data_dependency_parents:
-                ## note： 错误纠错机制需要考虑的第一个地方：数据依赖处理部分
-                retry_count_dep = 0
-                max_retries_dep = 3
-                
-                while retry_count_dep <= max_retries_dep:
-                    try:
-                        data_dependency_context = self.data_dependency_resolver.resolve_dependencies(
-                            step_id=step_id,
-                            step=step,
-                            alg_des_info=tool_metadata,
-                            data_dependency_parents=data_dependency_parents
-                        )
-                        logger.info(
-                            "📊 依赖上下文 | 图依赖:%s | 参数依赖:%s",
-                            len(data_dependency_context.get("graph_dependencies", [])),
-                            len(data_dependency_context.get("parameter_dependencies", [])),
-                        )
-                        break  # 成功，跳出重试循环
-                    except Exception as dep_err:
-                        if should_retry(retry_count_dep, max_retries_dep, self.error_recovery):
-                            logger.warning(f"⚠️ 数据依赖解析失败，尝试修复 (重试 {retry_count_dep + 1}/{max_retries_dep}): {dep_err}")
-                            try:
-                                error_info = prepare_error_info(dep_err)
-                                data_dependency_context = await self.error_recovery.recover_dependency_error(
-                                    step=step,
-                                    error_info=error_info,
-                                    context={
-                                        "data_dependency_parents": data_dependency_parents,
-                                        "tool_metadata": tool_metadata,
-                                        "step_id": step_id,
-                                        "previous_dependency_context": data_dependency_context if 'data_dependency_context' in locals() else {}
-                                    }
-                                )
-                                retry_count_dep += 1
-                                continue
-                            except Exception as recovery_err:
-                                logger.error(f"❌ 错误恢复失败: {recovery_err}")
-                                retry_count_dep += 1
-                                continue
-                        else:
-                            error_msg = f"数据依赖解析失败: {dep_err}"
-                            logger.error(f"❌ {error_msg}")
-                            self.dag.set_failed(step_id, error_msg)
-                            raise RuntimeError(f"节点 {step_id}: {error_msg}") from dep_err
+                data_dependency_context = self.data_dependency_resolver.resolve_dependencies(
+                    step_id=step_id,
+                    step=step,
+                    alg_des_info=tool_metadata,
+                    data_dependency_parents=data_dependency_parents
+                )
+                logger.info(
+                    "📊 依赖上下文 | 图依赖:%s | 参数依赖:%s",
+                    len(data_dependency_context.get("graph_dependencies", [])),
+                    len(data_dependency_context.get("parameter_dependencies", [])),
+                )
                 
 
             if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
@@ -797,137 +762,101 @@ class Scheduler:
                     self.dag.set_failed(step_id, f"初始化工作图失败: {graph_err}")
                     raise
 
-                ## note： 错误纠错机制需要考虑的第二个地方： 参数适配，后处理代码生成。 参数适配是指把问题中和上游节点依赖的参数值适配到算法输入参数的值，进行适配。 后处理代码生成是指根据算法的输出和问题语义，生成提取与问题相关的结果的后处理代码。
-                retry_count_param = 0
-                max_retries_param = 3
+                # extraction_result = self._prepare_parameters_for_execution(
+                #     step=step,
+                #     tool_description=tool_description,
+                #     vertex_schema=self.global_graph.get_vertex_properties_schema(),
+                #     edge_schema=self.global_graph.get_edge_properties_schema(),
+                #     dependency_parameters=data_dependency_context.get("parameter_input_adapter_result") or {},
+                # )
                 
-                while retry_count_param <= max_retries_param:
-                    try:
-                        extraction_result = self._prepare_parameters_for_execution(
-                            step=step,
-                            tool_description=tool_description,
-                            vertex_schema=self.global_graph.get_vertex_properties_schema(),
-                            edge_schema=self.global_graph.get_edge_properties_schema(),
-                            dependency_parameters=data_dependency_context.get("parameter_input_adapter_result") or {},
-                        )
-                        
-                        if extraction_result is None:
-                            raise ValueError("参数提取返回了 None")
-                        
-                        break  # 成功，跳出重试循环
-                    except Exception as param_err:
-                        if should_retry(retry_count_param, max_retries_param, self.error_recovery):
-                            logger.warning(f"⚠️ 参数准备失败，尝试修复 (重试 {retry_count_param + 1}/{max_retries_param}): {param_err}")
-                            try:
-                                error_info = prepare_error_info(param_err)
-                                extraction_result = await self.error_recovery.recover_parameter_error(
-                                    step=step,
-                                    error_info=error_info,
-                                    context={
-                                        "tool_description": tool_description,
-                                        "vertex_schema": self.global_graph.get_vertex_properties_schema(),
-                                        "edge_schema": self.global_graph.get_edge_properties_schema(),
-                                        "dependency_parameters": data_dependency_context.get("parameter_input_adapter_result") or {},
-                                        "previous_parameters": extraction_result.get("parameters", {}) if 'extraction_result' in locals() else {}
-                                    }
-                                )
-                                retry_count_param += 1
-                                continue
-                            except Exception as recovery_err:
-                                logger.error(f"❌ 错误恢复失败: {recovery_err}")
-                                retry_count_param += 1
-                                continue
-                        else:
-                            error_msg = f"参数准备失败: {param_err}"
-                            logger.error(f"❌ {error_msg}")
-                            self.dag.set_failed(step_id, error_msg)
-                            raise RuntimeError(f"节点 {step_id}: {error_msg}") from param_err
+                # if extraction_result is None:
+                #     error_msg = "参数提取返回了 None"
+                #     logger.error(f"❌ {error_msg}")
+                #     self.dag.set_failed(step_id, error_msg)
+                #     raise ValueError(error_msg)
 
-                logger.info(
-                    "✅ LLM/依赖提取的参数: %s",
-                    json.dumps(extraction_result.get("parameters", {}), ensure_ascii=False)
-                )
+                # logger.info(
+                #     "✅ LLM/依赖提取的参数: %s",
+                #     json.dumps(extraction_result.get("parameters", {}), ensure_ascii=False)
+                # )
 
-                post_processing_info = extraction_result.get("post_processing_code") or {}  
-                is_has_extract_code = bool(post_processing_info.get("is_calculate"))
-                output_schema = post_processing_info.get("output_schema") or {}
+                # post_processing_info = extraction_result.get("post_processing_code") or {}  
+                # is_has_extract_code = bool(post_processing_info.get("is_calculate"))
+                # output_schema = post_processing_info.get("output_schema") or {}
 
-                if post_processing_info.get("code"):
-                    logger.info(
-                        f"✅ 后处理代码:\n{post_processing_info.get('code','')}...")
+                # if post_processing_info.get("code"):
+                #     logger.info(
+                #         f"✅ 后处理代码:\n{post_processing_info.get('code','')}...")
         
-                ## note： 实际适配的参数和后处理代码执行的调用接口，一般错误也是发生在调用接口这里。
-                retry_count_alg = 0
-                max_retries_alg = 3
+                # tool_result = await self.computing_engine.run_algorithm(
+                #     step.graph_algorithm,
+                #     extraction_result.get("parameters", {}),
+                #     post_processing_info.get("code"),
+                #     global_graph=self.global_graph
+                # )
                 
-                while retry_count_alg <= max_retries_alg:
-                    try:
-                        tool_result = await self.computing_engine.run_algorithm(
-                            step.graph_algorithm,
-                            extraction_result.get("parameters", {}),
-                            post_processing_info.get("code"),
-                            global_graph=self.global_graph
-                        )
-                        
-                        if tool_result is None:
-                            raise ValueError("算法执行返回了 None")
-                        
-                        # 检查嵌套的 result.error
-                        result_data = tool_result.get("result")
-                        if result_data is not None and isinstance(result_data, dict) and "error" in result_data:
-                            error_msg = result_data.get("error")
-                            raise RuntimeError(error_msg)
-                        
-                        if not tool_result.get("success", False):
-                            error_msg = tool_result.get("error", "算法执行失败")
-                            raise RuntimeError(error_msg)
-                        
-                        break  # 成功，跳出重试循环
-                    except Exception as alg_err:
-                        if should_retry(retry_count_alg, max_retries_alg, self.error_recovery):
-                            logger.warning(f"⚠️ 算法执行失败，尝试修复 (重试 {retry_count_alg + 1}/{max_retries_alg}): {alg_err}")
-                            try:
-                                error_info = prepare_error_info(alg_err, tool_result if 'tool_result' in locals() else None)
-                                error_subtype = classify_error_type(error_info["error"])
-                                
-                                if error_subtype == "code":
-                                    # 修复后处理代码
-                                    fixed_code = await self.error_recovery.recover_postprocess_code_error(
-                                        step=step,
-                                        error_info=error_info,
-                                        context={
-                                            "previous_code": post_processing_info.get("code", ""),
-                                            "algorithm_result": tool_result.get("result", {}) if 'tool_result' in locals() else {},
-                                            "parameters": extraction_result.get("parameters", {})
-                                        }
-                                    )
-                                    post_processing_info["code"] = fixed_code
-                                else:
-                                    # 修复参数
-                                    fixed_params = await self.error_recovery.recover_parameter_error(
-                                        step=step,
-                                        error_info=error_info,
-                                        context={
-                                            "tool_description": tool_description,
-                                            "vertex_schema": self.global_graph.get_vertex_properties_schema(),
-                                            "edge_schema": self.global_graph.get_edge_properties_schema(),
-                                            "previous_parameters": extraction_result.get("parameters", {})
-                                        }
-                                    )
-                                    extraction_result.update(fixed_params)
-                                
-                                retry_count_alg += 1
-                                continue
-                            except Exception as recovery_err:
-                                logger.error(f"❌ 错误恢复失败: {recovery_err}")
-                                retry_count_alg += 1
-                                continue
-                        else:
-                            error_msg = f"算法执行失败: {alg_err}"
-                            logger.error(f"❌ {error_msg}")
-                            self.dag.set_failed(step_id, error_msg)
-                            raise RuntimeError(f"节点 {step_id} 执行失败：{error_msg}") from alg_err
+                # if tool_result is None:
+                #     error_msg = "算法执行返回了 None"
+                #     logger.error(f"❌ {error_msg}")
+                #     self.dag.set_failed(step_id, error_msg)
+                #     raise ValueError(error_msg)
+                
+                # # 检查嵌套的 result.error
+                # result_data = tool_result.get("result")
+                # if result_data is not None and isinstance(result_data, dict) and "error" in result_data:
+                #     error_msg = result_data.get("error")
+                #     logger.error(f"❌ {error_msg}")
+                #     self.dag.set_failed(step_id, error_msg)
+                #     raise RuntimeError(error_msg)
+                
+                # if not tool_result.get("success", False):
+                #     error_msg = tool_result.get("error", "算法执行失败")
+                #     logger.error(f"❌ {error_msg}")
+                #     self.dag.set_failed(step_id, error_msg)
+                #     raise RuntimeError(error_msg)
+                async def op_prepare_params_and_postprocess_then_execute(error_history):
+                    extraction_result = self._prepare_parameters_for_execution(
+                        step=step,
+                        tool_description=tool_description,
+                        vertex_schema=self.global_graph.get_vertex_properties_schema(),
+                        edge_schema=self.global_graph.get_edge_properties_schema(),
+                        dependency_parameters=data_dependency_context.get("parameter_input_adapter_result") or {},
+                        error_history=error_history
+                    )
 
+                    if extraction_result is None:
+                        raise ValueError("Parameter adaptation and post-processing code generation failed, returning an empty result.")
+
+                    post_processing_info = extraction_result.get("post_processing_code") or {} 
+                    is_has_extract_code = bool(post_processing_info.get("is_calculate"))
+                    output_schema = post_processing_info.get("output_schema") or {}
+
+
+                    tool_result = await self.computing_engine.run_algorithm(
+                        step.graph_algorithm,
+                        extraction_result.get("parameters", {}),
+                        post_processing_info.get("code"),
+                        global_graph=self.global_graph
+                    )
+
+                    if tool_result is None:
+                        raise ValueError("算法执行返回了 None")
+
+                    result_data = tool_result.get("result")
+                    if isinstance(result_data, dict) and "error" in result_data:
+                        raise RuntimeError(result_data.get("error") or "tool_result.result.error")
+
+                    # if not tool_result.get("success", False):
+                    #     raise RuntimeError(tool_result.get("error", "算法执行失败"))
+
+                    return is_has_extract_code, output_schema,tool_result
+
+
+                is_has_extract_code, output_schema,tool_result = await self.error_recovery.run(
+                    op_prepare_params_and_postprocess_then_execute,
+                    name=f"prepare_params+postprocess+execute(step={step_id})"
+                )
                 ## todo: 保存中间计算结果的模块: 如果图计算的结果规模特别大, 把结果写到一个文件里 
                 # 添加算法执行结果到 step
                 step.add_algorithm_result(
@@ -965,89 +894,55 @@ class Scheduler:
                     vertex_schema = self.global_graph.get_vertex_properties_schema()
                     edge_schema = self.global_graph.get_edge_properties_schema()
                 
-                generated_code = ""
-                output_schema = {}
-                retry_count_numeric = 0
-                max_retries_numeric = 3
+                # 生成数值分析代码
+                code_result = self.reasoner.generate_numeric_analysis_code(
+                    question=step.question,
+                    dependency_items=dependency_items,
+                    vertex_schema=vertex_schema,
+                    edge_schema=edge_schema
+                )
                 
-                while retry_count_numeric <= max_retries_numeric:
-                    try:
-                        # 生成或重新生成代码
-                        if not generated_code:
-                            code_result = self.reasoner.generate_numeric_analysis_code(
-                                question=step.question,
-                                dependency_items=dependency_items,
-                                vertex_schema=vertex_schema,
-                                edge_schema=edge_schema
+                numeric_analysis_code = code_result.get("numeric_analysis_code", {})
+                generated_code = numeric_analysis_code.get("code", "")
+                output_schema = numeric_analysis_code.get("output_schema", {})
+                logger.info(f"✅ 生成的数值分析代码: {generated_code[:200]}...")
+                
+                # 执行代码
+                code_result_value = self.computing_engine.execute_code(
+                    code=generated_code,
+                    data=execution_data,
+                    global_graph=self.global_graph,
+                    is_numeric_analysis=True
+                )
+
+                # 检查执行结果
+                if isinstance(code_result_value, dict) and "error" in code_result_value:
+                    error_msg = code_result_value.get("error")
+                    logger.error(f"❌ {error_msg}")
+                    self.dag.set_failed(step_id, error_msg)
+                    raise RuntimeError(error_msg)
+
+                # 成功执行
+                step.add_output(
+                    task_type=GraphAnalysisSubType.NUMERIC_COMPUTATION,
+                    source="numeric analysis code",
+                    output_schema=OutputSchema(
+                        description=output_schema.get("description", ""),
+                        type=output_schema.get("type", "dict"),
+                        fields={
+                            name: OutputField(
+                                type=info.get("type", ""),
+                                field_description=info.get("field_description", "")
                             )
-                            
-                            numeric_analysis_code = code_result.get("numeric_analysis_code", {})
-                            generated_code = numeric_analysis_code.get("code", "")
-                            output_schema = numeric_analysis_code.get("output_schema", {})
-                            logger.info(f"✅ 生成的数值分析代码: {generated_code[:200]}...")
-                        
-                        # 执行代码
-                        code_result_value = self.computing_engine.execute_code(
-                            code=generated_code,
-                            data=execution_data,
-                            global_graph=self.global_graph,
-                            is_numeric_analysis=True
-                        )
-
-                        # 检查执行结果
-                        if isinstance(code_result_value, dict) and "error" in code_result_value:
-                            raise RuntimeError(code_result_value.get("error"))
-
-                        # 成功执行
-                        step.add_output(
-                            task_type=GraphAnalysisSubType.NUMERIC_COMPUTATION,
-                            source="numeric analysis code",
-                            output_schema=OutputSchema(
-                                description=output_schema.get("description", ""),
-                                type=output_schema.get("type", "dict"),
-                                fields={
-                                    name: OutputField(
-                                        type=info.get("type", ""),
-                                        field_description=info.get("field_description", "")
-                                    )
-                                    for name, info in output_schema.get("fields", {}).items()
-                                }
-                            ) if output_schema else None,
-                            value=code_result_value if isinstance(code_result_value, dict) else {"result": code_result_value},
-                            path=None,
-                            validate_schema=True
-                        )
-                        logger.info(f"✅ 数值分析执行完成")
-                        self.dag.set_success(step_id)
-                        break  # 成功，跳出重试循环
-                        
-                    except Exception as numeric_err:
-                        if should_retry(retry_count_numeric, max_retries_numeric, self.error_recovery):
-                            logger.warning(f"⚠️ 数值分析执行失败，尝试修复 (重试 {retry_count_numeric + 1}/{max_retries_numeric}): {numeric_err}")
-                            try:
-                                error_info = prepare_error_info(numeric_err, code_result_value if 'code_result_value' in locals() else None)
-                                
-                                # 修复代码
-                                generated_code = await self.error_recovery.recover_numeric_code_error(
-                                    step=step,
-                                    error_info=error_info,
-                                    context={
-                                        "previous_code": generated_code,
-                                        "execution_data": execution_data,
-                                        "dependency_items": dependency_items
-                                    }
-                                )
-                                retry_count_numeric += 1
-                                continue
-                            except Exception as recovery_err:
-                                logger.error(f"❌ 错误恢复失败: {recovery_err}")
-                                retry_count_numeric += 1
-                                continue
-                        else:
-                            error_msg = f"数值分析执行失败: {numeric_err}"
-                            logger.error(error_msg, exc_info=True)
-                            self.dag.set_failed(step_id, error_msg)
-                            raise RuntimeError(f"节点 {step_id} 数值分析失败：{numeric_err}") from numeric_err
+                            for name, info in output_schema.get("fields", {}).items()
+                        }
+                    ) if output_schema else None,
+                    value=code_result_value if isinstance(code_result_value, dict) else {"result": code_result_value},
+                    path=None,
+                    validate_schema=True
+                )
+                logger.info(f"✅ 数值分析执行完成")
+                self.dag.set_success(step_id)
 
             elif step.task_type == GraphAnalysisType.GRAPH_QUERY:
                 logger.info("🔍 当前任务类型：Graph Query")
@@ -1183,35 +1078,62 @@ class Scheduler:
         tool_description: Optional[str],
         vertex_schema: Dict[str, str],
         edge_schema: Dict[str, str],
-        dependency_parameters: Dict[str, Any]
+        dependency_parameters: Dict[str, Any],
+        error_history: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
         """
             根据数据依赖或 LLM 结果准备图算法输入参数。
         """
         dependency_parameters = dependency_parameters or {}
-        result = None
-        
-        try:
-            if dependency_parameters:
-                result = self.reasoner.merge_parameters_from_dependencies(
-                    question=step.question,
-                    tool_description=tool_description,
-                    vertex_schema=vertex_schema,
-                    edge_schema=edge_schema,
-                    dependency_parameters=dependency_parameters
-                )
-            else:
-                result = self.reasoner.extract_parameters_with_postprocess_new(
-                    question=step.question,
-                    tool_description=tool_description,
-                    vertex_schema=vertex_schema,
-                    edge_schema=edge_schema,
-                )
-        except Exception as e:
-            logger.info(f"Parameter processing failed: {e}")
-            result = None
+        trace = {"step_id": getattr(step, "step_id", None), "op": "prepare_params"}
 
-        return result
+        if dependency_parameters:
+            return self.reasoner.merge_parameters_from_dependencies(
+                question=step.question,
+                tool_description=tool_description or "",
+                vertex_schema=vertex_schema,
+                edge_schema=edge_schema,
+                dependency_parameters=dependency_parameters,
+                error_history=error_history,
+                error_recovery=self.error_recovery,
+                trace=trace,
+            )
+
+        return self.reasoner.extract_parameters_with_postprocess_new(
+            question=step.question,
+            tool_description=tool_description or "",
+            vertex_schema=vertex_schema,
+            edge_schema=edge_schema,
+            error_history=error_history,
+            error_recovery=self.error_recovery,
+            trace=trace,
+        )
+        # result = None
+        # try:
+        #     if dependency_parameters:
+        #         result = self.reasoner.merge_parameters_from_dependencies(
+        #             question=step.question,
+        #             tool_description=tool_description,
+        #             vertex_schema=vertex_schema,
+        #             edge_schema=edge_schema,
+        #             dependency_parameters=dependency_parameters,
+        #             error_history=error_history, 
+        #             error_recovery=self.error_recovery
+        #         )
+        #     else:
+        #         result = self.reasoner.extract_parameters_with_postprocess_new(
+        #             question=step.question,
+        #             tool_description=tool_description,
+        #             vertex_schema=vertex_schema,
+        #             edge_schema=edge_schema,
+        #             error_history=error_history, 
+        #             error_recovery=self.error_recovery
+        #         )
+        # except Exception as e:
+        #     logger.info(f"Parameter processing failed: {e}")
+        #     result = None
+
+        # return result
 
     async def shutdown(self):
         if self.computing_engine:
