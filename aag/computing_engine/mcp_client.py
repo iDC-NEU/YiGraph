@@ -223,84 +223,85 @@ class GraphMCPClient:
     
     async def call_tool(self, tool_name: str, arguments: Dict[str, Any], post_processing_code: Optional[str] = None, global_graph: Optional[GraphData] = None, validate: bool = True) -> Dict[str, Any]: 
         """
-        调用MCP工具（支持可选的后处理代码）
+        Call MCP tool (supports optional post-processing code)
         
         Args:
-            tool_name: 工具名称
-            arguments: 工具参数
-            post_processing_code: 可选的后处理代码
-            validate: 是否验证参数
+            tool_name: Tool name
+            arguments: Tool arguments
+            post_processing_code: Optional post-processing code
+            validate: Whether to validate arguments
         
         Returns:
-            工具执行结果字典
+            Tool execution result dictionary
         """
         try:
-            # ========== 新增：参数清理 ==========
+            # ========== New: Argument cleaning ==========
             cleaned_arguments = {}
             for key, value in arguments.items():
-                # 将空容器转为 None（避免 NetworkX 等库的空容器陷阱）
+                # Convert empty containers to None (avoid empty container traps in libraries like NetworkX)
                 if isinstance(value, (dict, list)) and len(value) == 0:
                     cleaned_arguments[key] = None
-                    logger.warning(f"⚠️  参数 '{key}' 是空容器，已转为 None")
+                    logger.warning(f"⚠️  Parameter '{key}' is an empty container, converted to None")
                 else:
                     cleaned_arguments[key] = value
-            # ========== 参数验证  ==========
+            # ========== Argument validation ==========
             if validate:
                 is_valid, error_msg = self.validate_arguments(tool_name, arguments)
                 if not is_valid:
-                    logger.error(f"❌ 参数验证失败: {error_msg}")
+                    logger.error(f"❌ Argument validation failed: {error_msg}")
                     return {
                         "success": False,
-                        "error": f"参数验证失败: {error_msg}",
-                        "summary": "参数格式不正确"
+                        "error": f"Argument validation failed: {error_msg}",
+                        "summary": "Invalid argument format"
                     }
             
-            # ========== 步骤1: 调用原始工具 ==========
-            logger.info(f"📤 调用工具 {tool_name}...")
+            # ========== Step 1: Call original tool ==========
+            logger.info(f"📤 Calling tool {tool_name}...")
             result = await self.session.call_tool(tool_name, arguments=arguments)
             if result.content and len(result.content) > 0:
                 content = result.content[0]
                 if hasattr(content, 'text'):
                     try:
                         original_response = json.loads(content.text)
-                        # logger.info(f"✅ 工具执行完成: {original_response.get('summary', '')}")
+                        # logger.info(f"✅ Tool execution completed: {original_response.get('summary', '')}")
                     except json.JSONDecodeError as e:
                         raw_content = content.text if content.text else "Empty response"
-                        logger.error(f"❌ JSON 解析失败: {e} - 原始响应: {raw_content}")
+                        logger.error(f"JSON parsing failed: {e} - Raw response: {raw_content}")
                         return {
                             "success": False, 
                             "error": raw_content,
-                            "summary": "服务器返回非 JSON 响应"
+                            "summary": "Server returned non-JSON response"
                         }
                 else:
-                    return {"error": "❌ 工具调用失败: 无法解析工具调用结果"}
+                    return {"success": False, "error": "Tool call failed: Unable to parse tool call result"}
             else:
-                return {"error": "❌ 工具调用失败: 无法解析工具调用结果"}
+                return {"success": False, "error": "Tool call failed: Unable to parse tool call result"}
 
-            # ========== 步骤2: 如果有后处理代码，调用后处理工具 ==========
+            # ========== Step 2: If post-processing code exists, call post-processing tool ==========
             if post_processing_code:
-                logger.info(f"📤 应用后处理代码...")
+                logger.info(f"📤 Applying post-processing code...")
                 try:
-                    # ✅ 关键改动：使用本地执行器处理
+                    # ✅ Key change: Use local executor for processing
                     processed_data = self.code_executor.execute(
                         post_processing_code, 
-                        original_response.get("result"),  # 只传递 result 部分
+                        original_response.get("result"),  # Only pass the result part
                         global_graph=global_graph
                     )
                     
-                    # 更新返回结果
+                    # Update return result
                     original_response["result"] = processed_data
-                    original_response["summary"] = original_response.get("summary", "") + " (已应用本地后处理)"
+                    original_response["summary"] = original_response.get("summary", "") + " (Local post-processing applied)"
                     
-                    logger.info(f"✅ 后处理执行完成")
+                    logger.info(f"✅ Post-processing execution completed")
                     # logger.info(f"Key results extracted: {processed_data}")
                     logger.info(f"post_processing_status:{original_response}")
                     return original_response
                     
                 except Exception as post_error:
-                    logger.error(f"❌ 后处理执行失败: {post_error}")
-                    logger.warning("⚠️ 后处理失败，返回原始结果")
-                    return original_response
+                    logger.error(f"Post-processing execution failed: {post_error}")
+                    # logger.warning("⚠️ Post-processing failed, returning original result")
+                    # return original_response
+                    return {"success": False, "error": f"❌ Post-processing code execution failed:  {post_error}"}
             
             # 没有后处理代码时，直接返回原始结果
             return original_response

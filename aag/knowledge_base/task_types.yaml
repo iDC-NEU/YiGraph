@@ -152,3 +152,13 @@
     - wiener_index
     - degree_assortativity_coefficient
     - attribute_assortativity_coefficient
+
+- id: Graph Query
+  task_type: "Graph Query"
+  description: Graph query tools for querying specific nodes, neighbors, subgraphs, and paths
+  algorithm:
+    - get_node_attributes
+    - k_hop_neighbors
+    - common_neighbors
+    - extract_subgraph
+    - get_paths_between_two_nodes

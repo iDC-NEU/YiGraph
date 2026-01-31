@@ -331,10 +331,13 @@ class ComputingEngine:
             db_client = Neo4jGraphClient(config)
             
             # add gjq: 添加调试日志
-            logger.info(f"📝 创建NaturalLanguageQueryEngine")
+            logger.info(f"📝 创建LLMInterface包装Reasoner")
             
-            # add gjq: 将 Reasoner 包装成 LLMInterface
+            # 创建LLMInterface对象包装Reasoner
             llm_interface = LLMInterface(reasoner)
+            
+            # add gjq: 添加调试日志
+            logger.info(f"📝 创建NaturalLanguageQueryEngine")
             
             self.nl_query_engine = NaturalLanguageQueryEngine(db_client, llm_interface)
             self.nl_query_engine.initialize()

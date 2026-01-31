@@ -107,6 +107,43 @@ class DynamicCodeExecutor:
         if not self.check_and_install_dependencies(code):
             raise RuntimeError("依赖安装失败")
         
+        # 如果 data 是序列化后的图字典，将其转换回 NetworkX 图对象
+        # 这样后处理代码就可以正常使用 data.nodes() 和 data.edges() 等方法
+        if isinstance(data, dict) and data.get("type") == "graph":
+            try:
+                import networkx as nx
+                graph_type = data.get("graph_type", "DiGraph")
+                nodes = data.get("nodes", [])
+                edges = data.get("edges", [])
+                
+                # 根据图类型创建对应的图对象
+                if graph_type == "DiGraph":
+                    restored_graph = nx.DiGraph()
+                elif graph_type == "Graph":
+                    restored_graph = nx.Graph()
+                elif graph_type == "MultiDiGraph":
+                    restored_graph = nx.MultiDiGraph()
+                elif graph_type == "MultiGraph":
+                    restored_graph = nx.MultiGraph()
+                else:
+                    # 默认使用 DiGraph
+                    restored_graph = nx.DiGraph()
+                
+                # 添加节点和边
+                restored_graph.add_nodes_from(nodes)
+                for edge in edges:
+                    src = edge.get("src")
+                    dst = edge.get("dst")
+                    if src and dst:
+                        # 复制边属性（排除 src 和 dst）
+                        edge_attrs = {k: v for k, v in edge.items() if k not in ("src", "dst")}
+                        restored_graph.add_edge(src, dst, **edge_attrs)
+                
+                logger.info(f"🔄 已将序列化的图字典转换回 NetworkX {graph_type} 对象 (节点数: {len(nodes)}, 边数: {len(edges)})")
+                data = restored_graph
+            except Exception as e:
+                logger.warning(f"⚠️  无法将序列化的图字典转换回 NetworkX 图对象: {e}，将使用原始字典")
+
         # 创建独立命名空间
         namespace = {
             "data": data,

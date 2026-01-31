@@ -26,6 +26,7 @@ from aag.reasoner.prompt_template.llm_prompt_en import rag_prompt
 # add gjq: 移除直接导入，改为通过 computing_engine 调用
 # from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine, LLMInterface
 # from aag.computing_engine.graph_query.graph_query import Neo4jGraphClient, Neo4jConfig
+from aag.error_recovery.error_manager import ErrorRecovery
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,7 @@ class Scheduler:
         self.data_dependency_resolver: Optional[DataDependencyResolver] = None
         # add gjq: 移除 nl_query_engine 字段，改为通过 computing_engine 调用
         # self.nl_query_engine: Optional[NaturalLanguageQueryEngine] = None  # 图查询引擎
+        self.error_recovery: Optional[ErrorRecovery] = None  # 错误恢复模块
 
         self.current_dataset_name: Optional[str] = None  # Dataset-level name (for text datasets, this is the dataset name)
         self.current_dataset: Optional[List[DatasetConfig]] = None  # Original dataset config (text/graph, never changes)
@@ -78,6 +80,7 @@ class Scheduler:
         self._init_rag_engine()
         
         # add gjq: 图查询引擎已在 _init_computing_engine 中初始化，无需单独调用
+        self._init_error_recovery()
 
     
     def _init_reasoner(self):
@@ -149,6 +152,15 @@ class Scheduler:
             print(f"✓ RAGEngine initialized")
         except Exception as e:
             print(f"✗ RAGEngineinitialization failed: {e}")
+            raise
+
+    def _init_error_recovery(self):
+        """初始化错误恢复模块"""
+        try:
+            self.error_recovery = ErrorRecovery()
+            print("✓ ErrorRecoveryModule initialized")
+        except Exception as e:
+            print(f"✗ ErrorRecoveryModule initialization failed: {e}")
             raise
 
     def list_datasets(self, dtype: Optional[str] = None) -> Dict[str, List[str]]:
@@ -593,7 +605,26 @@ class Scheduler:
                 algorithm_list = self.expert_search_engine.retrieve_algorithm(step.question, selected_task_type_id)
                 logger.info(f"🔍 检索到的算法列表: {algorithm_list}")
                 
-                algorithm_result = self.reasoner.select_algorithm(step.question, algorithm_list)
+                # 获取当前数据集的完整schema信息
+                graph_schema_info = None
+                if self.current_graph_dataset:
+                    graph_schema_info = {
+                        "dataset_name": self.current_dataset_name,
+                        "graph_properties": {
+                            "directed": self.current_graph_dataset.schema.graph.directed if hasattr(self.current_graph_dataset.schema, 'graph') else True,
+                            "heterogeneous": self.current_graph_dataset.schema.graph.heterogeneous if hasattr(self.current_graph_dataset.schema, 'graph') else False,
+                            "multigraph": self.current_graph_dataset.schema.graph.multigraph if hasattr(self.current_graph_dataset.schema, 'graph') else False,
+                            "weighted": self.current_graph_dataset.schema.graph.weighted if hasattr(self.current_graph_dataset.schema, 'graph') else False,
+                        },
+                        "vertex_types": [v.type for v in self.current_graph_dataset.schema.vertex] if hasattr(self.current_graph_dataset.schema, 'vertex') else [],
+                        "edge_types": [e.type for e in self.current_graph_dataset.schema.edge] if hasattr(self.current_graph_dataset.schema, 'edge') else [],
+                        "vertex_configs": [{"type": v.type, "query_field": v.query_field, "attribute_fields": v.attribute_fields}
+                                          for v in self.current_graph_dataset.schema.vertex] if hasattr(self.current_graph_dataset.schema, 'vertex') else [],
+                        "edge_configs": [{"type": e.type, "source_field": e.source_field, "target_field": e.target_field, "weight_field": e.weight_field}
+                                        for e in self.current_graph_dataset.schema.edge] if hasattr(self.current_graph_dataset.schema, 'edge') else [],
+                    }
+                
+                algorithm_result = self.reasoner.select_algorithm(step.question, algorithm_list, graph_schema=graph_schema_info)
                 logger.info(f"🔍 算法选择结果: {algorithm_result}")
                 
                 # Check if algorithm_result is None or contains error
@@ -737,67 +768,101 @@ class Scheduler:
                     self.dag.set_failed(step_id, f"初始化工作图失败: {graph_err}")
                     raise
 
-                try:
+                # extraction_result = self._prepare_parameters_for_execution(
+                #     step=step,
+                #     tool_description=tool_description,
+                #     vertex_schema=self.global_graph.get_vertex_properties_schema(),
+                #     edge_schema=self.global_graph.get_edge_properties_schema(),
+                #     dependency_parameters=data_dependency_context.get("parameter_input_adapter_result") or {},
+                # )
+                
+                # if extraction_result is None:
+                #     error_msg = "参数提取返回了 None"
+                #     logger.error(f"❌ {error_msg}")
+                #     self.dag.set_failed(step_id, error_msg)
+                #     raise ValueError(error_msg)
+
+                # logger.info(
+                #     "✅ LLM/依赖提取的参数: %s",
+                #     json.dumps(extraction_result.get("parameters", {}), ensure_ascii=False)
+                # )
+
+                # post_processing_info = extraction_result.get("post_processing_code") or {}  
+                # is_has_extract_code = bool(post_processing_info.get("is_calculate"))
+                # output_schema = post_processing_info.get("output_schema") or {}
+
+                # if post_processing_info.get("code"):
+                #     logger.info(
+                #         f"✅ 后处理代码:\n{post_processing_info.get('code','')}...")
+        
+                # tool_result = await self.computing_engine.run_algorithm(
+                #     step.graph_algorithm,
+                #     extraction_result.get("parameters", {}),
+                #     post_processing_info.get("code"),
+                #     global_graph=self.global_graph
+                # )
+                
+                # if tool_result is None:
+                #     error_msg = "算法执行返回了 None"
+                #     logger.error(f"❌ {error_msg}")
+                #     self.dag.set_failed(step_id, error_msg)
+                #     raise ValueError(error_msg)
+                
+                # # 检查嵌套的 result.error
+                # result_data = tool_result.get("result")
+                # if result_data is not None and isinstance(result_data, dict) and "error" in result_data:
+                #     error_msg = result_data.get("error")
+                #     logger.error(f"❌ {error_msg}")
+                #     self.dag.set_failed(step_id, error_msg)
+                #     raise RuntimeError(error_msg)
+                
+                # if not tool_result.get("success", False):
+                #     error_msg = tool_result.get("error", "算法执行失败")
+                #     logger.error(f"❌ {error_msg}")
+                #     self.dag.set_failed(step_id, error_msg)
+                #     raise RuntimeError(error_msg)
+                async def op_prepare_params_and_postprocess_then_execute(error_history):
                     extraction_result = self._prepare_parameters_for_execution(
                         step=step,
                         tool_description=tool_description,
                         vertex_schema=self.global_graph.get_vertex_properties_schema(),
                         edge_schema=self.global_graph.get_edge_properties_schema(),
                         dependency_parameters=data_dependency_context.get("parameter_input_adapter_result") or {},
+                        error_history=error_history
                     )
-                except Exception as param_err:
-                    self.dag.set_failed(step_id, f"参数准备失败: {param_err}")
-                    raise
 
-                # 检查 extraction_result 是否为 None
-                if extraction_result is None:
-                    error_msg = "参数提取返回了 None"
-                    logger.error(f"❌ {error_msg} | 问题: {step.question}")
-                    self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"节点 {step_id}: {error_msg}")
+                    if extraction_result is None:
+                        raise ValueError("Parameter adaptation and post-processing code generation failed, returning an empty result.")
 
-                logger.info(
-                    "✅ LLM/依赖提取的参数: %s",
-                    json.dumps(extraction_result.get("parameters", {}), ensure_ascii=False)
+                    post_processing_info = extraction_result.get("post_processing_code") or {} 
+                    is_has_extract_code = bool(post_processing_info.get("is_calculate"))
+                    output_schema = post_processing_info.get("output_schema") or {}
+
+
+                    tool_result = await self.computing_engine.run_algorithm(
+                        step.graph_algorithm,
+                        extraction_result.get("parameters", {}),
+                        post_processing_info.get("code"),
+                        global_graph=self.global_graph
+                    )
+
+                    if tool_result is None:
+                        raise ValueError("算法执行返回了 None")
+
+                    result_data = tool_result.get("result")
+                    if isinstance(result_data, dict) and "error" in result_data:
+                        raise RuntimeError(result_data.get("error") or "tool_result.result.error")
+
+                    # if not tool_result.get("success", False):
+                    #     raise RuntimeError(tool_result.get("error", "算法执行失败"))
+
+                    return is_has_extract_code, output_schema,tool_result
+
+
+                is_has_extract_code, output_schema,tool_result = await self.error_recovery.run(
+                    op_prepare_params_and_postprocess_then_execute,
+                    name=f"prepare_params+postprocess+execute(step={step_id})"
                 )
-
-                post_processing_info = extraction_result.get("post_processing_code") or {}  
-                is_has_extract_code = bool(post_processing_info.get("is_calculate"))
-                output_schema = post_processing_info.get("output_schema") or {}
-
-                if post_processing_info.get("code"):
-                    logger.info(
-                        f"✅ 后处理代码:\n{post_processing_info.get('code','')}...")
-        
-                # 记录计算结果
-                tool_result = await self.computing_engine.run_algorithm(
-                    step.graph_algorithm,
-                    extraction_result.get("parameters", {}),
-                    post_processing_info.get("code"),
-                    global_graph=self.global_graph
-                )
-
-                # 检查 tool_result 是否为 None
-                if tool_result is None:
-                    error_msg = "算法执行返回了 None"
-                    logger.error(f"❌ {error_msg} | 算法: {step.graph_algorithm}")
-                    self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"节点 {step_id}: {step.question} 执行失败: {error_msg}")
-
-                # 安全地检查嵌套的 result.error
-                result_data = tool_result.get("result")
-                if result_data is not None and isinstance(result_data, dict) and "error" in result_data:
-                    error_msg = result_data.get("error")
-                    logger.error(f"❌ 算法执行错误 | 错误: {error_msg}")
-                    self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"节点 {step_id}: {step.question} 执行失败: {error_msg}")
-
-                if not tool_result.get("success", False):
-                    error_msg = tool_result.get("error", "算法执行失败")
-                    logger.error(f"❌ 算法执行失败 | 错误: {error_msg}")
-                    self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"节点 {step_id} 执行失败：{error_msg}")
-
                 ## todo: 保存中间计算结果的模块: 如果图计算的结果规模特别大, 把结果写到一个文件里 
                 # 添加算法执行结果到 step
                 step.add_algorithm_result(
@@ -812,86 +877,78 @@ class Scheduler:
 
             elif step.task_type == GraphAnalysisType.NUMERIC_ANALYSIS:
                 logger.info("🧮 当前任务类型：Numeric Analysis")
-                try:
-                    # 1. 合并 graph_dependencies 和 parameter_dependencies 成依赖参数项
-                    graph_deps = data_dependency_context.get("graph_dependencies", [])
-                    param_deps = data_dependency_context.get("parameter_dependencies", [])
-                    
-                    dependency_items = []
-                    execution_data = {}
-                    for dep_item in graph_deps + param_deps:   
-                        value = take_sample(dep_item.value)
-                        execution_data[dep_item.field_key] = value
-                        dependency_items.append({
-                            "field_key": dep_item.field_key,
-                            "field_type": str(dep_item.field_type) if dep_item.field_type else "unknown",
-                            "field_desc": dep_item.field_desc,
-                            "value": value
-                        })
                 
-                    vertex_schema = {}
-                    edge_schema = {}
-                    if self.global_graph:
-                        vertex_schema = self.global_graph.get_vertex_properties_schema()
-                        edge_schema = self.global_graph.get_edge_properties_schema()
-                        
-                    code_result = self.reasoner.generate_numeric_analysis_code(
-                        question=step.question,
-                        dependency_items=dependency_items,
-                        vertex_schema=vertex_schema,
-                        edge_schema=edge_schema
-                    )
-                    
-                    numeric_analysis_code = code_result.get("numeric_analysis_code", {})
-                    generated_code = numeric_analysis_code.get("code", "")
-                    output_schema = numeric_analysis_code.get("output_schema", {})
-                    logger.info(f"✅ 生成的数值分析代码: {generated_code[:200]}...")
-                    
-                    code_result_value = self.computing_engine.execute_code(
-                        code=generated_code,
-                        data=execution_data,
-                        global_graph=self.global_graph,
-                        is_numeric_analysis=True
-                    )
+                # 1. 合并 graph_dependencies 和 parameter_dependencies 成依赖参数项
+                graph_deps = data_dependency_context.get("graph_dependencies", [])
+                param_deps = data_dependency_context.get("parameter_dependencies", [])
+                
+                dependency_items = []
+                execution_data = {}
+                for dep_item in graph_deps + param_deps:   
+                    value = take_sample(dep_item.value)
+                    execution_data[dep_item.field_key] = value
+                    dependency_items.append({
+                        "field_key": dep_item.field_key,
+                        "field_type": str(dep_item.field_type) if dep_item.field_type else "unknown",
+                        "field_desc": dep_item.field_desc,
+                        "value": value
+                    })
+            
+                vertex_schema = {}
+                edge_schema = {}
+                if self.global_graph:
+                    vertex_schema = self.global_graph.get_vertex_properties_schema()
+                    edge_schema = self.global_graph.get_edge_properties_schema()
+                
+                # 生成数值分析代码
+                code_result = self.reasoner.generate_numeric_analysis_code(
+                    question=step.question,
+                    dependency_items=dependency_items,
+                    vertex_schema=vertex_schema,
+                    edge_schema=edge_schema
+                )
+                
+                numeric_analysis_code = code_result.get("numeric_analysis_code", {})
+                generated_code = numeric_analysis_code.get("code", "")
+                output_schema = numeric_analysis_code.get("output_schema", {})
+                logger.info(f"✅ 生成的数值分析代码: {generated_code[:200]}...")
+                
+                # 执行代码
+                code_result_value = self.computing_engine.execute_code(
+                    code=generated_code,
+                    data=execution_data,
+                    global_graph=self.global_graph,
+                    is_numeric_analysis=True
+                )
 
-                    if isinstance(code_result_value, dict) and "error" in code_result_value:
-                        error_msg = code_result_value.get("error")
-                        self.dag.set_failed(step_id, error_msg)
-                        raise RuntimeError(f"节点 {step_id} 数值分析失败：{error_msg}")
-
-                    step.add_output(
-                        task_type=GraphAnalysisSubType.NUMERIC_COMPUTATION,
-                        source="numeric analysis code",
-                        output_schema=OutputSchema(
-                            description=output_schema.get("description", ""),
-                            type=output_schema.get("type", "dict"),
-                            fields={
-                                name: OutputField(
-                                    type=info.get("type", ""),
-                                    field_description=info.get("field_description", "")
-                                )
-                                for name, info in output_schema.get("fields", {}).items()
-                            }
-                        ) if output_schema else None,
-                        value=code_result_value if isinstance(code_result_value, dict) else {"result": code_result_value},
-                        path=None,
-                        validate_schema=True
-                    )
-                    logger.info(f"✅ 数值分析执行完成")
-                    self.dag.set_success(step_id)
-                    
-                    # 设置tool_result用于后续的LLM分析
-                    tool_result = {
-                        "success": True,
-                        "result": code_result_value if isinstance(code_result_value, dict) else {"result": code_result_value},
-                        "summary": f"数值分析成功"
-                    }
-                    
-                except Exception as numeric_err:
-                    error_msg = f"数值分析执行失败: {numeric_err}"
-                    logger.error(error_msg, exc_info=True)
+                # 检查执行结果
+                if isinstance(code_result_value, dict) and "error" in code_result_value:
+                    error_msg = code_result_value.get("error")
+                    logger.error(f"❌ {error_msg}")
                     self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"节点 {step_id} 数值分析失败：{numeric_err}")
+                    raise RuntimeError(error_msg)
+
+                # 成功执行
+                step.add_output(
+                    task_type=GraphAnalysisSubType.NUMERIC_COMPUTATION,
+                    source="numeric analysis code",
+                    output_schema=OutputSchema(
+                        description=output_schema.get("description", ""),
+                        type=output_schema.get("type", "dict"),
+                        fields={
+                            name: OutputField(
+                                type=info.get("type", ""),
+                                field_description=info.get("field_description", "")
+                            )
+                            for name, info in output_schema.get("fields", {}).items()
+                        }
+                    ) if output_schema else None,
+                    value=code_result_value if isinstance(code_result_value, dict) else {"result": code_result_value},
+                    path=None,
+                    validate_schema=True
+                )
+                logger.info(f"✅ 数值分析执行完成")
+                self.dag.set_success(step_id)
 
             # add gjq: 修改为通过 computing_engine 调用图查询
             elif step.task_type == GraphAnalysisType.GRAPH_QUERY:
@@ -1042,35 +1099,36 @@ class Scheduler:
         tool_description: Optional[str],
         vertex_schema: Dict[str, str],
         edge_schema: Dict[str, str],
-        dependency_parameters: Dict[str, Any]
+        dependency_parameters: Dict[str, Any],
+        error_history: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
         """
             根据数据依赖或 LLM 结果准备图算法输入参数。
         """
         dependency_parameters = dependency_parameters or {}
-        result = None
-        
-        try:
-            if dependency_parameters:
-                result = self.reasoner.merge_parameters_from_dependencies(
-                    question=step.question,
-                    tool_description=tool_description,
-                    vertex_schema=vertex_schema,
-                    edge_schema=edge_schema,
-                    dependency_parameters=dependency_parameters
-                )
-            else:
-                result = self.reasoner.extract_parameters_with_postprocess_new(
-                    question=step.question,
-                    tool_description=tool_description,
-                    vertex_schema=vertex_schema,
-                    edge_schema=edge_schema,
-                )
-        except Exception as e:
-            logger.info(f"Parameter processing failed: {e}")
-            result = None
+        trace = {"step_id": getattr(step, "step_id", None), "op": "prepare_params"}
 
-        return result
+        if dependency_parameters:
+            return self.reasoner.merge_parameters_from_dependencies(
+                question=step.question,
+                tool_description=tool_description or "",
+                vertex_schema=vertex_schema,
+                edge_schema=edge_schema,
+                dependency_parameters=dependency_parameters,
+                error_history=error_history,
+                error_recovery=self.error_recovery,
+                trace=trace,
+            )
+
+        return self.reasoner.extract_parameters_with_postprocess_new(
+            question=step.question,
+            tool_description=tool_description or "",
+            vertex_schema=vertex_schema,
+            edge_schema=edge_schema,
+            error_history=error_history,
+            error_recovery=self.error_recovery,
+            trace=trace,
+        )
     
     def _extract_semantic_field_name(self, question: str, query_type: str) -> str:
         """
