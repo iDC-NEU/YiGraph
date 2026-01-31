@@ -4,6 +4,7 @@ import openai
 import json
 import re
 import requests # deepseek
+import logging  # add gjq: 添加logging导入
 from typing import Dict, Literal, Any, List, Optional
 from llama_index.core import Settings
 from llama_index.core.utils import print_text
@@ -16,6 +17,9 @@ from aag.config.engine_config import ReasonerConfig
 from aag.reasoner.prompt_template.llm_prompt_en import *
 from aag.reasoner.prompt_template.llm_prompt_zh import *
 from aag.utils.parse_json import extract_json_from_response, parse_openai_json_response
+
+# add gjq: 初始化logger
+logger = logging.getLogger(__name__)
 
 EMBEDD_DIMS = {
     "BAAI/bge-large-en-v1.5": 1024,
@@ -406,6 +410,22 @@ class OllamaEnv:
             question=question
         ))
         return extract_json_from_response(response.text)
+    
+    # add gjq
+    def nl_query_validate_cypher(self, cypher: str, question: str, query_type: str, 
+                                 params: dict, schema_info: str, template_info: str,
+                                 template_cypher_example: str) -> dict:
+        """Validate Cypher statement for natural language query engine."""
+        response = self.llm.complete(nl_query_validate_cypher_prompt.format(
+            schema_info=schema_info,
+            template_info=template_info,
+            template_cypher_example=template_cypher_example,
+            question=question,
+            query_type=query_type,
+            params=json.dumps(params, ensure_ascii=False, indent=2),
+            cypher=cypher
+        ))
+        return extract_json_from_response(response.text)
  
 
 
@@ -516,15 +536,32 @@ class OpenAIEnv:
         return json.loads(response)
     
     def select_algorithm(self, question: str, algorithm_list: list) -> dict:
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": select_algorithm_prompt.format(
-                question=question,
-                algorithm_list=algorithm_list
-            )}]
-        )
-        response = response.choices[0].message.content
-        return json.loads(response)
+        # add gjq: 添加容错处理，避免JSON解析失败
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": select_algorithm_prompt.format(
+                    question=question,
+                    algorithm_list=algorithm_list
+                )}]
+            )
+            response_text = response.choices[0].message.content
+            
+            # add gjq: 检查响应是否为空
+            if not response_text or not response_text.strip():
+                logger.warning(f"⚠️ LLM返回空响应 | 问题: {question}")
+                return {"error": "LLM returned empty response"}
+            
+            # add gjq: 尝试解析JSON，失败时使用parse_openai_json_response
+            try:
+                return json.loads(response_text)
+            except json.JSONDecodeError:
+                logger.warning(f"⚠️ JSON解析失败，尝试使用parse_openai_json_response | 响应: {response_text[:200]}")
+                return parse_openai_json_response(response_text, "select_algorithm")
+                
+        except Exception as e:
+            logger.error(f"❌ select_algorithm调用失败: {e}", exc_info=True)
+            return {"error": f"Failed to select algorithm: {str(e)}"}
     
     def extract_parameters_with_postprocess(self, question: str, tool_description: str) -> dict:
         response = self.client.chat.completions.create(
@@ -754,6 +791,26 @@ class OpenAIEnv:
         )
         response_text = response.choices[0].message.content
         return parse_openai_json_response(response_text, "nl_query_extract_params")
+    
+    # add gjq
+    def nl_query_validate_cypher(self, cypher: str, question: str, query_type: str, 
+                                 params: dict, schema_info: str, template_info: str,
+                                 template_cypher_example: str) -> dict:
+        """Validate Cypher statement for natural language query engine."""
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[{"role": "user", "content": nl_query_validate_cypher_prompt.format(
+                schema_info=schema_info,
+                template_info=template_info,
+                template_cypher_example=template_cypher_example,
+                question=question,
+                query_type=query_type,
+                params=json.dumps(params, ensure_ascii=False, indent=2),
+                cypher=cypher
+            )}]
+        )
+        response_text = response.choices[0].message.content
+        return parse_openai_json_response(response_text, "nl_query_validate_cypher")
 
 
 # 写一个 reasoner 类， 根据传入的配置参数ReasonerConfig 来初始化参数， 要求实现 根据provider 来选择切换对应的大模型OllamaEnv 和  OpenAIEnv
@@ -911,7 +968,16 @@ class Reasoner:
         if hasattr(self.env, "nl_query_extract_params"):
             return self.env.nl_query_extract_params(question, query_type, template, schema_info, query_modifiers)
         raise NotImplementedError("Underlying environment does not support nl_query_extract_params")
-
+    
+    # add gjq
+    def nl_query_validate_cypher(self, cypher: str, question: str, query_type: str, 
+                                 params: dict, schema_info: str, template_info: str,
+                                 template_cypher_example: str) -> dict:
+        """Validate Cypher statement for natural language query engine."""
+        if hasattr(self.env, "nl_query_validate_cypher"):
+            return self.env.nl_query_validate_cypher(cypher, question, query_type, params, 
+                                                     schema_info, template_info, template_cypher_example)
+        raise NotImplementedError("Underlying environment does not support nl_query_validate_cypher")
 
 
 

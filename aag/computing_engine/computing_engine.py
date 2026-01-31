@@ -10,7 +10,7 @@ from aag.computing_engine.mcp_client import GraphMCPClient
 from aag.computing_engine.code_executor import DynamicCodeExecutor
 from aag.expert_search_engine.database.datatype import GraphData
 # add gjq: 导入图查询相关类
-from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine
+from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine, LLMInterface
 from aag.computing_engine.graph_query.graph_query import Neo4jGraphClient, Neo4jConfig
 
 
@@ -333,7 +333,10 @@ class ComputingEngine:
             # add gjq: 添加调试日志
             logger.info(f"📝 创建NaturalLanguageQueryEngine")
             
-            self.nl_query_engine = NaturalLanguageQueryEngine(db_client, reasoner)
+            # add gjq: 将 Reasoner 包装成 LLMInterface
+            llm_interface = LLMInterface(reasoner)
+            
+            self.nl_query_engine = NaturalLanguageQueryEngine(db_client, llm_interface)
             self.nl_query_engine.initialize()
             logger.info("✓ NaturalLanguageQueryEngine initialized in ComputingEngine")
         except Exception as e:

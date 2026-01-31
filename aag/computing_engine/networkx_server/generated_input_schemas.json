@@ -7,27 +7,27 @@
         "type": "graph"
       },
       "k": {
-        "description": "If k is not None use k node samples to estimate betweenness. The value of k <= n where n is the number of nodes in the graph. Higher values give better approximation.",
+        "description": "If `k` is not `None`, use `k` sampled nodes as sources for the considered paths. The resulting sampled counts are then inflated to approximate betweenness. Higher values of `k` give better approximation. Must have ``k <= len(G)``.",
         "type": "int, optional (default=None)",
         "default": null
       },
       "normalized": {
-        "description": "If True the betweenness values are normalized by `2/((n-1)(n-2))` for graphs, and `1/((n-1)(n-2))` for directed graphs where `n` is the number of nodes in G.",
-        "type": "bool, optional",
+        "description": "If `True`, the betweenness values are rescaled by dividing by the number of possible $(s, t)$-pairs in the graph.",
+        "type": "bool, optional (default=True)",
         "default": true
       },
       "weight": {
-        "description": "If None, all edge weights are considered equal. Otherwise holds the name of the edge attribute used as weight. Weights are used to calculate weighted shortest paths, so they are interpreted as distances.",
+        "description": "If `None`, all edge weights are 1. Otherwise holds the name of the edge attribute used as weight. Weights are used to calculate weighted shortest paths, so they are interpreted as distances.",
         "type": "None or string, optional (default=None)",
         "default": null
       },
       "endpoints": {
-        "description": "If True include the endpoints in the shortest path counts.",
-        "type": "bool, optional",
+        "description": "If `True`, include the endpoints $s$ and $t$ in the shortest path counts. This is taken into account when rescaling the values.",
+        "type": "bool, optional (default=False)",
         "default": false
       },
       "seed": {
-        "description": "Indicator of random number generation state. See :ref:`Randomness<randomness>`. Note that this is only used if k is not None.",
+        "description": "Indicator of random number generation state. See :ref:`Randomness<randomness>`. Note that this is only used if ``k is not None``.",
         "type": "integer, random_state, or None (default)",
         "default": null
       }
@@ -41,20 +41,20 @@
         "type": "graph"
       },
       "sources": {
-        "description": "Nodes to use as sources for shortest paths in betweenness",
+        "description": "Nodes to use as sources for shortest paths in betweenness.",
         "type": "list of nodes"
       },
       "targets": {
-        "description": "Nodes to use as targets for shortest paths in betweenness",
+        "description": "Nodes to use as targets for shortest paths in betweenness.",
         "type": "list of nodes"
       },
       "normalized": {
-        "description": "If True the betweenness values are normalized by $2/((n-1)(n-2))$ for graphs, and $1/((n-1)(n-2))$ for directed graphs where $n$ is the number of nodes in G.",
-        "type": "bool, optional",
+        "description": "If `True`, the betweenness values are rescaled by dividing by the number of possible $(s, t)$-pairs in the graph.",
+        "type": "bool, optional (default=False)",
         "default": false
       },
       "weight": {
-        "description": "If None, all edge weights are considered equal. Otherwise holds the name of the edge attribute used as weight. Weights are used to calculate weighted shortest paths, so they are interpreted as distances.",
+        "description": "If `None`, all edge weights are 1. Otherwise holds the name of the edge attribute used as weight. Weights are used to calculate weighted shortest paths, so they are interpreted as distances.",
         "type": "None or string, optional (default=None)",
         "default": null
       }
@@ -194,22 +194,22 @@
         "type": "graph"
       },
       "k": {
-        "description": "If k is not None use k node samples to estimate betweenness. The value of k <= n where n is the number of nodes in the graph. Higher values give better approximation.",
+        "description": "If `k` is not `None`, use `k` sampled nodes as sources for the considered paths. The resulting sampled counts are then inflated to approximate betweenness. Higher values of `k` give better approximation. Must have ``k <= len(G)``.",
         "type": "int, optional (default=None)",
         "default": null
       },
       "normalized": {
-        "description": "If True the betweenness values are normalized by $2/(n(n-1))$ for graphs, and $1/(n(n-1))$ for directed graphs where $n$ is the number of nodes in G.",
-        "type": "bool, optional",
+        "description": "If `True`, the betweenness values are rescaled by dividing by the number of possible $(s, t)$-pairs in the graph.",
+        "type": "bool, optional (default=True)",
         "default": true
       },
       "weight": {
-        "description": "If None, all edge weights are considered equal. Otherwise holds the name of the edge attribute used as weight. Weights are used to calculate weighted shortest paths, so they are interpreted as distances.",
+        "description": "If `None`, all edge weights are 1. Otherwise holds the name of the edge attribute used as weight. Weights are used to calculate weighted shortest paths, so they are interpreted as distances.",
         "type": "None or string, optional (default=None)",
         "default": null
       },
       "seed": {
-        "description": "Indicator of random number generation state. See :ref:`Randomness<randomness>`. Note that this is only used if k is not None.",
+        "description": "Indicator of random number generation state. See :ref:`Randomness<randomness>`. Note that this is only used if ``k is not None``.",
         "type": "integer, random_state, or None (default)",
         "default": null
       }
@@ -223,20 +223,20 @@
         "type": "graph"
       },
       "sources": {
-        "description": "Nodes to use as sources for shortest paths in betweenness",
+        "description": "Nodes to use as sources for shortest paths in betweenness.",
         "type": "list of nodes"
       },
       "targets": {
-        "description": "Nodes to use as targets for shortest paths in betweenness",
+        "description": "Nodes to use as targets for shortest paths in betweenness.",
         "type": "list of nodes"
       },
       "normalized": {
-        "description": "If True the betweenness values are normalized by `2/(n(n-1))` for graphs, and `1/(n(n-1))` for directed graphs where `n` is the number of nodes in G.",
-        "type": "bool, optional",
+        "description": "If `True`, the betweenness values are rescaled by dividing by the number of possible $(s, t)$-pairs in the graph.",
+        "type": "bool, optional (default=False)",
         "default": false
       },
       "weight": {
-        "description": "If None, all edge weights are considered equal. Otherwise holds the name of the edge attribute used as weight. Weights are used to calculate weighted shortest paths, so they are interpreted as distances.",
+        "description": "If `None`, all edge weights are 1. Otherwise holds the name of the edge attribute used as weight. Weights are used to calculate weighted shortest paths, so they are interpreted as distances.",
         "type": "None or string, optional (default=None)",
         "default": null
       }
@@ -854,7 +854,12 @@
     "parameters": {
       "G": {
         "description": "Parameter 'G' for subgraph_centrality",
-        "type": "graph"
+        "type": "Graph"
+      },
+      "normalized": {
+        "description": "If True, normalize the centrality values using the largest eigenvalue of the adjacency matrix so that the centrality values are generally between 0 and 1.",
+        "type": "bool",
+        "default": false
       }
     }
   },
@@ -864,6 +869,11 @@
       "G": {
         "description": "Parameter 'G' for subgraph_centrality_exp",
         "type": "graph"
+      },
+      "normalized": {
+        "description": "If True, normalize the centrality values using the largest eigenvalue of the adjacency matrix so that the centrality values are generally between 0 and 1.",
+        "type": "bool",
+        "default": false
       }
     }
   },
@@ -1062,6 +1072,25 @@
       }
     }
   },
+  "run_greedy_node_swap_bipartition": {
+    "type": "object",
+    "parameters": {
+      "G": {
+        "description": "Parameter 'G' for greedy_node_swap_bipartition",
+        "type": "NetworkX graph"
+      },
+      "init_split": {
+        "description": "Pair of sets of nodes in ``G`` providing an initial bipartition for the algorithm. If not specified, a random balanced partition is used. If this pair of sets is not a partition of the nodes of `G`, :exc:`NetworkXException` is raised.",
+        "type": "2-tuple of sets of nodes",
+        "default": null
+      },
+      "max_iter": {
+        "description": "Maximum number of iterations of attempting swaps to find an improvement.",
+        "type": "int",
+        "default": 10
+      }
+    }
+  },
   "run_greedy_source_expansion": {
     "type": "object",
     "parameters": {
@@ -1131,8 +1160,8 @@
         "default": 10
       },
       "weight": {
-        "description": "Edge data key to use as weight. If None, the weights are all set to one.",
-        "type": "key",
+        "description": "If this is a string, then edge weights will be accessed via the edge attribute with this key (that is, the weight of the edge joining `u` to `v` will be ``G.edges[u, v][weight]``). If no such edge attribute exists, the weight of the edge is assumed to be one. If this is a function, the weight of an edge is the value returned by the function. The function must accept exactly three positional arguments: the two endpoints of an edge and the dictionary of edge attributes for that edge. The function must return a number or None to indicate a hidden edge.",
+        "type": "string or function (default: \"weight\")",
         "default": "weight"
       },
       "seed": {
@@ -1354,6 +1383,15 @@
       "partition"
     ]
   },
+  "run_spectral_modularity_bipartition": {
+    "type": "object",
+    "parameters": {
+      "G": {
+        "description": "Parameter 'G' for spectral_modularity_bipartition",
+        "type": "NetworkX graph"
+      }
+    }
+  },
   "run_google_matrix": {
     "type": "object",
     "parameters": {
@@ -1515,7 +1553,7 @@
     "type": "object",
     "parameters": {
       "G": {
-        "description": "An undirected graph",
+        "description": "An undirected graph Yields ------",
         "type": "NetworkX graph"
       }
     }
@@ -1580,6 +1618,11 @@
       "G": {
         "description": "A directed graph.",
         "type": "NetworkX Graph"
+      },
+      "source": {
+        "description": "Specify a node from which to start the depth-first search. If not provided, the algorithm will start from an arbitrary node. Yields ------ set A set of all nodes in a strongly connected component of `G`.",
+        "type": "node, optional (default=None)",
+        "default": null
       }
     }
   },
@@ -2883,7 +2926,7 @@
         "type": "NetworkX graph"
       },
       "cutoff": {
-        "description": "Depth at which to stop the search. Only paths of length at most `cutoff` are returned.",
+        "description": "Depth at which to stop the search. Only paths containing at most ``cutoff + 1`` nodes are returned.",
         "type": "integer, optional",
         "default": null
       }
@@ -2897,7 +2940,7 @@
         "type": "NetworkX graph"
       },
       "cutoff": {
-        "description": "Depth at which to stop the search. Only paths of length at most `cutoff` are returned.",
+        "description": "Depth at which to stop the search. Only paths of length at most `cutoff` (i.e. paths containing <= ``cutoff + 1`` nodes) are returned.",
         "type": "integer, optional",
         "default": null
       }
@@ -2941,7 +2984,7 @@
         "default": null
       },
       "cutoff": {
-        "description": "Depth to stop the search. Only paths of length <= cutoff are returned.",
+        "description": "Depth to stop the search. Only paths of length <= `cutoff` are returned.",
         "type": "integer, optional",
         "default": null
       },
@@ -2967,7 +3010,7 @@
         "type": "node label"
       },
       "cutoff": {
-        "description": "Depth to stop the search. Only paths of length <= cutoff are returned.",
+        "description": "Depth to stop the search. Only target nodes where the shortest path to this node from the source node contains <= ``cutoff + 1`` nodes will be included in the returned results.",
         "type": "integer, optional",
         "default": null
       }
@@ -2988,7 +3031,7 @@
         "type": "node"
       },
       "cutoff": {
-        "description": "Depth to stop the search. Only paths of length <= `cutoff` are returned.",
+        "description": "Depth to stop the search. Only target nodes where the shortest path to this node from the source node contains <= ``cutoff + 1`` nodes will be included in the returned results.",
         "type": "integer, optional",
         "default": null
       }
@@ -3009,7 +3052,7 @@
         "type": "node label"
       },
       "cutoff": {
-        "description": "Depth to stop the search. Only paths of length <= cutoff are returned.",
+        "description": "Depth to stop the search. Only source nodes where the shortest path from this node to the target node contains <= ``cutoff + 1`` nodes will be included in the returned results.",
         "type": "integer, optional",
         "default": null
       }
@@ -3030,7 +3073,7 @@
         "type": "node"
       },
       "cutoff": {
-        "description": "Depth to stop the search. Only paths of length <= cutoff are returned.",
+        "description": "Depth to stop the search. Only source nodes where the shortest path from this node to the target node contains <= ``cutoff + 1`` nodes will be included in the returned results.",
         "type": "integer, optional",
         "default": null
       }
@@ -3127,6 +3170,20 @@
       "source",
       "target"
     ]
+  },
+  "run_all_triangles": {
+    "type": "object",
+    "parameters": {
+      "G": {
+        "description": "An undirected graph.",
+        "type": "NetworkX graph"
+      },
+      "nbunch": {
+        "description": "If a node or iterable of nodes, only triangles involving at least one node in `nbunch` are yielded. If ``None``, yields all unique triangles in the graph. Yields ------ tuple A tuple of three nodes forming a triangle ``(u, v, w)``.",
+        "type": "node, iterable of nodes, or None (default=None)",
+        "default": null
+      }
+    }
   },
   "run_average_clustering": {
     "type": "object",
@@ -3249,7 +3306,7 @@
     "type": "object",
     "parameters": {
       "G": {
-        "description": "Parameter 'G' for find_cliques_recursive",
+        "description": "An undirected graph.",
         "type": "NetworkX graph"
       },
       "nodes": {
@@ -3322,7 +3379,22 @@
   },
   "run_number_of_cliques": {
     "type": "object",
-    "parameters": {}
+    "parameters": {
+      "G": {
+        "description": "An undirected graph.",
+        "type": "NetworkX graph"
+      },
+      "nodes": {
+        "description": "A list of nodes to return the number of maximal cliques for. If `None`, return the number of maximal cliques for all nodes.",
+        "type": "list or None, optional (default=None)",
+        "default": null
+      },
+      "cliques": {
+        "description": "A precomputed list of maximal cliques to use for the calculation.",
+        "type": "list or None, optional (default=None)",
+        "default": null
+      }
+    }
   },
   "run_core_number": {
     "type": "object",
@@ -4425,15 +4497,6 @@
       }
     }
   },
-  "run_compute_v_structures": {
-    "type": "object",
-    "parameters": {
-      "G": {
-        "description": "A networkx `~networkx.DiGraph`. Yields ------ A 3-tuple representation of a v-structure Each v-structure is a 3-tuple with the parent, collider, and other parent.",
-        "type": "graph"
-      }
-    }
-  },
   "run_dag_longest_path": {
     "type": "object",
     "parameters": {
@@ -4843,7 +4906,7 @@
         "default": 5
       },
       "c": {
-        "description": "A universal positive constant used to scale the number of sample random paths to generate.",
+        "description": "A universal constant that controls the number of random paths to generate. Higher values increase the number of sample paths and potentially improve accuracy at the cost of more computation. Defaults to 0.5 as recommended in [1]_.",
         "type": "float (default = 0.5)",
         "default": 0.5
       },
@@ -4853,7 +4916,7 @@
         "default": 0.1
       },
       "eps": {
-        "description": "The error bound. Per [1]_, a good value is ``sqrt(1/|E|)``. Therefore, if no value is provided, the recommended computed value will be used.",
+        "description": "The error bound for similarity approximation. This controls the accuracy of the sampled paths in representing the true similarity. Smaller values yield more accurate results but require more sample paths. If `None`, a value of ``sqrt(1/|E|)`` is used, which the authors found empirically effective.",
         "type": "float or None (default = None)",
         "default": null
       },
@@ -4861,6 +4924,67 @@
         "description": "The name of an edge attribute that holds the numerical value used as a weight. If None then each edge has weight 1.",
         "type": "string or None, optional (default=\"weight\")",
         "default": "weight"
+      },
+      "seed": {
+        "description": "Indicator of random number generation state. See :ref:`Randomness<randomness>`.",
+        "type": "integer, random_state, or None (default)",
+        "default": null
+      }
+    },
+    "required": [
+      "source"
+    ]
+  },
+  "run_panther_vector_similarity": {
+    "type": "object",
+    "parameters": {
+      "G": {
+        "description": "A NetworkX graph",
+        "type": "NetworkX graph"
+      },
+      "source": {
+        "description": "Source node for which to find the top ``k`` similar other nodes",
+        "type": "node"
+      },
+      "D": {
+        "description": "The number of similarity scores to use (in descending order) for each feature vector. Defaults to 10. Note that the original paper used D=50 [1]_, but KDTree is optimized for lower dimensions.",
+        "type": "int",
+        "default": 10
+      },
+      "k": {
+        "description": "The number of most similar nodes to return",
+        "type": "int",
+        "default": 5
+      },
+      "path_length": {
+        "description": "How long the randomly generated paths should be (``T`` in [1]_)",
+        "type": "int",
+        "default": 5
+      },
+      "c": {
+        "description": "A universal constant that controls the number of random paths to generate. Higher values increase the number of sample paths and potentially improve accuracy at the cost of more computation. Defaults to 0.5 as recommended in [1]_.",
+        "type": "float",
+        "default": 0.5
+      },
+      "delta": {
+        "description": "The probability that ``S`` is not an epsilon-approximation to (R, phi)",
+        "type": "float",
+        "default": 0.1
+      },
+      "eps": {
+        "description": "The error bound for similarity approximation. This controls the accuracy of the sampled paths in representing the true similarity. Smaller values yield more accurate results but require more sample paths. If None, a value of ``sqrt(1/|E|)`` is used, which the authors found empirically effective.",
+        "type": "float",
+        "default": null
+      },
+      "weight": {
+        "description": "The name of an edge attribute that holds the numerical value used as a weight. If `None` then each edge has weight 1.",
+        "type": "string or None, optional (default=\"weight\")",
+        "default": "weight"
+      },
+      "seed": {
+        "description": "Indicator of random number generation state. See :ref:`Randomness<randomness>`.",
+        "type": "integer, random_state, or None (default)",
+        "default": null
       }
     },
     "required": [
@@ -5828,22 +5952,6 @@
       }
     }
   },
-  "run_is_path": {
-    "type": "object",
-    "parameters": {
-      "G": {
-        "description": "A NetworkX graph.",
-        "type": "graph"
-      },
-      "nodes": {
-        "description": "A list of one or more nodes in the graph `G`.",
-        "type": "list"
-      }
-    },
-    "required": [
-      "nodes"
-    ]
-  },
   "run_is_reachable": {
     "type": "object",
     "parameters": {
@@ -6514,6 +6622,20 @@
       },
       "weight": {
         "description": "If None, every edge has weight 1. If a string, use this edge attribute as the edge weight. Any edge attribute not present defaults to 1. The edge weights are used to computing shortest-path distances.",
+        "type": "string or None, optional (default: None)",
+        "default": null
+      }
+    }
+  },
+  "run_hyper_wiener_index": {
+    "type": "object",
+    "parameters": {
+      "G": {
+        "description": "An undirected, connected graph.",
+        "type": "NetworkX graph"
+      },
+      "weight": {
+        "description": "The edge attribute to use for calculating shortest-path distances. If None, all edges are considered to have a weight of 1.",
         "type": "string or None, optional (default: None)",
         "default": null
       }

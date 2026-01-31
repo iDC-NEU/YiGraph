@@ -349,7 +349,12 @@ async def interactive_mode(engine: AAGEngine):
             print("\n\n⛔ 用户中断，系统退出")
             break
         except Exception as e:
+            import traceback
             print(f"⚠️ 处理分析时出错: {e}")
+            print(f"错误类型: {type(e).__name__}")
+            print(f"详细堆栈跟踪:")
+            traceback.print_exc()
+            print("-" * 74)
 
 
 def batch_mode(engine: AAGEngine, questions: List[str], output_file: Optional[str] = None):

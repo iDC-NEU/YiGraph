@@ -1,10 +1,10 @@
 {
   "run_betweenness_centrality": {
-    "type": "dictionary",
+    "type": "dict",
     "description": "Dictionary of nodes with betweenness centrality as the value."
   },
   "run_betweenness_centrality_subset": {
-    "type": "dictionary",
+    "type": "dict",
     "description": "Dictionary of nodes with betweenness centrality as the value."
   },
   "run_closeness_centrality": {
@@ -28,12 +28,12 @@
     "description": "If u (v) is specified, returns a dictionary of nodes with dispersion score for all \"target\" (\"source\") nodes. If neither u nor v is specified, returns a dictionary of dictionaries for all nodes 'u' in the graph with a dispersion score for each node 'v'."
   },
   "run_edge_betweenness_centrality": {
-    "type": "dictionary",
+    "type": "dict",
     "description": "Dictionary of edges with betweenness centrality as the value."
   },
   "run_edge_betweenness_centrality_subset": {
-    "type": "dictionary",
-    "description": "Dictionary of edges with Betweenness centrality as the value."
+    "type": "dict",
+    "description": "Dictionary of edges with betweenness centrality as the value."
   },
   "run_edge_current_flow_betweenness_centrality": {
     "type": "dictionary",
@@ -187,6 +187,10 @@
     "type": "any",
     "description": "communities: list A list of frozensets of nodes, one for each community. Sorted by length with largest communities first."
   },
+  "run_greedy_node_swap_bipartition": {
+    "type": "2-tuple of sets of nodes",
+    "description": "Pair of sets of nodes of ``G``, partitioned according to a node swap greedy modularity maximization algorithm."
+  },
   "run_greedy_source_expansion": {
     "type": "any",
     "description": "set A set of nodes representing the local community around the source node."
@@ -239,6 +243,10 @@
     "type": "any",
     "description": "(float, float) The (coverage, performance) tuple of the partition, as defined above."
   },
+  "run_spectral_modularity_bipartition": {
+    "type": "tuple",
+    "description": "Pair of communities as two sets of nodes of ``G``, partitioned according to second largest eigenvalue of the modularity matrix."
+  },
   "run_google_matrix": {
     "type": "2D NumPy ndarray",
     "description": "Google matrix of the graph"
@@ -272,8 +280,8 @@
     "description": "The condensation graph C of G.  The node labels are integers corresponding to the index of the component in the list of strongly connected components of G.  C has a graph attribute named 'mapping' with a dictionary mapping the original nodes to the nodes in C to which they belong.  Each node in C also has a node attribute 'members' with the set of original nodes in G that form the SCC that the node in C represents."
   },
   "run_connected_components": {
-    "type": "generator of sets",
-    "description": "A generator of sets of nodes, one for each component of G."
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_is_attracting_component": {
     "type": "bool",
@@ -285,7 +293,7 @@
   },
   "run_is_connected": {
     "type": "bool",
-    "description": "True if the graph is connected, false otherwise."
+    "description": "True if the graph is connected, False otherwise."
   },
   "run_is_semiconnected": {
     "type": "bool",
@@ -300,8 +308,8 @@
     "description": "True if the graph is weakly connected, False otherwise."
   },
   "run_kosaraju_strongly_connected_components": {
-    "type": "generator of sets",
-    "description": "A generator of sets of nodes, one for each strongly connected component of G."
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_node_connected_component": {
     "type": "set",
@@ -565,11 +573,11 @@
   },
   "run_single_source_shortest_path_length": {
     "type": "dict",
-    "description": "Dict keyed by node to shortest path length to `source`."
+    "description": "Dict keyed by node to shortest path length from source node."
   },
   "run_single_target_shortest_path": {
     "type": "dictionary",
-    "description": "Dictionary, keyed by target, of shortest paths."
+    "description": "Dictionary, keyed by source, of shortest paths."
   },
   "run_single_target_shortest_path_length": {
     "type": "dictionary",
@@ -594,6 +602,10 @@
   "run_shortest_simple_paths": {
     "type": "any",
     "description": "path_generator: generator A generator that produces lists of simple paths, in order from shortest to longest."
+  },
+  "run_all_triangles": {
+    "type": "any",
+    "description": "算法执行结果"
   },
   "run_average_clustering": {
     "type": "float",
@@ -649,7 +661,7 @@
   },
   "run_number_of_cliques": {
     "type": "any",
-    "description": "算法执行结果"
+    "description": "int or dict If `nodes` is a single node, return the number of maximal cliques it is part of. If `nodes` is a list, return a dictionary keyed by node to the number of maximal cliques it is part of."
   },
   "run_core_number": {
     "type": "dictionary",
@@ -871,10 +883,6 @@
     "type": "any",
     "description": "算法执行结果"
   },
-  "run_compute_v_structures": {
-    "type": "any",
-    "description": "算法执行结果"
-  },
   "run_dag_longest_path": {
     "type": "any",
     "description": "list Longest path"
@@ -1014,6 +1022,10 @@
   "run_panther_similarity": {
     "type": "dictionary",
     "description": "Dictionary of nodes to similarity scores (as floats). Note: the self-similarity (i.e., ``v``) will not be included in the returned dictionary. So, for ``k = 5``, a dictionary of top 4 nodes and their similarity scores will be returned."
+  },
+  "run_panther_vector_similarity": {
+    "type": "dict",
+    "description": "Dict of nodes to similarity scores (as floats). Note: the self-similarity (i.e., `node`) is not included in the dict."
   },
   "run_simrank_similarity": {
     "type": "dictionary or float",
@@ -1202,10 +1214,6 @@
   "run_hamiltonian_path": {
     "type": "list",
     "description": "A list of nodes which form a Hamiltonian path in `G`."
-  },
-  "run_is_path": {
-    "type": "any",
-    "description": "bool Whether the given list of nodes represents a simple path in `G`."
   },
   "run_is_reachable": {
     "type": "any",
@@ -1398,6 +1406,10 @@
   "run_gutman_index": {
     "type": "any",
     "description": "number The Gutman Index of the graph `G`."
+  },
+  "run_hyper_wiener_index": {
+    "type": "any",
+    "description": "float The Hyper-Wiener index of the graph G. Returns float(\"inf\") if the graph is not connected."
   },
   "run_schultz_index": {
     "type": "any",

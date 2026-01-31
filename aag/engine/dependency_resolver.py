@@ -234,11 +234,20 @@ class DataDependencyResolver:
                 continue
             
             value_dict = match.value or {}
+            # add gjq: 改进字段查找逻辑，支持模糊匹配
             if field_key not in value_dict:
-                logger.error(
-                    f"❌ 在 output_id={output_id} 中找不到字段 field_key='{field_key}' | 可选字段:{list(value_dict.keys())}"
-                )
-                continue
+                # 尝试查找相似的字段名（例如 recipients 可能对应 results）
+                similar_field = self._find_similar_field(field_key, list(value_dict.keys()))
+                if similar_field:
+                    logger.warning(
+                        f"⚠️ 在 output_id={output_id} 中找不到字段 '{field_key}'，使用相似字段 '{similar_field}' 代替"
+                    )
+                    field_key = similar_field
+                else:
+                    logger.error(
+                        f"❌ 在 output_id={output_id} 中找不到字段 field_key='{field_key}' | 可选字段:{list(value_dict.keys())}"
+                    )
+                    continue
 
             real_value = value_dict[field_key]
 
@@ -476,5 +485,56 @@ class DataDependencyResolver:
             "mapping_raw": mapping_result,           # LLM 原始 mapping 输出
             "reasoning": mapping_result.get("explanation", "")
         }
+    
+    def _find_similar_field(self, target_field: str, available_fields: List[str]) -> Optional[str]:
+        """
+        add gjq: 查找相似的字段名
+        
+        Args:
+            target_field: 目标字段名
+            available_fields: 可用字段列表
+            
+        Returns:
+            最相似的字段名，如果没有找到返回 None
+        """
+        if not available_fields:
+            return None
+        
+        target_lower = target_field.lower()
+        
+        # 1. 精确匹配（忽略大小写）
+        for field in available_fields:
+            if field.lower() == target_lower:
+                return field
+        
+        # 2. 语义映射（常见的字段名映射）
+        semantic_mappings = {
+            "recipients": ["results", "entities", "nodes", "accounts"],
+            "senders": ["results", "entities", "nodes", "accounts"],
+            "accounts": ["results", "entities", "nodes"],
+            "transactions": ["results", "edges", "relationships"],
+            "neighbors": ["results", "nodes", "entities"],
+            "paths": ["results", "routes"],
+            "entities": ["results", "nodes"],
+        }
+        
+        # 检查是否有语义映射
+        if target_lower in semantic_mappings:
+            for candidate in semantic_mappings[target_lower]:
+                for field in available_fields:
+                    if field.lower() == candidate:
+                        return field
+        
+        # 3. 部分匹配（包含关系）
+        for field in available_fields:
+            if target_lower in field.lower() or field.lower() in target_lower:
+                return field
+        
+        # 4. 如果有 "results" 字段，作为默认回退
+        for field in available_fields:
+            if field.lower() == "results":
+                return field
+        
+        return None
 
 

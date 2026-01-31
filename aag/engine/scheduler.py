@@ -901,17 +901,30 @@ class Scheduler:
                     query_result = self.computing_engine.execute_graph_query(step.question)
                     
                     if query_result.get("success"):
+                        # add gjq: 提取语义化的字段名（从问题中推断）
+                        # 例如："Identify the recipients..." -> 主要实体为 "recipients"
+                        results_data = query_result.get("results", [])
+                        count_data = query_result.get("count", 0)
+                        query_type_data = query_result.get("query_type", "unknown")
+                        
+                        # add gjq: 使用LLM提取问题中的关键实体作为语义化字段名
+                        semantic_field_name = self._extract_semantic_field_name(step.question, query_type_data)
+                        
                         # 将查询结果添加到step的输出
                         step.add_output(
                             task_type=GraphAnalysisSubType.SUBGRAPH_EXTRACTION,
                             source="graph_query",
                             output_schema=OutputSchema(
                                 description="图查询结果",
-                                type="list",
+                                type="dict",
                                 fields={
+                                    semantic_field_name: OutputField(
+                                        type="list",
+                                        field_description=f"查询返回的{semantic_field_name}列表"
+                                    ),
                                     "results": OutputField(
                                         type="list",
-                                        field_description="查询返回的结果列表"
+                                        field_description="查询返回的结果列表（原始字段）"
                                     ),
                                     "count": OutputField(
                                         type="int",
@@ -924,21 +937,22 @@ class Scheduler:
                                 }
                             ),
                             value={
-                                "results": query_result.get("results", []),
-                                "count": query_result.get("count", 0),
-                                "query_type": query_result.get("query_type", "unknown")
+                                semantic_field_name: results_data,  # add gjq: 添加语义化字段
+                                "results": results_data,
+                                "count": count_data,
+                                "query_type": query_type_data
                             },
                             path=None,
                             validate_schema=False
                         )
-                        logger.info(f"✅ 图查询执行完成，返回 {query_result.get('count', 0)} 条结果")
+                        logger.info(f"✅ 图查询执行完成，返回 {count_data} 条结果，语义字段名: {semantic_field_name}")
                         self.dag.set_success(step_id)
                         
                         # 设置tool_result用于后续的LLM分析
                         tool_result = {
                             "success": True,
-                            "result": query_result.get("results", []),
-                            "summary": f"图查询成功，返回 {query_result.get('count', 0)} 条结果"
+                            "result": results_data,
+                            "summary": f"图查询成功，返回 {count_data} 条结果"
                         }
                     else:
                         error_msg = query_result.get("error", "图查询失败")
@@ -1057,6 +1071,49 @@ class Scheduler:
             result = None
 
         return result
+    
+    def _extract_semantic_field_name(self, question: str, query_type: str) -> str:
+        """
+        add gjq: 从问题中提取语义化的字段名
+        
+        Args:
+            question: 用户问题
+            query_type: 查询类型
+            
+        Returns:
+            语义化的字段名（如 "recipients", "accounts", "transactions" 等）
+        """
+        # 简单的关键词提取逻辑
+        question_lower = question.lower()
+        
+        # 常见的实体关键词映射
+        entity_keywords = {
+            "recipient": "recipients",
+            "sender": "senders",
+            "account": "accounts",
+            "transaction": "transactions",
+            "node": "nodes",
+            "edge": "edges",
+            "person": "persons",
+            "user": "users",
+            "customer": "customers",
+            "entity": "entities",
+            "neighbor": "neighbors",
+            "path": "paths"
+        }
+        
+        # 查找匹配的关键词
+        for keyword, field_name in entity_keywords.items():
+            if keyword in question_lower:
+                return field_name
+        
+        # 如果没有匹配，根据查询类型返回默认值
+        if "neighbor" in query_type.lower():
+            return "neighbors"
+        elif "path" in query_type.lower():
+            return "paths"
+        else:
+            return "entities"  # 默认字段名
 
     async def shutdown(self):
         if self.computing_engine:
