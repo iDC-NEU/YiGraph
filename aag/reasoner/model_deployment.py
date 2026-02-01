@@ -16,7 +16,7 @@ from aag.config.engine_config import ReasonerConfig
 from aag.reasoner.prompt_template.llm_prompt_en import *
 from aag.reasoner.prompt_template.llm_prompt_zh import *
 from aag.utils.parse_json import extract_json_from_response, parse_openai_json_response
-from aag.error_recovery import ErrorRecovery
+from aag.error_recovery.error_manager import ErrorRecovery
 
 EMBEDD_DIMS = {
     "BAAI/bge-large-en-v1.5": 1024,
@@ -575,7 +575,8 @@ Please consider this schema when selecting the algorithm to ensure compatibility
                 algorithm_list=algorithm_list
             ) + schema_context}]
         )
-        return self.execute_prompt(full_prompt, parse_json=True)
+        response_text = response.choices[0].message.content
+        return parse_openai_json_response(response_text, "select_algorithm")
     
     def extract_parameters_with_postprocess(self, question: str, tool_description: str) -> dict:
         full_prompt = extract_parameters_with_postprocess_promt.format(
@@ -832,6 +833,21 @@ class Reasoner:
         )
         return self.env.execute_prompt(full_prompt, parse_json=True)
     
+    def refine_subqueries(self, current_dag: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        根据找到的算法信息优化DAG,确保子查询严格按照任务类型边界划分
+        
+        Args:
+            current_dag: 当前的DAG结构,包含subqueries列表
+            
+        Returns:
+            优化后的DAG结构
+        """
+        full_prompt = refine_subqueries_prompt_en.format(
+            current_dag=json.dumps(current_dag, ensure_ascii=False, indent=2)
+        )
+        return self.env.execute_prompt(full_prompt, parse_json=True)
+    
     def select_task_type(self, question: str, task_type_list: list) -> dict:
         full_prompt = select_task_type_prompt.format(
             question=question,
@@ -1034,6 +1050,44 @@ class Reasoner:
             optional_params=template.get('optional_params', []),
             query_modifiers=json.dumps(query_modifiers, ensure_ascii=False, indent=2),
             question=question
+        )
+        return self.env.execute_prompt(full_prompt, parse_json=True)
+
+    def rewrite_query(
+        self,
+        original_query: str,
+        algorithm_library_info: str,
+        dataset_info: Optional[str] = None,
+        use_chinese: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Rewrite a vague user query into a concrete, executable query.
+        
+        Args:
+            original_query: The user's original vague question
+            algorithm_library_info: Information about available task types and algorithms
+            dataset_info: Optional information about the current graph dataset
+            use_chinese: Whether to use Chinese prompt (default: True)
+            
+        Returns:
+            Dict containing:
+                - rewritten_query: The concrete, executable query
+                - reasoning: Explanation of changes made
+                - mapped_concepts: List of concept mappings
+        """
+        dataset_context = dataset_info if dataset_info else ("暂无数据集信息" if use_chinese else "No dataset information available")
+        
+        # Choose prompt based on language preference
+        if use_chinese:
+            from aag.reasoner.prompt_template.llm_prompt_zh import rewrite_query_prompt_zh
+            prompt_template = rewrite_query_prompt_zh
+        else:
+            prompt_template = rewrite_query_prompt
+        
+        full_prompt = prompt_template.format(
+            original_query=original_query,
+            algorithm_library_info=algorithm_library_info,
+            dataset_info=dataset_context
         )
         return self.env.execute_prompt(full_prompt, parse_json=True)
 

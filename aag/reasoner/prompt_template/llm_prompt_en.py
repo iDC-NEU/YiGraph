@@ -1,3 +1,6 @@
+# Import Chinese prompts
+from aag.reasoner.prompt_template.llm_prompt_zh import rewrite_query_prompt_zh
+
 #add gjq  加入了graph_query
 query_router_prompt = """
 You are the **query router** inside the AAG (Analytics Augmented Generation Engine) system.
@@ -2220,4 +2223,150 @@ Example Output 5 (Combined modifiers):
 }}}}
 }}}}
 Begin:
+"""
+
+rewrite_query_prompt = """
+You are an expert in graph analytics and query optimization. Your task is to rewrite vague or ambiguous user queries into concrete, specific, and executable tasks that align with the system's algorithm capabilities.
+
+## Context
+You will receive:
+1. **original_query**: A user's question that may contain vague concepts or unclear requirements
+2. **algorithm_library_info**: Information about available task types and algorithms in the system
+3. **dataset_info** (optional): Information about the current graph dataset schema
+
+## Your Task
+Transform the vague query into a concrete, step-by-step query that:
+1. Maps vague concepts to specific algorithm categories from the algorithm library
+2. Breaks down complex requirements into clear, executable sub-tasks
+3. Uses precise terminology that aligns with available algorithms
+4. Maintains the original intent while making it actionable
+
+## Algorithm Library Context
+The system supports the following task types:
+{algorithm_library_info}
+
+## Dataset Context (if available)
+{dataset_info}
+
+## Rewriting Guidelines
+1. **Map vague concepts to algorithms**:
+   - "money laundering" → Centrality analysis (influence detection) + Clustering (cycle detection)
+   - "abnormal transactions" → Community detection + Path analysis
+   - "high-risk users" → Centrality ranking + Threshold filtering
+
+2. **Be specific about metrics and thresholds**:
+   - Instead of "influential", use "PageRank score in top 10%"
+   - Instead of "frequent transactions", use "transaction count > threshold"
+   - Instead of "suspicious paths", use "circular transaction paths"
+
+3. **Break down complex tasks**:
+   - Separate detection from analysis
+   - Separate filtering from computation
+   - Make dependencies explicit
+
+4. **Use algorithm-aware language**:
+   - Reference specific graph structures (paths, cycles, communities)
+   - Use measurable criteria (top-K, threshold-based, ranking)
+   - Specify scope clearly (within community, between nodes, global graph)
+
+## Example Transformation
+
+**Original Query:**
+"Recently I discovered that user Anna has been conducting frequent transactions with some 'mule' accounts. I want to investigate her and check if there is money laundering behavior. List all potential money laundering paths, estimate how much cash may have been illegally transferred out, and identify the account with the largest transaction amount."
+
+**Rewritten Query:**
+"Detect whether Anna's influence ranks in the top 10% of all users; if so, classify Anna as a high-risk user. Then list all circular transaction paths involving Anna, calculate the total amount for each path separately, and identify the account with the largest transaction amount in each path."
+
+**Explanation of Changes:**
+- "money laundering behavior" → Specific: "influence ranking in top 10%" (Centrality analysis) + "circular transaction paths" (Cycle detection)
+- "frequent transactions" → Measurable: "influence ranking" (can be computed via PageRank/Centrality)
+- "potential money laundering paths" → Concrete: "circular transaction paths" (cycles in transaction graph)
+- "estimate cash transferred out" → Specific: "calculate total amount for each path" (aggregation on path edges)
+- "account with largest transaction amount" → Clear: "account with largest transaction amount in each path" (max aggregation per path)
+
+## Output Format
+Return a JSON object with the following structure:
+```json
+{{
+    "rewritten_query": "<the rewritten, concrete query>",
+    "reasoning": "<explanation of what changes were made and why>",
+    "mapped_concepts": [
+        {{
+            "original_concept": "<vague concept from original query>",
+            "mapped_to": "<specific algorithm/task type>",
+            "reason": "<why this mapping makes sense>"
+        }}
+    ]
+}}
+```
+
+## Now Rewrite the Query
+
+**Original Query:**
+{original_query}
+
+**Algorithm Library Information:**
+{algorithm_library_info}
+
+**Dataset Information:**
+{dataset_info}
+
+Please rewrite the query to be concrete and executable. Output valid JSON only.
+"""
+
+refine_subqueries_prompt_en = """
+**Role**: You are an expert specialized in optimizing task planning. Your task is to review and refactor an existing list of subqueries (`current_dag`) to ensure the division of subqueries strictly adheres to the "Task Type" boundaries of the execution engine.
+
+**Task Background**:
+We need to decompose complex user problems into executable atomic tasks. The DAG generated in the previous round may have mixed different types of tasks into a single node (e.g., requesting to run an algorithm directly without first acquiring the subgraph).
+You need to review the `current_dag` based on the "Task Boundaries" defined below.
+
+**Three Major Task Types & Boundaries (Standard)**:
+1. **Graph Query**:
+   - *Definition*: Data retrieval and extraction based on IDs or rules.
+   - *Typical Operations*: K-hop neighbor query (k-hop), Subgraph extraction (subgraph), Path query between two points (path), Node attribute query (get_node).
+   - *Splitting Principle*: If a task requires "finding specific nodes/edges (defining the scope)" before "performing a computation," the "finding nodes/defining scope" part MUST be split into a Graph Query.
+
+2. **Graph Algorithm**:
+   - *Definition*: Iterative computation or structural analysis within a given graph scope.
+   - *Typical Operations*: PageRank, Louvain, Shortest Path, Connected Components.
+   - *Splitting Principle*: Algorithms usually support simple Top-K parameters. **Note: Simple sorting and truncation (e.g., taking Top 10) do not need to be split; they are classified within the algorithm itself.** However, if the algorithm's input depends on the result of a previous "Graph Query," they must be separated.
+
+3. **Numerical Analysis/Post-processing**:
+   - *Definition*: Complex statistical or logical operations on the above results.
+   - *Typical Operations*: Set operations (Intersection/Union/Complement), Weighted summation, Comparative analysis of multiple results.
+   - *Splitting Principle*: This should only be an independent node when the logic cannot be completed via simple SQL/Filter, or when merging results from two independent branches.
+
+**Refactoring Rules**:
+1. **Separate "Query" and "Compute"**: Check if there is an attempt to run an algorithm intended for a specific subgraph directly on the whole graph (or without defining the subgraph first).
+   - *Error Example*: "Calculate Betweenness Centrality for Node A's 2-hop neighbors" (This is a mixed node).
+   - *Correction*: Split into -> q1: "Get the 2-hop neighbor subgraph of Node A" (Query) -> q2: "Calculate Betweenness Centrality on the result of q1" (Algo).
+2. **Decouple Multiple Algorithms**: If a Query contains two distinct computation steps (e.g., Cluster first, then calculate Density), please split them.
+3. **Retain Atomic Post-processing**: Do not split simple Top-K operations. For example, "Calculate PageRank and take the top 10" is a valid single algorithm node and does not need splitting.
+
+**Input Data (Current DAG)**:
+{current_dag}
+
+**Output Requirement**:
+Please output a standard JSON object containing the refactored `subqueries` list.
+
+**Reference Example (Corrected Version)**:
+Assuming the input contains: {{"id": "q1", "query": "Find the subgraph formed by User A's 2-hop neighbors, and detect communities using the Louvain algorithm in that subgraph", "depends_on": []}}
+This Query mixes "Graph Query" (finding neighbors/subgraph) and "Graph Algorithm" (Louvain) and must be split:
+{{
+  "subqueries": [
+    {{
+      "id": "q1",
+      "query": "Extract the subgraph formed by User A's 2-hop neighbors",
+      "depends_on": []
+    }},
+    {{
+      "id": "q2",
+      "query": "Execute Louvain community detection algorithm on the subgraph extracted in q1",
+      "depends_on": ["q1"]
+    }}
+  ]
+}}
+
+**Start Refactoring**:
 """
