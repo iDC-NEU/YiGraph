@@ -12,6 +12,7 @@ from aag.models.graph_workflow_dag import WorkflowStep, StepOutputItem
 from aag.reasoner.model_deployment import Reasoner
 from aag.models.task_types import GraphAnalysisType
 from aag.utils.data_utils import take_sample
+from aag.error_recovery.error_manager import ErrorRecovery
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +58,9 @@ class DataDependencyResolver:
     3. 管理子图缓存
     """
     
-    def __init__(self, reasoner: Reasoner):
+    def __init__(self, reasoner: Reasoner, error_recovery: Optional[ErrorRecovery] = None):
         self.reasoner = reasoner
+        self.error_recovery = error_recovery
         self.global_vertices: Optional[List[str]] = None
         self.global_edges: Optional[List[Tuple[str, str]]] = None
         
@@ -66,7 +68,7 @@ class DataDependencyResolver:
         self.global_vertices = graph_nodes
         self.global_edges = graph_edges
     
-    def resolve_dependencies(
+    async def resolve_dependencies(
         self,
         step_id: str,
         step: WorkflowStep,
@@ -105,7 +107,7 @@ class DataDependencyResolver:
                 )
                 continue
             
-            dep_info = self._classify_and_locate_dependency(
+            dep_info = await self._classify_and_locate_dependency(
                 current_step = step,
                 current_algo_desc=alg_des_doc,
                 parent_step=parent_step
@@ -136,7 +138,7 @@ class DataDependencyResolver:
             logger.info("🧠 当前任务为图算法 → 交给 Reasoner 写转换代码")
             # 处理图依赖 ----
             if graph_items:
-                conver_graph_llm_info  = self._convert_graph_dependencies(
+                conver_graph_llm_info = await self._convert_graph_dependencies(
                     current_question=step.question,
                     graph_items=graph_items,
                     parent_steps=parent_step_map
@@ -146,10 +148,7 @@ class DataDependencyResolver:
             # 处理参数依赖 ----
             if param_items:
                 logger.info("🔧 [参数依赖] 使用 LLM 生成参数映射代码...")
-
-                # 把参数适配放在一个新的函数里， 新的函数里包着这个调用函数
-                # todo: merged_parameters 换一个名字，其实调用这个函数是想说， 根据这些数据依赖项和当前问题的函数输入，做数据依赖项的适配工作。 具体来说： 首先执行self.reasoner.generate_parameter_mapping_code 根据当前的数据依赖项和当前图问题的函数的参数输入，找到适配的，输出适配的结果 {"description":xxxx, "适配字段":{"图算法函数字段1": "数据依赖项字段1"， "图算法函数字段2"：“数据依赖项字段2”}}
-                convert_parameter_llm_info = self._convert_parameter_dependencies(
+                convert_parameter_llm_info = await self._convert_parameter_dependencies(
                     current_question=step.question,
                     alg_des_doc=alg_des_doc,
                     param_items=param_items,
@@ -168,7 +167,7 @@ class DataDependencyResolver:
             "parameter_input_adapter_result": parameter_input_adapter_result
         }
             
-    def _classify_and_locate_dependency(
+    async def _classify_and_locate_dependency(
         self,
         current_step: WorkflowStep,
         current_algo_desc: str,
@@ -184,14 +183,35 @@ class DataDependencyResolver:
             f"{parent_step.question} → 当前节点: {current_step.step_id} | {current_step.question}"
         )
 
-        # Step 1: 调用 LLM 进行依赖判定与定位
-        analysis = self.reasoner.analyze_dependency_type_and_locate_dependency_data(
-            current_question=current_step.question,
-            task_type=current_step.task_type,
-            current_algo_desc=current_algo_desc,
-            parent_question=parent_step.question,
-            parent_outputs_meta=parent_step.get_result_meta()
-        )
+        # Step 1: 调用 LLM 进行依赖判定与定位（带 retry）
+        if self.error_recovery:
+            async def op_analyze_dependency(error_history):
+                return self.reasoner.analyze_dependency_type_and_locate_dependency_data(
+                    current_question=current_step.question,
+                    task_type=current_step.task_type,
+                    current_algo_desc=current_algo_desc,
+                    parent_question=parent_step.question,
+                    parent_outputs_meta=parent_step.get_result_meta()
+                )
+            
+            try:
+                analysis = await self.error_recovery.run(
+                    op_analyze_dependency,
+                    name=f"analyze_dependency(parent={parent_step.step_id},current={current_step.step_id})",
+                    operation_type="dependency_analysis",
+                    location=f"step_{current_step.step_id}"
+                )
+            except Exception as e:
+                logger.error(f"❌ Dependency analysis failed after retries: {e}")
+                raise
+        else:
+            analysis = self.reasoner.analyze_dependency_type_and_locate_dependency_data(
+                current_question=current_step.question,
+                task_type=current_step.task_type,
+                current_algo_desc=current_algo_desc,
+                parent_question=parent_step.question,
+                parent_outputs_meta=parent_step.get_result_meta()
+            )
         logger.info(f"analysis analysis:{analysis}")
 
         if not analysis:
@@ -279,7 +299,7 @@ class DataDependencyResolver:
     
 
 
-    def _convert_graph_dependencies(
+    async def _convert_graph_dependencies(
         self,
         current_question: str,
         graph_items: List[SingleDependencyItem],
@@ -327,66 +347,107 @@ class DataDependencyResolver:
                 "reason": item.reason
             })
 
-        llm_resp = self.reasoner.generate_graph_conversion_code(
-            current_question=current_question,
-            dependency_items=dependency_list,
-        )
+        # Step 1: 调用 LLM 生成图转换代码（带 retry）
+        if self.error_recovery:
+            async def op_generate_and_execute_graph_code(error_history):
+                # Step 1: 调用 LLM 生成图转换代码
+                llm_resp = self.reasoner.generate_graph_conversion_code(
+                    current_question=current_question,
+                    dependency_items=dependency_list,
+                )
+                if llm_resp is None:
+                    raise ValueError("LLM returned empty graph conversion result.")
+                code = llm_resp.get("code")
+                description = llm_resp.get("description", "")
+                if not code:
+                    raise ValueError("LLM did not return valid code.")
 
-        if llm_resp is None:
-            return {
-                "description": "LLM returned empty graph conversion result.",
-                "converted_graph": None,
-                "raw_llm_response": None
-            }
+                # Step 2: 执行生成的代码
+                upstream_values = {i.field_key: i.value for i in graph_items}
+                field_keys_in_order = [i.field_key for i in graph_items]
+                exec_env = {
+                    "global_nodes": self.global_vertices,
+                    "global_edges": self.global_edges
+                }
+                exec(code, exec_env)
+                fn = exec_env.get("transform_graph")
+                if not fn or not callable(fn):
+                    raise ValueError("Generated code does not define a valid transform_graph function.")
+                args = [upstream_values[k] for k in field_keys_in_order]
+                args += [self.global_vertices, self.global_edges]
+                converted_graph = fn(*args)
+                return description, converted_graph, llm_resp
 
-        # llm_resp 应该包含 {"code": "...", "description": "..."}
-        code = llm_resp.get("code")
-        description = llm_resp.get("description", "")
-        if not code:
-            return {
-                "description": "LLM did not return valid code.",
-                "converted_graph": None,
-                "raw_llm_response": llm_resp
-            }
-
-        try:
-            # 构造上游真实值字典：{ field_key: real_value }
-            upstream_values = {i.field_key: i.value for i in graph_items}
-            field_keys_in_order = [i.field_key for i in graph_items]
-
-            exec_env = {
-                "global_nodes": self.global_vertices,
-                "global_edges": self.global_edges
-            }
-            exec(code, exec_env)
-
-            fn = exec_env.get("transform_graph")
-            if not fn or not callable(fn):
+            try:
+                description, converted_graph, llm_resp = await self.error_recovery.run(
+                    op_generate_and_execute_graph_code,
+                    name=f"generate_and_execute_graph_code(question={current_question[:50]})",
+                    operation_type="generic",
+                    location="graph_conversion"
+                )
                 return {
-                    "description": "Generated code does not define a valid transform_graph function.",
+                    "description": description,
+                    "converted_graph": converted_graph,
+                    "raw_llm_response": llm_resp
+                }
+            except Exception as e:
+                logger.error(f"❌ Graph conversion (generate+execute) failed after retries: {e}")
+                return {
+                    "description": str(e),
+                    "converted_graph": None,
+                    "raw_llm_response": None
+                }
+        else:
+            llm_resp = self.reasoner.generate_graph_conversion_code(
+                current_question=current_question,
+                dependency_items=dependency_list,
+            )
+            if llm_resp is None:
+                return {
+                    "description": "LLM returned empty graph conversion result.",
+                    "converted_graph": None,
+                    "raw_llm_response": None
+                }
+            code = llm_resp.get("code")
+            description = llm_resp.get("description", "")
+            if not code:
+                return {
+                    "description": "LLM did not return valid code.",
                     "converted_graph": None,
                     "raw_llm_response": llm_resp
                 }
-
-            args = [ upstream_values[k] for k in field_keys_in_order ]
-            args += [ self.global_vertices, self.global_edges ]
-
-            converted_graph = fn(*args)
-        except Exception as e:
+            try:
+                upstream_values = {i.field_key: i.value for i in graph_items}
+                field_keys_in_order = [i.field_key for i in graph_items]
+                exec_env = {
+                    "global_nodes": self.global_vertices,
+                    "global_edges": self.global_edges
+                }
+                exec(code, exec_env)
+                fn = exec_env.get("transform_graph")
+                if not fn or not callable(fn):
+                    return {
+                        "description": "Generated code does not define a valid transform_graph function.",
+                        "converted_graph": None,
+                        "raw_llm_response": llm_resp
+                    }
+                args = [upstream_values[k] for k in field_keys_in_order]
+                args += [self.global_vertices, self.global_edges]
+                converted_graph = fn(*args)
+            except Exception as e:
+                return {
+                    "description": f"Error executing generated code: {e}",
+                    "converted_graph": None,
+                    "raw_llm_response": llm_resp
+                }
             return {
-                "description": f"Error executing generated code: {e}",
-                "converted_graph": None,
+                "description": description,
+                "converted_graph": converted_graph,
                 "raw_llm_response": llm_resp
             }
 
-        return {
-            "description": description,
-            "converted_graph": converted_graph,
-            "raw_llm_response": llm_resp
-        }
 
-
-    def _convert_parameter_dependencies(
+    async def _convert_parameter_dependencies(
         self,
         current_question: str,
         alg_des_doc: str,
@@ -422,57 +483,104 @@ class DataDependencyResolver:
                 "reason": item.reason
             })
 
-        mapping_result = self.reasoner.map_parameters(
-            current_question=current_question,
-            current_algo_desc=alg_des_doc,
-            dependency_items=dependency_list
-        )
-
-        if "mapping" not in mapping_result:
-            return {
-                "mapped_params": {},
-                "mapping_raw": mapping_result,
-                "reasoning": mapping_result.get("explanation", "LLM returned unexpected format")
-            }
-
-        mapping = mapping_result["mapping"]
-        final_params = {}
-
-        for param_name, mp in mapping.items():
-            from_field = mp.get("from_field")
-            parent_step_id = mp.get("parent_step_id")
-            extract_code = mp.get("extract_code")
-
-            # 找父节点值
-            matched_item = next(
-                (x for x in param_items
-                if x.parent_step_id == parent_step_id and x.field_key == from_field),
-                None
-            )
-
-            if matched_item is None:
-                logger.error(f"❌ 参数 {param_name} 的依赖字段找不到真实数据源")
-                continue
-
-            real_value = matched_item.value
-
-            # 没有转换代码，直接使用值
-            if extract_code is None:
-                final_params[param_name] = real_value
-                continue
-
-            # 需要执行 extract_code
-            exec_env = {"value": real_value, "param_value": None}
+        # Step 1: 调用 LLM 生成参数映射（带 retry）
+        if self.error_recovery:
+            async def op_map_parameters_and_execute(error_history):
+                mapping_result = self.reasoner.map_parameters(
+                    current_question=current_question,
+                    current_algo_desc=alg_des_doc,
+                    dependency_items=dependency_list
+                )
+                if "mapping" not in mapping_result:
+                    raise ValueError(
+                        mapping_result.get("explanation", "LLM returned unexpected format")
+                    )
+                mapping = mapping_result["mapping"]
+                final_params = {}
+                for param_name, mp in mapping.items():
+                    from_field = mp.get("from_field")
+                    parent_step_id = mp.get("parent_step_id")
+                    extract_code = mp.get("extract_code")
+                    matched_item = next(
+                        (x for x in param_items
+                         if x.parent_step_id == parent_step_id and x.field_key == from_field),
+                        None
+                    )
+                    if matched_item is None:
+                        raise ValueError(
+                            f"参数 {param_name} 的依赖字段找不到真实数据源"
+                        )
+                    real_value = matched_item.value
+                    if extract_code is None:
+                        final_params[param_name] = real_value
+                        continue
+                    exec_env = {"value": real_value, "param_value": None}
+                    exec(extract_code, exec_env)
+                    if "param_value" not in exec_env:
+                        raise ValueError(
+                            f"extract_code did not set param_value for parameter {param_name}"
+                        )
+                    final_params[param_name] = exec_env["param_value"]
+                return final_params, mapping_result
 
             try:
-                exec(extract_code, exec_env)
-                final_params[param_name] = exec_env["param_value"]
+                final_params, mapping_result = await self.error_recovery.run(
+                    op_map_parameters_and_execute,
+                    name=f"map_parameters+execute(question={current_question})",
+                    operation_type="generic",
+                    location="parameter_conversion"
+                )
+                return {
+                    "mapped_params": final_params,
+                    "mapping_raw": mapping_result,
+                    "reasoning": mapping_result.get("explanation", "")
+                }
             except Exception as e:
-                logger.error(f"❌ 执行 extract_code 失败: {e}\n代码:\n{extract_code}")
-                continue
-
-        return {
-            "mapped_params": final_params,           # ⭐最终可输入图算法的参数值
-            "mapping_raw": mapping_result,           # LLM 原始 mapping 输出
-            "reasoning": mapping_result.get("explanation", "")
-        }
+                logger.error(f"❌ Parameter mapping+execute failed after retries: {e}")
+                return {
+                    "mapped_params": {},
+                    "mapping_raw": None,
+                    "reasoning": f"Parameter mapping+execute failed: {e}"
+                }
+        else:
+            mapping_result = self.reasoner.map_parameters(
+                current_question=current_question,
+                current_algo_desc=alg_des_doc,
+                dependency_items=dependency_list
+            )
+            if "mapping" not in mapping_result:
+                return {
+                    "mapped_params": {},
+                    "mapping_raw": mapping_result,
+                    "reasoning": mapping_result.get("explanation", "LLM returned unexpected format")
+                }
+            mapping = mapping_result["mapping"]
+            final_params = {}
+            for param_name, mp in mapping.items():
+                from_field = mp.get("from_field")
+                parent_step_id = mp.get("parent_step_id")
+                extract_code = mp.get("extract_code")
+                matched_item = next(
+                    (x for x in param_items
+                     if x.parent_step_id == parent_step_id and x.field_key == from_field),
+                    None
+                )
+                if matched_item is None:
+                    logger.error(f"❌ 参数 {param_name} 的依赖字段找不到真实数据源")
+                    continue
+                real_value = matched_item.value
+                if extract_code is None:
+                    final_params[param_name] = real_value
+                    continue
+                exec_env = {"value": real_value, "param_value": None}
+                try:
+                    exec(extract_code, exec_env)
+                    final_params[param_name] = exec_env["param_value"]
+                except Exception as e:
+                    logger.error(f"❌ 执行 extract_code 失败: {e}\n参数: {param_name}\n代码:\n{extract_code}")
+                    continue
+            return {
+                "mapped_params": final_params,
+                "mapping_raw": mapping_result,
+                "reasoning": mapping_result.get("explanation", "")
+            }

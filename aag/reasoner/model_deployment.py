@@ -16,7 +16,7 @@ from aag.config.engine_config import ReasonerConfig
 from aag.reasoner.prompt_template.llm_prompt_en import *
 from aag.reasoner.prompt_template.llm_prompt_zh import *
 from aag.utils.parse_json import extract_json_from_response, parse_openai_json_response
-from aag.error_recovery.error_manager import ErrorRecovery
+from aag.error_recovery.enhancer import enhance_prompt
 
 EMBEDD_DIMS = {
     "BAAI/bge-large-en-v1.5": 1024,
@@ -955,8 +955,7 @@ class Reasoner:
         tool_description: str, 
         vertex_schema: Dict[str, str], 
         edge_schema: Dict[str, str],
-        error_history: Optional[List[Dict[str, Any]]] = None,
-        error_recovery: Optional[Any] = None,   
+        error_history: Optional[List[Dict[str, Any]]] = None, 
         trace: Optional[Dict[str, Any]] = None, # 用于记录step_id等
     ) -> dict:
         full_prompt = extract_parameters_with_postprocess_promt.format(
@@ -966,15 +965,10 @@ class Reasoner:
             edge_schema=json.dumps(edge_schema, ensure_ascii=False, indent=2)
         )
 
-        if error_recovery is not None and error_history:
-            full_prompt = error_recovery.enhance_prompt(
-                op="extract_parameters_with_postprocess_new",
+        if error_history:
+            full_prompt = enhance_prompt(
                 base_prompt=full_prompt,
-                error_history=error_history,
-                context={
-                    "question": question,
-                    "trace": trace or {},
-                },
+                error_history=error_history
             )
 
         return self.env.execute_prompt(full_prompt, parse_json=True)
@@ -987,7 +981,6 @@ class Reasoner:
         edge_schema: Dict[str, str],
         dependency_parameters: Dict[str, Any],
         error_history: Optional[List[Dict[str, Any]]] = None,
-        error_recovery: Optional[Any] = None,   
         trace: Optional[Dict[str, Any]] = None, # 用于记录step_id等
     ) -> dict:
         """Merge dependency parameters with extracted parameters and generate post-processing code."""
@@ -999,16 +992,12 @@ class Reasoner:
             edge_schema=json.dumps(edge_schema, indent=2)
         )
 
-        if error_recovery is not None and error_history:
-            full_prompt = error_recovery.enhance_prompt(
-                op="merge_parameters_from_dependencies",
+        if error_history:
+            full_prompt = enhance_prompt(
                 base_prompt=full_prompt,
-                error_history=error_history,
-                context={
-                    "question": question,
-                    "trace": trace or {},
-                },
+                error_history=error_history
             )
+
 
         return self.env.execute_prompt(full_prompt, parse_json=True)
 

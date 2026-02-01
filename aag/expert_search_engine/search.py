@@ -172,8 +172,7 @@ class ExpertSearchEngine:
                 "algorithm": task_type.get("algorithm", []),
             })
         return task_type_list
-
-    #todo(chaoyi): 相似度计算，获取最相关的算法
+ 
     def retrieve_algorithm(self, query_str: str, task_type_id: str) -> List[Dict[Any, Any]]:
         # 从 self.task_index 中获取 task_type_id 对应的 task_type, 然后获取这个task_type 里的algorithm， 遍历algorithm， 从self.algo_index 中获取每个algorithm的algorithm和description, 返回一个list[{"id": id, "algorithm": algorithm, "description": description}]
         algorithm_list = []

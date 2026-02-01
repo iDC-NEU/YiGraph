@@ -1,6 +1,5 @@
 import logging
 from flask import Blueprint, jsonify
-from .config import knowledge_bases
 
 logger = logging.getLogger(__name__) 
 bp = Blueprint("chat", __name__)

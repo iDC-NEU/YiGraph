@@ -47,8 +47,8 @@ class ErrorRecovery:
         self,
         *,
         fn_name: str,
-        operation_type: str,
         error_history: List[Dict[str, Any]],
+        operation_type: str = "generic",
     ) -> Optional[str]:
         """
         从 trace 获取 base_prompt，再注入错误信息。
@@ -76,10 +76,6 @@ class ErrorRecovery:
         operation_type: str = "generic",
         location: Optional[str] = None,
     ) -> Any:
-        """
-        块级重试：operation 必须包含完整流程（构建prompt->调用reasoner->处理/校验）
-        重试时会从 operation 开头重新执行整段逻辑（符合你的要求）。
-        """
         policy = get_policy(operation_type)
         max_attempts = policy.max_attempts
         max_error_history = policy.max_error_history
@@ -87,7 +83,7 @@ class ErrorRecovery:
         error_history: List[Dict[str, Any]] = []
         last_exc: Optional[Exception] = None
 
-        for attempt in range(max_attempts):
+        for attempt in range(max_attempts+1):
             try:
                 result = await operation(error_history)
                 if attempt > 1:

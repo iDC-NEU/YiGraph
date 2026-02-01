@@ -1,80 +1,130 @@
 /**
  * i18n.js - 通用国际化/语言切换脚本
+ * 集成了本地缓存优化以解决 FOUTC (Flash of Untranslated Content) 问题
  */
 
 // 初始化全局变量，确保其他脚本（如 chat.js）能访问
 window.LANG = {};
 
-// 核心加载语言函数
-async function loadLanguage(lang) {
-    try {
-        // 1. 保存设置到本地存储
-        localStorage.setItem('app_lang', lang);
-        document.documentElement.lang = lang; // 修改 html 标签的 lang 属性
+// --- 辅助函数：显示页面 ---
+// 配合 CSS 使用：body.lang-loading { opacity: 0; } body.lang-ready { opacity: 1; }
+function revealPage() {
+    document.body.classList.remove('lang-loading');
+    document.body.classList.add('lang-ready');
+}
 
-        // --- 新增代码开始：更新切换按钮的文字 ---
-        // 逻辑：按钮显示当前语言，English对应英文界面，简体中文对应中文界面
-        const btn = document.getElementById('lang-toggle-btn');
-        if (btn) {
-            if (lang === 'zh-CN') {
-                btn.textContent = '简体中文';
-            } else {
-                btn.textContent = 'English';
+// --- 核心逻辑：应用语言数据 ---
+function applyLanguageData(data, lang) {
+    // 1. 设置 JS 全局变量
+    window.LANG = data.js_vars || {};
+
+    // 2. 映射 HTML 静态内容
+    const htmlMap = data.html_map || {};
+    for (const [id, text] of Object.entries(htmlMap)) {
+        const el = document.getElementById(id);
+        if (el) {
+            // 特殊处理 input placeholder
+            if (el.tagName === 'INPUT' && el.hasAttribute('placeholder')) {
+                el.placeholder = text;
+            } 
+            // 特殊处理 textarea placeholder
+            else if (el.tagName === 'TEXTAREA' && el.hasAttribute('placeholder')) {
+                el.placeholder = text;
+            }
+            // 特殊处理 ContentEditable DIV (如聊天输入框)
+            else if (el.id === 'chat-input') {
+                el.setAttribute('placeholder', text); 
+            }
+            // 普通文本
+            else {
+                // 默认使用 innerText 防止 XSS，除非明确需要 HTML
+                el.innerText = text;
             }
         }
-        // --- 新增代码结束 ---
+    }
+    
+    // 3. 保存 html_map 到全局变量
+    window.HTML_MAP = htmlMap;
+    
+    // 4. 处理带有 data-placeholder-id 属性的输入框
+    document.querySelectorAll('[data-placeholder-id]').forEach(input => {
+        const placeholderId = input.getAttribute('data-placeholder-id');
+        if (htmlMap[placeholderId]) {
+            input.placeholder = htmlMap[placeholderId];
+        }
+    });
+    
+    // 5. 触发自定义事件，通知其他脚本语言已更新
+    document.dispatchEvent(new Event('languageLoaded'));
+}
 
-        // 请求语言文件
-        // 假设 JSON 文件都在 /static/language/ 目录下
+// --- 核心逻辑：获取语言数据 (网络请求) ---
+async function fetchLanguageData(lang, isBackgroundUpdate = false) {
+    try {
         const response = await fetch(`/static/language/${lang}.json`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
         const data = await response.json();
         
-        // 2. 设置 JS 全局变量 (给 chat.js 等逻辑脚本使用)
-        window.LANG = data.js_vars;
+        // 更新缓存
+        localStorage.setItem(`i18n_cache_${lang}`, JSON.stringify(data));
 
-        // 3. 映射 HTML 静态内容 (根据 ID 自动替换)
-        const htmlMap = data.html_map;
-        for (const [id, text] of Object.entries(htmlMap)) {
-            const el = document.getElementById(id);
-            if (el) {
-                // 特殊处理 input placeholder
-                if (el.tagName === 'INPUT' && el.hasAttribute('placeholder')) {
-                    el.placeholder = text;
-                } 
-                // 特殊处理 textarea placeholder
-                else if (el.tagName === 'TEXTAREA' && el.hasAttribute('placeholder')) {
-                    el.placeholder = text;
-                }
-                // 特殊处理 contentEditable div (模拟 placeholder)
-                else if (el.id === 'chat-input') {
-                        el.setAttribute('placeholder', text); 
-                }
-                else {
-                    // 普通文本替换
-                    el.innerText = text;
-                }
+        // 应用数据
+        applyLanguageData(data, lang);
+
+        if (!isBackgroundUpdate) {
+            // 如果不是后台更新（即首次加载），需要显示页面
+            revealPage();
+            console.log(`Loaded ${lang} from network`);
+        } else {
+            console.log(`Updated ${lang} cache in background`);
+        }
+
+    } catch (error) {
+        console.error('Fetch language error:', error);
+        // 如果出错且不是后台更新，也要显示页面，防止白屏
+        if (!isBackgroundUpdate) revealPage();
+    }
+}
+
+// --- 主函数：加载语言 ---
+async function loadLanguage(lang) {
+    try {
+        // 1. 保存设置
+        localStorage.setItem('app_lang', lang);
+        document.documentElement.lang = lang;
+
+        // 2. 更新切换按钮文字
+        const btn = document.getElementById('lang-toggle-btn');
+        if (btn) {
+            btn.textContent = (lang === 'zh-CN') ? 'English' : '简体中文';
+        }
+
+        // 3. 缓存策略：优先使用缓存渲染，后台静默更新
+        const cachedDataStr = localStorage.getItem(`i18n_cache_${lang}`);
+        
+        if (cachedDataStr) {
+            try {
+                const cachedData = JSON.parse(cachedDataStr);
+                // 命中缓存：立即渲染并显示页面
+                applyLanguageData(cachedData, lang);
+                revealPage();
+                console.log(`Loaded ${lang} from cache (Instant render)`);
+                
+                // 后台发起请求更新缓存（保持数据最新）
+                fetchLanguageData(lang, true);
+                return;
+            } catch (e) {
+                console.warn('Cache parse error, falling back to network', e);
             }
         }
-        
-        // 4. 保存 html_map 到全局变量，供其他函数使用
-        window.HTML_MAP = htmlMap;
-        
-        // 5. 处理带有 data-placeholder-id 属性的输入框的 placeholder
-        document.querySelectorAll('[data-placeholder-id]').forEach(input => {
-            const placeholderId = input.getAttribute('data-placeholder-id');
-            if (htmlMap[placeholderId]) {
-                input.placeholder = htmlMap[placeholderId];
-            }
-        });
-        
-        // 6. 触发自定义事件，通知其他脚本语言已更新
-        // 其他页面的特定 JS (如 dashboard.js) 可以监听这个事件来刷新它的动态内容
-        document.dispatchEvent(new Event('languageLoaded'));
-        console.log(`Language loaded: ${lang}`);
-        
+
+        // 4. 未命中缓存：等待网络请求
+        await fetchLanguageData(lang, false);
+
     } catch (error) {
-        console.error('Failed to load language:', error);
+        console.error('Failed to load language flow:', error);
+        revealPage();
     }
 }
 
@@ -85,58 +135,33 @@ function toggleLanguage() {
     return loadLanguage(next);
 }
 
-// 绑定语言切换按钮的函数（使用标志避免重复绑定）
+// 绑定语言切换按钮的函数
 let buttonBound = false;
 let clickHandler = null;
 
 function bindLanguageToggleButton() {
     const btn = document.getElementById('lang-toggle-btn');
     if (!btn) {
-        console.log('Language toggle button not found');
+        // console.log('Language toggle button not found yet');
         return false;
     }
     
-    // 如果已经绑定过，不再重复绑定
     if (btn.hasAttribute('data-i18n-bound')) {
-        console.log('Language toggle button already bound');
         return true;
     }
     
-    // 创建事件处理函数（只创建一次）
     if (!clickHandler) {
         clickHandler = function(e) {
-            // 阻止事件冒泡，避免被其他元素拦截
             if (e) {
                 e.stopPropagation();
                 e.preventDefault();
             }
-            console.log('Language toggle button clicked', new Date().getTime());
+            console.log('Language toggle button clicked');
             
-            // 获取按钮引用
-            const clickedBtn = e ? e.target.closest('#lang-toggle-btn') || document.getElementById('lang-toggle-btn') : document.getElementById('lang-toggle-btn');
-            
-            // 调用切换语言函数
             if (typeof toggleLanguage === 'function') {
-                try {
-                    // 立即调用，不等待
-                    const result = toggleLanguage();
-                    // 如果返回Promise，处理它
-                    if (result && typeof result.then === 'function') {
-                        result.catch((error) => {
-                            console.error('Error in toggleLanguage:', error);
-                        });
-                    }
-                } catch (error) {
-                    console.error('Error in toggleLanguage:', error);
-                    // 备用方案：直接切换语言并刷新页面
-                    const current = localStorage.getItem('app_lang') || 'zh-CN';
-                    const next = current === 'zh-CN' ? 'en-US' : 'zh-CN';
-                    localStorage.setItem('app_lang', next);
-                    location.reload();
-                }
+                toggleLanguage().catch(err => console.error(err));
             } else {
-                console.error('toggleLanguage function not available');
-                // 备用方案：直接切换语言并刷新页面
+                // 兜底方案
                 const current = localStorage.getItem('app_lang') || 'zh-CN';
                 const next = current === 'zh-CN' ? 'en-US' : 'zh-CN';
                 localStorage.setItem('app_lang', next);
@@ -145,14 +170,10 @@ function bindLanguageToggleButton() {
         };
     }
     
-    // 绑定事件监听器（使用capture阶段确保能捕获到事件）
-    // 同时绑定到按钮和li元素，确保能捕获到点击
-    btn.addEventListener('click', clickHandler, { 
-        capture: false,  // 在冒泡阶段处理
-        passive: false   // 允许preventDefault
-    });
+    // 绑定事件
+    btn.addEventListener('click', clickHandler, { capture: false, passive: false });
     
-    // 也绑定到父元素li，以防按钮被遮挡
+    // 同时绑定父元素 LI 以增加点击区域
     const liParent = btn.closest('li');
     if (liParent && !liParent.hasAttribute('data-i18n-bound')) {
         liParent.addEventListener('click', function(e) {
@@ -162,10 +183,9 @@ function bindLanguageToggleButton() {
         }, { capture: false, passive: false });
         liParent.setAttribute('data-i18n-bound', 'true');
     }
+    
     btn.setAttribute('data-i18n-bound', 'true');
     buttonBound = true;
-    
-    console.log('Language toggle button bound successfully');
     return true;
 }
 
@@ -173,35 +193,28 @@ function bindLanguageToggleButton() {
 function initI18n() {
     // 1. 读取存储的语言，默认为中文
     const savedLang = localStorage.getItem('app_lang') || 'zh-CN';
+    
+    // 2. 加载语言 (如果 body 有 lang-loading 类，此时会处理显示逻辑)
     loadLanguage(savedLang);
     
-    // 2. 尝试绑定切换按钮（多次重试确保成功）
+    // 3. 尝试绑定按钮 (重试机制)
     const tryBind = () => {
         if (!bindLanguageToggleButton()) {
-            // 如果按钮还不存在，延迟重试
             setTimeout(tryBind, 50);
         }
     };
-    
-    // 立即尝试绑定
     tryBind();
-    
-    // 延迟重试，确保按钮已加载
-    setTimeout(tryBind, 100);
     setTimeout(tryBind, 300);
-    setTimeout(tryBind, 500);
 }
 
-// 根据文档状态决定如何初始化
+// 根据文档状态启动
 if (document.readyState === 'loading') {
-    // DOM还在加载中，等待DOMContentLoaded事件
     document.addEventListener('DOMContentLoaded', initI18n);
 } else {
-    // DOM已经加载完成，立即初始化
     initI18n();
 }
 
-// 额外保障：监听DOM变化，如果按钮后来才出现，也能绑定
+// 额外保障：监听 DOM 变化以绑定后来出现的按钮
 if (typeof MutationObserver !== 'undefined') {
     const observer = new MutationObserver(() => {
         const btn = document.getElementById('lang-toggle-btn');
@@ -210,17 +223,9 @@ if (typeof MutationObserver !== 'undefined') {
         }
     });
     
-    if (document.body) {
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-    } else {
-        document.addEventListener('DOMContentLoaded', () => {
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-        });
-    }
+    const observeTarget = document.body || document.documentElement;
+    observer.observe(observeTarget, {
+        childList: true,
+        subtree: true
+    });
 }

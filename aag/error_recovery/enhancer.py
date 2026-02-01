@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 import json
 
+from sympy import N
+
 
 def _format_errors(error_history: List[Dict[str, Any]], keep_last_k: int = 2) -> str:
     if not error_history:
@@ -24,8 +26,7 @@ def _format_errors(error_history: List[Dict[str, Any]], keep_last_k: int = 2) ->
 def enhance_prompt(
     base_prompt: str,
     error_history: List[Dict[str, Any]],
-    *,
-    operation_type: str,
+    operation_type: str = None,
     keep_last_k: int = 2,
     extra_constraints: Optional[str] = None,
 ) -> str:
@@ -54,7 +55,7 @@ def enhance_prompt(
     repair_section = f"""
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ REPAIR MODE ({operation_type})
+⚠️ REPAIR MODE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Previous attempt errors (most recent last):
 {error_blob}

@@ -77,8 +77,7 @@ def get_knowledge_bases():
         asyncio.run(server_Test.handler(a1))
         gkb = a1.returnmsg
         knowledge_bases = json.loads(gkb)
-        logger.info("####这是子涵页面里信息 %s",knowledge_bases)
-        logger.info("####这是子涵页面里信息类型 %s",type(knowledge_bases))
+        logger.info("knowledge_bases: %s",knowledge_bases)
         for kb in knowledge_bases["content"]["data"]:
             if kb["文件类型"] == "graph":
                 if kb["文档个数"] == 1:

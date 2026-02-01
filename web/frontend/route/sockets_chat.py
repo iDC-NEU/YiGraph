@@ -1,7 +1,6 @@
 import json
 import time
 from . import socketio
-from .config import TEST_DATA
 import os
 import json
 import logging
@@ -201,14 +200,8 @@ def handle_chat_request(data):
     if not user_message and not dag_confirm and not is_dag_modification:
         emit('chat_response', {"error": "消息内容不能为空"})
         return
-    
-    """
 
-        这里是写死的读取config 模板
-        3. 选择测试数据
-
-    """
-
+    # 3. 选择测试数据
     if dag_confirm == "yes":
         time.sleep(1)
         test_data_key = "CNdag_new_confirmation"

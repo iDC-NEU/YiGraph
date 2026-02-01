@@ -67,8 +67,6 @@ class Scheduler:
         self._init_expert_search_engine()
 
         self._init_dataset_manager()
-
-        self._init_data_dependency_resolver()
         
         self._init_router()
 
@@ -76,6 +74,7 @@ class Scheduler:
         
         self._init_error_recovery()
 
+        self._init_data_dependency_resolver()
     
     def _init_reasoner(self):
         """初始化 reasoner 连接"""
@@ -126,7 +125,8 @@ class Scheduler:
     def _init_data_dependency_resolver(self):
         """初始化 data dependency resolver 连接"""
         try:
-            self.data_dependency_resolver = DataDependencyResolver(self.reasoner)
+            # Note: error_recovery will be set after initialization
+            self.data_dependency_resolver = DataDependencyResolver(self.reasoner, self.error_recovery)
             print("✓ DataDependencyResolver initialized")
         except Exception as e:
             print(f"✗ DataDependencyResolver initialization failed: {e}")
@@ -837,6 +837,29 @@ class Scheduler:
             tool_metadata = None
             tool_result = None 
 
+            # step 1. 上游依赖解析
+            data_dependency_parents = [self.dag.steps[pid] for pid in self.dag.get_data_dependency(step_id)]
+            data_dependency_context = {
+                "graph_dependencies": [],
+                "parameter_dependencies": [],
+                "graph_input_adapter_result": None,
+                "parameter_input_adapter_result": None,
+            }
+            
+            if data_dependency_parents:
+                data_dependency_context = await self.data_dependency_resolver.resolve_dependencies(
+                    step_id=step_id,
+                    step=step,
+                    alg_des_info=tool_metadata,
+                    data_dependency_parents=data_dependency_parents
+                )
+                logger.info(
+                    "📊 依赖上下文 | 图依赖:%s | 参数依赖:%s",
+                    len(data_dependency_context.get("graph_dependencies", [])),
+                    len(data_dependency_context.get("parameter_dependencies", [])),
+                )
+                
+
             if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
                 if not step.graph_algorithm:
                     self.dag.set_failed(step_id, "未为该节点选择图算法")
@@ -856,31 +879,6 @@ class Scheduler:
                 
                 # logger.info(f"tool_description:{tool_description}")
 
-            # step 2. 上游依赖解析
-            data_dependency_ids = self.dag.get_data_dependency(step_id)
-            data_dependency_parents = [self.dag.steps[pid] for pid in data_dependency_ids]
-            data_dependency_context = {
-                "graph_dependencies": [],
-                "parameter_dependencies": [],
-                "graph_input_adapter_result": None,
-                "parameter_input_adapter_result": None,
-            }
-            
-            if data_dependency_parents:
-                data_dependency_context = self.data_dependency_resolver.resolve_dependencies(
-                    step_id=step_id,
-                    step=step,
-                    alg_des_info=tool_metadata,
-                    data_dependency_parents=data_dependency_parents
-                )
-                logger.info(
-                    "📊 依赖上下文 | 图依赖:%s | 参数依赖:%s",
-                    len(data_dependency_context.get("graph_dependencies", [])),
-                    len(data_dependency_context.get("parameter_dependencies", [])),
-                )
-                
-
-            if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
                 try:
                     await self._prepare_graph_for_execution(
                         graph_dependencies=data_dependency_context.get("graph_dependencies") or [],
@@ -960,7 +958,6 @@ class Scheduler:
                     is_has_extract_code = bool(post_processing_info.get("is_calculate"))
                     output_schema = post_processing_info.get("output_schema") or {}
 
-
                     tool_result = await self.computing_engine.run_algorithm(
                         step.graph_algorithm,
                         extraction_result.get("parameters", {}),
@@ -969,22 +966,29 @@ class Scheduler:
                     )
 
                     if tool_result is None:
-                        raise ValueError("算法执行返回了 None")
+                        raise ValueError("Algorithm execution returned None")
 
                     result_data = tool_result.get("result")
                     if isinstance(result_data, dict) and "error" in result_data:
-                        raise RuntimeError(result_data.get("error") or "tool_result.result.error")
+                        raise RuntimeError(result_data.get("error") or "Algorithm execution failed")
 
-                    # if not tool_result.get("success", False):
-                    #     raise RuntimeError(tool_result.get("error", "算法执行失败"))
+                    if not tool_result.get("success", False):
+                        error_msg = tool_result.get("error") or "Algorithm execution failed"
+                        raise RuntimeError(error_msg)
 
-                    return is_has_extract_code, output_schema,tool_result
+                    return is_has_extract_code, output_schema, tool_result
 
+                try:
+                    is_has_extract_code, output_schema, tool_result = await self.error_recovery.run(
+                        op_prepare_params_and_postprocess_then_execute,
+                        name=f"prepare_params+postprocess+execute(step={step_id})",
+                        operation_type="generic",
+                        location=f"step_{step_id}"
+                    )
+                except Exception as e:
+                    self.dag.set_failed(step_id, str(e))
+                    raise RuntimeError(str(e))
 
-                is_has_extract_code, output_schema,tool_result = await self.error_recovery.run(
-                    op_prepare_params_and_postprocess_then_execute,
-                    name=f"prepare_params+postprocess+execute(step={step_id})"
-                )
                 ## todo: 保存中间计算结果的模块: 如果图计算的结果规模特别大, 把结果写到一个文件里 
                 # 添加算法执行结果到 step
                 step.add_algorithm_result(
@@ -1223,7 +1227,6 @@ class Scheduler:
                 edge_schema=edge_schema,
                 dependency_parameters=dependency_parameters,
                 error_history=error_history,
-                error_recovery=self.error_recovery,
                 trace=trace,
             )
 
@@ -1233,7 +1236,6 @@ class Scheduler:
             vertex_schema=vertex_schema,
             edge_schema=edge_schema,
             error_history=error_history,
-            error_recovery=self.error_recovery,
             trace=trace,
         )
         # result = None
