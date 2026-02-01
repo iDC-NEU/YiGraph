@@ -310,6 +310,8 @@ class Scheduler:
 
         self._build_dag_from_query(query, decompose)
         self._find_algorithm()
+        print("✅ 初始 DAG 构建与算法选择完成")
+        self.dag.print_dag_info()
         
         if mode == "expert":
             dag_info = self.dag.get_dag_info()
@@ -319,7 +321,6 @@ class Scheduler:
             }
         
         # 普通模式：继续执行完整流程
-        self.dag.print_dag_info()
         self.dag.refresh_data_dependency(self.reasoner)
         self.dag.print_data_dependency()
         print("✅ DAG 构建与算法选择完成，准备执行计算流程")
@@ -527,11 +528,138 @@ class Scheduler:
         return self.dag
 
 
+    def _get_algorithm_library_info(self) -> str:
+        """
+        Extract algorithm library information from expert_search_engine's knowledge base.
+        
+        Returns:
+            Formatted string containing task types and their algorithms
+        """
+        if not self.expert_search_engine:
+            return "Algorithm library not available"
+        
+        task_index = self.expert_search_engine.task_index
+        algo_index = self.expert_search_engine.algo_index
+        
+        if not task_index or not algo_index:
+            return "Algorithm library not loaded"
+        
+        library_info = []
+        for task_id, task_data in task_index.items():
+            task_type = task_data.get("task_type", "Unknown")
+            description = task_data.get("description", "")
+            algorithms = task_data.get("algorithm", [])
+            
+            # Get algorithm names
+            algo_names = []
+            for algo_id in algorithms[:5]:  # Limit to first 5 for brevity
+                if algo_id in algo_index:
+                    algo_names.append(algo_id)
+            
+            if algorithms:
+                algo_list = ", ".join(algo_names)
+                if len(algorithms) > 5:
+                    algo_list += f" (and {len(algorithms) - 5} more)"
+                library_info.append(
+                    f"- **{task_type}**: {description}\n  Algorithms: {algo_list}"
+                )
+        
+        return "\n".join(library_info)
+    
+    def _get_graph_schema_summary(self) -> Optional[str]:
+        """
+        Get a summary of the current graph dataset schema.
+        
+        Returns:
+            Formatted string with dataset schema information, or None if not available
+        """
+        if not self.current_graph_dataset:
+            return None
+        
+        try:
+            schema_info = []
+            schema_info.append(f"Dataset: {self.current_dataset_name}")
+            
+            # Graph properties
+            if hasattr(self.current_graph_dataset.schema, 'graph'):
+                graph_props = self.current_graph_dataset.schema.graph
+                graph_type = []
+                if graph_props.directed:
+                    graph_type.append("Directed")
+                else:
+                    graph_type.append("Undirected")
+                if graph_props.heterogeneous:
+                    graph_type.append("Heterogeneous")
+                if graph_props.weighted:
+                    graph_type.append("Weighted")
+                schema_info.append(f"Graph Type: {', '.join(graph_type)}")
+            
+            # Vertex types
+            if hasattr(self.current_graph_dataset.schema, 'vertex'):
+                vertex_types = [v.type for v in self.current_graph_dataset.schema.vertex]
+                schema_info.append(f"Vertex Types: {', '.join(vertex_types)}")
+            
+            # Edge types
+            if hasattr(self.current_graph_dataset.schema, 'edge'):
+                edge_types = [e.type for e in self.current_graph_dataset.schema.edge]
+                schema_info.append(f"Edge Types: {', '.join(edge_types)}")
+            
+            return "\n".join(schema_info)
+        except Exception as e:
+            logger.warning(f"Failed to get graph schema summary: {e}")
+            return None
+
     def _build_dag_from_query(self, query: str, decompose: bool = True) -> GraphWorkflowDAG:
         """
-            将用户查询转换为DAG
+        将用户查询转换为DAG，包含查询重写步骤
+        
+        Args:
+            query: 用户原始查询
+            decompose: 是否分解查询
+            
+        Returns:
+            构建完成的DAG对象
         """
-        subquery_plan = self.reasoner.plan_subqueries(decompose, query)
+        # Step 1: Get algorithm library information
+        algorithm_library_info = self._get_algorithm_library_info()
+        logger.info("📚 Algorithm library information extracted")
+        
+        # Step 2: Get dataset schema information (optional)
+        dataset_info = self._get_graph_schema_summary()
+        if dataset_info:
+            logger.info("📊 Dataset schema information extracted")
+        
+        # Step 3: Rewrite query with algorithm context
+        try:
+            rewrite_result = self.reasoner.rewrite_query(
+                original_query=query,
+                algorithm_library_info=algorithm_library_info,
+                dataset_info=dataset_info
+            )
+            
+            rewritten_query = rewrite_result.get("rewritten_query", query)
+            reasoning = rewrite_result.get("reasoning", "")
+            mapped_concepts = rewrite_result.get("mapped_concepts", [])
+            
+            logger.info(f"✍️ Query rewritten successfully")
+            logger.info(f"Original query: {query}")
+            logger.info(f"Rewritten query: {rewritten_query}")
+            logger.info(f"Reasoning: {reasoning}")
+            
+            if mapped_concepts:
+                logger.info("🔗 Concept mappings:")
+                for mapping in mapped_concepts:
+                    logger.info(f"  - {mapping.get('original_concept')} → {mapping.get('mapped_to')}")
+            
+            # Use rewritten query for planning
+            query_to_use = rewritten_query
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Query rewriting failed: {e}, using original query")
+            query_to_use = query
+        
+        # Step 4: Continue with existing flow (plan subqueries)
+        subquery_plan = self.reasoner.plan_subqueries(decompose, query_to_use)
         return self.build_dag_from_subquery_plan(subquery_plan)
 
 
@@ -1134,6 +1262,122 @@ class Scheduler:
         #     result = None
 
         # return result
+    
+    def _extract_dag_structure(self) -> Dict[str, Any]:
+        """
+        从当前DAG中提取subquery结构
+        
+        Returns:
+            包含subqueries列表的字典
+        """
+        subqueries = []
+        for step_id in self.dag.topological_order():
+            step = self.dag.steps[step_id]
+            
+            # 将内部step_id映射回query_id (如q1, q2等)
+            query_id = None
+            for qid, sid in self.query_id_mapping.items():
+                if sid == step_id:
+                    query_id = qid
+                    break
+            
+            if query_id is None:
+                query_id = f"q{step_id}"
+            
+            # 获取依赖的query_ids - 使用DAG的in_edges而不是step.depends_on
+            depends_on = []
+            parent_step_ids = self.dag.parents_of(step_id)
+            for dep_step_id in parent_step_ids:
+                for qid, sid in self.query_id_mapping.items():
+                    if sid == dep_step_id:
+                        depends_on.append(qid)
+                        break
+            
+            subqueries.append({
+                "id": query_id,
+                "query": step.question,
+                "depends_on": depends_on,
+                "task_type": str(step.task_type) if step.task_type else None,
+                "algorithm": step.graph_algorithm
+            })
+        
+        return {"subqueries": subqueries}
+    
+    def _is_dag_changed(self, old_structure: Dict[str, Any], new_structure: Dict[str, Any]) -> bool:
+        """
+        检查DAG结构是否发生变化
+        
+        Args:
+            old_structure: 旧的DAG结构
+            new_structure: 新的DAG结构
+            
+        Returns:
+            True if changed, False otherwise
+        """
+        old_queries = old_structure.get("subqueries", [])
+        new_queries = new_structure.get("subqueries", [])
+        
+        # 检查节点数量是否变化
+        if len(old_queries) != len(new_queries):
+            return True
+        
+        # 检查每个节点的query和依赖关系是否变化
+        for old_q, new_q in zip(old_queries, new_queries):
+            if old_q.get("query") != new_q.get("query"):
+                return True
+            if set(old_q.get("depends_on", [])) != set(new_q.get("depends_on", [])):
+                return True
+        
+        return False
+    
+    def _refine_dag_with_retry(self, max_retries: int = 1) -> Dict[str, Any]:
+        """
+        使用LLM优化DAG,确保任务类型边界清晰
+        
+        Args:
+            max_retries: 最大重试次数
+            
+        Returns:
+            优化后的DAG信息
+        """
+        logger.info("🔄 开始DAG优化流程...")
+        
+        for retry_count in range(max_retries + 1):
+            try:
+                # 获取当前DAG的subquery结构
+                current_dag_structure = self._extract_dag_structure()
+                
+                logger.info(f"📋 当前DAG结构 (尝试 {retry_count + 1}/{max_retries + 1}):")
+                logger.info(json.dumps(current_dag_structure, ensure_ascii=False, indent=2))
+                
+                # 调用LLM进行DAG优化
+                refined_structure = self.reasoner.refine_subqueries(current_dag_structure)
+                
+                logger.info("✅ LLM返回的优化DAG:")
+                logger.info(json.dumps(refined_structure, ensure_ascii=False, indent=2))
+                
+                # 检查是否有实质性变化
+                if self._is_dag_changed(current_dag_structure, refined_structure):
+                    logger.info("🔄 检测到DAG结构变化,重新构建DAG...")
+                    
+                    # 重新构建DAG
+                    self.build_dag_from_subquery_plan(refined_structure)
+                    
+                    # 重新为新的节点找算法
+                    self._find_algorithm()
+                    
+                    logger.info(f"✅ DAG优化完成 (第 {retry_count + 1} 次迭代)")
+                else:
+                    logger.info("✅ DAG结构已优化,无需进一步调整")
+                    break
+                    
+            except Exception as e:
+                logger.error(f"❌ DAG优化失败 (尝试 {retry_count + 1}/{max_retries + 1}): {e}")
+                if retry_count == max_retries:
+                    logger.warning("⚠️ 达到最大重试次数,使用当前DAG继续执行")
+                continue
+        
+        return self.dag.get_dag_info()
 
     async def shutdown(self):
         if self.computing_engine:
