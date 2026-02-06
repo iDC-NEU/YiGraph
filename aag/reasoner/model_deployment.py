@@ -308,7 +308,7 @@ Please consider this schema when selecting the algorithm to ensure compatibility
         response = self.llm.complete(extract_parameters_with_postprocess_promt_new.format(
             question=question,
             tool_description=tool_description,
-            vetrix_schema=json.dumps(vertex_schema, indent=2),
+            vertex_schema=json.dumps(vertex_schema, indent=2),
             edge_schema=json.dumps(edge_schema, indent=2)
         ))
         return extract_json_from_response(response.text)
@@ -326,7 +326,7 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             question=question,
             tool_description=tool_description,
             dependency_parameters=json.dumps(dependency_parameters, indent=2),
-            vetrix_schema=json.dumps(vertex_schema, indent=2),
+            vertex_schema=json.dumps(vertex_schema, indent=2),
             edge_schema=json.dumps(edge_schema, indent=2)
         )
         return self.execute_prompt(full_prompt, parse_json=True)
@@ -590,7 +590,7 @@ Please consider this schema when selecting the algorithm to ensure compatibility
         full_prompt = extract_parameters_with_postprocess_promt_new.format(
             question=question,
             tool_description=tool_description,
-            vetrix_schema=json.dumps(vertex_schema, indent=2),
+            vertex_schema=json.dumps(vertex_schema, indent=2),
             edge_schema=json.dumps(edge_schema, indent=2)
         )
         return self.execute_prompt(full_prompt, parse_json=True)
@@ -609,7 +609,7 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             question=question,
             tool_description=tool_description,
             dependency_parameters=json.dumps(dependency_parameters, indent=2),
-            vetrix_schema=json.dumps(vertex_schema, indent=2),
+            vertex_schema=json.dumps(vertex_schema, indent=2),
             edge_schema=json.dumps(edge_schema, indent=2)
         )
         return self.execute_prompt(full_prompt, parse_json=True)
@@ -771,7 +771,6 @@ Please consider this schema when selecting the algorithm to ensure compatibility
         return self.execute_prompt(full_prompt, parse_json=True)
 
 
-# 写一个 reasoner 类， 根据传入的配置参数ReasonerConfig 来初始化参数， 要求实现 根据provider 来选择切换对应的大模型OllamaEnv 和  OpenAIEnv
 class Reasoner:
 
     def __init__(self, config: ReasonerConfig):
@@ -958,7 +957,7 @@ class Reasoner:
         error_history: Optional[List[Dict[str, Any]]] = None, 
         trace: Optional[Dict[str, Any]] = None, # 用于记录step_id等
     ) -> dict:
-        full_prompt = extract_parameters_with_postprocess_promt.format(
+        full_prompt = extract_parameters_with_postprocess_promt_new.format(
             question=question,
             tool_description=tool_description,
             vertex_schema=json.dumps(vertex_schema, ensure_ascii=False, indent=2),
@@ -988,7 +987,7 @@ class Reasoner:
             question=question,
             tool_description=tool_description,
             dependency_parameters=json.dumps(dependency_parameters, indent=2),
-            vetrix_schema=json.dumps(vertex_schema, indent=2),
+            vertex_schema=json.dumps(vertex_schema, indent=2),
             edge_schema=json.dumps(edge_schema, indent=2)
         )
 

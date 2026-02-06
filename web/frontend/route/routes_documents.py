@@ -24,15 +24,11 @@ def load_knowledge_bases():
     a23 = DummySocket(json.dumps({"action": "get_datasets"}))
     asyncio.run(server_Test.handler(a23))
     knowledge_bases_with_count = a23.returnmsg
-    logger.info("#### %s",knowledge_bases_with_count)
-    logger.info("#### %s",type(knowledge_bases_with_count))
     print(jsonify({
         'success': True,
         'data': knowledge_bases_with_count
     }))
     basescy = json.loads(knowledge_bases_with_count)
-    logger.info("#### %s",basescy)
-    logger.info("#### %s",type(basescy))
     return basescy["content"]["data"]
 
 
@@ -60,7 +56,6 @@ def get_knowledge_base_name(kb_id):
         for kb in knowledge_bases:
             if kb["id"] == kb_id:
                 return kb["名称"]
-                logger.info(f"名称获取成功：{kb}")
         return f"kb_{kb_id}"  
     except Exception as e:
         logger.error(f"获取知识库名称错误: {str(e)}")
@@ -71,13 +66,10 @@ def get_knowledge_base_name(kb_id):
 def get_knowledge_bases():
     """获取知识库列表"""
     try:
-        logger.info("收到知识库查询请求")
-        
         a1 = DummySocket(json.dumps({"action": "get_datasets"}))
         asyncio.run(server_Test.handler(a1))
         gkb = a1.returnmsg
         knowledge_bases = json.loads(gkb)
-        logger.info("knowledge_bases: %s",knowledge_bases)
         for kb in knowledge_bases["content"]["data"]:
             if kb["文件类型"] == "graph":
                 if kb["文档个数"] == 1:
@@ -85,10 +77,9 @@ def get_knowledge_bases():
                     asyncio.run(server_Test.handler(a6))
                     gkb6 = a6.returnmsg
                     gkb6_json = json.loads(gkb6)
-                    logger.info("####判断信息类型 %s",gkb6_json)
-                    logger.info("####判断信息类型 %s",type(gkb6_json))
                     if gkb6_json["content"]["data"][0].get("vertex_file",None) is not None:
                         kb["文档个数"] = 2
+        
         return jsonify({
             "success": True,
             "data": knowledge_bases["content"]["data"],
@@ -109,7 +100,6 @@ def create_knowledge_base_route():
     """创建知识库"""
     try:
         data = request.get_json()
-        logger.info(f"收到创建知识库请求: {data}")
 
         if not data or not data.get("名称"):
             return jsonify({
@@ -158,8 +148,6 @@ def create_knowledge_base_route():
 def delete_knowledge_base_route(kb_id):
     """删除知识库"""
     try:
-        logger.info(f"收到删除知识库请求，ID: {kb_id}")
-        
         # 获取要删除的知识库名称，用于后续调用 
         #knowledge_bases = load_knowledge_bases()
         kb_to_delete = get_knowledge_base_name(kb_id)

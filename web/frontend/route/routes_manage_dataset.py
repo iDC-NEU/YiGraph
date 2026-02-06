@@ -10,9 +10,9 @@ import yaml
 from flask import Blueprint, jsonify, request
 from flask_socketio import emit, join_room, leave_room
 from DummySocket import DummySocket
-# sys.path.append("../../")
+sys.path.append("../../")
+from aag.utils.path_utils import DATASETS_DATA_DIR
 from aag.api.DocumentAPI import server_Test
-from aag.utils.path_utils import DATASETS_DIR
 
 class MessageCollectingSocket:
     """包装DummySocket，收集所有消息，优先返回error消息"""
@@ -58,14 +58,13 @@ logger = logging.getLogger(__name__)
 bp = Blueprint("manage", __name__)
 
 # 确保上传目录存在 - 修改为前一个目录下的debug/files
-UPLOAD_BASE_DIR =  DATASETS_DIR
-os.makedirs(UPLOAD_BASE_DIR, exist_ok=True)
+# UPLOAD_BASE_DIR = "./../../../aag/datasets"
+# os.makedirs(UPLOAD_BASE_DIR, exist_ok=True)
 
 
 # 添加新的API端点来检查解析状态
 @bp.route('/api/check_parsing_status', methods=['POST'])
 def api_check_parsing_status():
-    logger.info("检查解析状态请求#############")
     """检查数据集所有文件的解析状态"""
     try:
         data = request.get_json()
@@ -78,7 +77,6 @@ def api_check_parsing_status():
                 'error': 'Missing kb_id'
             }), 400
         
-        logger.info(f"检查解析状态请求: 知识库 {kb_id}, 文件数 {len(files)}")
         kb_name = get_knowledge_base_name(kb_id)
         kb_type = get_dataset_type_from_back(kb_id)
         # 获取解析状态
@@ -86,7 +84,6 @@ def api_check_parsing_status():
         asyncio.run(server_Test.handler(a24))
         acps = a24.returnmsg
         acpss = json.loads(acps)
-        logger.info("##### %s",acpss)
         if kb_type == 'graph':
             a25 = DummySocket(json.dumps({"action": "get_dataset_schema","ds_name":kb_name}))
             asyncio.run(server_Test.handler(a25))
@@ -94,7 +91,6 @@ def api_check_parsing_status():
             acpss5 = json.loads(acps5)
             if acpss5["content"]["data"][0].get("vertex_file",None) is not None:
                 acpss["content"]["data"]["parsing_status"][acpss5["content"]["data"][0]["vertex_file"].split("/")[-1]] = "completed"
-        logger.info("###解析状态检查###%s",acpss)
         return jsonify({
             'success': True,
             'kb_id': kb_id,
@@ -115,8 +111,6 @@ def load_knowledge_bases():
     a23 = DummySocket(json.dumps({"action": "get_datasets"}))
     asyncio.run(server_Test.handler(a23))
     knowledge_bases_with_count = a23.returnmsg
-    logger.info("#### %s",knowledge_bases_with_count)
-    logger.info("#### %s",type(knowledge_bases_with_count))
     print(jsonify({
         'success': True,
         'data': knowledge_bases_with_count
@@ -155,7 +149,6 @@ def get_knowledge_base_name(kb_id):
         for kb in knowledge_bases:
             if kb["id"] == kb_id:
                 return kb["名称"]
-                logger.info(f"名称获取成功：{kb}")
         return f"kb_{kb_id}"  
     except Exception as e:
         logger.error(f"获取知识库名称错误: {str(e)}")
@@ -171,7 +164,6 @@ def get_dataset_type_from_back(kb_id):
         for kb in knowledge_bases:
             if kb["id"] == kb_id:
                 return kb["文件类型"]
-                logger.info(f"文件类型获取成功：{kb}")
         return f"kb_{kb_id}"  
     except Exception as e:
         logger.error(f"获取文件类型错误: {str(e)}")
@@ -181,14 +173,10 @@ def get_files_for_knowledge_base(kb_id):
     """获取指定知识库的所有文件信息"""
     try:
         kb_name = get_knowledge_base_name(kb_id)
-        logger.info("查找文本文档调用")
         a23 = DummySocket(json.dumps({"action": "get_dataset_schema","ds_name": kb_name}))
         asyncio.run(server_Test.handler(a23))
-        logger.info("####### %s",a23.returnmsg)
         regffkb = json.loads(a23.returnmsg)
         reregffkb = regffkb["content"]["data"]
-        logger.info("查找文本文档返回 %s",reregffkb)
-        logger.info("查找文本文档返回类型 %s",type(reregffkb))
         if reregffkb[0]["type"] == "graph":
             reregffkb[0]["size"] = reregffkb[0]["edge_size"]
             if reregffkb[0].get("vertex_file",None) is not None:
@@ -202,7 +190,6 @@ def get_files_for_knowledge_base(kb_id):
                 })
             else:
                 pass
-        logger.info("查找文本文档返回修改之后 %s",reregffkb)
         #return files
         return reregffkb
     except Exception as e:
@@ -212,7 +199,6 @@ def get_files_for_knowledge_base(kb_id):
 @bp.route('/api/knowledge_bases/<kb_id>/files', methods=['GET'])
 def get_knowledge_base_files(kb_id):
     """获取指定知识库的文件列表"""
-    logger.info("收到查询文件的请求 %s", get_knowledge_base_name(kb_id))
     try:
         files = get_files_for_knowledge_base(kb_id)
         return jsonify({
@@ -232,8 +218,6 @@ def api_preview_file():
     try:
         kb_id = request.args.get('kb_id')
         file_name = request.args.get('file_name')
-        
-        logger.info(f"预览文件请求: kb_id={kb_id}, file_name={file_name}")
         
         if not kb_id or not file_name:
             return jsonify({
@@ -266,12 +250,8 @@ def api_preview_file():
                 api_file = inspect.getfile(DocumentAPIServer)
                 api_dir = os.path.dirname(os.path.abspath(api_file))
                 dataset_folder_abs = os.path.normpath(os.path.join(api_dir, server_Test.dataset_folder))
-                logger.info(f"解析dataset_folder: {server_Test.dataset_folder} (相对路径)")
-                logger.info(f"  - api_dir: {api_dir}")
-                logger.info(f"  - dataset_folder_abs: {dataset_folder_abs}")
             else:
                 dataset_folder_abs = server_Test.dataset_folder
-                logger.info(f"使用绝对路径dataset_folder: {dataset_folder_abs}")
             
             # 图数据集可能有多个文件，需要遍历查找
             for dataset_name, dataset_info in server_Test.each_dataset.items():
@@ -285,11 +265,8 @@ def api_preview_file():
                     
                     # 检查文件名是否匹配
                     path_file_name = os.path.basename(original_path)
-                    logger.info(f"文件名匹配检查: target={target_file_name}, path_file={path_file_name}, original_path={original_path}")
                     if target_file_name != path_file_name and target_file_name not in original_path:
-                        logger.info(f"文件名不匹配，跳过")
                         return None
-                    logger.info(f"文件名匹配，继续解析路径")
                     
                     # 解析路径：从original_path中提取data/之后的部分
                     if not os.path.isabs(original_path):
@@ -299,18 +276,14 @@ def api_preview_file():
                             data_index = original_path.find("data/")
                             rel_path = original_path[data_index:]  # data/{kb_name}/graph/{file_name}
                             resolved_path = os.path.normpath(os.path.join(dataset_folder_abs, rel_path))
-                            logger.info(f"路径解析: original_path={original_path}, rel_path={rel_path}, resolved_path={resolved_path}, exists={os.path.exists(resolved_path)}")
                         else:
                             # 如果没有data/，直接使用标准路径
                             resolved_path = os.path.join(dataset_folder_abs, "data", kb_name, "graph", target_file_name)
-                            logger.info(f"使用标准路径: resolved_path={resolved_path}, exists={os.path.exists(resolved_path)}")
                     else:
                         resolved_path = original_path
-                        logger.info(f"使用绝对路径: resolved_path={resolved_path}, exists={os.path.exists(resolved_path)}")
                     
                     # 检查路径是否存在
                     if os.path.exists(resolved_path):
-                        logger.info(f"✓ 找到文件: {resolved_path}")
                         return resolved_path
                     else:
                         logger.warning(f"✗ 路径不存在: {resolved_path}")
@@ -327,7 +300,6 @@ def api_preview_file():
                 # 先检查edge文件
                 if "edge" in schema and len(schema["edge"]) > 0:
                     edge_original_path = schema["edge"][0].get("original_path", "")
-                    logger.info(f"检查edge文件: file_name={file_name}, edge_original_path={edge_original_path}")
                     resolved_path = resolve_file_path(edge_original_path, file_name)
                     if resolved_path:
                         file_path = resolved_path
@@ -336,7 +308,6 @@ def api_preview_file():
                 # 再检查vertex文件（即使edge文件匹配但路径不存在，也要继续检查）
                 if "vertex" in schema and len(schema["vertex"]) > 0:
                     vertex_original_path = schema["vertex"][0].get("original_path", "")
-                    logger.info(f"检查vertex文件: file_name={file_name}, vertex_original_path={vertex_original_path}")
                     resolved_path = resolve_file_path(vertex_original_path, file_name)
                     if resolved_path:
                         file_path = resolved_path
@@ -550,13 +521,11 @@ def api_upload_file():
                 'error': 'Missing kb_id'
             }), 400
         
-        logger.info("这是表单填写的数据%s和该数据的类型%s",graph_info_json, type(graph_info_json))
-        
         # 获取知识库名称
         kb_name = get_knowledge_base_name(kb_id)
         
-        # 创建目录结构
-        file_dir = os.path.join("..","..", "aag", "datasets", "data" ,kb_name, file_type)
+        # 创建目录结构，统一使用后端 DATASETS_DATA_DIR 绝对路径
+        file_dir = os.path.join(str(DATASETS_DATA_DIR), kb_name, file_type)
         os.makedirs(file_dir, exist_ok=True)
         
         if is_batch_upload and file_type == 'graph':
@@ -568,11 +537,6 @@ def api_upload_file():
                     'error': 'Missing files'
                 }), 400
             
-            logger.info(f"=== HTTP批量文件上传请求 ===")
-            logger.info(f"知识库ID: {kb_id}")
-            logger.info(f"文件数量: {len(files)}")
-            logger.info(f"文件类型: {file_type}")
-            
             # 先保存所有文件
             for file in files:
                 file_path = os.path.join(file_dir, file.filename)
@@ -583,10 +547,8 @@ def api_upload_file():
                     'path': file_path,
                     'size': file_size
                 })
-                logger.info(f"文件保存成功: {file_path}, 大小: {file_size} bytes")
             
             # 所有文件保存完成后，再调用DocumentAPI
-            logger.info("开始修改schema")
             try:
                 graph_info = json.loads(graph_info_json)
             except (json.JSONDecodeError, TypeError) as e:
@@ -595,14 +557,12 @@ def api_upload_file():
                     if os.path.exists(saved_file['path']):
                         try:
                             os.remove(saved_file['path'])
-                            logger.info(f"JSON解析失败：已删除文件: {saved_file['path']}")
                         except Exception as del_e:
                             logger.error(f"删除文件失败 {saved_file['path']}: {str(del_e)}")
                 return jsonify({
                     'success': False,
                     'error': f'Invalid graph_info JSON: {str(e)}'
                 }), 400
-            logger.info("这是转换之后的info %s 和类型 %s",graph_info, type(graph_info))
             graph_name = graph_info.get("graphName")
             # 提取顶点文件相关字段
             vertex_file_name = graph_info["vertexSchema"].get("fileName", "")  # 顶点文件名（可选）
@@ -617,7 +577,8 @@ def api_upload_file():
             edge_relation_field = graph_info["edgeSchema"].get("relationField", "")  # 关系字段（必填）
             weight_col = graph_info["edgeSchema"].get("weightField", "")  # 权重字段（可选）
             is_directed = graph_info["graphProperties"].get("isDirected", True)  # 是否为有向图
-
+            vertex_attribute_field = format_string_to_list(graph_info["vertexSchema"].get("propertiesField", ""))  # 顶点属性字段（可选），转为后端期望的列表字面量字符串
+            vertex_query_field = graph_info["vertexSchema"].get("nameField", "")  # 顶点查询字段（可选）
             # 验证必填字段
             if not edge_file_name or not edge_source_field or not edge_target_field:
                 # 删除已保存的文件
@@ -625,7 +586,6 @@ def api_upload_file():
                     if os.path.exists(saved_file['path']):
                         try:
                             os.remove(saved_file['path'])
-                            logger.info(f"验证失败：已删除文件: {saved_file['path']}")
                         except Exception as del_e:
                             logger.error(f"删除文件失败 {saved_file['path']}: {str(del_e)}")
                 return jsonify({
@@ -640,7 +600,6 @@ def api_upload_file():
                     if os.path.exists(saved_file['path']):
                         try:
                             os.remove(saved_file['path'])
-                            logger.info(f"验证失败：已删除文件: {saved_file['path']}")
                         except Exception as del_e:
                             logger.error(f"删除文件失败 {saved_file['path']}: {str(del_e)}")
                 return jsonify({
@@ -650,7 +609,6 @@ def api_upload_file():
             
             vertex_name_field = format_string_to_list(vertex_name_field)
             edge_relation_field = format_string_to_list(edge_relation_field)
-            logger.info("这是前端返回的结果%s和类型%s", graph_info, type(graph_info))
             msg111 = json.dumps({
                 "action": "upload_file", 
                 "file_name": edge_file_name, 
@@ -661,15 +619,14 @@ def api_upload_file():
                 "source_field": edge_source_field, 
                 "target_field": edge_target_field,
                 "relation_field": edge_relation_field,  # 使用 relation_field 而不是 edge_relation_field
-                "is_directed": is_directed
+                "is_directed": is_directed,
                 #"weight_field": weight_col if weight_col else None
+                "vertex_attribute_field": vertex_attribute_field,
+                "vertex_query_field": vertex_query_field
             })
-            logger.info("这是准备发给DocumentAPI的消息%s", msg111)
             a25 = MessageCollectingSocket(msg111)
             asyncio.run(server_Test.handler(a25))
             acps = a25.returnmsg
-            logger.info("这是DocumentAPI返回的结果%s", acps)
-            logger.info("收集到的所有消息: %s", a25.messages)
                 # 如果有错误，优先使用错误消息
             if a25.has_error:
                 try:
@@ -683,7 +640,6 @@ def api_upload_file():
                         if os.path.exists(saved_file['path']):
                             try:
                                 os.remove(saved_file['path'])
-                                logger.info(f"已删除文件: {saved_file['path']}")
                             except Exception as e:
                                 logger.error(f"删除文件失败 {saved_file['path']}: {str(e)}")
                 return jsonify({
@@ -699,7 +655,6 @@ def api_upload_file():
                         if os.path.exists(saved_file['path']):
                             try:
                                 os.remove(saved_file['path'])
-                                logger.info(f"已删除文件: {saved_file['path']}")
                             except Exception as e:
                                 logger.error(f"删除文件失败 {saved_file['path']}: {str(e)}")
                 return jsonify({
@@ -732,11 +687,6 @@ def api_upload_file():
                     'error': 'Missing file'
                 }), 400
             
-            logger.info(f"=== HTTP文件上传请求 ===")
-            logger.info(f"知识库ID: {kb_id}")
-            logger.info(f"文件名: {file.filename}")
-            logger.info(f"文件类型: {file_type}")
-            
             # 保存文件
             file_path = os.path.join(file_dir, file.filename)
             file.save(file_path)
@@ -745,8 +695,6 @@ def api_upload_file():
             # 获取文件大小
             file_size = os.path.getsize(file_path)
             
-            logger.info(f"文件保存成功: {file_path}, 大小: {file_size} bytes")
-            logger.info("开始修改schema")
             if file_type == 'text':
                 # 使用可捕获错误信息的socket
                 a25 = MessageCollectingSocket(json.dumps({
@@ -756,8 +704,6 @@ def api_upload_file():
                 }))
                 asyncio.run(server_Test.handler(a25))
                 acps = a25.returnmsg
-                logger.info("这是DocumentAPI返回的结果%s", acps)
-                logger.info("收集到的所有消息: %s", a25.messages)
                 # 如果有错误，优先使用错误消息
                 if a25.has_error:
                     try:
@@ -770,7 +716,6 @@ def api_upload_file():
                         if os.path.exists(file_path):
                             try:
                                 os.remove(file_path)
-                                logger.info(f"已删除文件: {file_path}")
                             except Exception as e:
                                 logger.error(f"删除文件失败 {file_path}: {str(e)}")
                     return jsonify({
@@ -788,7 +733,6 @@ def api_upload_file():
                         if os.path.exists(file_path):
                             try:
                                 os.remove(file_path)
-                                logger.info(f"已删除文件: {file_path}")
                             except Exception as e:
                                 logger.error(f"删除文件失败 {file_path}: {str(e)}")
                     return jsonify({
@@ -804,14 +748,12 @@ def api_upload_file():
                     if saved_file_path and os.path.exists(saved_file_path):
                         try:
                             os.remove(saved_file_path)
-                            logger.info(f"JSON解析失败：已删除文件: {saved_file_path}")
                         except Exception as del_e:
                             logger.error(f"删除文件失败 {saved_file_path}: {str(del_e)}")
                     return jsonify({
                         'success': False,
                         'error': f'Invalid graph_info JSON: {str(e)}'
                     }), 400
-                logger.info("这是转换之后的info %s 和类型 %s",graph_info, type(graph_info))
                 graph_name = graph_info.get("graphName")
                 # 提取顶点文件相关字段
                 vertex_file_name = graph_info["vertexSchema"].get("fileName", "")  # 顶点文件名（可选）
@@ -845,7 +787,6 @@ def api_upload_file():
                     }), 400
                 vertex_name_field = format_string_to_list(vertex_name_field)
                 edge_relation_field = format_string_to_list(edge_relation_field)
-                logger.info("这是前端返回的结果%s和类型%s", graph_info, type(graph_info))
                 msg111 = json.dumps({
                     "action": "upload_file", 
                     "file_name": edge_file_name, 
@@ -859,12 +800,9 @@ def api_upload_file():
                     "is_directed": is_directed,
                     #"weight_field": weight_col if weight_col else None
                 })
-                logger.info("这是准备发给DocumentAPI的消息%s", msg111)
                 a25 = MessageCollectingSocket(msg111)
                 asyncio.run(server_Test.handler(a25))
                 acps = a25.returnmsg
-                logger.info("这是DocumentAPI返回的结果%s", acps)
-                logger.info("收集到的所有消息: %s", a25.messages)
                 # 如果有错误，优先使用错误消息
                 if a25.has_error:
                     try:
@@ -875,7 +813,6 @@ def api_upload_file():
                     if os.path.exists(file_path):
                         try:
                             os.remove(file_path)
-                            logger.info(f"已删除文件: {file_path}")
                         except Exception as e:
                             logger.error(f"删除文件失败 {file_path}: {str(e)}")
                     return jsonify({
@@ -887,7 +824,6 @@ def api_upload_file():
                     if os.path.exists(file_path):
                         try:
                             os.remove(file_path)
-                            logger.info(f"已删除文件: {file_path}")
                         except Exception as e:
                             logger.error(f"删除文件失败 {file_path}: {str(e)}")
                     return jsonify({
@@ -914,14 +850,12 @@ def api_upload_file():
                 if os.path.exists(saved_file['path']):
                     try:
                         os.remove(saved_file['path'])
-                        logger.info(f"异常处理：已删除文件: {saved_file['path']}")
                     except Exception as del_e:
                         logger.error(f"异常处理：删除文件失败 {saved_file['path']}: {str(del_e)}")
         # 单个文件上传的情况
         elif saved_file_path and os.path.exists(saved_file_path):
             try:
                 os.remove(saved_file_path)
-                logger.info(f"异常处理：已删除文件: {saved_file_path}")
             except Exception as del_e:
                 logger.error(f"异常处理：删除文件失败 {saved_file_path}: {str(del_e)}")
         return jsonify({
@@ -930,42 +864,38 @@ def api_upload_file():
         }), 500
 
 
-def process_graph_file(kb_name, file_name, graph_info):
-    """处理图数据文件"""
-    try:
-        # 构建文件路径
-        file_dir = os.path.join(UPLOAD_BASE_DIR, kb_name, file_name)
-        file_path = os.path.join(file_dir, file_name)
+# def process_graph_file(kb_name, file_name, graph_info):
+#     """处理图数据文件"""
+#     try:
+#         # 构建文件路径
+#         file_dir = os.path.join(UPLOAD_BASE_DIR, kb_name, file_name)
+#         file_path = os.path.join(file_dir, file_name)
         
-        # 这里调用你的图数据处理逻辑
-        logger.info(f"处理图数据文件: {file_name} in dataset {kb_name}")
+#         # 这里调用你的图数据处理逻辑
+#         # 示例：调用DocumentAPI处理图数据
+#         # 请根据你的实际需求实现这个函数
+#         # from your_module import process_graph_data
+#         # process_graph_data(kb_name, file_path, graph_info)
         
-        # 示例：调用DocumentAPI处理图数据
-        # 请根据你的实际需求实现这个函数
-        # from your_module import process_graph_data
-        # process_graph_data(kb_name, file_path, graph_info)
-        
-    except Exception as e:
-        logger.error(f"处理图数据文件失败: {str(e)}")
+#     except Exception as e:
+#         logger.error(f"处理图数据文件失败: {str(e)}")
 
 
-def process_text_file(kb_name, file_name):
-    """处理文本数据文件"""
-    try:
-        # 构建文件路径
-        file_dir = os.path.join(UPLOAD_BASE_DIR, kb_name, file_name)
-        file_path = os.path.join(file_dir, file_name)
+# def process_text_file(kb_name, file_name):
+#     """处理文本数据文件"""
+#     try:
+#         # 构建文件路径
+#         file_dir = os.path.join(UPLOAD_BASE_DIR, kb_name, file_name)
+#         file_path = os.path.join(file_dir, file_name)
         
-        # 这里调用你的文本处理逻辑
-        logger.info(f"处理文本文件: {file_name} in dataset {kb_name}")
+#         # 这里调用你的文本处理逻辑
+#         # 示例：调用DocumentAPI处理文本数据
+#         # 请根据你的实际需求实现这个函数
+#         # from your_module import process_text_data
+#         # process_text_data(kb_name, file_path)
         
-        # 示例：调用DocumentAPI处理文本数据
-        # 请根据你的实际需求实现这个函数
-        # from your_module import process_text_data
-        # process_text_data(kb_name, file_path)
-        
-    except Exception as e:
-        logger.error(f"处理文本文件失败: {str(e)}")
+#     except Exception as e:
+#         logger.error(f"处理文本文件失败: {str(e)}")
 
 # API路由保持不变
 @bp.route('/api/knowledge_bases1', methods=['GET'])
@@ -976,8 +906,6 @@ def get_knowledge_bases1():
         asyncio.run(server_Test.handler(a1))
         gkb = a1.returnmsg
         knowledge_bases = json.loads(gkb)
-        logger.info("####这是子涵页面里信息 %s",knowledge_bases)
-        logger.info("####这是子涵页面里信息类型 %s",type(knowledge_bases))
         for kb in knowledge_bases["content"]["data"]:
             if kb.get("文件类型") == "graph" and kb.get("文档个数") == 1:
                 try:
@@ -985,14 +913,11 @@ def get_knowledge_bases1():
                     asyncio.run(server_Test.handler(a6))
                     gkb6 = a6.returnmsg
                     gkb6_json = json.loads(gkb6)
-                    logger.info("####判断信息类型 %s",gkb6_json)
-                    logger.info("####判断信息类型 %s",type(gkb6_json))
                     data_list = gkb6_json.get("content", {}).get("data", [])
                     if isinstance(data_list, list) and data_list and data_list[0].get("vertex_file",None) is not None:
                         kb["文档个数"] = 2
                 except Exception as inner_e:
                     logger.warning(f"统计图文件数时出错，已忽略: {inner_e}")
-        logger.info("这是return给网页的信息%s",len(knowledge_bases["content"]["data"]))
         return jsonify({
             "success": True,
             "data": knowledge_bases["content"]["data"],
@@ -1046,9 +971,6 @@ def api_delete_file():
         kb_id = request.args.get('kb_id')
         file_name = request.args.get('file_name')
         
-        logger.info(f"=== HTTP删除文件请求 ===")
-        logger.info(f"知识库ID: {kb_id}")
-        logger.info(f"文件名: {file_name}")
         if not kb_id or not file_name:
             return jsonify({
                 'success': False,
@@ -1065,17 +987,12 @@ def api_delete_file():
             acps = json.loads(acps)
             file_name = acps["content"]["data"][0]["name"]
         try:
-            logger.info("###### %s %s", file_name, kb_name)
-            logger.info("删除可以进来这里")
             socketserver2 = DummySocket(json.dumps(
                 {"action":"delete_file",
                 "file_name":file_name,
                 "ds_name":kb_name}
             ))
-            logger.info("这是真删除成功了")
             asyncio.run(server_Test.handler(socketserver2))
-        #     
-        #     logger.info(f"成功删除文件夹: {file_dir}")
             
             return jsonify({
                 'success': True,
@@ -1105,11 +1022,6 @@ def api_parse_control():
         kb_id = request.args.get('kb_id')
         file_name = request.args.get('file_name')
         action = request.args.get('action')  # 'start' 或 'pause'
-        
-        logger.info(f"=== HTTP解析控制请求 ===")
-        logger.info(f"知识库ID: {kb_id}")
-        logger.info(f"文件名: {file_name}")
-        logger.info(f"操作类型: {action}")
         
         if not kb_id or not file_name or not action:
             return jsonify({
@@ -1145,14 +1057,12 @@ def api_parse_control():
             parsed_msg = json.loads(raw_msg)
         except Exception:
             parsed_msg = {}
-        logger.info("这是解析后的消息%s",parsed_msg)
         # 如果 DocumentAPI 返回的是 error，则把详细信息透传给前端
         if isinstance(parsed_msg, dict) and parsed_msg.get("type") == "error":
             a6 = DummySocket(json.dumps({"action": "schema_refine","ds_name": kb_name,"file_name": file_name}))
             asyncio.run(server_Test.handler(a6))
             #acps = a6.returnmsg
             #acps = json.loads(acps)
-            #logger.info("这是schema_refine返回的结果%s",acps)
             # content 中已经包含“添加失败 ❌ ... 未找到 JSON 内容，原始响应: ...”
             error_content = parsed_msg.get("content") or "解析失败，请检查文件内容"
             logger.error(f"在数据集{kb_name}中解析文件{file_name}失败: {error_content}")
@@ -1170,15 +1080,6 @@ def api_parse_control():
         # - file_path: 文件完整路径
         # - action: 'start' 或 'pause'
         # ============================================
-        
-        # 示例：打印接收到的信息
-        logger.info(f"=== 解析请求信息 ===")
-        logger.info(f"知识库ID: {kb_id}")
-        logger.info(f"知识库名称: {kb_name}")
-        logger.info(f"文件名: {file_name}")
-        #logger.info(f"文件路径: {file_path}")
-        logger.info(f"操作类型: {action}")
-        logger.info(f"===================")
         
         # 这里可以调用您的 DocumentAPI 或其他处理逻辑
         # 例如：
@@ -1210,13 +1111,7 @@ def api_generate_graph():
         kb_name = data.get('kb_name')
         files = data.get('files', [])
         dataset_type = get_dataset_type_from_back(kb_id)
-        logger.info(f"=== 生成图谱请求 ===")
-        logger.info(f"知识库ID: {kb_id}")
-        logger.info(f"知识库名称: {kb_name}")
-        logger.info(f"文件列表: {files}")
-        logger.info(f"数据集类型: {dataset_type}")
         graph_name1 = files[0].split('.')[0]
-        logger.info(graph_name1)
         if not kb_id:
             return jsonify({
                 'success': False,
@@ -1239,17 +1134,6 @@ def api_generate_graph():
         # ============================================
         # 在这里调用您的三元组生成逻辑
         # ============================================
-        
-        logger.info(f"=== 图谱生成请求信息 ===")
-        logger.info(f"知识库ID: {kb_id}")
-        logger.info(f"知识库显示名称: {kb_name}")
-        logger.info(f"知识库实际名称: {kb_real_name}")
-        logger.info(f"文件数量: {len(files)}")
-        for file in files:
-            logger.info(f"  - {file}")
-        logger.info(f"===================")
-        
-        # ============================================
         # 这里是您需要实现的三元组生成逻辑
         # 请替换下面的示例代码
         # ============================================
@@ -1262,7 +1146,6 @@ def api_generate_graph():
             asyncio.run(server_Test.handler(a33))
             agg = a33.returnmsg
             agg1 = json.loads(agg)
-            logger.info("####这里都可以的 %s", agg)
             triplets = agg1["content"]["data"]
             if len(triplets) > 500:
                 triplets = triplets[:500]
@@ -1274,7 +1157,6 @@ def api_generate_graph():
             asyncio.run(server_Test.handler(a33))
             agg = a33.returnmsg
             agg1 = json.loads(agg)
-            logger.info("####这里都可以的 %s", agg1)
             triplets = agg1["content"]["data"]["edges"]
             is_directed = agg1["content"]["data"].get("is_directed",True)
             if len(triplets) > 500:

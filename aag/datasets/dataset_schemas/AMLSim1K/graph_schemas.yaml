@@ -1,12 +1,17 @@
 datasets:
 - description: "AMLSim 1K synthetic transaction graph."
-  name: AMLSim1K
+  name: transactions.csv
+  create_time: '2025-12-18 17:49:27'
+  graph_status: completed
   schema:
     edge:
     - attribute_fields: []
       format: csv
       label_field: is_sar
-      path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/graph/transactions.csv
+      # path: ../../aag/datasets/data/AMLSim1K/process_graph/transactions.csv_edges.csv
+      # original_path: ../../aag/datasets/data/AMLSim1K/graph/transactions.csv
+      path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/process_graph/transactions.csv_edges.csv
+      original_path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/graph/transactions.csv
       source_field: orig_acct
       target_field: bene_acct
       type: transfer
@@ -30,7 +35,10 @@ datasets:
       query_field: [last_name, first_name]
       id_field: acct_id
       label_field: prior_sar_count
-      path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/graph/accounts.csv
+      # path: ../../aag/datasets/data/AMLSim1K/process_graph/transactions.csv_vertices.csv
+      # original_path: ../../aag/datasets/data/AMLSim1K/graph/accounts.csv
+      path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/process_graph/transactions.csv_vertices.csv
+      original_path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/graph/accounts.csv
       type: account
   type: graph
 

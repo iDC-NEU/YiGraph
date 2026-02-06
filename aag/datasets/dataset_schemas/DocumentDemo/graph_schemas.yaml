@@ -1,0 +1,103 @@
+datasets:
+- description: DocumentDemo_aml_doc graph generated from ../../aag/datasets/data/DocumentDemo/text/demo_document1.md
+  name: DocumentDemo_aml_doc
+  type: graph
+  graph_status: completed
+  create_time: '2026-02-02 11:29:03'
+  schema:
+    vertex:
+    - attribute_fields: []
+      format: csv
+      id_field: acct_id
+      label_field: dsply_nm
+      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_aml_doc_accounts.csv
+      type: account
+    edge:
+    - attribute_fields: []
+      format: csv
+      label_field: bene_acct
+      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_aml_doc_transactions.csv
+      source_field: tran_id
+      target_field: orig_acct
+      type: transfer
+      weight_field: null
+    graph:
+      directed: 'true'
+      heterogeneous: 'false'
+      multigraph: 'false'
+      weighted: 'false'
+    graph_store_info:
+      backend: nebula_graph
+      edge_count: 9
+      space_name: DocumentDemo_aml_doc
+      status: success
+      version: 'null'
+      vertex_count: 15
+- description: DocumentDemo_graph_analysis_doc.md graph generated from ../../aag/datasets/data/DocumentDemo/text/demo_document2.md
+  name: DocumentDemo_graph_analysis_doc.md
+  type: graph
+  graph_status: completed
+  create_time: '2026-02-02 11:30:48'
+  schema:
+    vertex:
+    - attribute_fields: []
+      format: csv
+      id_field: acct_id
+      label_field: dsply_nm
+      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_graph_analysis_doc.md_accounts.csv
+      type: account
+    edge:
+    - attribute_fields: []
+      format: csv
+      label_field: bene_acct
+      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_graph_analysis_doc.md_transactions.csv
+      source_field: tran_id
+      target_field: orig_acct
+      type: transfer
+      weight_field: null
+    graph:
+      directed: 'true'
+      heterogeneous: 'false'
+      multigraph: 'false'
+      weighted: 'false'
+    graph_store_info:
+      backend: nebula_graph
+      edge_count: 19
+      space_name: DocumentDemo_graph_analysis_doc.md
+      status: success
+      version: 'null'
+      vertex_count: 30
+- description: DocumentDemo_knowledge_graph_doc.md graph generated from ../../aag/datasets/data/DocumentDemo/text/demo_document3.md
+  name: DocumentDemo_knowledge_graph_doc.md
+  type: graph
+  graph_status: completed
+  create_time: '2026-02-02 11:31:18'
+  schema:
+    vertex:
+    - attribute_fields: []
+      format: csv
+      id_field: acct_id
+      label_field: dsply_nm
+      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_knowledge_graph_doc.md_accounts.csv
+      type: account
+    edge:
+    - attribute_fields: []
+      format: csv
+      label_field: bene_acct
+      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_knowledge_graph_doc.md_transactions.csv
+      source_field: tran_id
+      target_field: orig_acct
+      type: transfer
+      weight_field: null
+    graph:
+      directed: 'true'
+      heterogeneous: 'false'
+      multigraph: 'false'
+      weighted: 'false'
+    graph_store_info:
+      backend: nebula_graph
+      edge_count: 17
+      space_name: DocumentDemo_knowledge_graph_doc.md
+      status: success
+      version: 'null'
+      vertex_count: 18

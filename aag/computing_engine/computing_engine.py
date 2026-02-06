@@ -171,21 +171,21 @@ class ComputingEngine:
             logger.error(f"❌ Algorithm '{algo_name}' failed: {e}")
             return {"success": False, "error": str(e)}
 
-    async def get_algorithm_description(self, algo_name: str) -> tuple[str, dict]:
+    async def get_algorithm_description(self, algo_name: str) -> tuple[str, Optional[dict]]:
         """
         获取指定算法的工具描述信息（包含 input/output schema）
         """
         engine = self._resolve_engine(algo_name)
         client = self.clients.get(engine)
         if not client:
-            return f"⚠️ Engine '{engine}' not connected.\n"
+            return f"⚠️ Engine '{engine}' not connected.\n", None
 
         # ✅ 使用新方法解析工具名
         tool_name = self._resolve_tool_name(algo_name, engine)
         
         tool_info = client.available_tools.get(tool_name)
         if not tool_info:
-            return f"⚠️ Tool '{tool_name}' not found in engine '{engine}'.\n"
+            return f"⚠️ Tool '{tool_name}' not found in engine '{engine}'.\n", None
 
         # 取出 schema
         input_schema = tool_info.get("input_schema", {})

@@ -1036,7 +1036,7 @@ def process(data):
 When writing the post-processing code, follow these guidelines:
 1. Access to Global Graph Data
 The code has access to **global_graph** (instance of GraphData) for property retrieval and topology analysis.
-**vetrix_schema** provide vertex property names and **edge_schema** provide edge property names.
+**vertex_schema** provide vertex property names and **edge_schema** provide edge property names.
 You must choose properties based on these given schemas.
 Available API Methods:
 - global_graph.has_vertex(vid: str): Check if a vertex exists.
@@ -1290,7 +1290,7 @@ Parameter Cleaning: Do not include G or backend_kwargs in the parameters object.
 ### tool_description
 {tool_description}
 ###vertexData schema
-{vetrix_schema}
+{vertex_schema}
 ###edgeData schema
 {edge_schema}
 
@@ -1400,7 +1400,7 @@ CRITICAL: Analyze Input Data Structure Before Writing Code**: The input paramete
 When writing the post-processing code, follow these guidelines:
 1. Access to Global Graph Data
 The code has access to **global_graph** (instance of GraphData) for property retrieval and topology analysis.
-**vetrix_schema** provide vertex property names and **edge_schema** provide edge property names.
+**vertex_schema** provide vertex property names and **edge_schema** provide edge property names.
 You must choose properties based on these schemas.
 Available API Methods:
 - global_graph.has_vertex(vid: str): Check if a vertex exists.
@@ -1648,7 +1648,7 @@ These parameters have been automatically extracted from parent step results and 
 {dependency_parameters}
 ```
 ###vertexData schema
-{vetrix_schema}
+{vertex_schema}
 ###edgeData schema
 {edge_schema}
 

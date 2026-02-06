@@ -2,6 +2,7 @@ import re
 from typing import Dict, Any, List
 from tqdm import tqdm
 import datetime
+import json
 
 from aag.utils.file_operation import file_exist
 from aag.utils.parse_json import extract_json_from_response
@@ -12,7 +13,8 @@ prompt_template_str = """
 **Identify Named Entities**: Extract entities based on the given entity types, ensuring they appear in the order they are mentioned in the text.
 **Establish Triplets**: Form triples with reference to the provided predicates, again in the order they appear in the text.
 
-Your final response should follow this format:
+Your final response should follow this format (must be a json format):
+
 
 **Output:**
 ```json
@@ -246,7 +248,7 @@ class Text2Graph:
         for idx, chunk in enumerate(tqdm(self.text_chunks)):
             
             for attempt in range(1, MAX_RETRIES + 1):
-                response = self.llm.complete(prompt=prompt_template_str.format(context=chunk))
+                response = self.llm.generate_response(query=prompt_template_str.format(context=chunk))
                 # 判空
                 if not response:
                     print(f"⚠️ 块 {idx} 第 {attempt} 次尝试未获得响应")
@@ -441,7 +443,7 @@ class Text2Graph:
         assert False, "stop here"
         return triplets
 
-    def extract_graph_and_entity_by_LLM(self, MAX_RETRIES = 5):
+    def extract_graph_and_entity_by_LLM(self, each_dataset, file_name, each_dataset_schema_file_path, MAX_RETRIES = 5):
         """
         从文本数据中提取三元组与实体类型
 
@@ -455,13 +457,33 @@ class Text2Graph:
         entity2type: Dict[str, str] = {}
 
         for idx, chunk in enumerate(tqdm(self.text_chunks)):
+
             for attempt in range(1, MAX_RETRIES + 1):
-                response = self.llm.complete(prompt=prompt_template_str.format(context=chunk))
+                response = self.llm.generate_response(query=prompt_template_str.format(context=chunk)).text
                 if not response:
                     print(f"⚠️ 块 {idx} 第 {attempt} 次无响应")
                     continue
+                
+                cleaned = response.strip()
 
-                response_parsed = extract_json_from_response(response)
+                # remove markdown mark
+                cleaned = re.sub(r"^```[a-zA-Z]*\n?|```$", "", cleaned, flags=re.MULTILINE).strip()
+
+                # match {} content
+                match = re.search(r'\{[\s\S]*\}', cleaned)
+                if not match:
+                    print(f"❌ 未找到 JSON 内容，原始响应:\n{cleaned}")
+                    continue
+
+                json_str = match.group(0)
+                
+                try:
+                    response_parsed = json.loads(json_str)
+                except json.JSONDecodeError as e:
+                    # JSON 解析失败，记录日志并跳过当前条目
+                    print(f"[Warning] JSON parsing failed at index {idx} of {attempt}: {e}")
+                    continue
+
                 if not isinstance(response_parsed, dict):
                     print(f"⚠️ 块 {idx} 第 {attempt} 次 JSON 解析失败")
                     continue
@@ -470,11 +492,13 @@ class Text2Graph:
             else:
                 print(f"❌ 块 {idx} 超过 {MAX_RETRIES} 次尝试失败，跳过")
                 continue
-
+            
+                
             # ======================
             # 1️⃣ 解析 entities 部分
             # ======================
             entities_from_response = {}
+            
             if isinstance(response.get("entities"), dict):
                 for entity_type, names in response["entities"].items():
                     for name in names:
@@ -497,11 +521,15 @@ class Text2Graph:
                         if x_clean:  # 非空字符串才保留
                             clean_triplet.append(x_clean.capitalize())
                     else:
-                        clean_triplet.append(x)  # 数字或其他类型保留原样
+                        if x is not None:
+                            clean_triplet.append(str(x))
 
                 # 长度必须为3才保留
                 if len(clean_triplet) == 3:
                     new_triplets.append(clean_triplet)
+                    if clean_triplet[0] == "New york":
+                        print(clean_triplet)
+                        print(len(clean_triplet))
                 else:
                     print(f"⚠️ 三元组长度不足3，跳过: {triplet}")
 
@@ -519,6 +547,16 @@ class Text2Graph:
                             # 调用大模型补全实体类型
                             entity_type = self._ask_entity_type(ent, chunk, MAX_RETRIES)
                             entity2type[ent] = entity_type
+            
+            each_dataset[file_name]["parsing_rate"] = (idx + 1) / len(self.text_chunks)
+            import yaml
+            output_file = []
+            for key in each_dataset:
+                output_file.append(each_dataset[key])
+            final_schema = {"datasets": output_file}
+            with open(each_dataset_schema_file_path, "w", encoding="utf-8") as f:
+                yaml.dump(final_schema, f, sort_keys=False, allow_unicode=True)
+            f.close()
         # ======================
         # 4️⃣ 生成实体-ID 映射
         # ======================
@@ -531,7 +569,7 @@ class Text2Graph:
         """向 LLM 查询实体类型"""
         prompt = prompt_entity_type.format(entity=entity, text_context=chunk)
         for attempt in range(1, MAX_RETRIES + 1):
-            response = self.llm.complete(prompt=prompt)
+            response = self.llm.generate_response(query=prompt).text
             if response and isinstance(response, str):
                 return response.strip().capitalize()
         print(f"⚠️ 无法确定实体类型：{entity}，默认设为 Unknown")
@@ -551,6 +589,10 @@ class Text2Graph:
         # -------------------------
         # 1️⃣ 保存实体 CSV（增加 type 列）
         # -------------------------
+        if os.path.exists(entities_csv_path):
+            os.remove(entities_csv_path)
+        if os.path.exists(triplets_csv_path):
+            os.remove(triplets_csv_path)
         with open(entities_csv_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(["acct_id", "dsply_nm", "type"])
@@ -566,6 +608,9 @@ class Text2Graph:
             writer = csv.writer(f)
             writer.writerow(["tran_id", "orig_acct", "bene_acct"])
             for head, rel, tail in triplets:
+                print(head, rel, tail)
+                if head not in entity2id or tail not in entity2id:
+                    continue
                 writer.writerow([entity2id[head], entity2id[tail], rel])
         print(f"✅ 边 CSV 保存到: {triplets_csv_path}")
 
@@ -576,7 +621,8 @@ class Text2Graph:
                     "description": f"{graph_name} graph generated from {self.file_path}",
                     "name": graph_name,
                     "type": "graph",
-                    "create time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "graph_status": "completed",
+                    "create_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "schema": {
                         "vertex": [
                             {
@@ -671,26 +717,24 @@ class Text2Graph:
             }
         }
 
-        if text_schema_path is None:
-            schema_yaml_path = os.path.join(dir_path, f"{base_name}_text_schemas.yaml")
-        else:
+        if text_schema_path is not None:
             schema_yaml_path = text_schema_path
-        import yaml
-        datasets = []
-        if os.path.exists(schema_yaml_path):
-            try:
-                with open(schema_yaml_path, "r", encoding="utf-8") as f:
-                    yaml_content = yaml.safe_load(f)
-                    if yaml_content and "datasets" in yaml_content:
-                        datasets = yaml_content["datasets"]
-            except Exception as e:
-                print(f"读取 YAML 失败: {e}")
+            import yaml
+            datasets = []
+            if os.path.exists(schema_yaml_path):
+                try:
+                    with open(schema_yaml_path, "r", encoding="utf-8") as f:
+                        yaml_content = yaml.safe_load(f)
+                        if yaml_content and "datasets" in yaml_content:
+                            datasets = yaml_content["datasets"]
+                except Exception as e:
+                    print(f"读取 YAML 失败: {e}")
 
-        datasets.append(new_dataset)
-        final_schema = {"datasets": datasets}
+            datasets.append(new_dataset)
+            final_schema = {"datasets": datasets}
 
-        with open(schema_yaml_path, "w", encoding="utf-8") as f:
-            yaml.dump(final_schema, f, sort_keys=False, allow_unicode=True)
+            with open(schema_yaml_path, "w", encoding="utf-8") as f:
+                yaml.dump(final_schema, f, sort_keys=False, allow_unicode=True)
 
         return schema_dict
 

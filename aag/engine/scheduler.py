@@ -967,13 +967,17 @@ class Scheduler:
 
                     if tool_result is None:
                         raise ValueError("Algorithm execution returned None")
+                    logger.info(f"tool_result:{tool_result} !!!!!!!!!!!!!")
 
                     result_data = tool_result.get("result")
                     if isinstance(result_data, dict) and "error" in result_data:
                         raise RuntimeError(result_data.get("error") or "Algorithm execution failed")
+                    logger.info(f"tool_result:{result_data} xxxxxxx")
+
 
                     if not tool_result.get("success", False):
                         error_msg = tool_result.get("error") or "Algorithm execution failed"
+                        logger.info(f"tool_result:{error_msg} sssssss")
                         raise RuntimeError(error_msg)
 
                     return is_has_extract_code, output_schema, tool_result
