@@ -3,8 +3,8 @@ import os
 import logging
 from datetime import datetime
 
-# 数据文件路径
-DATA_FILE = "/home/liuhy/AAG/web/frontend/models.json"
+
+DATA_FILE = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), "models.json")
 
 logger = logging.getLogger(__name__)
 

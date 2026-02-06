@@ -1,9 +1,0 @@
-datasets:
-- description: Test11 documents.
-  name: Test11
-  type: text
-  schema:
-    path: /home/caiy/aag_video/AAG/web/frontend/route/../debug/files/444444/Test11.txt/Test11.md
-    origin file path: /home/caiy/aag_video/AAG/web/frontend/route/../debug/files/444444/Test11.txt/Test11.txt
-    format: txt
-    encoding: utf-8
