@@ -157,6 +157,14 @@
   task_type: "Graph Query"
   description: Graph query tools for querying specific nodes, neighbors, subgraphs, and paths
   algorithm:
+    - node_lookup
+    - relationship_filter
+    - aggregation_query
+    - neighbor_query
+    - path_query
+    - common_neighbor
+    - subgraph
+    - subgraph_by_nodes
     - get_node_attributes
     - k_hop_neighbors
     - common_neighbors

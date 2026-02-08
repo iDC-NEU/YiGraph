@@ -5550,16 +5550,520 @@
     overall system?
   - In the supply chain association and traceability graph, from a full-chain perspective, what is the overall reachability
     distance level between nodes?
+- id: node_lookup
+  task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        label:
+          type: string
+          description: Node label to query
+          required: true
+        key:
+          type: string, optional
+          description: Property name for unique key lookup (required for single node lookup)
+          default: null
+        value:
+          type: any, optional
+          description: Property value for unique key lookup (required for single node lookup)
+          default: null
+        conditions:
+          type: dict, optional
+          description: Property conditions for filtering multiple nodes (required for multiple node filtering)
+          default: null
+        return_fields:
+          type: list, optional
+          description: List of fields to return
+          default: null
+    output_schema:
+      type: node or list of nodes
+      description: Single node (when using key+value) or list of nodes (when using conditions) matching the criteria
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
+  Application_scenario: Node lookup is fundamental for finding specific nodes in a graph database. It supports two modes - exact lookup by unique key (e.g., finding a user by ID) and property-based filtering (e.g., finding all customers in a specific state). This is commonly used in customer relationship management, user profile queries, and entity searches in knowledge graphs.
+  Tuning_Mechanisms:
+    conditions: Supports complex property filtering with operators like >, <, >=, <=, ==, != for numeric comparisons and string matching
+    return_fields: Specifying return fields can optimize query performance by reducing data transfer
+  Principles:
+    description: The algorithm performs either a direct index lookup (for unique key queries) or property-based filtering (for condition queries). For single node lookup, it uses get_node_by_unique_key method with O(1) complexity. For multiple node filtering, it uses filter_nodes_by_properties with complexity depending on index availability.
+    time_complexity: O(1) for unique key lookup, O(n) for property filtering without index
+  solvable_questions:
+  - Find user Collins Steven in the graph
+  - Query all customers living in US with state VT
+  - Find the account node with account_id = "ACC_12345"
+  - List all users with age greater than 30
+  - Find all products with price between 100 and 500
+  - Query the person node with name "John Smith"
+  - Find all transactions with status = "completed"
+- id: relationship_filter
+  task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        rel_type:
+          type: string
+          description: Relationship type to filter
+          required: true
+        start_label:
+          type: string, optional
+          description: Label of start node
+          default: null
+        end_label:
+          type: string, optional
+          description: Label of end node
+          default: null
+        rel_conditions:
+          type: dict, optional
+          description: Relationship property conditions
+          default: null
+        return_fields:
+          type: list, optional
+          description: List of fields to return
+          default: null
+        aggregate:
+          type: string, optional
+          description: Aggregation function (COUNT, SUM, AVG, MAX, MIN)
+          default: null
+    output_schema:
+      type: list of relationships or aggregation result
+      description: Relationships matching the conditions or aggregated statistics
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
+  Application_scenario: Relationship filtering is essential for querying edges based on their properties, such as finding high-value transactions, filtering communication records by timestamp, or analyzing relationships with specific attributes. It's widely used in fraud detection (finding suspicious transactions), network analysis (filtering connections by strength), and temporal queries (finding events in a time range).
+  Tuning_Mechanisms:
+    rel_conditions: Supports complex filtering with multiple conditions combined with AND/OR logic
+    aggregate: When specified, returns statistical results instead of raw data, useful for counting relationships or summing values
+  Principles:
+    description: The algorithm scans relationships of the specified type and applies property-based filters. It can optionally aggregate results using functions like COUNT, SUM, AVG. The method filter_relationships is used for this operation.
+    time_complexity: O(m) where m is the number of relationships of the specified type
+  solvable_questions:
+  - Find all transactions with amount greater than 400
+  - List the count of transactions where is_sar is False
+  - Find all TRANSFER relationships with timestamp after 2024-01-01
+  - Query communication records with duration longer than 60 minutes
+  - Find all friendship relationships created in the last month
+  - Calculate the total amount of all outgoing transactions
+  - Count how many citations occurred in year 2023
+- id: aggregation_query
+  task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        aggregate_type:
+          type: string
+          description: Aggregation type (COUNT, SUM, AVG, MAX, MIN)
+          required: true
+        group_by_node:
+          type: string, optional
+          description: Node label to group by
+          default: null
+        group_by_property:
+          type: string, optional
+          description: Property name to group by
+          default: null
+        node_label:
+          type: string, optional
+          description: Node label for filtering
+          default: null
+        rel_type:
+          type: string, optional
+          description: Relationship type for filtering
+          default: null
+        direction:
+          type: string, optional
+          description: Relationship direction (OUTGOING, INCOMING, BOTH)
+          default: null
+        aggregate_field:
+          type: string, optional
+          description: Field to aggregate (required for SUM, AVG, MAX, MIN)
+          default: null
+        return_fields:
+          type: list, optional
+          description: Additional fields to return
+          default: null
+    output_schema:
+      type: list of aggregation results
+      description: Grouped aggregation results with group key and aggregated value
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
+  Application_scenario: Aggregation queries are crucial for statistical analysis and ranking tasks, such as counting transactions per account, calculating total transaction amounts, finding top spenders, or analyzing degree distributions. Common use cases include business intelligence dashboards, fraud pattern detection (accounts with unusual transaction counts), and network analysis (node degree statistics).
+  Tuning_Mechanisms:
+    group_by_node: Groups results by node, useful for per-entity statistics
+    group_by_property: Groups results by property value, useful for categorical analysis
+    aggregate_type: Different aggregation functions provide different insights (COUNT for frequency, SUM for totals, AVG for averages)
+  Principles:
+    description: The algorithm performs GROUP BY operations combined with aggregation functions. It groups data by specified node or property and applies aggregation functions like COUNT, SUM, AVG. The method aggregation_query is used with complexity depending on the number of groups.
+    time_complexity: O(n + m) where n is nodes and m is relationships involved
+  solvable_questions:
+  - Count the number of transactions per account
+  - Calculate the total amount of outgoing transactions per account
+  - Count the number of accounts under each branch_id
+  - Find the top 10 accounts with the most transactions
+  - Calculate the average transaction amount per day
+  - Count how many papers each author has published
+  - Find the maximum transaction amount for each account
+  - Calculate the average degree of nodes in each community
+- id: neighbor_query
+  task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        label:
+          type: string
+          description: Node label
+          required: true
+        key:
+          type: string
+          description: Property name for node identification
+          required: true
+        value:
+          type: any
+          description: Property value for node identification
+          required: true
+        hops:
+          type: int, optional
+          description: Number of hops (default 1)
+          default: 1
+        rel_type:
+          type: string, optional
+          description: Relationship type to traverse
+          default: null
+        direction:
+          type: string, optional
+          description: Traversal direction (OUTGOING, INCOMING, BOTH)
+          default: null
+        return_fields:
+          type: list, optional
+          description: Fields to return for each edge
+          default: null
+    output_schema:
+      type: list of neighbors or paths
+      description: Neighbor nodes and their relationships within specified hops
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
+  Application_scenario: Neighbor queries are fundamental for exploring local graph structure, such as finding friends of a user, accounts that transacted with a specific account, or papers cited by a given paper. It's essential for recommendation systems (finding similar items through neighbors), fraud detection (analyzing transaction patterns), and social network analysis (finding connections).
+  Tuning_Mechanisms:
+    hops: Controls the depth of traversal; hops=1 for direct neighbors, higher values for extended neighborhoods
+    direction: OUTGOING for following edges, INCOMING for reverse edges, BOTH for undirected exploration
+    return_fields: When specified, returns detailed information for each edge, preventing data loss from path aggregation
+  Principles:
+    description: The algorithm uses breadth-first search (BFS) to find all nodes reachable within k hops from a starting node. The method neighbors_n_hop is used. For hops=1 with detailed edge information, return_fields should be specified.
+    time_complexity: O(d^k) where d is average degree and k is number of hops
+  solvable_questions:
+  - Query neighbors of Collins Steven
+  - Find all accounts that Collins Steven has transferred money to
+  - List all papers cited by "Attention is All You Need"
+  - Find all 2-hop neighbors of user Alice
+  - Query all transaction details where Collins Steven is the source account
+  - Find all friends of friends for user Bob
+  - List all companies connected to person X within 3 hops
+- id: path_query
+  task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        label:
+          type: string
+          description: Node label for both nodes
+          required: true
+        key:
+          type: string
+          description: Property name for node identification
+          required: true
+        v1:
+          type: any
+          description: Property value for first node
+          required: true
+        v2:
+          type: any
+          description: Property value for second node
+          required: true
+        rel_type:
+          type: string, optional
+          description: Relationship type to traverse
+          default: null
+        direction:
+          type: string, optional
+          description: Traversal direction (OUTGOING, INCOMING, BOTH)
+          default: null
+        min_hops:
+          type: int, optional
+          description: Minimum path length
+          default: null
+        max_hops:
+          type: int, optional
+          description: Maximum path length
+          default: null
+    output_schema:
+      type: list of paths
+      description: Paths connecting the two nodes
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
+  Application_scenario: Path queries are critical for understanding how two entities are connected, such as finding money flow paths between accounts, tracing citation chains between papers, or discovering social connection paths. Applications include fraud investigation (tracing fund flows), relationship discovery in knowledge graphs, and supply chain analysis (tracking product flows).
+  Tuning_Mechanisms:
+    min_hops: Sets minimum path length, useful for excluding direct connections
+    max_hops: Limits maximum path length to control search space and avoid very long paths
+    rel_type: Restricts paths to specific relationship types
+  Principles:
+    description: The algorithm finds all paths or shortest paths between two nodes using methods like BFS for shortest paths or DFS for all paths. The method paths_between is used. Complexity depends on graph density and path length constraints.
+    time_complexity: O(V + E) for shortest path, exponential for all paths
+  solvable_questions:
+  - Find the path from Collins Steven to Nunez Mitchell
+  - Trace money flow from account A to account B
+  - Find citation chain from paper X to paper Y
+  - Discover social connection between user Alice and user Bob
+  - Find all paths between two companies within 5 hops
+  - Trace the shortest supply chain path from supplier to customer
+  - Find relationship path between two entities in knowledge graph
+- id: common_neighbor
+  task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        label:
+          type: string
+          description: Node label for both nodes
+          required: true
+        key:
+          type: string
+          description: Property name for node identification
+          required: true
+        v1:
+          type: any
+          description: Property value for first node
+          required: true
+        v2:
+          type: any
+          description: Property value for second node
+          required: true
+        rel_type:
+          type: string, optional
+          description: Relationship type to consider
+          default: null
+        direction:
+          type: string, optional
+          description: Relationship direction (OUTGOING, INCOMING, BOTH)
+          default: null
+        rel_conditions:
+          type: dict, optional
+          description: Relationship property conditions for filtering
+          default: null
+        return_fields:
+          type: list, optional
+          description: Fields to return
+          default: null
+    output_schema:
+      type: list of common neighbors
+      description: Nodes that are neighbors of both input nodes
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
+  Application_scenario: Common neighbor queries are essential for link prediction, similarity analysis, and pattern detection. Use cases include finding mutual friends in social networks, identifying shared transaction partners in financial networks (potential collusion), discovering co-cited papers in citation networks, and detecting common suppliers in supply chains.
+  Tuning_Mechanisms:
+    rel_conditions: When specified, filters common neighbors based on relationship properties, enabling more precise queries like "common neighbors with transaction amount > 400"
+    direction: Controls whether to consider outgoing, incoming, or both types of relationships
+  Principles:
+    description: The algorithm finds the intersection of neighbor sets of two nodes. It supports two modes - simple common neighbor query using common_neighbors method, or with relationship property filtering using common_neighbors_with_rel_filter method. Complexity is O(d1 + d2) where d1, d2 are degrees of the two nodes.
+    time_complexity: O(d1 + d2) where d1, d2 are node degrees
+  solvable_questions:
+  - Find common neighbors of Collins Steven and Nunez Mitchell
+  - Identify mutual friends between user A and user B
+  - Find common transaction partners of two accounts
+  - Discover shared recipients that both accounts transferred money to
+  - Find common transaction neighbors of Steven Collins and Samantha Cook where transaction amounts are all greater than 400
+  - Identify papers co-cited by two different papers
+  - Find common suppliers for two companies
+- id: subgraph
+  task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        label:
+          type: string, optional
+          description: Node label for center node (mode 1)
+          default: null
+        key:
+          type: string, optional
+          description: Property name for center node identification (mode 1)
+          default: null
+        value:
+          type: any, optional
+          description: Property value for center node identification (mode 1)
+          default: null
+        hops:
+          type: int, optional
+          description: Number of hops for expansion (mode 1)
+          default: null
+        rel_type:
+          type: string, optional
+          description: Relationship type for filtering
+          default: null
+        direction:
+          type: string, optional
+          description: Relationship direction (OUTGOING, INCOMING, BOTH)
+          default: null
+        limit_paths:
+          type: int, optional
+          description: Limit number of paths (mode 1)
+          default: null
+        rel_conditions:
+          type: dict, optional
+          description: Relationship property conditions (mode 2)
+          default: null
+        start_label:
+          type: string, optional
+          description: Start node label for relationship filtering (mode 2)
+          default: null
+        end_label:
+          type: string, optional
+          description: End node label for relationship filtering (mode 2)
+          default: null
+        limit:
+          type: int, optional
+          description: Limit number of relationships (mode 2)
+          default: null
+    output_schema:
+      type: subgraph
+      description: Extracted subgraph with nodes and relationships
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
+  Application_scenario: Subgraph extraction is crucial for focused analysis, visualization, and pattern detection. Common scenarios include extracting ego networks for user analysis, isolating suspicious transaction networks for fraud investigation, extracting temporal subgraphs (all transactions on a specific date), and creating training samples for graph neural networks.
+  Tuning_Mechanisms:
+    hops: Controls the size of extracted subgraph in mode 1 (center node expansion)
+    rel_conditions: Enables property-based filtering in mode 2, such as extracting all transactions within a specific amount range or time period
+    limit: Controls the maximum number of relationships to include, useful for large graphs
+  Principles:
+    description: The algorithm supports two modes - (1) Single center node expansion using subgraph_extract method, expanding k hops from a center node; (2) Relationship property filtering using subgraph_extract_by_rel_filter method, extracting all relationships matching conditions. Complexity depends on the subgraph size.
+    time_complexity: O(d^k) for mode 1, O(m) for mode 2 where m is matching relationships
+  solvable_questions:
+  - Extract subgraph around Collins Steven within 2 hops
+  - Extract subgraph of all transactions on 2025-05-01
+  - Extract subgraph of transactions with amounts between 300 and 500
+  - Extract ego network of user Alice with 3-hop neighbors
+  - Extract all TRANSFER relationships in January 2024
+  - Extract citation network around a specific paper
+  - Extract communication subgraph for a time period
+- id: subgraph_by_nodes
+  task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        label:
+          type: string
+          description: Node label
+          required: true
+        key:
+          type: string
+          description: Property name for node identification
+          required: true
+        values:
+          type: list
+          description: List of property values for multiple nodes
+          required: true
+        include_internal:
+          type: bool, optional
+          description: Whether to include only internal edges between specified nodes
+          default: true
+        rel_type:
+          type: string, optional
+          description: Relationship type to include
+          default: null
+        direction:
+          type: string, optional
+          description: Relationship direction (OUTGOING, INCOMING, BOTH)
+          default: null
+    output_schema:
+      type: subgraph
+      description: Induced subgraph containing specified nodes and their mutual relationships
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
+  Application_scenario: Subgraph extraction by node list is essential for analyzing relationships among a specific set of entities, such as examining transaction patterns among a group of suspicious accounts, analyzing collaboration networks among selected researchers, or studying interaction patterns among a set of users. It's widely used in fraud ring detection, team analysis, and focused network studies.
+  Tuning_Mechanisms:
+    include_internal: When True, only includes edges between the specified nodes; when False, may include edges to external nodes
+    rel_type: Filters to specific relationship types, useful for multi-relational graphs
+  Principles:
+    description: The algorithm extracts an induced subgraph containing specified nodes and all edges between them. The method subgraph_extract_by_nodes is used. It retrieves nodes by their identifiers and then finds all relationships connecting them.
+    time_complexity: O(n + m) where n is number of specified nodes and m is edges between them
+  solvable_questions:
+  - Extract accounts A, B, C and their transfer relationships
+  - Extract subgraph of a specific group of users and their friendships
+  - Analyze transaction network among 5 suspicious accounts
+  - Extract collaboration network among selected researchers
+  - Find all relationships among a set of companies
+  - Extract communication patterns among a team of users
+  - Analyze citation relationships among a set of papers
 - id: get_node_attributes
   task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        label:
+          type: string
+          description: Node label
+          required: true
+        key:
+          type: string
+          description: Property name for node identification
+          required: true
+        value:
+          type: any
+          description: Property value for node identification
+          required: true
+        return_fields:
+          type: list, optional
+          description: Specific fields to return (if not specified, returns all attributes)
+          default: null
+    output_schema:
+      type: dictionary
+      description: Dictionary containing node attributes
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
   Application_scenario: This algorithm is fundamental for retrieving detailed profile information in knowledge graphs, social
     networks, or product catalogs. For example, in a Customer 360 view, it is used to fetch specific user details (age, location,
     account status) based on their unique User ID; in an e-commerce graph, it retrieves product specifications given a product
     SKU.
+  Tuning_Mechanisms:
+    return_fields: Specifying specific fields can optimize query performance by reducing data transfer and processing overhead
   Principles:
     description: The algorithm performs a direct index lookup to retrieve the properties or attributes associated with a specific
       node identifier. It acts as a key-value retrieval operation within the graph database, returning the metadata stored
       on the node rather than its structural connections.
+    time_complexity: O(1) with proper indexing
   solvable_questions:
   - For user ID = U1024, return all attribute information of this node.
   - Query the node details for product number SKU-88991.
@@ -5571,14 +6075,59 @@
   - (Web Links) What is the page information corresponding to this webpage URL in the system?
 - id: k_hop_neighbors
   task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        label:
+          type: string
+          description: Node label
+          required: true
+        key:
+          type: string
+          description: Property name for node identification
+          required: true
+        value:
+          type: any
+          description: Property value for node identification
+          required: true
+        hops:
+          type: int, optional
+          description: Number of hops (default 1)
+          default: 1
+        rel_type:
+          type: string, optional
+          description: Relationship type to traverse
+          default: null
+        direction:
+          type: string, optional
+          description: Traversal direction (OUTGOING, INCOMING, BOTH)
+          default: BOTH
+        return_fields:
+          type: list, optional
+          description: Fields to return for neighbors and relationships
+          default: null
+    output_schema:
+      type: list
+      description: List of neighbor nodes within k hops
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
   Application_scenario: K-hop neighbor queries are widely used in recommendation systems, risk analysis, and impact assessment.
     For instance, in social networks, querying 2-hop neighbors helps suggest "Friends of Friends"; in supply chain management,
     it identifies tier-2 and tier-3 suppliers to assess indirect risks; in cybersecurity, it analyzes the "blast radius" of
     a compromised server by finding all connected devices within k steps.
+  Tuning_Mechanisms:
+    hops: Controls the depth of neighbor discovery; higher values explore wider neighborhoods but increase computational cost
+    direction: OUTGOING for following edges, INCOMING for reverse edges, BOTH for bidirectional exploration
+    rel_type: Filters traversal to specific relationship types, useful in heterogeneous graphs
   Principles:
     description: This algorithm traverses the graph starting from a seed node (or set of nodes) and expands outwards to find
       all nodes reachable within exactly 'k' steps or up to 'k' steps. It typically uses a Breadth-First Search (BFS) strategy
       to discover layers of neighbors, effectively retrieving the local neighborhood structure around the target node.
+    time_complexity: O(d^k) where d is average degree and k is number of hops
   solvable_questions:
   - Find all neighbor nodes connected by outgoing edges from node 7 and return a list of their IDs.
   - List all nodes with a distance of 1 from node 11, along with their edge attributes.
@@ -5592,14 +6141,58 @@
   - (Paper Network) Which papers cite "Attention is All You Need"? Please provide a list of the citing papers.
 - id: common_neighbors
   task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        label:
+          type: string
+          description: Node label for both nodes
+          required: true
+        key:
+          type: string
+          description: Property name for node identification
+          required: true
+        v1:
+          type: any
+          description: Property value for first node
+          required: true
+        v2:
+          type: any
+          description: Property value for second node
+          required: true
+        rel_type:
+          type: string, optional
+          description: Relationship type to consider
+          default: null
+        direction:
+          type: string, optional
+          description: Relationship direction (OUTGOING, INCOMING, BOTH)
+          default: BOTH
+        return_fields:
+          type: list, optional
+          description: Fields to return for common neighbors
+          default: null
+    output_schema:
+      type: list
+      description: List of nodes that are common neighbors of both input nodes
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
   Application_scenario: Finding common neighbors is a key heuristic for Link Prediction and similarity analysis. In social
     media, if two users share many mutual friends, the system recommends they connect; in fraud detection, identifying that
     two seemingly unrelated accounts share the same IP address, device ID, or phone number (common neighbors) can indicate
     a sybil attack or collusion.
+  Tuning_Mechanisms:
+    direction: Controls whether to consider outgoing, incoming, or both types of relationships when finding neighbors
+    rel_type: Filters to specific relationship types, useful in multi-relational graphs
   Principles:
     description: The algorithm identifies the set of nodes that have a direct connection to both node A and node B. Mathematically,
       it computes the intersection of the neighbor set of node A and the neighbor set of node B. It is a measure of structural
       proximity and is often used as a building block for more complex similarity metrics like Jaccard Coefficient or Adamic-Adar.
+    time_complexity: O(d1 + d2) where d1, d2 are degrees of the two nodes
   solvable_questions:
   - Find the common neighbor nodes of node A and node B, and return the IDs of these nodes.
   - Calculate the intersection of the neighbor sets of "Node_X" and "Node_Y," and output the detailed information of the nodes
@@ -5614,15 +6207,60 @@
     their common remittance sources.
 - id: extract_subgraph
   task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        label:
+          type: string, optional
+          description: Node label for center node (required for center-based extraction)
+          default: null
+        key:
+          type: string, optional
+          description: Property name for center node identification
+          default: null
+        value:
+          type: any, optional
+          description: Property value for center node identification
+          default: null
+        hops:
+          type: int, optional
+          description: Number of hops for expansion from center node
+          default: 2
+        rel_type:
+          type: string, optional
+          description: Relationship type to include
+          default: null
+        direction:
+          type: string, optional
+          description: Relationship direction (OUTGOING, INCOMING, BOTH)
+          default: BOTH
+        limit:
+          type: int, optional
+          description: Maximum number of nodes or relationships to include
+          default: null
+    output_schema:
+      type: subgraph
+      description: Extracted subgraph containing nodes and relationships
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
   Application_scenario: Subgraph extraction is essential for focused analysis, visualization, and machine learning training
     (GNNs). Scenarios include extracting a specific community for visual inspection, isolating a transaction ring suspected
     of money laundering for manual review, or creating an Ego Graph (a node and its immediate context) to train a localized
     prediction model.
+  Tuning_Mechanisms:
+    hops: Controls the radius of extraction; larger values include more distant nodes but increase subgraph size
+    limit: Prevents extraction of excessively large subgraphs by limiting the number of elements
+    rel_type: Filters to specific relationship types, useful for extracting single-relation subgraphs
   Principles:
     description: This algorithm retrieves a subset of the original graph based on specific criteria, such as a list of target
       nodes or a specific region. It typically returns an "induced subgraph," which includes the selected nodes and all existing
       edges between them from the original graph. This allows for analyzing specific structural patterns without processing
       the entire network.
+    time_complexity: O(d^k) where d is average degree and k is number of hops
   solvable_questions:
   - Starting from node "Center_Node," extract all nodes and edges within a 2-hop range and return the subgraph data.
   - Retrieve the subgraph containing the node list [A, B, C] and all connecting edges between them.
@@ -5638,14 +6276,63 @@
     and the relationships among these followers.
 - id: get_paths_between_two_nodes
   task_type_id: Graph Query
+  Deployment_method:
+    support_engine: graph_query
+    input_schema:
+      parameters:
+        label:
+          type: string
+          description: Node label for both nodes
+          required: true
+        key:
+          type: string
+          description: Property name for node identification
+          required: true
+        v1:
+          type: any
+          description: Property value for first node (source)
+          required: true
+        v2:
+          type: any
+          description: Property value for second node (target)
+          required: true
+        rel_type:
+          type: string, optional
+          description: Relationship type to traverse
+          default: null
+        direction:
+          type: string, optional
+          description: Traversal direction (OUTGOING, INCOMING, BOTH)
+          default: BOTH
+        min_hops:
+          type: int, optional
+          description: Minimum path length
+          default: null
+        max_hops:
+          type: int, optional
+          description: Maximum path length
+          default: null
+    output_schema:
+      type: list of paths
+      description: List of paths connecting the two nodes, each path is a sequence of nodes and relationships
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: true
   Application_scenario: Path queries are critical for tracing relationships, logistics, and root cause analysis. In a knowledge
     graph, it answers "How is Person A related to Company B?"; in navigation apps, it finds routes between locations; in network
     operations, it traces the physical or logical link between a user and a server to diagnose connectivity issues.
+  Tuning_Mechanisms:
+    min_hops: Sets minimum path length, useful for excluding direct connections and finding indirect relationships
+    max_hops: Limits maximum path length to control search space and avoid very long paths that may not be meaningful
+    rel_type: Restricts paths to specific relationship types, useful for domain-specific path queries
   Principles:
     description: The algorithm searches for sequences of edges that connect a source node to a target node. Depending on the
       specific variation, it can return all simple paths (paths with no repeated nodes), the shortest path (minimum hops or
       weight), or paths constrained by max depth. It reveals the connectivity and intermediate hops required to traverse from
       one entity to another.
+    time_complexity: O(V + E) for shortest path using BFS, exponential for all simple paths
   solvable_questions:
   - Find all acyclic paths (All Simple Paths) between node A and node B.
   - Determine whether there is at least one connected path from Start_Node to End_Node (return True/False).
