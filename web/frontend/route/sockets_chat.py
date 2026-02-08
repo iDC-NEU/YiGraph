@@ -216,8 +216,8 @@ def handle_chat_request(data):
             """发送响应数据到前端"""
             socketio.emit('chat_response', data_chunk)
 
-        # 确定模式
-        mode = "expert" if expert_mode else "normal"
+        # 兼容旧前端开关：expert_mode 对应新的 interact 模式
+        mode = "interact" if expert_mode else "normal"
         logger.info(f"WS处理请求：模型={selected_model}，数据集={dataset}，消息={user_message[:20]}...，ExpertMode={expert_mode}，Mode={mode}")
 
         async def process_request():
