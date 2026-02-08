@@ -824,6 +824,22 @@ class Reasoner:
                     }]}  
         full_prompt = plan_subqueries_prompt.format(query=query)
         return self.env.execute_prompt(full_prompt, parse_json=True)
+
+    def plan_expert_subqueries_with_algorithms(
+        self,
+        expert_instruction: str,
+        algorithm_library_info: str = "",
+        dataset_info: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        将专家自然语言指令转为带 algorithm 字段的 subqueries。
+        """
+        full_prompt = expert_subqueries_with_algorithms_prompt_zh.format(
+            expert_instruction=expert_instruction,
+            algorithm_library_info=algorithm_library_info or "Algorithm library not available",
+            dataset_info=dataset_info or "N/A"
+        )
+        return self.env.execute_prompt(full_prompt, parse_json=True)
     
     def revise_subquery_plan(self, current_plan: Dict[str, Any], user_request: str) -> Dict[str, Any]:
         full_prompt = revise_subquery_plan_prompt.format(

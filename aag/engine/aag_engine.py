@@ -73,14 +73,14 @@ class AAGEngine:
         
         Args:
             query: 用户查询
-            mode: 执行模式 "normal" | "expert"
+            mode: 执行模式 "normal" | "interact" | "expert"
             callback: 可选的回调函数，用于实时发送数据（如DAG信息）
                      签名: callback(data: Dict[str, Any])
                      注意：仅在 Web 调用时使用，终端调用不传此参数
         
         Returns:
             普通模式: 返回分析结果字符串
-            专家模式: 返回DAG信息字典（包含 dag_info, message 等）
+            交互/专家模式: 返回DAG信息字典（包含 dag_info, message 等）
         """
         return await self.scheduler.execute(query, mode=mode, callback=callback)
     

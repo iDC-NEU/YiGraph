@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class ChatService:
     """
     聊天服务 - 封装AAG引擎的聊天功能
-    支持普通模式和专家模式
+    支持 normal / interact / expert 三种模式
     """
     
     def __init__(self):
@@ -42,16 +42,16 @@ class ChatService:
             message: 用户消息
             model: 模型名称（可选，用于日志）
             dataset: 数据集名称（可选）
-            mode: 模式 "normal" | "expert"
-            expert_mode: 是否为专家模式（如果为True，mode会被设置为"expert"）
+            mode: 模式 "normal" | "interact" | "expert"
+            expert_mode: 兼容旧前端开关（True时使用 interact）
         
         Returns:
             处理结果字典
         """
         try:
-            # 如果expert_mode为True，强制使用expert模式
+            # 兼容旧前端：expert_mode 开关对应新的 interact 模式
             if expert_mode:
-                mode = "expert"
+                mode = "interact"
             
             engine = self.engine_service.get_engine()
             
@@ -148,15 +148,15 @@ class ChatService:
             message: 用户消息
             model: 模型名称（可选）
             dataset: 数据集名称（可选）
-            mode: 模式 "normal" | "expert"
-            expert_mode: 是否为专家模式
+            mode: 模式 "normal" | "interact" | "expert"
+            expert_mode: 兼容旧前端开关（True时使用 interact）
             callback: 回调函数，用于发送流式数据
                      签名: callback(data: Dict[str, Any])
         """
         try:
-            # 如果expert_mode为True，强制使用expert模式
+            # 兼容旧前端：expert_mode 开关对应新的 interact 模式
             if expert_mode:
-                mode = "expert"
+                mode = "interact"
             
             engine = self.engine_service.get_engine()
             
@@ -179,14 +179,19 @@ class ChatService:
             result = await engine.run(message, mode=mode, callback=callback)
             
             # 根据模式返回不同格式
-            if mode == "expert" and isinstance(result, dict):
-                # 专家模式返回DAG
+            if mode in {"interact", "expert"} and isinstance(result, dict) and "dag_info" in result:
+                # interact / expert 模式返回 DAG
                 dag_content = self._convert_dag_to_frontend_format(result)
                 if callback:
                     callback({
                         "type": "result",
                         "contentType": "dag",
                         "content": dag_content
+                    })
+            elif mode in {"interact", "expert"} and isinstance(result, dict) and "error" in result:
+                if callback:
+                    callback({
+                        "error": result.get("error", "处理失败")
                     })
             elif mode == "normal" and isinstance(result, dict) and "dag_info" in result:
                 # 普通模式：如果返回了包含 DAG 信息的字典（Web 调用）
@@ -333,4 +338,3 @@ class ChatService:
                 "success": True,
                 "message": "DAG已拒绝"
             }
-

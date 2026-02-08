@@ -134,3 +134,81 @@ rewrite_query_prompt_zh = """
 
 请将查询重写为具体可执行的形式。只输出有效的JSON格式。
 """
+
+
+expert_subqueries_with_algorithms_prompt_zh = """
+你是一名图分析工作流专家。你的任务是把专家给出的自然语言分析指令，转换为可执行的 DAG 子查询计划。
+
+## 输入
+你将收到：
+1. expert_instruction: 专家输入的自然语言指令（可能包含任务步骤、依赖关系、算法偏好）
+2. algorithm_library_info: 当前系统算法库信息（任务类型与可用算法）
+3. dataset_info: 当前数据集结构信息（可选）
+
+## 核心要求
+1. 输出 JSON，且只能输出 JSON，不要输出解释文字。
+2. 输出结构必须是：
+{{
+  "subqueries": [
+    {{
+      "id": "q1",
+      "query": "子问题描述",
+      "depends_on": [],
+      "algorithm": "算法ID"
+    }}
+  ],
+  "instruction_algorithm_adjustments": [
+    {{
+      "mentioned_algorithm": "专家指令中提到的算法名",
+      "replacement_algorithm": "系统最终采用的替代算法ID（若无则为空字符串）",
+      "recommendations": ["推荐算法1", "推荐算法2"],
+      "reason": "替换理由"
+    }}
+  ],
+  "instruction_algorithm_adjustment_summary": "给用户的简短说明，可为空字符串"
+}}
+3. 每个 subquery 必须包含 `algorithm` 字段，且算法应来自算法库。
+4. `depends_on` 必须是无环依赖；先决任务应在前，后续任务依赖前置任务。
+5. 如果专家明确指定了算法，优先使用该算法（前提是算法库可用）。
+6. 如果专家没有指定算法，请根据子问题语义从算法库选择最合适算法。
+7. `query` 要具体可执行，不要空泛描述。
+8. 如果专家指令中提到了算法库不存在的算法（如 SPFA），请在 `instruction_algorithm_adjustments` 中给出替换与推荐。
+9. 如果不存在替换情况，`instruction_algorithm_adjustments` 输出空数组，`instruction_algorithm_adjustment_summary` 输出空字符串。
+
+## 额外约束
+1. id 统一使用 q1, q2, q3... 连续编号。
+2. 不要生成无意义步骤。
+3. 若一个问题只需一步，也必须给出一个 subquery，包含 algorithm。
+
+## 输出示例
+{{
+  "subqueries": [
+    {{
+      "id": "q1",
+      "query": "识别节点23所在社区的节点集合",
+      "depends_on": [],
+      "algorithm": "louvain_communities"
+    }},
+    {{
+      "id": "q2",
+      "query": "在该社区子图中计算影响力最高的前10个节点",
+      "depends_on": ["q1"],
+      "algorithm": "pagerank"
+    }}
+  ],
+  "instruction_algorithm_adjustments": [],
+  "instruction_algorithm_adjustment_summary": ""
+}}
+
+## 输入内容
+expert_instruction:
+{expert_instruction}
+
+algorithm_library_info:
+{algorithm_library_info}
+
+dataset_info:
+{dataset_info}
+
+请严格按 JSON 输出。
+"""

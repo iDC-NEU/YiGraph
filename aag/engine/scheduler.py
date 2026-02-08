@@ -3,9 +3,11 @@ import time
 import traceback
 import logging
 import json
+import difflib
+import re
 from argparse import OPTIONAL
 from dataclasses import asdict
-from typing import Any, Dict, Optional, Callable, List, Tuple, Union
+from typing import Any, Dict, Optional, Callable, List, Tuple, Union, Set
 
 from sympy import N
 from aag.config.engine_config import *
@@ -204,6 +206,19 @@ class Scheduler:
         
         return self.current_dataset
 
+    def _normalize_graph_mode(self, mode: str) -> str:
+        """
+        Normalize graph execution mode.
+        Supported modes: normal | interact | expert
+        """
+        normalized = (mode or "normal").strip().lower()
+        allowed_modes = {"normal", "interact", "expert"}
+        if normalized not in allowed_modes:
+            raise ValueError(
+                f"不支持的模式 '{mode}'，请使用 normal / interact / expert"
+            )
+        return normalized
+
     async def execute(
         self, 
         query: str, 
@@ -217,18 +232,23 @@ class Scheduler:
         Args:
             query: 用户查询
             decompose: 是否分解查询
-            mode: 执行模式 "normal" | "expert"
+            mode: 执行模式 "normal" | "interact" | "expert"
             callback: 可选的回调函数，用于实时发送数据（如DAG信息）
                      签名: callback(data: Dict[str, Any])
         
         Returns:
             普通模式: 返回分析结果字符串
-            专家模式: 返回DAG信息字典（包含 dag_info, message 等）
+            交互/专家模式: 返回DAG信息字典（包含 dag_info, message 等）
         
         Validates:
             1. RAG query + graph dataset → Error (graph data cannot do retrieval)
             2. GRAPH query + text dataset → Check if converted graph exists
         """
+        try:
+            mode = self._normalize_graph_mode(mode)
+        except ValueError as mode_err:
+            return f"❌ 错误：{mode_err}"
+
         decision = self.router.route(query=query)
         logger.info(f"🚦[Router] query_type={decision.query_type}, reason={decision.reason}")
 
@@ -287,13 +307,13 @@ class Scheduler:
         Args:
             query: 用户查询
             decompose: 是否分解查询
-            mode: 执行模式 "normal" | "expert"
+            mode: 执行模式 "normal" | "interact" | "expert"
             callback: 可选的回调函数，用于实时发送数据（如DAG信息）
                      签名: callback(data: Dict[str, Any])
         
         Returns:
             普通模式: 返回分析结果字符串
-            专家模式: 返回DAG信息字典
+            交互/专家模式: 返回DAG信息字典
         
         Uses self.current_graph_dataset (which may be converted graph for text datasets)
         """
@@ -306,14 +326,18 @@ class Scheduler:
         
         if not self.global_graph:
             return "⚠️ 图数据未加载，请先加载图数据"
-        
+
+        mode = self._normalize_graph_mode(mode)
+
+        if mode == "expert":
+            return self._execute_graph_expert_mode(query)
 
         self._build_dag_from_query(query, decompose)
         self._find_algorithm()
         print("✅ 初始 DAG 构建与算法选择完成")
         self.dag.print_dag_info()
         
-        if mode == "expert":
+        if mode == "interact":
             dag_info = self.dag.get_dag_info()
             return {
                 "message": "DAG已生成，请选择下一步操作",
@@ -339,9 +363,267 @@ class Scheduler:
         
         return analysis_result
 
+    @staticmethod
+    def _normalize_algorithm_token(raw_name: str) -> str:
+        return re.sub(r"[^a-z0-9]+", "", (raw_name or "").strip().lower())
+
+    def _resolve_expert_algorithm(self, requested_algorithm: str) -> Optional[str]:
+        if not self.expert_search_engine or not self.expert_search_engine.algo_index:
+            return None
+
+        algo_index = self.expert_search_engine.algo_index
+        direct_name = (requested_algorithm or "").strip()
+        if direct_name in algo_index:
+            return direct_name
+
+        lowered_map = {
+            aid.lower(): aid
+            for aid in algo_index.keys()
+            if isinstance(aid, str)
+        }
+        if direct_name.lower() in lowered_map:
+            return lowered_map[direct_name.lower()]
+
+        normalized_target = self._normalize_algorithm_token(direct_name)
+        for algo_id in algo_index.keys():
+            if not isinstance(algo_id, str):
+                continue
+            if self._normalize_algorithm_token(algo_id) == normalized_target:
+                return algo_id
+        return None
+
+    def _suggest_algorithms(self, requested_algorithm: str, limit: int = 5) -> List[str]:
+        if not self.expert_search_engine or not self.expert_search_engine.algo_index:
+            return []
+
+        candidate_algorithms = [
+            aid for aid in self.expert_search_engine.algo_index.keys()
+            if isinstance(aid, str)
+        ]
+
+        direct_matches = difflib.get_close_matches(
+            requested_algorithm, candidate_algorithms, n=limit, cutoff=0.45
+        )
+        if direct_matches:
+            return direct_matches
+
+        normalized_candidates = {
+            self._normalize_algorithm_token(aid): aid for aid in candidate_algorithms
+        }
+        normalized_matches = difflib.get_close_matches(
+            self._normalize_algorithm_token(requested_algorithm),
+            list(normalized_candidates.keys()),
+            n=limit,
+            cutoff=0.45
+        )
+        return [normalized_candidates[key] for key in normalized_matches]
+
+    def _parse_expert_dag_instruction(self, expert_instruction: str) -> Tuple[Dict[str, Any], Dict[str, str], List[Dict[str, Any]], str]:
+        normalized_instruction = (expert_instruction or "").strip()
+        if not normalized_instruction:
+            raise ValueError("专家模式输入不能为空")
+
+        algorithm_library_info = self._get_algorithm_library_info()
+        dataset_info = self._get_graph_schema_summary()
+        payload = self.reasoner.plan_expert_subqueries_with_algorithms(
+            expert_instruction=normalized_instruction,
+            algorithm_library_info=algorithm_library_info,
+            dataset_info=dataset_info,
+        )
+
+        if not isinstance(payload, dict):
+            raise ValueError("专家模式输入解析失败：LLM 未返回有效的 subqueries 结构")
+
+        subqueries = payload.get("subqueries")
+        if not isinstance(subqueries, list) or not subqueries:
+            raise ValueError("专家模式输入缺少 subqueries 列表")
+
+        normalized_subqueries = []
+        algorithm_hints: Dict[str, str] = {}
+        missing_algorithm_subqueries: List[str] = []
+
+        for idx, item in enumerate(subqueries, start=1):
+            if not isinstance(item, dict):
+                raise ValueError(f"subqueries[{idx}] 必须是对象")
+
+            query_id = str(item.get("id", f"q{idx}")).strip() or f"q{idx}"
+            question = str(item.get("query") or item.get("question") or "").strip()
+            if not question:
+                raise ValueError(f"subqueries[{idx}] 缺少 query/question")
+
+            depends_on = item.get("depends_on", [])
+            if depends_on is None:
+                depends_on = []
+            if not isinstance(depends_on, list):
+                raise ValueError(f"subqueries[{idx}].depends_on 必须是列表")
+
+            normalized_subqueries.append({
+                "id": query_id,
+                "query": question,
+                "depends_on": [str(dep).strip() for dep in depends_on if str(dep).strip()]
+            })
+
+            requested_algorithm = (
+                item.get("algorithm")
+                or item.get("graph_algorithm")
+                or item.get("algo")
+            )
+            if requested_algorithm is not None and str(requested_algorithm).strip():
+                algorithm_hints[query_id] = str(requested_algorithm).strip()
+            else:
+                missing_algorithm_subqueries.append(query_id)
+
+        if missing_algorithm_subqueries:
+            raise ValueError(
+                "专家模式要求每个 subquery 必须包含 algorithm 字段，缺失: "
+                + ", ".join(missing_algorithm_subqueries)
+            )
+
+        raw_adjustments = (
+            payload.get("instruction_algorithm_adjustments")
+            or payload.get("algorithm_adjustments")
+            or []
+        )
+        normalized_adjustments: List[Dict[str, Any]] = []
+        if isinstance(raw_adjustments, list):
+            for item in raw_adjustments:
+                if not isinstance(item, dict):
+                    continue
+                mentioned_algorithm = str(item.get("mentioned_algorithm") or "").strip()
+                if not mentioned_algorithm:
+                    continue
+                replacement_algorithm_raw = str(item.get("replacement_algorithm") or "").strip()
+                recommendations_raw = item.get("recommendations") or []
+                recommendations = []
+                if isinstance(recommendations_raw, list):
+                    recommendations = [
+                        str(rec).strip()
+                        for rec in recommendations_raw
+                        if str(rec).strip()
+                    ][:5]
+                reason = str(item.get("reason") or "").strip()
+
+                normalized_adjustments.append({
+                    "mentioned_algorithm": mentioned_algorithm,
+                    "replacement_algorithm": replacement_algorithm_raw or None,
+                    "recommendations": recommendations,
+                    "reason": reason,
+                })
+
+        adjustment_summary = str(
+            payload.get("instruction_algorithm_adjustment_summary")
+            or payload.get("algorithm_adjustment_summary")
+            or ""
+        ).strip()
+
+        return {"subqueries": normalized_subqueries}, algorithm_hints, normalized_adjustments, adjustment_summary
+
+    def _build_dag_from_expert_instruction(self, expert_instruction: str) -> Dict[str, Any]:
+        subquery_plan, algorithm_hints, instruction_adjustments, adjustment_summary = self._parse_expert_dag_instruction(expert_instruction)
+        self.build_dag_from_subquery_plan(subquery_plan)
+
+        query_text_map = {
+            subquery["id"]: subquery["query"]
+            for subquery in subquery_plan.get("subqueries", [])
+        }
+
+        validation: Dict[str, Any] = {
+            "provided_algorithms": algorithm_hints,
+            "applied_algorithms": {},
+            "unsupported_algorithms": [],
+            "missing_step_ids": [],
+            "unsupported_step_ids": [],
+        }
+
+        for query_id, requested_algorithm in algorithm_hints.items():
+            step_id = self.query_id_mapping.get(query_id)
+            if step_id is None:
+                validation["missing_step_ids"].append(query_id)
+                continue
+
+            resolved_algorithm = self._resolve_expert_algorithm(requested_algorithm)
+            if resolved_algorithm is None:
+                validation["unsupported_algorithms"].append({
+                    "query_id": query_id,
+                    "query": query_text_map.get(query_id, ""),
+                    "requested_algorithm": requested_algorithm,
+                    "suggestions": self._suggest_algorithms(requested_algorithm),
+                })
+                validation["unsupported_step_ids"].append(step_id)
+                continue
+
+            step = self.dag.steps[step_id]
+            step.task_type = GraphAnalysisType.GRAPH_ALGORITHM
+            step.graph_algorithm = resolved_algorithm
+            validation["applied_algorithms"][query_id] = resolved_algorithm
+
+        validation["instruction_algorithm_adjustments"] = instruction_adjustments
+        validation["instruction_algorithm_adjustment_summary"] = adjustment_summary
+
+        return validation
+
+    def _execute_graph_expert_mode(self, expert_instruction: str) -> Dict[str, Any]:
+        """
+        Expert mode:
+        - Expert provides high-quality instruction in natural language
+        - Scheduler builds DAG as instructed
+        - Validate requested algorithms against algorithm library boundary
+        """
+        try:
+            validation = self._build_dag_from_expert_instruction(expert_instruction)
+            unsupported_step_ids = set(validation.get("unsupported_step_ids", []))
+
+            self._find_algorithm(
+                respect_preassigned=True,
+                skip_step_ids=unsupported_step_ids
+            )
+            self.dag.print_dag_info()
+
+            dag_info = self.dag.get_dag_info()
+            has_out_of_boundary_algorithms = bool(validation.get("unsupported_algorithms")) or bool(validation.get("missing_step_ids"))
+
+            if has_out_of_boundary_algorithms:
+                return {
+                    "message": "专家DAG已构建，但检测到超出算法库边界的算法，请修正后再开始分析",
+                    "dag_info": dag_info,
+                    "algorithm_validation": {
+                        "provided_algorithms": validation.get("provided_algorithms", {}),
+                        "applied_algorithms": validation.get("applied_algorithms", {}),
+                        "unsupported_algorithms": validation.get("unsupported_algorithms", []),
+                        "missing_step_ids": validation.get("missing_step_ids", []),
+                        "instruction_algorithm_adjustments": validation.get("instruction_algorithm_adjustments", []),
+                    },
+                    "can_start_analysis": False
+                }
+
+            instruction_adjustments = validation.get("instruction_algorithm_adjustments", [])
+            adjustment_message = str(validation.get("instruction_algorithm_adjustment_summary") or "").strip()
+            base_message = "专家DAG已按指令构建完成"
+            if adjustment_message:
+                base_message = f"{base_message}。{adjustment_message}"
+
+            return {
+                "message": base_message,
+                "dag_info": dag_info,
+                "algorithm_validation": {
+                    "provided_algorithms": validation.get("provided_algorithms", {}),
+                    "applied_algorithms": validation.get("applied_algorithms", {}),
+                    "unsupported_algorithms": [],
+                    "missing_step_ids": [],
+                    "instruction_algorithm_adjustments": instruction_adjustments,
+                },
+                "can_start_analysis": True
+            }
+        except Exception as e:
+            logger.error(f"专家模式构建失败: {e}", exc_info=True)
+            return {
+                "error": f"专家模式构建失败: {str(e)}",
+                "input_hint": "请直接输入自然语言专家指令，系统会自动生成 subqueries。"
+            }
+
     async def expert_modify_dag(self, modification_request: str) -> Dict[str, Any]:
         """
-        专家模式：根据用户需求修改DAG
+        交互模式：根据用户需求修改DAG
         
         Args:
             modification_request: 用户修改需求（自然语言）
@@ -370,7 +652,7 @@ class Scheduler:
 
     async def expert_start_analysis(self) -> str:
         """
-        专家模式：开始执行分析
+        交互模式/专家模式：开始执行分析
         
         Returns:
             分析结果字符串
@@ -663,14 +945,37 @@ class Scheduler:
         return self.build_dag_from_subquery_plan(subquery_plan)
 
 
-    def _find_algorithm(self):
+    def _find_algorithm(
+        self,
+        respect_preassigned: bool = False,
+        skip_step_ids: Optional[Set[int]] = None
+    ):
         """
            遍历dag，对每个节点，确定适合执行的图算法
            函数逻辑：
              1. 遍历每个dag的节点，对每个节点做：
                  获取每个节点的 question, 确定每个节点适合执行的算法，并设置每个节点的graph_algorithm字段
         """
+        skip_step_ids = skip_step_ids or set()
         for step in self.dag.steps.values():
+            if step.step_id in skip_step_ids:
+                logger.warning(
+                    "⚠️ 跳过算法自动匹配（专家模式算法越界）| step=%s | question=%s",
+                    step.step_id,
+                    step.question,
+                )
+                continue
+
+            if respect_preassigned and step.graph_algorithm:
+                if not step.task_type:
+                    step.task_type = GraphAnalysisType.GRAPH_ALGORITHM
+                logger.info(
+                    "✅ 保留专家预设算法 | step=%s | algorithm=%s",
+                    step.step_id,
+                    step.graph_algorithm,
+                )
+                continue
+
             # Step 1: Classify question type (graph_algorithm or numeric_analysis)
             question_classification = self.reasoner.classify_question_type(step.question)
             logger.info(f"🔍 问题分类结果: {question_classification}")
