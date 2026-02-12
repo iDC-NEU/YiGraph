@@ -12,10 +12,10 @@ const config = {
   },
 
   // GitHub Pages（用你自己的仓库）
-  url: 'https://neugjq.github.io',
+  url: 'https://superccy.github.io',
   baseUrl: '/AAG/',
 
-  organizationName: 'neugjq',
+  organizationName: 'superccy',
   projectName: 'AAG',
 
   onBrokenLinks: 'throw',
