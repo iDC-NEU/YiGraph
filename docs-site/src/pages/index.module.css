@@ -1,0 +1,228 @@
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.hero {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, 
+    #ffeef8 0%, 
+    #e8d5ff 25%, 
+    #d5e8ff 50%, 
+    #d5ffe8 75%, 
+    #fff5d5 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+.languageToggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background: white;
+  border: 2px solid #667eea;
+  border-radius: 25px;
+  color: #667eea;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+}
+
+.languageToggle:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(255, 182, 193, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(173, 216, 230, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(221, 160, 221, 0.3) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.heroContent {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+
+.heroTitle {
+  font-size: 96px;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -2px;
+  line-height: 1.1;
+}
+
+.heroSubtitle {
+  font-size: 48px;
+  font-weight: 700;
+  margin: 24px 0 12px;
+  color: #2d3748;
+  letter-spacing: -1px;
+}
+
+.heroTagline {
+  font-size: 24px;
+  color: #4a5568;
+  margin: 0 0 48px;
+  font-weight: 500;
+}
+
+.heroButtons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.primaryBtn,
+.secondaryBtn,
+.githubBtn {
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+}
+
+.primaryBtn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  color: white;
+}
+
+.secondaryBtn {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+}
+
+.secondaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6);
+  color: white;
+}
+
+.githubBtn {
+  background: white;
+  color: #2d3748;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e2e8f0;
+}
+
+.githubBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  color: #2d3748;
+  border-color: #cbd5e0;
+}
+
+/* 响应式设计 */
+@media (max-width: 996px) {
+  .heroTitle {
+    font-size: 72px;
+  }
+  
+  .heroSubtitle {
+    font-size: 36px;
+  }
+  
+  .heroTagline {
+    font-size: 20px;
+  }
+  
+  .languageToggle {
+    top: 15px;
+    right: 15px;
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 56px;
+  }
+  
+  .heroSubtitle {
+    font-size: 28px;
+  }
+  
+  .heroTagline {
+    font-size: 18px;
+  }
+  
+  .heroButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .primaryBtn,
+  .secondaryBtn,
+  .githubBtn {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .languageToggle {
+    top: 10px;
+    right: 10px;
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 42px;
+  }
+  
+  .heroSubtitle {
+    font-size: 24px;
+  }
+  
+  .heroTagline {
+    font-size: 16px;
+  }
+  
+  .languageToggle {
+    top: 8px;
+    right: 8px;
+    padding: 5px 12px;
+    font-size: 11px;
+  }
+}

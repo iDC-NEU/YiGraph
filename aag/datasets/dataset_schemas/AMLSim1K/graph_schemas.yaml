@@ -5,7 +5,7 @@ datasets:
   graph_status: completed
   schema:
     edge:
-    - attribute_fields: []
+    - attribute_fields: [tx_type,base_amt,tran_timestamp,is_sar,alert_id]
       format: csv
       label_field: is_sar
       # path: ../../aag/datasets/data/AMLSim1K/process_graph/transactions.csv_edges.csv

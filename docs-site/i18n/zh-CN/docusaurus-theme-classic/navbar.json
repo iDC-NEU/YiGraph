@@ -1,0 +1,14 @@
+{
+  "title": {
+    "message": "YiGraph中文文档",
+    "description": "The title in the navbar"
+  },
+  "item.label.Developer Guide": {
+    "message": "开发者指南",
+    "description": "Navbar item with label Developer Guide"
+  },
+  "item.label.GitHub": {
+    "message": "GitHub",
+    "description": "Navbar item with label GitHub"
+  }
+}

@@ -111,6 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let isDagReviewMode = false; 
     let currentDagId = null; 
     let isDagModeEnabled = false;
+    let isInteractiveModeEnabled = false;
     let selectedModel = 'GPT 4'; 
     let selectedDataset = null; 
 
@@ -149,15 +150,63 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    if (localStorage.getItem('dagModeEnabled') !== null) {
-        isDagModeEnabled = localStorage.getItem('dagModeEnabled') === 'true';
-        document.getElementById('dag-mode-toggle').checked = isDagModeEnabled;
+    // 初始化交互式模式状态
+    if (localStorage.getItem('interactiveModeEnabled') !== null) {
+        isInteractiveModeEnabled = localStorage.getItem('interactiveModeEnabled') === 'true';
+        const interactiveToggle = document.getElementById('interactive-mode-toggle');
+        if (interactiveToggle) {
+            interactiveToggle.checked = isInteractiveModeEnabled;
+        }
     }
 
-    document.getElementById('dag-mode-toggle').addEventListener('change', function(e) {
-        isDagModeEnabled = e.target.checked;
-        localStorage.setItem('dagModeEnabled', isDagModeEnabled);
-    });
+    // 监听交互式模式切换
+    const expertToggle = document.getElementById('dag-mode-toggle');
+    const interactiveToggle = document.getElementById('interactive-mode-toggle');
+
+    // 1. 专家模式 (Expert Mode) 监听器
+    if (expertToggle) {
+        expertToggle.addEventListener('change', function(e) {
+            isDagModeEnabled = e.target.checked;
+            
+            // 互斥逻辑：如果开启了专家模式，强制关闭交互式模式
+            if (isDagModeEnabled) {
+                isInteractiveModeEnabled = false;
+                if (interactiveToggle) interactiveToggle.checked = false;
+                localStorage.setItem('interactiveModeEnabled', 'false');
+            }
+            
+            localStorage.setItem('dagModeEnabled', isDagModeEnabled);
+        });
+    }
+
+    // 2. 交互式模式 (Interactive Mode) 监听器
+    if (interactiveToggle) {
+        interactiveToggle.addEventListener('change', function(e) {
+            isInteractiveModeEnabled = e.target.checked;
+            
+            // 互斥逻辑：如果开启了交互式模式，强制关闭专家模式
+            if (isInteractiveModeEnabled) {
+                isDagModeEnabled = false;
+                if (expertToggle) expertToggle.checked = false;
+                localStorage.setItem('dagModeEnabled', 'false');
+            }
+            
+            localStorage.setItem('interactiveModeEnabled', isInteractiveModeEnabled);
+        });
+    }
+    
+    // 3. 初始化状态加载 
+    if (localStorage.getItem('dagModeEnabled') === 'true') {
+        isDagModeEnabled = true;
+        isInteractiveModeEnabled = false; // 确保互斥
+        if (expertToggle) expertToggle.checked = true;
+        if (interactiveToggle) interactiveToggle.checked = false;
+    } else if (localStorage.getItem('interactiveModeEnabled') === 'true') {
+        isInteractiveModeEnabled = true;
+        isDagModeEnabled = false; 
+        if (interactiveToggle) interactiveToggle.checked = true;
+        if (expertToggle) expertToggle.checked = false;
+    }
 
     async function loadModels() {
         try {
@@ -1024,6 +1073,10 @@ document.addEventListener('DOMContentLoaded', function() {
             model: selectedModel,
             expert_mode: isDagModeEnabled
         };
+
+        if (isInteractiveModeEnabled) {
+            payload.mode = "interact";
+        }
 
         if (isDagReviewMode) {
             payload.is_dag_modification = "true";

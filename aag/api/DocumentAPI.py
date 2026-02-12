@@ -6,6 +6,7 @@ import os
 import yaml
 import datetime
 import logging
+from time import sleep
 logger = logging.getLogger(__name__)
 from aag.utils.path_utils import DATASETS_DIR, DATASETS_DATA_DIR, DATASETS_SCHEMA_DIR, DATASETS_INDEX_PATH
 from aag.data_pipeline.data_transformer.text_2_graph.text_2_graph import Text2Graph
@@ -90,7 +91,9 @@ class DocumentAPIServer:
 
         try:
             # 创建数据集目录
+            logger.info(f"0111Creating dataset directory: {self.dataset_schema_dir}")
             dataset_path = os.path.join(self.dataset_schema_dir, f"{name}")
+            logger.info(f"0222Creating dataset directory: {dataset_path}")
             os.makedirs(dataset_path, exist_ok=True)        
             # 创建数据目录
             dataset_path = os.path.join(self.dataset_data_dir, f"{name}/{type}")
@@ -313,19 +316,19 @@ class DocumentAPIServer:
                     if src == "" or dst == "":
                         continue
                     
-                    # 读取多个 relation 列
-                    if edge_relation_field is None:
-                        rel = ""
-                    else:
-                        for field in edge_relation_field:
-                            if field not in reader.fieldnames:
-                                raise ValueError(f"Edge file missing required column: {field}")
-                        rel_values = [row[field] for field in edge_relation_field]
+                    # # 读取多个 relation 列
+                    # if edge_relation_field is None:
+                    #     rel = ""
+                    # else:
+                    #     for field in edge_relation_field:
+                    #         if field not in reader.fieldnames:
+                    #             raise ValueError(f"Edge file missing required column: {field}")
+                    #     rel_values = [row[field] for field in edge_relation_field]
 
-                        # 你可以选择把多个字段拼起来（常见做法）
-                        rel = ",".join(rel_values)
+                    #     # 你可以选择把多个字段拼起来（常见做法）
+                    #     rel = ",".join(rel_values)
 
-                    edges.append((src, rel, dst))
+                    edges.append([src, dst] + [row[field] for field in edge_relation_field])
                     all_node_names.add(src)
                     all_node_names.add(dst)
 
@@ -359,7 +362,7 @@ class DocumentAPIServer:
                 # 3. 读取 CSV 并在必要时自动选择属性列
                 vertex2attributes = {}  # vid -> {attr_name: attr_value} 或 vid -> 拼接字符串
                 id2name = {}
-
+                id2name_list = {}
                 with open(vertex_file_path, "r", encoding="utf-8") as f:
                     reader = csv.DictReader(f)
 
@@ -383,12 +386,10 @@ class DocumentAPIServer:
                         name_parts = [row[nf] for nf in vertex_name_fields]
                         name = ",".join([p for p in name_parts if p])  # 过滤空字段
                         id2name[vid] = name
+                        id2name_list[vid] = name_parts
 
-                        # 读取属性列并拼接（也可以保留为 dict）
-                        attr_values = [row[f] for f in vertex_attribute_fields]
-                        # 过滤空值再用逗号拼接，若要保留空值可去掉过滤
-                        attr_joined = ",".join([v for v in attr_values if v])
-                        vertex2attributes[vid] = attr_joined
+                        # 读取属性列：保存为 字段名 -> 值 的字典，便于按列写出
+                        vertex2attributes[vid] = {f: row[f] for f in vertex_attribute_fields}
 
                 # 检查：边文件中的 name 是否在顶点文件里
                 for id in all_node_names:
@@ -411,10 +412,10 @@ class DocumentAPIServer:
             edge_out_path = os.path.join(process_dir, f"{file_name}_edges.csv")
             with open(edge_out_path, "w", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f)
-                writer.writerow(["src", "dst", "relation"])
+                writer.writerow([edge_source_field, edge_target_field] + edge_relation_field)
                 
-                for src, rel, dst in edges:
-                    writer.writerow([src, dst, rel])
+                for src, dst, *rel_values in edges:
+                    writer.writerow([src, dst] + rel_values)
 
             # ------------------------------------------------------------
             # 保存 vertex 文件（只有用户提供了实体文件才写）
@@ -423,12 +424,14 @@ class DocumentAPIServer:
                 vertex_out_path = os.path.join(process_dir, f"{file_name}_vertices.csv")
                 with open(vertex_out_path, "w", encoding="utf-8", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow(["id", "name", "attributes"])
-
+                    # 表头：id, name + 各属性字段名（每个字段一列，保留字段与值的对应关系）
+                    writer.writerow([vertex_id_field] + vertex_name_fields + vertex_attribute_fields)
                     for vid in id2name:
                         name = id2name[vid]
-                        attrs = vertex2attributes.get(vid, "")
-                        writer.writerow([vid, name, attrs])
+                        attrs_dict = vertex2attributes.get(vid, {})
+                        #vertex_real_name = name.split(",")
+                        row_values = [vid] + id2name_list[vid] + [attrs_dict.get(f, "") for f in vertex_attribute_fields]
+                        writer.writerow(row_values)
 
             if os.path.exists(self.each_dataset_schema_file):
                 with open(self.each_dataset_schema_file, "r", encoding="utf-8") as f:
@@ -870,19 +873,24 @@ class DocumentAPIServer:
             vertex_schema = graph_schema.get("vertex")
             if vertex_schema and len(vertex_schema) > 0:
                 vertex_path = vertex_schema[0]["path"]
-                vertex_id_field = "id"
-                vertex_name_field = "name"
+                vertex_id_field = vertex_schema[0]["id_field"]
+                vertex_name_field = vertex_schema[0]["query_field"]
                 vertex_attributes_field = "attributes"
 
                 id2name = {}
                 name2attribute = {}
                 with open(vertex_path, "r", encoding="utf-8") as f:
                     reader = csv.DictReader(f)
+                    fieldnames = reader.fieldnames or []
+                    # 兼容两种格式：旧版仅 "attributes" 一列（字符串）；新版为 id,name + 各属性列（字段与值分列）
+                    use_attributes_column = vertex_attributes_field in fieldnames
                     for row in reader:
-                        vid = row[vertex_id_field]
-                        name = row[vertex_name_field]
-                        attrs = row[vertex_attributes_field]
-
+                        vid = row.get(vertex_id_field, "")
+                        name = '  '.join(row.get(namefieldeach,'') for namefieldeach in vertex_name_field)
+                        if use_attributes_column:
+                            attrs = row.get(vertex_attributes_field, "")
+                        else:
+                            attrs = {k: row.get(k, "") for k in fieldnames if k not in (vertex_id_field, vertex_name_field)}
                         id2name[vid] = name
                         name2attribute[name] = attrs
             else:
@@ -894,18 +902,18 @@ class DocumentAPIServer:
             # -----------------------
             edge_schema = graph_schema.get("edge")[0]  # 假设每个 graph 至少有一个边文件
             edge_path = edge_schema["path"]
-            edge_src_field = "src"
-            edge_dst_field = "dst"
-            edge_rel_field = "relation"
-
+            edge_src_field = edge_schema["source_field"]
+            edge_dst_field = edge_schema["target_field"]
+            #edge_rel_field = "relation"
+            edge_relation_field = edge_schema.get("attribute_fields", [])
             edges = []
             with open(edge_path, "r", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     src = row[edge_src_field]
                     dst = row[edge_dst_field]
-                    rel = row[edge_rel_field]
-
+                    #rel = row[edge_rel_field]
+                    rel = "  ".join([row[field] for field in edge_relation_field])
                     # 如果顶点文件存在，替换 id -> name
                     if id2name:
                         src = id2name.get(src, src)

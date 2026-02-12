@@ -1,0 +1,8 @@
+{
+  "label": "从这里开始",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "学习 YiGraph 的基础知识。"
+  }
+}

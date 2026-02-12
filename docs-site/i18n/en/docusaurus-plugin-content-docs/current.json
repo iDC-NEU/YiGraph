@@ -1,0 +1,22 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.基本信息": {
+    "message": "Basic Information",
+    "description": "The label for category 基本信息 in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.从这里开始": {
+    "message": "Getting Started",
+    "description": "The label for category 从这里开始 in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.上手案例": {
+    "message": "Tutorials",
+    "description": "The label for category 上手案例 in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.专用算子": {
+    "message": "Algorithms",
+    "description": "The label for category 专用算子 in sidebar tutorialSidebar"
+  }
+}
