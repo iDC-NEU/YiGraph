@@ -1,0 +1,8 @@
+{
+  "label": "专用算子",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "专用图算法和算子。"
+  }
+}

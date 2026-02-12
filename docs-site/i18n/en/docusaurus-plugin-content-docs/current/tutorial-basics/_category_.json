@@ -1,0 +1,8 @@
+{
+  "label": "Getting Started",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "Learn the basics to get started with YiGraph."
+  }
+}

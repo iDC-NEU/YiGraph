@@ -3,8 +3,8 @@ import { themes as prismThemes } from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'AAG Documentation',
-  tagline: 'AAG 用户手册',
+  title: 'YiGraph Documentation',
+  tagline: 'YiGraph中文文档',
   favicon: 'img/favicon.ico',
 
   future: {
@@ -23,7 +23,19 @@ const config = {
 
   i18n: {
     defaultLocale: 'zh-CN',
-    locales: ['zh-CN'],
+    locales: ['zh-CN', 'en'],
+    localeConfigs: {
+      'zh-CN': {
+        label: '简体中文',
+        direction: 'ltr',
+        htmlLang: 'zh-CN',
+      },
+      en: {
+        label: 'English',
+        direction: 'ltr',
+        htmlLang: 'en-US',
+      },
+    },
   },
 
   presets: [
@@ -50,11 +62,13 @@ const config = {
 
   themeConfig: {
     navbar: {
-      title: 'AAG中文文档',
+      title: 'YiGraph中文文档',
       items: [
-      { to: '/docs/intro', label: '指南', position: 'left' },
-      { to: '/docs/intro', label: 'API文档', position: 'left' },
       { to: '/docs/intro', label: '开发者指南', position: 'left' },
+      {
+        type: 'localeDropdown',
+        position: 'right',
+      },
       { href: 'https://github.com/superccy/AAG', label: 'GitHub', position: 'right' },
     ],
     },

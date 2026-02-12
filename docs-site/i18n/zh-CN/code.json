@@ -1,0 +1,34 @@
+{
+  "homepage.title": {
+    "message": "YiGraph",
+    "description": "The homepage title"
+  },
+  "homepage.description": {
+    "message": "YiGraph - 面向复杂关联数据的图分析智能体系统",
+    "description": "The homepage description"
+  },
+  "homepage.heroTitle": {
+    "message": "YiGraph",
+    "description": "The hero title on homepage"
+  },
+  "homepage.heroSubtitle": {
+    "message": "面向复杂关联数据的图分析智能体系统",
+    "description": "The hero subtitle on homepage"
+  },
+  "homepage.heroTagline": {
+    "message": "用自然语言，洞察数据背后的深层关系",
+    "description": "The hero tagline on homepage"
+  },
+  "homepage.introBtn": {
+    "message": "简介",
+    "description": "Introduction button text"
+  },
+  "homepage.quickStartBtn": {
+    "message": "快速开始",
+    "description": "Quick start button text"
+  },
+  "homepage.githubBtn": {
+    "message": "Github →",
+    "description": "Github button text"
+  }
+}

@@ -1,40 +1,135 @@
-# AAG: 分析增强生成框架
+# AAG: Analytics-Augmented Generation
 
-## 项目简介
+<div align="center">
 
+**端到端的图数据分析增强生成框架**
 
-AAG（Analytics Augmented Generation Engine）是一个端到端的分析增强生成框架，旨在提升大语言模型（LLM）在图结构数据处理与分析方面的能力。该框架通过集成图分析系统、RAG（Retrieval-Augmented Generation）知识层和大模型推理，实现了从任意数据到图建模、图分析、专业问题建模与总结的全流程自动化，助力解决复杂的图相关问题。
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
----
+[English](README_EN.md) | 简体中文
 
-## 核心特性
-
-- **图计算引擎**：支持多种图算法（PageRank、连通分量、中心性等），基于 NetworkX 和 PyTorch Geometric
-- **混合检索**：结合图检索（NebulaGraph）和向量检索（Milvus）的优势，提供更精准的知识检索
-- **智能问题建模**：将领域问题自动转化为图分析任务，支持复杂依赖的多任务流水线
-- **知识库增强**：集成领域知识库，提升 LLM 对图结构问题的理解与推理能力
-- **灵活数据支持**：支持图数据（graph）、表格数据（table）、文本数据（text）等多种数据源
-- **多种运行模式**：支持交互式对话、批处理等多种使用方式
-- **配置驱动**：通过 YAML 配置文件灵活配置系统参数
+</div>
 
 ---
 
-## 架构总览
+## 📖 项目介绍
 
-![AAG 架构图](./figure/aag_architecture.png)
+**AAG（Analytics-Augmented Generation，分析增强生成）** 是一套端到端的图数据分析智能体系统，用于帮助用户从复杂数据中快速洞察关键关联关系。
+
+AAG 能够从日志、文档、表格等多类原始数据中，自动抽取实体与关系，构建结构化的图数据；用户只需通过**自然语言**描述业务问题，系统即可自动规划分析流程，完成计算，并生成**清晰、可解释、可追溯的分析报告**。
+
+在系统内部，**大语言模型**负责理解用户意图、拆解分析任务并组织最终输出；而支撑分析结果可靠性的核心技术是 **AAG（Analytics-Augmented Generation，分析增强生成）**。AAG 将分析计算作为核心能力，在关键环节调用图算法与图系统完成可验证的计算，再由模型对结果进行解释与汇总。
+
+因此，AAG 并非只"回答问题"的对话式 AI，而是一套能够将业务问题转化为**可执行、可复核分析流程**的图分析智能体。
+
+### 适用场景
+
+AAG 可灵活适配不同行业与业务需求，覆盖多类复杂关联数据分析场景，包括但不限于：
+
+- **金融反洗钱与可疑交易分析**：将海量交易流水自动构建为交易网络，识别异常资金路径与可疑交易环路
+- **电商风控与羊毛党识别**：融合账号、设备、地址等多源数据建图，发现团伙化作弊与关联作恶行为
+- **企业关联与风险排查**：通过企业、股权、交易等关系建图，穿透复杂结构，识别潜在合规与经营风险
+- **园区/城市事件分析**：将门禁、轨迹、事件数据统一建图，还原人员关系与事件演化过程
+- **供应链风险分析**：整合企业与交易数据构建供应链网络，定位隐蔽关联风险及传导路径
+
+---
+
+## ⚡ 核心功能
+
+### 1. 知识驱动的任务规划
+
+系统会先理解用户问题"想解决什么"，再把它拆成可执行的分析步骤：
+- 需要哪些数据字段与关系
+- 该构建怎样的图（哪些实体、哪些关系）
+- 该用哪些分析方法与参数
+- 分析结果需要如何解释与呈现
+
+> 你不需要懂图算法，系统会把"我要查什么"转成"怎么做分析"。
+
+### 2. 以算法为核心的可靠执行
+
+AAG 不会让模型随意"写一段不可控的代码再去跑"。相反，它会以"可验证的算法模块"为中心进行调用与组合，让每一步分析：
+- **可复现**：同样输入得到稳定一致的输出
+- **可追溯**：知道用了哪些算法、跑了哪些步骤
+- **更可靠**：关键计算由专业模块完成，而不是纯文本推理
+
+### 3. 任务感知的图构建
+
+AAG 不会把所有原始数据不加区分地建成一张大图。它会根据当前任务需要，选择性抽取与构建"与问题相关的实体与关系"，避免无关结构干扰分析，并把图组织成更适合执行的形式，从而提升效率与结果质量。
+
+### 4. 丰富的图算法库
+
+内置 **100+ 种图算法**，覆盖 11 大类别，为各类图分析场景提供专业算法支持：
+
+| 算法类别 | 算法数量 | 典型算法 | 应用场景 |
+|---------|---------|---------|---------|
+| [**Basics（基础算子）**](docs-site/docs/tutorial-algorithm/basic.md) | 10 个 | BFS、DFS、拓扑排序、DAG 判定、祖先/后代查询 | 图结构校验、依赖分析、层级遍历 |
+| [**Path（路径算法）**](docs-site/docs/tutorial-algorithm/path.md) | 13 个 | Dijkstra、Bellman-Ford、Floyd-Warshall、欧拉路径、DAG 最长路径 | 路径规划、关系链分析、关键路径 |
+| [**Centrality（中心性算法）**](docs-site/docs/tutorial-algorithm/centrality.md) | 14 个 | PageRank、介数中心性、接近中心性、特征向量中心性、HITS、VoteRank | 关键节点识别、影响力评估、种子选择 |
+| [**Connectivity & Components（连通性与组件）**](docs-site/docs/tutorial-algorithm/Connectivity_Components.md) | 13 个 | 连通分量、强连通分量、割点/割边、最小割、节点/边连通度 | 网络稳健性、脆弱性分析、孤岛识别 |
+| [**Clustering & Community（聚类与社区）**](docs-site/docs/tutorial-algorithm/Clustering_Community.md) | 17 个 | Louvain、Leiden、标签传播、k-clique、Girvan-Newman、聚类系数、环检测 | 圈层识别、团伙发现、紧密度分析 |
+| [**Tree & Spanning Tree（树与生成树）**](docs-site/docs/tutorial-algorithm/tree.md) | 3 个 | 最小生成树、最大生成树、随机生成树 | 网络骨架提取、成本优化 |
+| [**Flow & Cut（流与割）**](docs-site/docs/tutorial-algorithm/flow.md) | 5 个 | Edmonds-Karp、最大流、最小割、Gomory-Hu 树 | 容量规划、瓶颈分析、网络韧性 |
+| [**Matching & Coloring（匹配与着色）**](docs-site/docs/tutorial-algorithm/matching_coloring.md) | 6 个 | 最大/最小权重匹配、贪心着色、最小边覆盖 | 资源分配、冲突检测、任务调度 |
+| [**Cliques & Cores（团与核）**](docs-site/docs/tutorial-algorithm/cliques_cores.md) | 4 个 | 极大团枚举、最大权重团、k-core、核数计算 | 紧密群体发现、核心成员识别 |
+| [**Distance & Measures（距离与结构度量）**](docs-site/docs/tutorial-algorithm/distance.md) | 8 个 | 离心率、直径、半径、中心/边缘、维纳指数、同配系数 | 网络体检、拓扑对比、结构偏好分析 |
+| [**Graph Query（图查询）**](docs-site/docs/tutorial-algorithm/graph_query.md) | 8 个 | 节点查询、关系过滤、邻居查询、路径查询、共同邻居、子图抽取、聚合统计 | 数据获取与筛选、交互式探索、风控排查 |
+
+> 详细的算法说明和使用指南请参考[算法文档](docs-site/docs/tutorial-algorithm/)，或访问[文档站点](docs-site/docs/intro.md)
+
+
+### 5. 灵活的数据支持
+
+支持多种数据源输入：
+- **图数据**：GML、GraphML、边列表等格式
+- **表格数据**：CSV、Excel 等结构化数据
+- **文本数据**：文档、日志、报告等非结构化数据
+
+系统会自动从原始数据中抽取实体与关系，构建结构化的图数据。
+
+### 6. 多种运行模式
+
+- **交互式模式**：通过自然语言对话完成图分析任务
+- **批处理模式**：批量处理多个分析任务
+- **API 模式**：通过 RESTful API 集成到现有系统
+
+---
+
+## 🎯 版本发布
+
+### v0.1.0 (当前版本)
+
+**核心能力**
+- ✅ 完整的图计算引擎（基于 NetworkX 和 PyTorch Geometric）
+- ✅ 智能任务规划与执行
+- ✅ 100+ 种图算法支持，覆盖 11 大类别
+- ✅ 多数据源支持（图/表格/文本）
+- ✅ 交互式对话界面
+
+**已知限制**
+- 大规模图（百万节点以上）性能有待优化
+- 部分高级图算法仍在开发中
+- 文档和示例仍在完善
+
+### 路线图
+
+**v0.2.0（计划中）**
+- 🔄 更多图深度学习算法
+- 🔄 更多数据源连接器
 
 
 ---
 
-## 快速开始
+## 🚀 快速开始
 
-### 1. 环境准备
+### 1. 准备环境
 
-#### Python 版本要求
+#### 1.1 Python 版本要求
 
-- **Python >= 3.11**
+- Python >= **3.11**
 
-请确保您的 Python 版本满足要求。可以通过以下命令检查：
+请确认当前 Python 版本满足要求：
 
 ```bash
 python --version
@@ -42,40 +137,39 @@ python --version
 python3 --version
 ```
 
-#### 安装项目
+#### 1.2 使用 Conda 创建虚拟环境（推荐）
 
-**安装依赖**
+```bash
+conda create -n AAG python=3.11
+conda activate AAG
+```
+
+### 2. 获取源码并安装依赖
+
+#### 2.1 下载源码
+
+```bash
+git clone https://github.com/superccy/AAG.git
+cd AAG
+```
+
+#### 2.2 安装依赖
 
 ```bash
 pip install -r requirements.txt
 ```
 
+### 3. 配置系统参数
 
-#### 启动必要服务
+#### 3.1 配置推理与检索引擎
 
-**NebulaGraph (图数据库)**
-```bash
-docker run -d --name nebula-graphd \
-  -p 9669:9669 -p 19669:19669 \
-  vesoft/nebula-graphd:v3.4.0
+编辑配置文件：
+
+```text
+config/engine_config.yaml
 ```
 
-**Milvus (向量数据库)**
-```bash
-docker run -d --name milvus-standalone \
-  -p 19530:19530 -p 9091:9091 \
-  milvusdb/milvus:v2.3.3
-```
-
-**Ollama (可选，本地 LLM)**
-```bash
-ollama serve
-ollama pull llama3.1:70b
-```
-
-### 2. 配置系统
-
-编辑 `config/engine_config.yaml` 配置文件：
+示例配置如下：
 
 ```yaml
 # 运行模式： interactive / batch
@@ -84,7 +178,7 @@ mode: interactive
 # 推理模块配置
 reasoner:
   llm:
-    provider: "openai"  # ollama 或 openai
+    provider: "openai"   # 可选：ollama / openai
     openai:
       base_url: "https://your-api-endpoint/v1/"
       api_key: "your-api-key"
@@ -111,9 +205,15 @@ retrieval:
       k_similarity: 5
 ```
 
-### 3. 数据准备
+#### 3.2 配置数据集
 
-在 `config/data_upload_config.yaml` 中配置数据集：
+编辑配置文件：
+
+```text
+config/data_upload_config.yaml
+```
+
+示例配置如下：
 
 ```yaml
 datasets:
@@ -133,51 +233,91 @@ datasets:
           target_field: bene_acct
 ```
 
-### 4. 运行系统
+> 请将 `path` 修改为你本地真实的数据文件路径。
+
+### 4. 启动 AAG
+
+AAG 支持以下两种运行模式：
+
+- **Web 交互模式（推荐）**
+  通过浏览器进行交互式分析，适合日常使用、演示与业务分析场景。
+
+- **终端交互模式（Terminal）**
+  通过命令行进行交互，适合开发调试、快速验证与批量测试场景。
+
+#### 4.1 Web 交互模式
+
+在项目根目录下执行以下命令启动 Web 服务：
 
 ```bash
-# 进入项目目录
-cd AAG
+python web/frontend/run.py
+```
 
-# 启动交互模式
+启动成功后，终端会输出可访问的服务地址。请根据提示在浏览器中打开对应地址，即可进入 AAG 的 Web 界面。
+
+在 Web 界面中，用户可以通过自然语言输入业务问题，系统将自动完成分析流程，并展示分析结果与报告。
+
+#### 4.2 终端交互模式（Terminal）
+
+如果希望直接通过命令行与 AAG 进行交互，可在项目根目录下执行：
+
+```bash
 python aag/main.py
 ```
 
-### 5. 使用示例
+启动后，系统将进入终端交互模式。用户可按照终端提示输入问题，AAG 将在命令行中完成分析并输出结果。
 
-启动后，系统进入交互模式，支持以下命令：
+该模式主要用于开发调试、算法验证或快速测试场景。
 
-```
-👤 用户 > help                    # 显示帮助
-👤 用户 > datasets                # 列出可用数据集
-👤 用户 > use AMLSim1K           # 选择数据集
-👤 用户 > 分析这个图中的重要节点  # 提出问题
-👤 用户 > quit                   # 退出
-```
+### 5. 使用 AAG
+
+无论采用 Web 模式还是终端模式，AAG 的基本使用流程一致：
+
+- 启动对应的运行模式
+- 根据提示输入自然语言业务问题
+- 系统自动完成任务理解、分析执行与结果生成
+
+更多高级功能、参数说明与使用示例，请参考项目的 README 文档或界面中的操作提示。
+
+### 6. 常见问题建议
+
+- **GPU 设备不可用**：请确认 `embedding.device` 设置正确
+- **端口冲突**：检查图数据库与向量数据库服务是否已启动
+- **模型无法加载**：确认 API Key 与模型名称是否有效
 
 ---
 
-## 目录结构
+## 📂 项目结构
 
 ```
-GraphLLM/
+AAG/
 ├── aag/                          # 核心代码目录
 │   ├── main.py                   # 主入口文件
 │   ├── engine/                   # AAG 引擎
 │   │   ├── aag_engine.py         # 引擎核心
-│   │   └── scheduler.py          # 任务调度器
+│   │   ├── scheduler.py          # 任务调度器
+│   │   ├── router.py             # 任务路由
+│   │   └── dependency_resolver.py # 依赖解析
 │   ├── computing_engine/         # 图计算引擎
 │   │   ├── graph_processor.py    # 图处理器
+│   │   ├── computing_engine.py   # 计算引擎核心
 │   │   ├── networkx_server/      # NetworkX 服务
 │   │   └── pyg_server/           # PyTorch Geometric 服务
+│   ├── rag_engine/               # RAG 检索引擎
+│   │   ├── graph_rag.py          # 图检索
+│   │   ├── vector_rag.py         # 向量检索
+│   │   └── rag.py                # 混合检索
 │   ├── expert_search_engine/     # 专家搜索引擎
-│   │   ├── rag.py                # RAG 核心
+│   │   ├── search.py             # 搜索核心
 │   │   ├── database/             # 数据库接口
-│   │   │   ├── nebulagraph.py    # NebulaGraph
-│   │   │   └── milvus.py         # Milvus
+│   │   │   ├── nebulagraph.py    # NebulaGraph 接口
+│   │   │   └── milvus.py         # Milvus 接口
 │   │   └── data_process/         # 数据处理
 │   ├── data_pipeline/            # 数据处理管道
 │   │   ├── data_transformer/     # 数据转换器
+│   │   │   ├── graph_loader.py   # 图数据加载
+│   │   │   ├── table_loader.py   # 表格数据加载
+│   │   │   └── text_loader.py    # 文本数据加载
 │   │   └── knowledge_ingestion/  # 知识抽取
 │   ├── reasoner/                 # 推理模块
 │   │   ├── model_deployment.py   # LLM 部署
@@ -187,199 +327,109 @@ GraphLLM/
 │   │   ├── knowledge.yaml        # 知识定义
 │   │   └── task_types.yaml       # 任务类型
 │   ├── models/                   # 模型定义
-│   │   └── graph_workflow_dag.py # 工作流 DAG
+│   │   ├── graph_workflow_dag.py # 工作流 DAG
+│   │   └── task_types.py         # 任务类型定义
+│   ├── error_recovery/           # 错误恢复
+│   │   ├── error_manager.py      # 错误管理
+│   │   └── policies.py           # 恢复策略
+│   ├── api/                      # API 接口
+│   │   ├── chat_api.py           # 对话 API
+│   │   └── services/             # 服务层
 │   └── utils/                    # 工具函数
 ├── config/                       # 配置文件
 │   ├── engine_config.yaml        # 引擎配置
 │   └── data_upload_config.yaml   # 数据配置
 ├── datasets/                     # 数据集目录
 │   ├── graphs/                   # 图数据集
-│   └── papers/                   # 论文数据
+│   ├── data/                     # 原始数据
+│   └── dataset_schemas/          # 数据集模式
+├── docs-site/                    # 文档站点
+│   └── docs/                     # 文档内容
+├── test/                         # 测试文件
 ├── requirements.txt              # 依赖列表
 └── README.md                     # 本文档
 ```
 
 ---
 
-## 主要功能
+## 📞 联系我们
 
-### 1. 图数据自动抽取
+### 问题反馈
 
-支持从多种数据源自动构建图结构：
+如果您在使用过程中遇到问题，欢迎通过以下方式反馈：
 
-- **表格数据**：从 CSV/Excel 文件中提取节点和边
-- **文本数据**：从文本中抽取实体和关系
-- **已有图数据**：直接加载 GML、GraphML 等格式
+- **GitHub Issues**: [提交 Issue](https://github.com/your-org/AAG/issues)
+- **邮件**: aag-support@example.com
 
-### 2. 灵活的图算法执行
+### 贡献指南
 
-内置多种常用图算法，支持：
+我们欢迎各种形式的贡献：
 
-- **遍历算法**：BFS、DFS
-- **中心性算法**：度中心性、接近中心性、介数中心性、特征向量中心性
-- **社区检测**：Louvain 社区检测
-- **路径算法**：最短路径、所有路径
-- **其他算法**：PageRank、连通分量等
+- 🐛 报告 Bug
+- 💡 提出新功能建议
+- 📝 改进文档
+- 🔧 提交代码
 
-### 3. RAG 知识增强
+请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详细的贡献指南。
 
-- **图检索**：基于问题在图中检索相关子图
-- **向量检索**：基于语义相似度检索相关知识文档
-- **知识融合**：结合多种知识源提升回答质量
+### 社区交流
 
-### 4. 专业问题建模与总结
+- **Discord**: [加入我们的 Discord 社区](https://discord.gg/aag)
+- **微信群**: 添加微信号 `AAG-Community` 并备注"AAG"
 
-- 自动将自然语言问题转化为图分析任务
-- 支持复杂多步骤的分析流程
-- 生成专业级的分析报告
+### 商业合作
 
-### 5. 多任务依赖与流水线
-
-支持复杂的工作流编排：
-
-- 自动识别任务依赖关系
-- 构建执行 DAG
-- 并行执行独立任务
+如需商业支持或定制化开发，请联系：
+- 邮箱: business@example.com
+- 电话: +86 xxx-xxxx-xxxx
 
 ---
 
-## 使用场景
+## 📚 引用
 
-- **金融风控**：关系网络分析、异常交易检测
-- **知识图谱**：自动构建与推理
-- **社交网络**：社区发现、影响力分析
-- **供应链分析**：网络建模与优化
-- **学术研究**：图算法研究与实验
+如果您在研究中使用了 AAG，请引用我们的论文：
 
----
-
-## 扩展性与定制化
-
-### 添加自定义图算法
-
-在 `aag/knowledge_base/algorithms.yaml` 中定义新算法：
-
-```yaml
-- id: custom_algorithm
-  task_type_id: custom_task
-  description:
-    principle: "算法原理描述"
-    meaning: "算法意义和应用场景"
-  support_engines: networkx
-  inputSchema:
-    parameters:
-      graph:
-        type: graph
-        required: true
-  output:
-    type: dict
-    description: "输出格式"
+```bibtex
+@article{aag2024,
+  title={AAG: Analytics-Augmented Generation for Graph Data Analysis},
+  author={Your Name and Others},
+  journal={arXiv preprint arXiv:xxxx.xxxxx},
+  year={2024}
+}
 ```
 
-### 添加新的数据源
-
-在 `aag/data_pipeline/data_transformer/` 中实现新的数据加载器。
-
-### 集成新的 LLM
-
-在 `aag/reasoner/model_deployment.py` 中添加新的 LLM 接口。
-
----
-
-## 配置说明
-
-### 引擎配置 (engine_config.yaml)
-
-主要配置项：
-
-- **mode**: 运行模式（interactive/batch）
-- **reasoner**: LLM 配置（模型、API 密钥等）
-- **retrieval**: 检索配置（数据库连接、RAG 参数等）
-- **monitoring**: 性能监控配置
-
-### 数据配置 (data_upload_config.yaml)
-
-数据配置结构：
-
-- **datasets**: 数据集列表
-  - **name**: 数据集名称
-  - **type**: 数据类型（graph/table/text）
-  - **schema**: 数据模式定义（节点、边、属性等）
-
-详细配置说明请参考配置文件中的注释。
-
----
-
-## 性能优化建议
-
-1. **硬件配置**：
-   - GPU：NVIDIA RTX 4090 或更高
-   - 内存：32GB+ RAM
-   - 存储：SSD 用于向量索引
-
-2. **参数调优**：
-   - 调整 `k_hop` 控制图检索范围
-   - 调整 `k_similarity` 控制向量检索数量
-   - 优化批处理大小提升吞吐量
-
-3. **缓存策略**：
-   - 启用模型缓存
-   - 实现查询结果缓存
-
----
-
-## 故障排除
-
-### 常见问题
-#### 1. 数据库连接失败
-
-**原因**：NebulaGraph 或 Milvus 服务未启动。
-
-**解决方案**：
-- 检查服务状态：`docker ps | grep nebula` 和 `docker ps | grep milvus`
-- 启动服务（见"快速开始"部分的说明）
-- 验证 `config/engine_config.yaml` 中的连接参数
-
-#### 3. 模型加载失败
-
-**解决方案**：
-- 检查 Ollama 服务：`ollama list` 和 `ollama serve`
-- 下载模型：`ollama pull llama3.1:70b`
-- 验证 GPU 内存是否充足（如果使用 GPU）
-
-#### 4. 内存不足
-
-**解决方案**：
-- 减少批处理大小
-- 使用更小的模型（如 `llama3.1:8b` 而不是 `llama3.1:70b`）
-- 增加系统内存
-
----
-
-## 贡献与反馈
-
-欢迎提交 Issue、PR 或建议，帮助我们完善 GraphLLM/AAG！
-
----
-
-## 致谢
+### 致谢
 
 本项目受益于以下开源项目：
 
-- **NetworkX**：图分析和算法库
-- **LlamaIndex**：RAG 框架
-- **NebulaGraph**：图数据库
-- **Milvus**：向量数据库
-- **PyTorch Geometric**：图深度学习框架
+- [NetworkX](https://networkx.org/) - 图分析和算法库
+- [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/) - 图深度学习框架
+- [NebulaGraph](https://www.nebula-graph.io/) - 分布式图数据库
+- [Milvus](https://milvus.io/) - 向量数据库
+- [LlamaIndex](https://www.llamaindex.ai/) - RAG 框架
 
-感谢所有贡献者！
-
----
-
-## 许可证
-
-MIT License
+感谢所有贡献者的辛勤付出！
 
 ---
 
-如需进一步帮助，请联系项目维护者或提交 Issue。
+## 📄 许可证
+
+本项目采用 [MIT License](LICENSE) 开源协议。
+
+---
+
+## ⭐ Star History
+
+如果这个项目对您有帮助，欢迎 Star ⭐ 支持我们！
+
+[![Star History Chart](https://api.star-history.com/svg?repos=your-org/AAG&type=Date)](https://star-history.com/#your-org/AAG&Date)
+
+---
+
+<div align="center">
+
+**让图数据分析更简单、更智能**
+
+[官方网站](https://aag.example.com) | [文档](https://docs.aag.example.com) | [演示视频](https://demo.aag.example.com)
+
+</div>
