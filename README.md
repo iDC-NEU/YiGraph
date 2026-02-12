@@ -2,7 +2,8 @@
 
 <div align="center">
 
-<img src="figure/logo.png" alt="YiGraph Logo" width="200" />
+<p align="center"><img src="figure/logo.png" alt="YiGraph Logo" width="200" /></p>
+
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
@@ -14,7 +15,7 @@
 
 ## 📖 项目介绍
 
-**易图（YiGraph）是一套端到端的图数据分析智能体系统**，用于帮助用户从复杂数据中快速洞察关键关联关系。
+**易图（YiGraph）是一套端到端的图数据处理智能体系统**，用于帮助用户从复杂数据中快速洞察关键关联关系。
 
 易图能够从日志、文档、表格等多类原始数据中，自动抽取实体与关系，构建结构化的图数据；用户只需通过**自然语言**描述业务问题，系统即可自动规划分析流程，完成计算，并生成**清晰、可解释、可追溯的分析报告**。
 

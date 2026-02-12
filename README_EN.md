@@ -2,7 +2,8 @@
 
 <div align="center">
 
-<img src="figure/logo.png" alt="YiGraph Logo" width="200" />
+<p align="center"><img src="figure/logo.png" alt="YiGraph Logo" width="200" /></p>
+
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
@@ -14,7 +15,7 @@ English | [简体中文](README.md)
 
 ## 📖 Project Introduction
 
-**YiGraph is an end-to-end intelligent graph data analysis agent system** designed to help users quickly gain insights into key relationships from complex data.
+**YiGraph is an end-to-end intelligent graph data processing agent system** designed to help users quickly gain insights into key relationships from complex data.
 
 YiGraph can automatically extract entities and relationships from various raw data sources such as logs, documents, and tables to build structured graph data. Users only need to describe business problems in **natural language**, and the system will automatically plan the analysis process, complete calculations, and generate **clear, interpretable, and traceable analysis reports**.
 
