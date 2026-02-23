@@ -56,12 +56,4 @@ def create_app():
     except ImportError as e:
         logger.warning(f"导入 sockets_chat 失败: {e}")
 
-# ====== 注册文件管理 WebSocket 事件 ======
-    try:
-        from .routes_manage_dataset import register_socket_events
-        register_socket_events(socketio)
-        logger.info("文件管理 WebSocket 事件已注册")
-    except Exception as e:
-        logger.error(f"注册文件管理 WebSocket 事件失败: {str(e)}")
-
     return app

@@ -137,6 +137,7 @@ class ChatService:
         message: str,
         model: Optional[str] = None,
         dataset: Optional[str] = None,
+        dataset_type: Optional[str] = None,
         mode: str = "normal",
         expert_mode: bool = False,
         callback: Optional[Callable[[Dict[str, Any]], None]] = None
@@ -148,6 +149,7 @@ class ChatService:
             message: 用户消息
             model: 模型名称（可选）
             dataset: 数据集名称（可选）
+            dataset_type: 数据集类型 "text" | "graph"（可选）
             mode: 模式 "normal" | "interact" | "expert"
             expert_mode: 兼容旧前端开关（True时使用 interact）
             callback: 回调函数，用于发送流式数据
@@ -170,8 +172,8 @@ class ChatService:
             
             # 如果指定了数据集，先选择数据集
             if dataset:
-                logger.info(f"选择数据集: {dataset}")
-                engine.specific_dataset(dataset)
+                logger.info(f"选择数据集: {dataset}, type: {dataset_type}")
+                engine.specific_dataset(dataset, dataset_type)
             
             logger.info(f"流式处理消息: mode={mode}, message={message[:50]}...")
             

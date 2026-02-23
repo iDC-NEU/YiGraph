@@ -505,24 +505,9 @@ async function getKnowledgeBases() {
         console.error('Failed to fetch knowledge bases:', error);
         // Return mock data as fallback
         return [
-            {
-                "id": 1,
-                "名称": "AI Knowledge Base",
-                "文档个数": 128,
-                "创建时间": "2024-09-12 10:30:00",
-            },
-            {
-                "id": 2,
-                "名称": "Frontend Development Docs",
-                "文档个数": 86,
-                "创建时间": "2023-06-05 14:15:00",
-            },
-            {
-                "id": 3,
-                "名称": "Company Policies & Regulations",
-                "文档个数": 54,
-                "创建时间": "2022-11-20 09:00:00",
-            },
+            { "id": 1, "name": "AI Knowledge Base", "file_count": 128, "created_at": "2024-09-12 10:30:00" },
+            { "id": 2, "name": "Frontend Development Docs", "file_count": 86, "created_at": "2023-06-05 14:15:00" },
+            { "id": 3, "name": "Company Policies & Regulations", "file_count": 54, "created_at": "2022-11-20 09:00:00" },
         ];
     }
 }
@@ -615,12 +600,11 @@ async function renderKnowledgeBases() {
         const row = document.createElement('tr');
         
         // 根据文件类型选择图标
-        const fileTypeIcon = kb.文件类型 === 'graph' 
+        const fileTypeIcon = kb.file_type === 'graph' 
         ? `<i class="fas fa-project-diagram text-blue-400 mr-2" style="font-size: 0.95rem;"></i>`  // 稍微调小一点
         : `<i class="fas fa-file-alt text-blue-400 mr-2" style="font-size: 1.3rem;"></i>`;
         
-        // 修复：使用正确的字段名 "文件个数" 而不是 "文档个数"
-        const fileCount = kb.文档个数 !== undefined ? kb.文档个数 : 0;
+        const fileCount = kb.file_count !== undefined ? kb.file_count : (kb.文档个数 !== undefined ? kb.文档个数 : 0);
         
         // 获取文件单位翻译
         // 确保语言已加载，如果还没有加载，使用window.HTML_MAP直接获取
@@ -638,7 +622,7 @@ async function renderKnowledgeBases() {
                         ${fileTypeIcon}
                     </span>
                     <div class="ms-3">
-                        <div class="line-clamp-2 text-xs font-bold text-slate-600 dark:text-slate-200">${kb.名称}</div>
+                        <div class="line-clamp-2 text-xs font-bold text-slate-600 dark:text-slate-200">${kb.name}</div>
                     </div>
                 </div>
             </td>
@@ -648,8 +632,8 @@ async function renderKnowledgeBases() {
 </span>
             </td>
             <td class="border-t border-slate-200 py-3 pe-5 ps-5 last:sticky last:end-0 last:bg-white last:ps-2 dark:border-slate-800 last:dark:bg-slate-950">
-                <span class="block whitespace-nowrap text-xs font-bold text-slate-600 dark:text-slate-200">${kb.创建时间.split(' ')[0]}</span>
-                <span class="block text-[11px] font-medium text-slate-500 dark:text-slate-400">${kb.创建时间.split(' ')[1]}</span>
+                <span class="block whitespace-nowrap text-xs font-bold text-slate-600 dark:text-slate-200">${(kb.created_at || kb.创建时间 || '').split(' ')[0]}</span>
+                <span class="block text-[11px] font-medium text-slate-500 dark:text-slate-400">${(kb.created_at || kb.创建时间 || '').split(' ')[1] || ''}</span>
             </td>
             <td class="border-t border-slate-200 py-3 pe-5 ps-5 last:sticky last:end-0 last:bg-white last:ps-2 dark:border-slate-800 last:dark:bg-slate-950">
                 <ul class="flex justify-end gap-2">
@@ -688,7 +672,7 @@ function applySearchFilter() {
     } else {
         // 根据数据集名称进行搜索（不区分大小写）
         filteredKnowledgeBases = allKnowledgeBases.filter(kb => {
-            const name = kb.名称 ? kb.名称.toLowerCase() : '';
+            const name = kb.name ? kb.name.toLowerCase() : '';
             return name.includes(searchTerm);
         });
     }

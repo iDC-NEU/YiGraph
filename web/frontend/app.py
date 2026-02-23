@@ -32,24 +32,24 @@ MODEL_MAPPING = {
 knowledge_bases = [
     {
         "id": 1,
-        "名称": "NBA Match Records",
-        "文件类型": "text",  # 新增字段
-        "文档个数": 5,
-        "创建时间": datetime(2024, 9, 12, 10, 30).strftime("%Y-%m-%d %H:%M:%S"),
+        "name": "NBA Match Records",
+        "file_type": "text",
+        "file_count": 5,
+        "created_at": datetime(2024, 9, 12, 10, 30).strftime("%Y-%m-%d %H:%M:%S"),
     },
     {
         "id": 2,
-        "名称": "Social Network Graph",
-        "文件类型": "graph",  # 新增字段
-        "文档个数": 3,
-        "创建时间": datetime(2023, 6, 5, 14, 15).strftime("%Y-%m-%d %H:%M:%S"),
+        "name": "Social Network Graph",
+        "file_type": "graph",
+        "file_count": 3,
+        "created_at": datetime(2023, 6, 5, 14, 15).strftime("%Y-%m-%d %H:%M:%S"),
     },
     {
         "id": 3,
-        "名称": "Materials Lab Manual",
-        "文件类型": "text",  # 新增字段
-        "文档个数": 6,
-        "创建时间": datetime(2022, 11, 20, 9, 0).strftime("%Y-%m-%d %H:%M:%S"),
+        "name": "Materials Lab Manual",
+        "file_type": "text",
+        "file_count": 6,
+        "created_at": datetime(2022, 11, 20, 9, 0).strftime("%Y-%m-%d %H:%M:%S"),
     },
 ]
 # 测试数据集
@@ -305,14 +305,14 @@ def create_knowledge_base():
         data = request.get_json()
         logger.info(f"收到创建知识库请求: {data}")
         
-        if not data or not data.get("名称"):
+        name = data.get("name") or data.get("名称")
+        if not data or not name:
             return jsonify({
                 "success": False,
                 "error": "知识库名称不能为空"
             }), 400
         
-        # 获取文件类型，默认为"text"
-        file_type = data.get("文件类型", "text")
+        file_type = data.get("file_type") or data.get("文件类型", "text")
         
         # 验证文件类型是否合法
         if file_type not in ["text", "graph"]:
@@ -323,16 +323,16 @@ def create_knowledge_base():
         
         new_kb = {
             "id": new_id,
-            "名称": data.get("名称"),
-            "文件类型": file_type,  # 新增文件类型字段
-            "文档个数": 0,
-            "创建时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "name": name,
+            "file_type": file_type,
+            "file_count": 0,
+            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
         knowledge_bases.append(new_kb)
         
         print(knowledge_bases)
 
-        logger.info(f"成功创建知识库: {new_kb['名称']}, 文件类型: {file_type}")
+        logger.info(f"成功创建知识库: {new_kb['name']}, 文件类型: {file_type}")
         return jsonify({
             "success": True,
             "data": new_kb
@@ -355,7 +355,7 @@ def get_dataset_type_function(kb_id):
         # 遍历查找匹配的知识库
         for kb in knowledge_bases:
             if kb["id"] == kb_id_int:
-                return kb.get("文件类型", "text")  # 默认为text
+                return kb.get("file_type") or kb.get("文件类型", "text")
         
         # 如果没有找到，返回默认值
         return "text"

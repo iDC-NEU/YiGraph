@@ -148,7 +148,7 @@ def get_knowledge_base_name(kb_id):
         knowledge_bases = load_knowledge_bases() 
         for kb in knowledge_bases:
             if kb["id"] == kb_id:
-                return kb["名称"]
+                return kb["name"]
         return f"kb_{kb_id}"  
     except Exception as e:
         logger.error(f"获取知识库名称错误: {str(e)}")
@@ -163,7 +163,7 @@ def get_dataset_type_from_back(kb_id):
         knowledge_bases = load_knowledge_bases() 
         for kb in knowledge_bases:
             if kb["id"] == kb_id:
-                return kb["文件类型"]
+                return kb["file_type"]
         return f"kb_{kb_id}"  
     except Exception as e:
         logger.error(f"获取文件类型错误: {str(e)}")
@@ -907,15 +907,15 @@ def get_knowledge_bases1():
         gkb = a1.returnmsg
         knowledge_bases = json.loads(gkb)
         for kb in knowledge_bases["content"]["data"]:
-            if kb.get("文件类型") == "graph" and kb.get("文档个数") == 1:
+            if kb.get("file_type") == "graph" and kb.get("file_count") == 1:
                 try:
-                    a6 = DummySocket(json.dumps({"action": "get_dataset_schema","ds_name":kb["名称"]}))
+                    a6 = DummySocket(json.dumps({"action": "get_dataset_schema","ds_name":kb["name"]}))
                     asyncio.run(server_Test.handler(a6))
                     gkb6 = a6.returnmsg
                     gkb6_json = json.loads(gkb6)
                     data_list = gkb6_json.get("content", {}).get("data", [])
                     if isinstance(data_list, list) and data_list and data_list[0].get("vertex_file",None) is not None:
-                        kb["文档个数"] = 2
+                        kb["file_count"] = 2
                 except Exception as inner_e:
                     logger.warning(f"统计图文件数时出错，已忽略: {inner_e}")
         return jsonify({

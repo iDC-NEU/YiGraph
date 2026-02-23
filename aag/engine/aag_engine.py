@@ -31,7 +31,10 @@ class AAGEngine:
     def __init__(self, config: EngineConfig):
         self.config = config
         self.scheduler: Optional[Scheduler] = None
-    
+        # Cache for dataset init: only re-run heavy init when name or dtype changes
+        self._current_dataset_name: Optional[str] = None
+        self._current_dataset_type: Optional[str] = None
+
         # 性能监控
         self.metrics = {
             "retrieval_time": [],
@@ -110,7 +113,12 @@ class AAGEngine:
         return self.scheduler.list_datasets(dtype)
 
     def specific_dataset(self, name: str, dtype: Optional[str] = None) -> Optional[Any]:
+        dtype = (dtype or "").strip() or None
+        if name == self._current_dataset_name and dtype == self._current_dataset_type:
+            return None
         result = self.scheduler.specific_analysis_dataset(name, dtype)
+        self._current_dataset_name = name
+        self._current_dataset_type = dtype
         return result if result is not None else None
 
 

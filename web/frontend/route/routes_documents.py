@@ -55,7 +55,7 @@ def get_knowledge_base_name(kb_id):
         knowledge_bases = load_knowledge_bases() 
         for kb in knowledge_bases:
             if kb["id"] == kb_id:
-                return kb["名称"]
+                return kb["name"]
         return f"kb_{kb_id}"  
     except Exception as e:
         logger.error(f"获取知识库名称错误: {str(e)}")
@@ -71,14 +71,14 @@ def get_knowledge_bases():
         gkb = a1.returnmsg
         knowledge_bases = json.loads(gkb)
         for kb in knowledge_bases["content"]["data"]:
-            if kb["文件类型"] == "graph":
-                if kb["文档个数"] == 1:
-                    a6 = DummySocket(json.dumps({"action": "get_dataset_schema","ds_name":kb["名称"]}))
+            if kb["file_type"] == "graph":
+                if kb["file_count"] == 1:
+                    a6 = DummySocket(json.dumps({"action": "get_dataset_schema","ds_name":kb["name"]}))
                     asyncio.run(server_Test.handler(a6))
                     gkb6 = a6.returnmsg
                     gkb6_json = json.loads(gkb6)
                     if gkb6_json["content"]["data"][0].get("vertex_file",None) is not None:
-                        kb["文档个数"] = 2
+                        kb["file_count"] = 2
         
         return jsonify({
             "success": True,
@@ -101,13 +101,14 @@ def create_knowledge_base_route():
     try:
         data = request.get_json()
 
-        if not data or not data.get("名称"):
+        name = data.get("name") or data.get("名称")
+        if not data or not name:
             return jsonify({
                 "success": False,
                 "error": "知识库名称不能为空"
             }), 400
 
-        file_type = data.get("文件类型", "text")
+        file_type = data.get("file_type") or data.get("文件类型", "text")
         if file_type not in ["text", "graph"]:
             file_type = "text"
 
@@ -117,7 +118,7 @@ def create_knowledge_base_route():
         #     file_type=file_type
         # )
 
-        a2 = DummySocket(json.dumps({"action": "create_dataset","name":data.get("名称"),"type":data.get("文件类型", "text")}))
+        a2 = DummySocket(json.dumps({"action": "create_dataset","name": name,"type": file_type}))
         asyncio.run(server_Test.handler(a2))
         result = _parse_ws_result(getattr(a2, "returnmsg", "{}"))
 

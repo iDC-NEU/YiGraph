@@ -2301,11 +2301,11 @@ async function renderKnowledgeBaseList() {
 
     kbList.forEach(kb => {
         // 使用从后端获取的实际文件数量
-        const fileCount = kb.文档个数 || 0;
+        const fileCount = kb.file_count !== undefined ? kb.file_count : (kb.文档个数 || 0);
         const filesUnit = getTranslation('files_unit', 'files');
         
         // 根据文件类型选择图标
-        const fileTypeIcon = kb.文件类型 === 'graph' 
+        const fileTypeIcon = kb.file_type === 'graph' 
             ? `<i class="fas fa-project-diagram text-blue-400 mr-2" style="font-size: 1.1rem;"></i>`
             : `<i class="fas fa-file-alt text-blue-400 mr-2" style="font-size: 1.3rem;"></i>`;
         
@@ -2318,7 +2318,7 @@ async function renderKnowledgeBaseList() {
                     ${fileTypeIcon}
                 </span>
                 <div class="ms-3">
-                    <div class="text-sm font-bold text-slate-600 dark:text-slate-200">${kb.名称}</div>
+                    <div class="text-sm font-bold text-slate-600 dark:text-slate-200">${kb.name}</div>
                     <div class="block text-xs text-slate-500 dark:text-slate-400">${fileCount} ${filesUnit}</div>
                 </div>
             </div>
@@ -3452,8 +3452,8 @@ async function loadFiles() {
                 // 方法3: 从已加载的知识库列表中查找
                 if (!datasetType && Array.isArray(knowledgeBasesList)) {
                     const currentKb = knowledgeBasesList.find(kb => String(kb.id) === String(currentKnowledgeBase));
-                    if (currentKb && currentKb.文件类型) {
-                        datasetType = currentKb.文件类型;
+                    if (currentKb && currentKb.file_type) {
+                        datasetType = currentKb.file_type;
                         console.log('[AddFiles调试] 从知识库列表获取类型:', datasetType, 'kb对象:', currentKb);
                     }
                 }

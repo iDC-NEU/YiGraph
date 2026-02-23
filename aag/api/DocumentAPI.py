@@ -1180,11 +1180,11 @@ class DocumentAPIServer:
             for key in self.datasets:
                 result.append({})
                 self.load_each_dataset(key)
-                result[id]["id"] = id+1
-                result[id]["名称"] = key
-                result[id]["文件类型"] = self.datasets[key]["type"]
-                result[id]["创建时间"] = self.datasets[key]["created_at"]
-                result[id]["文档个数"] = len(self.each_dataset)
+                result[id]["id"] = id + 1
+                result[id]["name"] = key
+                result[id]["file_type"] = self.datasets[key]["type"]
+                result[id]["created_at"] = self.datasets[key]["created_at"]
+                result[id]["file_count"] = len(self.each_dataset)
                 id += 1
 
             await websocket.send(json.dumps({

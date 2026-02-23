@@ -17,7 +17,7 @@ def get_knowledge_base_name(kb_id):
     knowledge_bases = load_knowledge_bases()
     for kb in knowledge_bases:
         if kb["id"] == int(kb_id):
-            return kb["名称"]
+            return kb.get("name") or kb.get("名称")
     return f"kb_{kb_id}"  # 默认名称
 
 def load_knowledge_bases():
@@ -108,11 +108,11 @@ def create_knowledge_base(name, file_type):
     os.makedirs(kb_folder_path, exist_ok=True)
     
     new_kb = {
-        "id": new_id,  
-        "名称": name,
-        "文件类型": file_type,
-        "创建时间": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "文件个数": 0  
+        "id": new_id,
+        "name": name,
+        "file_type": file_type,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "file_count": 0,
     }
     
     knowledge_bases.append(new_kb)
@@ -138,7 +138,7 @@ def delete_knowledge_base(kb_id):
         knowledge_bases = [kb for kb in knowledge_bases if kb["id"] != kb_id]
         
         # 删除对应的文件夹 - 使用知识库名称而不是ID
-        kb_folder_path = os.path.join(FILE_STORAGE_BASE_PATH, kb_to_delete["名称"])
+        kb_folder_path = os.path.join(FILE_STORAGE_BASE_PATH, kb_to_delete.get("name") or kb_to_delete.get("名称"))
         try:
             import shutil
             if os.path.exists(kb_folder_path):

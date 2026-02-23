@@ -304,14 +304,18 @@ document.addEventListener('DOMContentLoaded', function() {
         datasets.forEach(dataset => {
             const option = document.createElement('div');
             option.className = 'px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-sm';
-            option.textContent = dataset.名称;
+            option.textContent = dataset.name;
             option.addEventListener('click', () => {
-                selectedDataset = dataset.id;
-                document.getElementById('dataset-display-text').textContent = dataset.名称;
+                selectedDataset = dataset;
+                document.getElementById('dataset-display-text').textContent = dataset.name;
                 dropdown.classList.add('hidden');
             });
             dropdown.appendChild(option);
         });
+        if (datasets.length > 0 && !selectedDataset) {
+            selectedDataset = datasets[0];
+            document.getElementById('dataset-display-text').textContent = datasets[0].name;
+        }
     }
 
      document.getElementById('model-select-btn').addEventListener('click', function(e) {
@@ -337,6 +341,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getSelectedModel() {
         return selectedModel;
+    }
+
+    function getSelectedDataset() {
+        return selectedDataset;
+    }
+
+    function getSelectedDatasetName() {
+        return selectedDataset && selectedDataset.name ? selectedDataset.name : '';
+    }
+
+    function getSelectedDatasetType() {
+        return selectedDataset && selectedDataset.file_type ? selectedDataset.file_type : '';
     }
 
     loadModels();
@@ -578,7 +594,9 @@ document.addEventListener('DOMContentLoaded', function() {
         socket.emit('chat_request', {
             dag_confirm: 'yes',
             dag_id: currentDagId,
-            model: selectedModel
+            model: selectedModel,
+            dataset: getSelectedDatasetName(),
+            dataset_type: getSelectedDatasetType()
         });
     }
 
@@ -1071,7 +1089,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedModel = getSelectedModel();
         const payload = {
             model: selectedModel,
-            expert_mode: isDagModeEnabled
+            expert_mode: isDagModeEnabled,
+            dataset: getSelectedDatasetName(),
+            dataset_type: getSelectedDatasetType()
         };
 
         if (isInteractiveModeEnabled) {
