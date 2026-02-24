@@ -589,15 +589,5 @@ Documentation includes:
 - **API Reference**: Complete API interface documentation
 - **Best Practices**: Analysis cases and experience summaries for typical scenarios
 
-### View Documentation Locally
 
-To run the documentation website locally:
-
-```bash
-cd docs-site
-yarn install
-yarn start
-```
-
-The documentation website will automatically open in your browser (default address: http://localhost:3000)
 

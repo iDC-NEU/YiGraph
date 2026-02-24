@@ -589,16 +589,6 @@ AAG/
 - **API 参考**：完整的 API 接口文档
 - **最佳实践**：典型场景的分析案例和经验总结
 
-### 本地查看文档
 
-如需在本地运行文档网站：
-
-```bash
-cd docs-site
-yarn install
-yarn start
-```
-
-文档网站将在浏览器中自动打开（默认地址：http://localhost:3000）
 
 
