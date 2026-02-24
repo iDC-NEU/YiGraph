@@ -2,11 +2,11 @@
 
 <div align="center">
 
+<p align="center">
+  <img src="figure/logo.png" alt="YiGraph Logo" width="200" />
+</p>
+
 **End-to-End Intelligent Graph Data Analysis Agent System Based on AAG Framework**
-
-<div align="center">
-
-<p align="center"><img src="figure/logo.png" alt="YiGraph Logo" width="200" /></p>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -426,12 +426,7 @@ AAG/
 
 ## 📞 Contact Us
 
-### Issue Feedback
 
-If you encounter problems during use, please feel free to provide feedback through the following methods:
-
-- **GitHub Issues**: [Submit Issue](https://github.com/your-org/AAG/issues)
-- **Email**: aag-support@example.com
 
 ### Contribution Guidelines
 
@@ -447,19 +442,12 @@ We welcome all forms of contributions:
 
 - **Discord**: [Join our Discord community](https://discord.gg/aag)
 
-#### WeChat
 <div align="center">
-<img src="figure/wechat.png" alt="WeChat" width="200"/>
-</div>
 
-#### Xiaohongshu (Little Red Book)
-<div align="center">
-<img src="figure/redbook.png" alt="Xiaohongshu" width="200"/>
-</div>
+| WeChat | Xiaohongshu | Twitter |
+|:---:|:---:|:---:|
+| <img src="figure/wechat.png" alt="WeChat" width="200"/> | <img src="figure/redbook.png" alt="Xiaohongshu" width="200"/> | <img src="figure/twitter.png" alt="Twitter" width="200"/> |
 
-#### Twitter
-<div align="center">
-<img src="figure/twitter.png" alt="Twitter" width="200"/>
 </div>
 
 

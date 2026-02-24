@@ -2,11 +2,11 @@
 
 <div align="center">
 
+<p align="center">
+  <img src="figure/logo.png" alt="YiGraph Logo" width="200" />
+</p>
+
 **基于 AAG 框架的端到端图数据分析智能体系统**
-
-<div align="center">
-
-<p align="center"><img src="figure/logo.png" alt="YiGraph Logo" width="200" /></p>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -426,12 +426,7 @@ AAG/
 
 ## 📞 联系我们
 
-### 问题反馈
 
-如果您在使用过程中遇到问题，欢迎通过以下方式反馈：
-
-- **GitHub Issues**: [提交 Issue](https://github.com/your-org/AAG/issues)
-- **邮件**: aag-support@example.com
 
 ### 贡献指南
 
@@ -447,19 +442,12 @@ AAG/
 
 - **Discord**: [加入我们的 Discord 社区](https://discord.gg/aag)
 
-#### 微信
 <div align="center">
-<img src="figure/wechat.png" alt="微信" width="200"/>
-</div>
 
-#### 小红书
-<div align="center">
-<img src="figure/redbook.png" alt="小红书" width="200"/>
-</div>
+| 微信 | 小红书 | Twitter |
+|:---:|:---:|:---:|
+| <img src="figure/wechat.png" alt="微信" width="200"/> | <img src="figure/redbook.png" alt="小红书" width="200"/> | <img src="figure/twitter.png" alt="Twitter" width="200"/> |
 
-#### Twitter
-<div align="center">
-<img src="figure/twitter.png" alt="Twitter" width="200"/>
 </div>
 
 
