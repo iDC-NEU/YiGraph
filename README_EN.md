@@ -2,15 +2,22 @@
 
 <div align="center">
 
-<p align="center">
-  <img src="figure/logo.png" alt="YiGraph Logo" width="200" />
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td align="center" valign="middle" style="padding-right: 30px;">
+      <img src="figure/logo.png" alt="YiGraph Logo" width="180" />
+    </td>
+    <td align="left" valign="middle">
+      <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #2c3e50;">End-to-End Intelligent Graph Data<br/>Analysis Agent System Based on AAG Framework</h2>
+    </td>
+  </tr>
+</table>
+
+<p style="margin-top: 20px;">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
+  <a href="#-contact-us"><img src="https://img.shields.io/badge/📞-Contact_Us-green.svg" alt="Contact"></a>
 </p>
-
-**End-to-End Intelligent Graph Data Analysis Agent System Based on AAG Framework**
-
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Contact](https://img.shields.io/badge/📞-Contact_Us-green.svg)](#-contact-us)
 
 English | [简体中文](README.md)
 
@@ -329,6 +336,56 @@ After successful startup, the terminal will output the accessible service addres
 
 In the Web interface, users can input business questions in natural language, and the system will automatically complete the analysis process and display analysis results and reports.
 
+##### Web Interface Usage Guide
+
+![YiGraph Web Interface](figure/chat_en.png)
+
+Basic steps for using the YiGraph web interface for analysis:
+
+1. **Start Conversation**: Start a new conversation or select an existing conversation from history.
+
+2. **Select Mode**: Choose the mode that best suits your needs.
+
+3. **Select Dataset**: The system will list your uploaded datasets. For example: DocumentDemo.
+
+4. **Enter Your Request**: Type your instructions or questions in the input box. Please be as clear and specific as possible.
+
+5. **Submit**: Click the send button.
+
+6. **Monitor Progress**: Observe status updates in the main chat area (Running, Planning, Analyzing, etc.).
+
+7. **View Results**: After processing is complete, results will be displayed in the main chat area. You can then ask follow-up questions or start a new request.
+
+##### Dataset Management
+
+![Dataset Management Interface](figure/dataset_en.png)
+
+In the web interface, you can conveniently manage datasets:
+
+1. **Create Dataset**: Click the "Create New" button.
+
+2. **Fill in Dataset Information**:
+   - Enter the dataset name
+   - Select the file type for the dataset
+
+3. **Upload Data Files**: Upload corresponding data files based on the selected file type.
+
+4. **Save Dataset**: After completing the configuration, save it. The dataset will be available for selection in conversations.
+
+##### File Management
+
+![File Management Interface](figure/file_en.png)
+
+In the file management interface, you can manage and visualize files in datasets:
+
+1. **Select Dataset**: Choose the corresponding dataset from the dropdown list.
+
+2. **Upload Files**: Upload files to the selected dataset.
+
+3. **View Parsing Progress**: The system will display file parsing progress and provide real-time status feedback.
+
+4. **Visualize Knowledge Graph**: After file parsing is complete, click the "Visualization" button to view the knowledge graph visualization for that dataset.
+
 #### 4.2 Terminal Interactive Mode
 
 If you want to interact with YiGraph directly through the command line, you can execute in the project root directory:
@@ -338,6 +395,20 @@ python aag/main.py
 ```
 
 After startup, the system will enter terminal interactive mode. Users can input questions according to terminal prompts, and YiGraph will complete the analysis and output results in the command line.
+
+![Terminal Interactive Mode](figure/zhongduan.png)
+
+##### Terminal Interactive Usage Guide
+
+Basic steps for using terminal interactive mode:
+
+1. **View Available Datasets**: Use commands to view available datasets in the system.
+
+2. **Select Dataset**: Select the dataset you want to use according to the prompts.
+
+3. **Enter Questions**: Directly input your business questions or analysis requirements in the terminal.
+
+4. **View Results**: The system will display the analysis process and final results in real-time in the terminal.
 
 This mode is mainly used for development debugging, algorithm verification, or quick testing scenarios.
 

@@ -2,15 +2,22 @@
 
 <div align="center">
 
-<p align="center">
-  <img src="figure/logo.png" alt="YiGraph Logo" width="200" />
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td align="center" valign="middle" style="padding-right: 30px;">
+      <img src="figure/logo.png" alt="YiGraph Logo" width="180" />
+    </td>
+    <td align="left" valign="middle">
+      <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #2c3e50;">基于 AAG 框架的端到端<br/>图数据分析智能体系统</h2>
+    </td>
+  </tr>
+</table>
+
+<p style="margin-top: 20px;">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
+  <a href="#-联系我们"><img src="https://img.shields.io/badge/📞-联系我们-green.svg" alt="Contact"></a>
 </p>
-
-**基于 AAG 框架的端到端图数据分析智能体系统**
-
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Contact](https://img.shields.io/badge/📞-联系我们-green.svg)](#-联系我们)
 
 [English](README_EN.md) | 简体中文
 
@@ -329,6 +336,56 @@ python web/frontend/run.py
 
 在 Web 界面中，用户可以通过自然语言输入业务问题，系统将自动完成分析流程，并展示分析结果与报告。
 
+##### Web 界面使用说明
+
+![易图 Web 界面](figure/chat.png)
+
+使用易图 Web 界面进行分析的基本步骤如下：
+
+1. **开始对话**：开启一个新对话或者从历史记录中选择一个现有对话。
+
+2. **选择模式**：选择最适合您的模式。
+
+3. **选择数据集**：会将您上传好的数据集列举出来。例如：DocumentDemo。
+
+4. **输入您的请求**：在输入框中输入您的指令或问题。请尽可能清晰和具体。
+
+5. **提交**：点击发送按钮。
+
+6. **监控进度**：在主聊天区观察状态更新（运行中、规划中、分析中等）。
+
+7. **查看结果**：处理完成后，结果将显示在主聊天区。然后您可以提出后续问题或开始新的请求。
+
+##### 数据集管理
+
+![数据集管理界面](figure/dataset.png)
+
+在 Web 界面中，您可以方便地管理数据集：
+
+1. **创建数据集**：点击"创建"按钮。
+
+2. **填写数据集信息**：
+   - 输入数据集的名称
+   - 选择数据集中文件的类型
+
+3. **上传数据文件**：根据选择的文件类型上传相应的数据文件。
+
+4. **保存数据集**：完成配置后保存，数据集将在对话中可供选择使用。
+
+##### 文件管理
+
+![文件管理界面](figure/file.png)
+
+在文件管理界面中，您可以对数据集中的文件进行管理和可视化：
+
+1. **选择数据集**：从下拉列表中选择对应的数据集。
+
+2. **上传文件**：向选定的数据集中上传文件。
+
+3. **查看解析进度**：系统会显示文件的解析进度，实时反馈处理状态。
+
+4. **可视化知识图谱**：文件解析完成后，点击"可视化"按钮，即可查看该数据集对应的知识图谱可视化展示。
+
 #### 4.2 终端交互模式（Terminal）
 
 如果希望直接通过命令行与易图进行交互，可在项目根目录下执行：
@@ -338,6 +395,20 @@ python aag/main.py
 ```
 
 启动后，系统将进入终端交互模式。用户可按照终端提示输入问题，易图将在命令行中完成分析并输出结果。
+
+![终端交互模式](figure/zhongduan.png)
+
+##### 终端交互使用说明
+
+使用终端交互模式的基本步骤：
+
+1. **查看可用数据集**：通过指令查看系统中有哪些可用的数据集。
+
+2. **选择数据集**：根据提示选择要使用的数据集。
+
+3. **输入问题**：直接在终端中输入您的业务问题或分析需求。
+
+4. **查看结果**：系统会在终端中实时显示分析过程和最终结果。
 
 该模式主要用于开发调试、算法验证或快速测试场景。
 

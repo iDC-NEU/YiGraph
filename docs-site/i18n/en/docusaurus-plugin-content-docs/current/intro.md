@@ -121,7 +121,6 @@ It will selectively extract and construct "entities and relationships relevant t
 ### 6.1 Multiple Data Input Types
 YiGraph supports various common data formats, adapting to different starting points from "existing graph data" to "building graphs from scratch":
 - **Text/Logs**: Reports, audit materials, logs, event descriptions, etc.
-- **Tabular Data**: CSV / Excel and other business details
 - **Existing Relational Data/Knowledge Graphs**: Existing node-edge data or graph assets
 
 ### 6.2 Multiple Usage Methods (Suggested Naming)

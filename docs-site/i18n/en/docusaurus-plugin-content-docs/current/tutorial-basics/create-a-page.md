@@ -219,6 +219,56 @@ Please open the corresponding address in your browser according to the prompt to
 
 In the web interface, users can input business questions in natural language, and the system will automatically complete the analysis process and display analysis results and reports.
 
+#### Web Interface Usage Guide
+
+![AAG Web Interface](../../../../../static/img/chat_en.png)
+
+Basic steps for using the AAG web interface for analysis:
+
+1. **Start Conversation**: Start a new conversation or select an existing conversation from history.
+
+2. **Select Mode**: Choose the mode that best suits your needs.
+
+3. **Select Dataset**: The system will list your uploaded datasets. For example: DocumentDemo.
+
+4. **Enter Your Request**: Type your instructions or questions in the input box. Please be as clear and specific as possible.
+
+5. **Submit**: Click the send button.
+
+6. **Monitor Progress**: Observe status updates in the main chat area (Running, Planning, Analyzing, etc.).
+
+7. **View Results**: After processing is complete, results will be displayed in the main chat area. You can then ask follow-up questions or start a new request.
+
+#### Dataset Management
+
+![Dataset Management Interface](../../../../../static/img/dataset_en.png)
+
+In the web interface, you can conveniently manage datasets:
+
+1. **Create Dataset**: Click the "Create New" button.
+
+2. **Fill in Dataset Information**:
+   - Enter the dataset name
+   - Select the file type for the dataset
+
+3. **Upload Data Files**: Upload corresponding data files based on the selected file type.
+
+4. **Save Dataset**: After completing the configuration, save it. The dataset will be available for selection in conversations.
+
+#### File Management
+
+![File Management Interface](../../../../../static/img/file_en.png)
+
+In the file management interface, you can manage and visualize files in datasets:
+
+1. **Select Dataset**: Choose the corresponding dataset from the dropdown list.
+
+2. **Upload Files**: Upload files to the selected dataset.
+
+3. **View Parsing Progress**: The system will display file parsing progress and provide real-time status feedback.
+
+4. **Visualize Knowledge Graph**: After file parsing is complete, click the "Visualization" button to view the knowledge graph visualization for that dataset.
+
 
 ### 4.2 Terminal Interactive Mode
 
@@ -227,11 +277,25 @@ If you want to interact with AAG directly through the command line, execute in t
 ```bash
 python aag/main.py
 ```
-
 After startup, the system will enter terminal interactive mode.
 Users can input questions according to terminal prompts, and AAG will complete the analysis and output results in the command line.
 
+![Terminal Interactive Mode](../../../../../static/img/zhongduan.png)
+
+#### Terminal Interactive Usage Guide
+
+Basic steps for using terminal interactive mode:
+
+1. **View Available Datasets**: Use commands to view available datasets in the system.
+
+2. **Select Dataset**: Select the dataset you want to use according to the prompts.
+
+3. **Enter Questions**: Directly input your business questions or analysis requirements in the terminal.
+
+4. **View Results**: The system will display the analysis process and final results in real-time in the terminal.
+
 This mode is mainly used for development debugging, algorithm verification, or quick testing scenarios.
+
 ------------------------------------------------------------------------
 
 ## 5. Using AAG
