@@ -440,7 +440,7 @@ We welcome all forms of contributions:
 
 ### Community Communication
 
-- **Discord**: [Join our Discord community](https://discord.gg/aag)
+
 
 <div align="center">
 

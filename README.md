@@ -440,7 +440,7 @@ AAG/
 
 ### 社区交流
 
-- **Discord**: [加入我们的 Discord 社区](https://discord.gg/aag)
+
 
 <div align="center">
 

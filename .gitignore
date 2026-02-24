@@ -122,7 +122,8 @@ docs/_build
 *.png
 *.pdf
 
-!logo.png
+# Allow images in figure directory
+!figure/*.png
 
 # personnal
 *.csv
