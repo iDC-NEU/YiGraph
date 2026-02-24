@@ -4,8 +4,13 @@
 
 **End-to-End Intelligent Graph Data Analysis Agent System Based on AAG Framework**
 
+<div align="center">
+
+<p align="center"><img src="figure/logo.png" alt="YiGraph Logo" width="200" /></p>
+
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Contact](https://img.shields.io/badge/📞-Contact_Us-green.svg)](#-contact-us)
 
 English | [简体中文](README.md)
 
@@ -144,6 +149,71 @@ conda create -n AAG python=3.11
 conda activate AAG
 ```
 
+#### 1.3 Neo4j Installation and Configuration
+
+YiGraph requires Neo4j as the graph database. This guide uses **Neo4j 3.5.25**.
+
+##### 1.3.1 Java Version Requirements
+
+Neo4j 3.5.25 requires Java 8 or Java 11. Please check your Java version:
+
+```bash
+java -version
+```
+
+If Java is not installed, please install the appropriate version first.
+
+##### 1.3.2 Download and Extract Neo4j
+
+1. Download the Neo4j 3.5.25 installation package from the official website (usually in `.tar.gz` or `.zip` format)
+2. Extract the package to your desired location:
+
+**Linux/Mac systems (.tar.gz format):**
+```bash
+tar -xzf neo4j-community-3.5.25-unix.tar.gz
+cd neo4j-community-3.5.25
+```
+
+**Windows systems (.zip format):**
+- Right-click the archive and select "Extract to current folder"
+- Or use command: `unzip neo4j-community-3.5.25-windows.zip`
+- Navigate to the extracted directory
+
+##### 1.3.3 Configure Neo4j
+
+Enter the `conf` directory and edit the `neo4j.conf` file:
+
+```bash
+cd conf
+```
+
+Add or modify the following settings in `neo4j.conf`:
+
+```properties
+dbms.connectors.default_listen_address=0.0.0.0
+dbms.connectors.default_advertised_address=localhost
+dbms.connector.bolt.listen_address=0.0.0.0:7687
+dbms.connector.http.listen_address=0.0.0.0:7474
+dbms.connector.https.enabled=true
+```
+
+##### 1.3.4 Start and Stop Neo4j
+
+Navigate to the `bin` directory to start or stop Neo4j:
+
+**Start Neo4j:**
+```bash
+cd bin
+./neo4j start
+```
+
+**Stop Neo4j:**
+```bash
+./neo4j stop
+```
+
+After starting Neo4j, you can access the web interface at `http://localhost:7474` to verify the installation.
+
 ### 2. Get Source Code and Install Dependencies
 
 #### 2.1 Download Source Code
@@ -236,6 +306,8 @@ datasets:
 > Please modify `path` to your local actual data file path.
 
 ### 4. Start YiGraph
+
+> **Important Note:** Before starting YiGraph, please ensure that the Neo4j database is already running. If Neo4j is not started, YiGraph will not be able to connect to the graph database. Please refer to [1.3.4 Start and Stop Neo4j](#134-start-and-stop-neo4j) to start Neo4j.
 
 YiGraph supports the following two operating modes:
 
@@ -374,13 +446,23 @@ We welcome all forms of contributions:
 ### Community Communication
 
 - **Discord**: [Join our Discord community](https://discord.gg/aag)
-- **WeChat Group**: Add WeChat ID `AAG-Community` with note "AAG"
 
-### Business Cooperation
+#### WeChat
+<div align="center">
+<img src="figure/wechat.png" alt="WeChat" width="200"/>
+</div>
 
-For commercial support or customized development, please contact:
-- Email: business@example.com
-- Phone: +86 xxx-xxxx-xxxx
+#### Xiaohongshu (Little Red Book)
+<div align="center">
+<img src="figure/redbook.png" alt="Xiaohongshu" width="200"/>
+</div>
+
+#### Twitter
+<div align="center">
+<img src="figure/twitter.png" alt="Twitter" width="200"/>
+</div>
+
+
 
 ---
 

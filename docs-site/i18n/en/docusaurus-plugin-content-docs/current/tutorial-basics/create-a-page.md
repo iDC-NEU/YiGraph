@@ -29,6 +29,71 @@ conda create -n AAG python=3.11
 conda activate AAG
 ```
 
+### 1.3 Neo4j Installation and Configuration
+
+AAG requires Neo4j as the graph database. This guide uses **Neo4j 3.5.25**.
+
+#### 1.3.1 Java Version Requirements
+
+Neo4j 3.5.25 requires Java 8 or Java 11. Please check your Java version:
+
+``` bash
+java -version
+```
+
+If Java is not installed, please install the appropriate version first.
+
+#### 1.3.2 Download and Extract Neo4j
+
+1. Download the Neo4j 3.5.25 installation package from the official website (usually in `.tar.gz` or `.zip` format)
+2. Extract the package to your desired location:
+
+**Linux/Mac systems (.tar.gz format):**
+``` bash
+tar -xzf neo4j-community-3.5.25-unix.tar.gz
+cd neo4j-community-3.5.25
+```
+
+**Windows systems (.zip format):**
+- Right-click the archive and select "Extract to current folder"
+- Or use command: `unzip neo4j-community-3.5.25-windows.zip`
+- Navigate to the extracted directory
+
+#### 1.3.3 Configure Neo4j
+
+Enter the `conf` directory and edit the `neo4j.conf` file with the following configurations:
+
+``` bash
+cd conf
+```
+
+Add or modify the following settings in `neo4j.conf`:
+
+``` properties
+dbms.connectors.default_listen_address=0.0.0.0
+dbms.connectors.default_advertised_address=localhost
+dbms.connector.bolt.listen_address=0.0.0.0:7687
+dbms.connector.http.listen_address=0.0.0.0:7474
+dbms.connector.https.enabled=true
+```
+
+#### 1.3.4 Start and Stop Neo4j
+
+Navigate to the `bin` directory to start or stop Neo4j:
+
+**Start Neo4j:**
+``` bash
+cd bin
+./neo4j start
+```
+
+**Stop Neo4j:**
+``` bash
+./neo4j stop
+```
+
+After starting Neo4j, you can access the web interface at `http://localhost:7474` to verify the installation.
+
 ------------------------------------------------------------------------
 
 ## 2. Get Source Code and Install Dependencies
@@ -129,6 +194,8 @@ datasets:
 ------------------------------------------------------------------------
 
 ## 4. Start AAG
+
+> **Important Note:** Before starting AAG, please ensure that the Neo4j database is already running. If Neo4j is not started, AAG will not be able to connect to the graph database. Please refer to [1.3.4 Start and Stop Neo4j](#134-start-and-stop-neo4j) to start Neo4j.
 
 AAG supports the following two running modes:
 

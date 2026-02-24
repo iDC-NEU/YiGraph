@@ -148,3 +148,26 @@ To facilitate different users, YiGraph can provide multiple interaction and cont
 (Demo link can be placed here)
 
 ⭐️ **Welcome to Star / Follow AAG for the latest product progress and capability updates**
+
+---
+
+## 📞 Contact Us
+
+Welcome to connect with us through the following channels:
+
+<table style={{width: '100%', borderCollapse: 'collapse', border: 'none'}}>
+  <tr>
+    <td style={{textAlign: 'center', border: 'none', padding: '20px'}}>
+      <h4>WeChat</h4>
+      <img src={require('@site/static/img/wechat.png').default} alt="WeChat" width="180"/>
+    </td>
+    <td style={{textAlign: 'center', border: 'none', padding: '20px'}}>
+      <h4>Xiaohongshu</h4>
+      <img src={require('@site/static/img/redbook.png').default} alt="Xiaohongshu" width="180"/>
+    </td>
+    <td style={{textAlign: 'center', border: 'none', padding: '20px'}}>
+      <h4>Twitter</h4>
+      <img src={require('@site/static/img/twitter.png').default} alt="Twitter" width="180"/>
+    </td>
+  </tr>
+</table>

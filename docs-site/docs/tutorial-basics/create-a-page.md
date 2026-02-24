@@ -30,6 +30,71 @@ conda create -n AAG python=3.11
 conda activate AAG
 ```
 
+### 1.3 Neo4j 安装与配置
+
+AAG 需要使用 Neo4j 作为图数据库。本指南使用 **Neo4j 3.5.25** 版本。
+
+#### 1.3.1 Java 版本要求
+
+Neo4j 3.5.25 需要 Java 8 或 Java 11。请先检查 Java 版本：
+
+``` bash
+java -version
+```
+
+如果未安装 Java，请先安装对应版本。
+
+#### 1.3.2 下载与解压 Neo4j
+
+1. 从官网下载 Neo4j 3.5.25 安装包（通常是 `.tar.gz` 或 `.zip` 格式）
+2. 解压安装包到指定位置：
+
+**Linux/Mac 系统（.tar.gz 格式）：**
+``` bash
+tar -xzf neo4j-community-3.5.25-unix.tar.gz
+cd neo4j-community-3.5.25
+```
+
+**Windows 系统（.zip 格式）：**
+- 右键点击压缩包，选择"解压到当前文件夹"
+- 或使用命令：`unzip neo4j-community-3.5.25-windows.zip`
+- 进入解压后的目录
+
+#### 1.3.3 配置 Neo4j
+
+进入 `conf` 目录，编辑 `neo4j.conf` 配置文件：
+
+``` bash
+cd conf
+```
+
+在 `neo4j.conf` 中添加或修改以下配置：
+
+``` properties
+dbms.connectors.default_listen_address=0.0.0.0
+dbms.connectors.default_advertised_address=localhost
+dbms.connector.bolt.listen_address=0.0.0.0:7687
+dbms.connector.http.listen_address=0.0.0.0:7474
+dbms.connector.https.enabled=true
+```
+
+#### 1.3.4 启动与停止 Neo4j
+
+进入 `bin` 目录，执行启动或停止命令：
+
+**启动 Neo4j：**
+``` bash
+cd bin
+./neo4j start
+```
+
+**停止 Neo4j：**
+``` bash
+./neo4j stop
+```
+
+启动 Neo4j 后，可以通过浏览器访问 `http://localhost:7474` 来验证安装是否成功。
+
 ------------------------------------------------------------------------
 
 ## 2. 获取源码并安装依赖
@@ -130,6 +195,8 @@ datasets:
 ------------------------------------------------------------------------
 
 ## 4. 启动 AAG
+
+> **重要提示：** 在启动 AAG 之前，请确保 Neo4j 数据库已经启动并正常运行。如果 Neo4j 未启动，AAG 将无法连接到图数据库。请参考 [1.3.4 启动与停止 Neo4j](#134-启动与停止-neo4j) 部分启动 Neo4j。
 
 AAG 支持以下两种运行模式：
 

@@ -165,8 +165,3 @@
     - common_neighbor
     - subgraph
     - subgraph_by_nodes
-    - get_node_attributes
-    - k_hop_neighbors
-    - common_neighbors
-    - extract_subgraph
-    - get_paths_between_two_nodes

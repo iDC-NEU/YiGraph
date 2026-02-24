@@ -148,3 +148,26 @@ AAG 主要包含三类关键能力：
 （此处可放演示链接）
 
 ⭐️ **欢迎 Star / 关注 AAG，获取最新产品进展与能力更新**
+
+---
+
+## 📞 联系我们
+
+欢迎通过以下方式与我们交流:
+
+<table style={{width: '100%', borderCollapse: 'collapse', border: 'none'}}>
+  <tr>
+    <td style={{textAlign: 'center', border: 'none', padding: '20px'}}>
+      <h4>微信</h4>
+      <img src={require('@site/static/img/wechat.png').default} alt="微信" width="180"/>
+    </td>
+    <td style={{textAlign: 'center', border: 'none', padding: '20px'}}>
+      <h4>小红书</h4>
+      <img src={require('@site/static/img/redbook.png').default} alt="小红书" width="180"/>
+    </td>
+    <td style={{textAlign: 'center', border: 'none', padding: '20px'}}>
+      <h4>Twitter</h4>
+      <img src={require('@site/static/img/twitter.png').default} alt="Twitter" width="180"/>
+    </td>
+  </tr>
+</table>
