@@ -5660,3 +5660,64 @@
   - (Social Network) Explore all relationship chains between "User_A" and "User_B" and identify the shortest one.
   - (Paper Network) Investigate all academic collaboration chains (i.e., any connections established through co-authors) between
     author "Author_Zhang" and author "Author_Li," and finally list the lengths of each collaboration chain.
+
+- id: find_cycle
+  task_type_id: Path
+  Deployment_method:
+    support_engine: networkx
+    input_schema:
+      parameters:
+        G:
+          type: graph
+          description: A directed/undirected graph/multigraph.
+          required: true
+        source:
+          type: node, list of nodes
+          description: >-
+            The node from which the traversal begins. If None, then a source is chosen arbitrarily and repeatedly until all
+            edges from each node in the graph are searched.
+          default: null
+        orientation:
+          type: 'None | ''original'' | ''reverse'' | ''ignore'' (default: None)'
+          description: >-
+            For directed graphs and directed multigraphs, edge traversals need not respect the original orientation of the
+            edges. When set to 'reverse' every edge is traversed in the reverse direction. When set to 'ignore', every edge
+            is treated as undirected. When set to 'original', every edge is treated as directed. In all three cases, the yielded
+            edge tuples add a last entry to indicate the direction in which that edge was traversed. If orientation is None,
+            the yielded edge has no direction indicated. The direction is respected, but not reported.
+          default: null
+    output_schema:
+      type: directed edges
+      description: >-
+        A list of directed edges indicating the path taken for the loop. If no cycle is found, then an exception is raised.
+        For graphs, an edge is of the form `(u, v)` where `u` and `v` are the tail and head of the edge as determined by the
+        traversal. For multigraphs, an edge is of the form `(u, v, key)`, where `key` is the key of the edge. When the graph
+        is directed, then `u` and `v` are always in the order of the actual directed edge. If orientation is not None then
+        the edge tuple is extended to include the direction of traversal ('forward' or 'reverse') on that edge.
+    graph_type:
+      directed: both
+      multigraph: true
+      weighted: true
+      heterogeneous: false
+  Application_scenario: >-
+    The find_cycle algorithm is particularly useful in detecting cycles within directed and undirected graphs, such as in
+    task scheduling, deadlock detection in concurrent programming, and analyzing feedback loops in directed network structures.
+    It can be applied in various domains including computer science, operations research, and systems engineering where understanding
+    cyclic dependencies is essential.
+  Principles: >-
+    This algorithm operates by traversing the graph starting from a specified source node to search for cycles. It works on
+    both directed and undirected graphs and is capable of handling multigraphs. The time complexity is generally O(V + E),
+    where V represents the number of vertices and E represents the number of edges, making it efficient for sparse graphs.
+  Tuning_Mechanisms:
+    source: >-
+      Adjusting the source parameter allows the user to specify the starting node for the cycle detection. If set to None,
+      the algorithm will arbitrarily select a starting node, which may influence the traversal paths taken but does not affect
+      the overall cycle detection capability.
+    orientation: >-
+      The orientation parameter impacts how edge directions are treated during traversal. By setting it to 'ignore', the algorithm
+      treats all edges as undirected, potentially finding cycles that would otherwise be missed in a directed context. Using
+      'reverse' examines the graph in the opposite direction, which could reveal different cycles depending on the graph's
+      structure.
+  solvable_questions:
+    - List all circular transaction paths related to Anna.
+    - List all circular transaction paths related to Anna.

@@ -21,17 +21,9 @@ reasoner:
 # 检索模块（Expert Search Engine / Retrieval）配置
 retrieval:
   database:
-    graph:
-      space_name: "AMLSim1K"
-      server_ip: "127.0.0.1"
-      server_port: "9669"
-      create: true
-      verbose: false
     vector:
-      collection_name: "graphllm_collection"
       host: "localhost"
       port: 19530
-    # add gjq: Neo4j图查询配置
     neo4j:
       enabled: true
       uri: "bolt://202.199.13.67:7687"
@@ -44,15 +36,6 @@ retrieval:
     chunk_size: 512
     chunk_overlap: 20
     device: "cuda:2"
-
-  rag:
-    graph:
-      k_hop: 2
-      pruning: 30
-      data_type: "qa"
-      pruning_mode: "embedding_for_perentity"
-    vector:
-      k_similarity: 5
 
 # 性能监控配置
 monitoring:

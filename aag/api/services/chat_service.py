@@ -16,6 +16,17 @@ from .engine_service import EngineService
 
 logger = logging.getLogger(__name__)
 
+# 聊天页统一错误提示（以 type: result 形式返回，便于在聊天框内展示，不弹窗）
+CHAT_FRIENDLY_ERROR_MSG = "Request failed. Please try again later."
+
+
+def _is_scheduler_error_text(text: str) -> bool:
+    """判断是否为 scheduler 返回的业务错误字符串（应统一为友好提示）。"""
+    if not text or not isinstance(text, str):
+        return False
+    t = text.strip()
+    return t.startswith("⚠️") or t.startswith("❌") or "错误：" in t
+
 
 class ChatService:
     """
@@ -193,7 +204,9 @@ class ChatService:
             elif mode in {"interact", "expert"} and isinstance(result, dict) and "error" in result:
                 if callback:
                     callback({
-                        "error": result.get("error", "处理失败")
+                        "type": "result",
+                        "contentType": "text",
+                        "content": CHAT_FRIENDLY_ERROR_MSG
                     })
             elif mode == "normal" and isinstance(result, dict) and "dag_info" in result:
                 # 普通模式：如果返回了包含 DAG 信息的字典（Web 调用）
@@ -221,8 +234,9 @@ class ChatService:
             else:
                 # 普通模式：返回字符串（向后兼容，或没有 callback 的情况）
                 result_text = str(result) if result else "未获取到结果"
+                if _is_scheduler_error_text(result_text):
+                    result_text = CHAT_FRIENDLY_ERROR_MSG
                 if callback:
-                    # 分段发送文本结果
                     paragraphs = [p.strip() for p in result_text.split('\n') if p.strip()]
                     for para in paragraphs:
                         callback({
@@ -238,12 +252,15 @@ class ChatService:
                 })
                 
         except Exception as e:
-            logger.error(f"流式处理失败: {str(e)}")
+            logger.error(f"流式处理失败: {str(e)}", exc_info=True)
             if callback:
                 callback({
-                    "error": f"处理失败：{str(e)}"
+                    "type": "result",
+                    "contentType": "text",
+                    "content": CHAT_FRIENDLY_ERROR_MSG
                 })
-            raise
+                callback({"type": "stream_end"})
+            return
     
     def _convert_dag_to_frontend_format(self, dag_result: Dict[str, Any]) -> Dict[str, Any]:
         """

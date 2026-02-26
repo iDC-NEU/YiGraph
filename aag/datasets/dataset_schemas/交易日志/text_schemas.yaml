@@ -1,0 +1,11 @@
+datasets:
+- name: ICDE_305_submission_review.txt
+  description: ICDE_305_submission_review.txt doc
+  type: markdown
+  graph_status: completed
+  parsing_rate: 0.8461538461538461
+  create_time: '2026-02-25 00:49:09'
+  schema:
+    path: /home/chency/GraphLLM/aag/datasets/data/交易日志/process_text/ICDE_305_submission_review.txt.md
+    original_path: /home/chency/GraphLLM/aag/datasets/data/交易日志/text/ICDE_305_submission_review.txt
+    format: md

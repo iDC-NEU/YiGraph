@@ -48,6 +48,7 @@
         "model-label": "Model",
         "dataset-label": "Dataset",
         "label-expert-mode": "Expert Mode",
+        "label-interactive-mode": "Interactive Mode",
         "chat-input-placeholder": "Type your message here...",
         "footer-terms": "Terms",
         "footer-about": "About",

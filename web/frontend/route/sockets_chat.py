@@ -269,7 +269,8 @@ def handle_chat_request(data):
                 )
             except Exception as exc:
                 logger.error(f"Background processing failed: {exc}", exc_info=True)
-                send_response({'error': f"Processing failed: {str(exc)}"})
+                send_response({'type': 'result', 'contentType': 'text', 'content': CHAT_FRIENDLY_ERROR_MSG})
+                send_response({'type': 'stream_end'})
 
         future = asyncio.run_coroutine_threadsafe(process_request(), loop)
         future.result()
@@ -279,4 +280,5 @@ def handle_chat_request(data):
     except Exception as e:
         error_msg = f"Processing failed: {str(e)}"
         logger.error(error_msg, exc_info=True)
-        emit('chat_response', {'error': error_msg})
+        emit('chat_response', {'type': 'result', 'contentType': 'text', 'content': CHAT_FRIENDLY_ERROR_MSG})
+        emit('chat_response', {'type': 'stream_end'})

@@ -10,13 +10,13 @@ datasets:
       format: csv
       id_field: acct_id
       label_field: dsply_nm
-      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_aml_doc_accounts.csv
+      path: ../../data/DocumentDemo/text/DocumentDemo_aml_doc_accounts.csv
       type: account
     edge:
     - attribute_fields: []
       format: csv
       label_field: bene_acct
-      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_aml_doc_transactions.csv
+      path: ../../data/DocumentDemo/text/DocumentDemo_aml_doc_transactions.csv
       source_field: tran_id
       target_field: orig_acct
       type: transfer
@@ -44,13 +44,13 @@ datasets:
       format: csv
       id_field: acct_id
       label_field: dsply_nm
-      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_graph_analysis_doc.md_accounts.csv
+      path: ../../data/DocumentDemo/text/DocumentDemo_graph_analysis_doc.md_accounts.csv
       type: account
     edge:
     - attribute_fields: []
       format: csv
       label_field: bene_acct
-      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_graph_analysis_doc.md_transactions.csv
+      path: ../../data/DocumentDemo/text/DocumentDemo_graph_analysis_doc.md_transactions.csv
       source_field: tran_id
       target_field: orig_acct
       type: transfer
@@ -78,13 +78,13 @@ datasets:
       format: csv
       id_field: acct_id
       label_field: dsply_nm
-      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_knowledge_graph_doc.md_accounts.csv
+      path: ../../data/DocumentDemo/text/DocumentDemo_knowledge_graph_doc.md_accounts.csv
       type: account
     edge:
     - attribute_fields: []
       format: csv
       label_field: bene_acct
-      path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/DocumentDemo_knowledge_graph_doc.md_transactions.csv
+      path: ../../data/DocumentDemo/text/DocumentDemo_knowledge_graph_doc.md_transactions.csv
       source_field: tran_id
       target_field: orig_acct
       type: transfer

@@ -165,6 +165,8 @@ class ExpertSearchEngine:
         # 遍历self.task_index, 获取每个task_type的task_type和description, 返回一个list[{"task_type": task_type, "description": description}]
         task_type_list = []
         for task_type in self.task_index.values():
+            if task_type.get("task_type") == "Graph Query":
+                continue
             task_type_list.append({
                 "id": task_type.get("id", ""),
                 "task_type": task_type.get("task_type", ""),

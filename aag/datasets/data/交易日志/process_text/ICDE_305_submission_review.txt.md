@@ -1,0 +1,45 @@
+GPU Native Computation of Scalable Tensor Programs
+
+1. Overall Rating
+Weak Reject
+
+2. Relevant for ICDE
+Yes
+
+3. Are there specific revisions that could raise your overall rating?
+No
+
+4. Paper Summary. In one solid paragraph, describe what is being proposed and in what context, and briefly justify your overall recommendation.
+
+This paper presents TensorPlanner-GPU, which addresses key challenges in executing general loop-based tensor programs on multi-node, multi-GPU clusters, including high communication overhead, low parallelization efficiency, and unbalanced task scheduling. The framework introduces OpenACC directives, loop reordering, and tiling at compile time to enable automatic parallelization and optimize memory access. At runtime, it leverages GPU-aware MPI and GPUDirect to keep tensor blocks fully resident on GPUs and support efficient end-to-end transfers. The scheduler combines GBJ pattern matching with a cost model to balance workload and reduce communication, resulting in a distributed tensor computation framework that is efficient, general-purpose, and scalable.
+
+5. Three (or more) strong points about the paper. Please be precise and explicit; clearly explain the value and nature of the contribution.
+S1. The authors identify and address a critical bottleneck caused by frequent GPU-CPU data transfers in distributed GPU computing environments, proposing an approach that ensures GPU memory residency and direct GPU-to-GPU communication, which has practical significance.
+S2. The scheduler integrates the GBJ pattern with a detailed cost model, aiming to balance computational load and communication cost simultaneously, demonstrating a thoughtful approach to task scheduling challenges.
+S3. The framework combines compile-time automatic parallelization and runtime scheduling optimizations, providing a comprehensive performance optimization strategy for general-purpose tensor programs.
+
+6. Three (or more) weak points about the paper. Please clearly indicate whether the paper has any mistakes, missing related work, or results that cannot be considered a contribution; write it so that the authors can understand what is seen as negative.
+W1.  The paper lacks clear novelty compared to prior work and provides limited insights in key sections such as OpenACC usage (see D1-D2).
+W2.  The scheduling strategy may cause imbalance for sparse workloads. (see D3)
+W3.  The experiments lack evaluation on irregular workloads (e.g., sparse tensor, graph computations), do not quantify the effectiveness of communication/load balancing, and lack evaluation of the scheduler and GPU memory manager. (see D4-D7).
+
+7. Detailed Evaluation (Contribution, Pros/Cons, Errors). Please number each point and provide as constructive feedback as possible.
+D1. The OpenACC section lacks depth. The CODE GENERATION section mainly introduces basic OpenACC directives and memory access patterns. It lacks deeper analysis of how OpenACC should be adapted to matrix sparsity, varying sizes, and GPU hardware characteristics. A more insightful discussion is needed.
+
+D2. The paper lacks clear distinction from prior work TensorPlanner. The overall architecture, figures, and textual descriptions in this paper overlap with the previously published TensorPlanner work. The authors should clearly explain the difference and new contributions of this paper to avoid simple repetition.
+
+D3. Static scheduling based on coordinate mapping may cause severe GPU load imbalance. The task scheduling in this paper relies on static coordinate mapping. In sparse matrix scenarios, where non-zero elements are unevenly distributed, this method may cause serious GPU load imbalance. The authors are encouraged to consider dynamic scheduling strategies that account for sparsity.
+
+D4. The paper claims to achieve communication minimization and load balancing through scheduling. However, the experiments do not provide concrete metrics to support these claims. The authors should add measurements to validate their design.
+
+D5. The experiments in this paper mainly focus on dense tensor computation tasks, lacking evaluation of irregular workloads such as sparse tensor operations or graph computing. Since these tasks are common in real-world applications, I suggest the authors include corresponding experiments to improve the generality of the framework.
+
+D6. The paper does not analyze the runtime or resource overhead of the scheduler itself. The authors should provide experiments or quantitative analysis to show the scalability and efficiency of the scheduling module.
+
+D7. Although the paper proposes a custom garbage collector for GPU memory, there is no dedicated experiment to measure its effectiveness. I suggest the authors design experiments to assess its impact on memory usage and execution efficiency.
+
+D8. Figure 4 and Figure 5 are not described in the main text, making it hard to understand their meaning.
+
+8. Revision. If revision is required, list specific required revisions you seek from the authors. Please number each point
+D1-D8
+

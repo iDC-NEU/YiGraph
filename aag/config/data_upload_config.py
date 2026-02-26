@@ -252,13 +252,16 @@ def load_data_upload_config(yaml_path: str, validate_files: bool = False) -> Dat
                     primary_key=s.get("primary_key")
                 )
 
-            elif dtype == "text":
+            elif dtype in ("text", "markdown", "md"):
+                # markdown/md 为上传生成的文本条目格式，按文本 schema 解析
                 s = ds.get("schema", {})
                 schema = TextSchemaConfig(
                     path=s.get("path", ""),
                     format=s.get("format", ""),
                     encoding=s.get("encoding", "utf-8")
                 )
+                if dtype != "text":
+                    dtype = "text"  # 下游统一按 text 处理
 
             else:
                 raise ValueError(f"不支持的数据集类型: {dtype}")

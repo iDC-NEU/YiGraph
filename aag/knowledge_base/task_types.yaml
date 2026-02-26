@@ -15,8 +15,9 @@
 
 - id: Path
   task_type: "Path"
-  description: Algorithms for finding shortest paths, Eulerian paths, and longest paths
+  description: Algorithms for finding shortest paths, Eulerian paths, longest paths, and circular paths
   algorithm:
+    - find_cycle
     - shortest_path
     - dijkstra_path
     - dijkstra_path_length

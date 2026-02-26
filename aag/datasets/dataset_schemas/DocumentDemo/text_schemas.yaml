@@ -6,8 +6,8 @@ datasets:
   create_time: '2026-02-02 11:23:51'
   parsing_rate: 0.5
   schema:
-    path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/demo_document1.md
-    original_path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/demo_document1.md
+    path: ../../data/DocumentDemo/text/demo_document1.md
+    original_path: ../../data/DocumentDemo/text/demo_document1.md
     format: md
     encoding: utf-8
 - name: DocumentDemo_graph_analysis_doc.md
@@ -17,8 +17,8 @@ datasets:
   create_time: '2026-02-02 11:23:51'
   parsing_rate: 0
   schema:
-    path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/demo_document2.md
-    original_path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/demo_document2.md
+    path: ../../data/DocumentDemo/text/demo_document2.md
+    original_path: ../../data/DocumentDemo/text/demo_document2.md
     format: md
     encoding: utf-8
 - name: DocumentDemo_knowledge_graph_doc.md
@@ -28,7 +28,7 @@ datasets:
   create_time: '2026-02-02 11:23:51'
   parsing_rate: 0
   schema:
-    path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/demo_document3.md
-    original_path: /home/chency/GraphLLM/aag/datasets/data/DocumentDemo/text/demo_document3.md
+    path: ../../data/DocumentDemo/text/demo_document3.md
+    original_path: ../../data/DocumentDemo/text/demo_document3.md
     format: md
     encoding: utf-8

@@ -311,3 +311,6 @@ engine_supported_algorithms:
 
     attribute_assortativity_coefficient:
       - tool: attribute_assortativity_coefficient
+    
+    find_cycle:
+      - tool: find_cycle

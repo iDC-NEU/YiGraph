@@ -8,10 +8,8 @@ datasets:
     - attribute_fields: [tx_type,base_amt,tran_timestamp,is_sar,alert_id]
       format: csv
       label_field: is_sar
-      # path: ../../aag/datasets/data/AMLSim1K/process_graph/transactions.csv_edges.csv
-      # original_path: ../../aag/datasets/data/AMLSim1K/graph/transactions.csv
-      path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/process_graph/transactions.csv_edges.csv
-      original_path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/graph/transactions.csv
+      path: ../../data/AMLSim1K/process_graph/transactions.csv_edges.csv
+      original_path: ../../data/AMLSim1K/graph/transactions.csv
       source_field: orig_acct
       target_field: bene_acct
       type: transfer
@@ -35,10 +33,8 @@ datasets:
       query_field: [last_name, first_name]
       id_field: acct_id
       label_field: prior_sar_count
-      # path: ../../aag/datasets/data/AMLSim1K/process_graph/transactions.csv_vertices.csv
-      # original_path: ../../aag/datasets/data/AMLSim1K/graph/accounts.csv
-      path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/process_graph/transactions.csv_vertices.csv
-      original_path: /home/chency/GraphLLM/aag/datasets/data/AMLSim1K/graph/accounts.csv
+      path: ../../data/AMLSim1K/process_graph/transactions.csv_vertices.csv
+      original_path: ../../data/AMLSim1K/graph/accounts.csv
       type: account
   type: graph
 

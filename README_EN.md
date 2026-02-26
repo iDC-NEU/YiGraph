@@ -1,11 +1,24 @@
-# YiGraph: An End-to-End Intelligent Agent System for Graph Data Processing Based on Analytics-Augmented Generation (AAG)
+# YiGraph
 
 <div align="center">
 
-<p align="center"><img src="figure/logo.png" alt="YiGraph Logo" width="200" /></p>
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td align="center" valign="middle" style="padding-right: 30px;">
+      <img src="figure/logo.png" alt="YiGraph Logo" width="180" />
+    </td>
+    <td align="left" valign="middle">
+      <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #2c3e50;">End-to-End Intelligent Graph Data<br/>Analysis Agent System Based on AAG Framework</h2>
+    </td>
+  </tr>
+</table>
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+<p style="margin-top: 20px;">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
+  <a href="http://superccy.github.io/YiGraphDocs/"><img src="https://img.shields.io/badge/📚-Docs-purple.svg" alt="Docs"></a>
+  <a href="#-contact-us"><img src="https://img.shields.io/badge/📞-Contact_Us-green.svg" alt="Contact"></a>
+</p>
 
 English | [简体中文](README.md)
 
@@ -15,7 +28,7 @@ English | [简体中文](README.md)
 
 ## 📖 Project Introduction
 
-**YiGraph is an end-to-end intelligent graph data processing agent system** designed to help users quickly gain insights into key relationships from complex data.
+**YiGraph is an end-to-end intelligent graph data analysis agent system** designed to help users quickly gain insights into key relationships from complex data.
 
 YiGraph can automatically extract entities and relationships from various raw data sources such as logs, documents, and tables to build structured graph data. Users only need to describe business problems in **natural language**, and the system will automatically plan the analysis process, complete calculations, and generate **clear, interpretable, and traceable analysis reports**.
 
@@ -82,17 +95,16 @@ Built-in **100+ graph algorithms** covering 11 major categories, providing profe
 ### 5. Flexible Data Support
 
 Supports multiple data source inputs:
-- **Graph Data**: GML, GraphML, edge list formats, etc.
-- **Tabular Data**: CSV, Excel, and other structured data
+- **Graph Data**
 - **Text Data**: Documents, logs, reports, and other unstructured data
 
 The system will automatically extract entities and relationships from raw data to build structured graph data.
 
 ### 6. Multiple Operating Modes
 
-- **Interactive Mode**: Complete graph analysis tasks through natural language dialogue
-- **Batch Processing Mode**: Process multiple analysis tasks in batches
-- **API Mode**: Integrate into existing systems through RESTful API
+- **Normal Mode**: Users only need to submit their business questions. YiGraph will automatically parse the problem, select appropriate graph algorithms, execute the computation, and generate an analysis report. This mode is suitable for non-technical or general business users.
+- **Interactive Mode**: Users collaborate with YiGraph to analyze business problems. For a given question, YiGraph interacts with the LLM to determine the computation workflow and graph algorithms, then executes the plan and returns an analysis report. This mode is suitable for advanced users who are familiar with both the business and graph algorithms.
+- **Expert Mode**: Users directly specify the business problem along with the solution approach, computation steps, and graph algorithms. YiGraph then executes the provided plan and returns an analysis report. This mode is intended for expert users with deep knowledge of the business and graph algorithms.
 
 ---
 
@@ -104,19 +116,14 @@ The system will automatically extract entities and relationships from raw data t
 - ✅ Complete graph computing engine (based on NetworkX and  Neo4j)
 - ✅ Intelligent task planning and execution
 - ✅ 100+ graph algorithms support, covering 11 major categories
-- ✅ Multi-data source support (graph/table/text)
+- ✅ Multi-data source support (graph/text)
 - ✅ Interactive dialogue interface
-
-**Known Limitations**
-- Performance optimization needed for large-scale graphs (millions of nodes and above)
-- Some advanced graph algorithms are still under development
-- Documentation and examples are still being improved
 
 ### Roadmap
 
 **v0.2.0 (Planned)**
-- 🔄 More graph deep learning algorithms
-- 🔄 More data source connectors
+- 🔄 Expand the graph algorithm library to 200–300 algorithms
+- 🔄 Add an integrated graph learning module (training/inference)
 
 
 ---
@@ -143,6 +150,71 @@ python3 --version
 conda create -n AAG python=3.11
 conda activate AAG
 ```
+
+#### 1.3 Neo4j Installation and Configuration
+
+YiGraph requires Neo4j as the graph database. This guide uses **Neo4j 3.5.25**.
+
+##### 1.3.1 Java Version Requirements
+
+Neo4j 3.5.25 requires Java 8 or Java 11. Please check your Java version:
+
+```bash
+java -version
+```
+
+If Java is not installed, please install the appropriate version first.
+
+##### 1.3.2 Download and Extract Neo4j
+
+1. Download the Neo4j 3.5.25 installation package from the official website (usually in `.tar.gz` or `.zip` format)
+2. Extract the package to your desired location:
+
+**Linux/Mac systems (.tar.gz format):**
+```bash
+tar -xzf neo4j-community-3.5.25-unix.tar.gz
+cd neo4j-community-3.5.25
+```
+
+**Windows systems (.zip format):**
+- Right-click the archive and select "Extract to current folder"
+- Or use command: `unzip neo4j-community-3.5.25-windows.zip`
+- Navigate to the extracted directory
+
+##### 1.3.3 Configure Neo4j
+
+Enter the `conf` directory and edit the `neo4j.conf` file:
+
+```bash
+cd conf
+```
+
+Add or modify the following settings in `neo4j.conf`:
+
+```properties
+dbms.connectors.default_listen_address=0.0.0.0
+dbms.connectors.default_advertised_address=localhost
+dbms.connector.bolt.listen_address=0.0.0.0:7687
+dbms.connector.http.listen_address=0.0.0.0:7474
+dbms.connector.https.enabled=true
+```
+
+##### 1.3.4 Start and Stop Neo4j
+
+Navigate to the `bin` directory to start or stop Neo4j:
+
+**Start Neo4j:**
+```bash
+cd bin
+./neo4j start
+```
+
+**Stop Neo4j:**
+```bash
+./neo4j stop
+```
+
+After starting Neo4j, you can access the web interface at `http://localhost:7474` to verify the installation.
 
 ### 2. Get Source Code and Install Dependencies
 
@@ -237,6 +309,8 @@ datasets:
 
 ### 4. Start YiGraph
 
+> **Important Note:** Before starting YiGraph, please ensure that the Neo4j database is already running. If Neo4j is not started, YiGraph will not be able to connect to the graph database. Please refer to [1.3.4 Start and Stop Neo4j](#134-start-and-stop-neo4j) to start Neo4j.
+
 YiGraph supports the following two operating modes:
 
 - **Web Interactive Mode (Recommended)**
@@ -257,6 +331,56 @@ After successful startup, the terminal will output the accessible service addres
 
 In the Web interface, users can input business questions in natural language, and the system will automatically complete the analysis process and display analysis results and reports.
 
+##### Web Interface Usage Guide
+
+![YiGraph Web Interface](figure/chat_en.png)
+
+Basic steps for using the YiGraph web interface for analysis:
+
+1. **Start Conversation**: Start a new conversation or select an existing conversation from history.
+
+2. **Select Mode**: Choose the mode that best suits your needs.
+
+3. **Select Dataset**: The system will list your uploaded datasets. For example: DocumentDemo.
+
+4. **Enter Your Request**: Type your instructions or questions in the input box. Please be as clear and specific as possible.
+
+5. **Submit**: Click the send button.
+
+6. **Monitor Progress**: Observe status updates in the main chat area (Running, Planning, Analyzing, etc.).
+
+7. **View Results**: After processing is complete, results will be displayed in the main chat area. You can then ask follow-up questions or start a new request.
+
+##### Dataset Management
+
+![Dataset Management Interface](figure/dataset_en.png)
+
+In the web interface, you can conveniently manage datasets:
+
+1. **Create Dataset**: Click the "Create New" button.
+
+2. **Fill in Dataset Information**:
+   - Enter the dataset name
+   - Select the file type for the dataset
+
+3. **Upload Data Files**: Upload corresponding data files based on the selected file type.
+
+4. **Save Dataset**: After completing the configuration, save it. The dataset will be available for selection in conversations.
+
+##### File Management
+
+![File Management Interface](figure/file_en.png)
+
+In the file management interface, you can manage and visualize files in datasets:
+
+1. **Select Dataset**: Choose the corresponding dataset from the dropdown list.
+
+2. **Upload Files**: Upload files to the selected dataset.
+
+3. **View Parsing Progress**: The system will display file parsing progress and provide real-time status feedback.
+
+4. **Visualize Knowledge Graph**: After file parsing is complete, click the "Visualization" button to view the knowledge graph visualization for that dataset.
+
 #### 4.2 Terminal Interactive Mode
 
 If you want to interact with YiGraph directly through the command line, you can execute in the project root directory:
@@ -266,6 +390,20 @@ python aag/main.py
 ```
 
 After startup, the system will enter terminal interactive mode. Users can input questions according to terminal prompts, and YiGraph will complete the analysis and output results in the command line.
+
+![Terminal Interactive Mode](figure/zhongduan.png)
+
+##### Terminal Interactive Usage Guide
+
+Basic steps for using terminal interactive mode:
+
+1. **View Available Datasets**: Use commands to view available datasets in the system.
+
+2. **Select Dataset**: Select the dataset you want to use according to the prompts.
+
+3. **Enter Questions**: Directly input your business questions or analysis requirements in the terminal.
+
+4. **View Results**: The system will display the analysis process and final results in real-time in the terminal.
 
 This mode is mainly used for development debugging, algorithm verification, or quick testing scenarios.
 
@@ -286,14 +424,26 @@ For more advanced features, parameter descriptions, and usage examples, please r
 - **Model cannot be loaded**: Confirm that API Key and model name are valid
 
 
+## 📖 Documentation & Resources
+
+### 📚 Online Documentation
+
+Access the complete user manual and developer guide:
+
+**[http://superccy.github.io/YiGraphDocs/](http://superccy.github.io/YiGraphDocs/)**
+
+Documentation includes:
+- **Quick Start**: System installation, configuration, and basic usage
+- **Core Concepts**: AAG framework principles and architecture design
+- **Algorithm Documentation**: Detailed descriptions and usage examples of 100+ graph algorithms
+- **API Reference**: Complete API interface documentation
+- **Best Practices**: Analysis cases and experience summaries for typical scenarios
+
+
+
 ## 📞 Contact Us
 
-### Issue Feedback
 
-If you encounter problems during use, please feel free to provide feedback through the following methods:
-
-- **GitHub Issues**: [Submit Issue](https://github.com/your-org/AAG/issues)
-- **Email**: aag-support@example.com
 
 ### Contribution Guidelines
 
@@ -307,13 +457,17 @@ We welcome all forms of contributions:
 
 ### Community Communication
 
-- **WeChat Group**: Add WeChat ID `AAG-Community` with note "YiGraph"
 
-### Business Cooperation
 
-For commercial support or customized development, please contact:
-- Email: business@example.com
-- Phone: +86 xxx-xxxx-xxxx
+<div align="center">
+
+| WeChat | Xiaohongshu | Twitter |
+|:---:|:---:|:---:|
+| <img src="figure/wechat.png" alt="WeChat" width="200"/> | <img src="figure/redbook.png" alt="Xiaohongshu" width="200"/> | <img src="figure/twitter.png" alt="Twitter" width="200"/> |
+
+</div>
+
+
 
 ---
 
@@ -322,11 +476,11 @@ For commercial support or customized development, please contact:
 If you use YiGraph or the AAG framework in your research, please cite our paper:
 
 ```bibtex
-@article{aag2024,
-  title={YiGraph: Analytics-Augmented Generation for Graph Data Analysis},
-  author={Your Name and Others},
-  journal={arXiv preprint arXiv:xxxx.xxxxx},
-  year={2024}
+@article{YiGraph2026,
+  title={Towards Autonomous Graph Data Analytics with Analytics-Augmented Generation},
+  author={Qiange Wang, Chaoyi Chen, Jingqi Gao, Zihan Wang, Yanfeng Zhang, Ge Yu},
+  journal={arXiv preprint arXiv:2602.21604},
+  year={2026}
 }
 ```
 
@@ -366,30 +520,6 @@ If this project helps you, please Star ⭐ to support us!
 
 ---
 
-## 📖 Documentation & Resources
 
-### 📚 Online Documentation
 
-Access the complete user manual and developer guide:
-
-**[https://superccy.github.io/AAG/en/docs/intro](https://superccy.github.io/AAG/en/docs/intro)**
-
-Documentation includes:
-- **Quick Start**: System installation, configuration, and basic usage
-- **Core Concepts**: AAG framework principles and architecture design
-- **Algorithm Documentation**: Detailed descriptions and usage examples of 100+ graph algorithms
-- **API Reference**: Complete API interface documentation
-- **Best Practices**: Analysis cases and experience summaries for typical scenarios
-
-### View Documentation Locally
-
-To run the documentation website locally:
-
-```bash
-cd docs-site
-yarn install
-yarn start
-```
-
-The documentation website will automatically open in your browser (default address: http://localhost:3000)
 

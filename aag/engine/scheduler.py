@@ -922,7 +922,7 @@ class Scheduler:
             rewritten_query = rewrite_result.get("rewritten_query", query)
             reasoning = rewrite_result.get("reasoning", "")
             mapped_concepts = rewrite_result.get("mapped_concepts", [])
-            
+            print(f"rewritten_query: {rewritten_query}")
             logger.info(f"✍️ Query rewritten successfully")
             logger.info(f"Original query: {query}")
             logger.info(f"Rewritten query: {rewritten_query}")

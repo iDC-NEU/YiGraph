@@ -48,6 +48,7 @@
         "model-label": "模型",
         "dataset-label": "数据集",
         "label-expert-mode": "专家模式",
+        "label-interactive-mode": "交互模式",
         "chat-input-placeholder": "在此输入您的问题...",
         "footer-terms": "服务条款",
         "footer-about": "关于我们",

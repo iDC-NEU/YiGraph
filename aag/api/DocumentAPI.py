@@ -12,6 +12,40 @@ from aag.utils.path_utils import DATASETS_DIR, DATASETS_DATA_DIR, DATASETS_SCHEM
 from aag.data_pipeline.data_transformer.text_2_graph.text_2_graph import Text2Graph
 
 
+def _resolve_schema_paths_in_place(dataset_dict: dict, schema_dir: str) -> None:
+    """
+    Resolve relative path and original_path in a loaded dataset/schema dict to absolute paths.
+    Paths are interpreted relative to the directory of the schema file (e.g. graph_schemas.yaml).
+    Mutates dataset_dict in place.
+    """
+    schema = dataset_dict.get("schema") or {}
+    if not isinstance(schema, dict):
+        return
+    schema_dir = os.path.normpath(schema_dir)
+
+    def resolve_one(raw):
+        if not raw or os.path.isabs(raw):
+            return raw
+        return os.path.normpath(os.path.join(schema_dir, raw))
+
+    # Text: schema.path, schema.original_path
+    for key in ("path", "original_path"):
+        if key in schema and schema[key]:
+            schema[key] = resolve_one(schema[key])
+
+    # Graph: schema.vertex[].path, schema.vertex[].original_path, schema.edge[].path, schema.edge[].original_path
+    for v in schema.get("vertex") or []:
+        if isinstance(v, dict):
+            for key in ("path", "original_path"):
+                if key in v and v[key]:
+                    v[key] = resolve_one(v[key])
+    for e in schema.get("edge") or []:
+        if isinstance(e, dict):
+            for key in ("path", "original_path"):
+                if key in e and e[key]:
+                    e[key] = resolve_one(e[key])
+
+
 def parse_list_like_string(s):
     """'[''tx_type'',''base_amt'',...]' -> ['tx_type','base_amt',...]；'a,b,c' -> ['a','b','c']"""
     if s is None or not str(s).strip():
@@ -159,6 +193,10 @@ class DocumentAPIServer:
             key = dataset.get("name")
             if key:
                 self.each_dataset[key] = dataset
+
+        schema_dir = os.path.dirname(os.path.abspath(self.each_dataset_schema_file))
+        for key in self.each_dataset:
+            _resolve_schema_paths_in_place(self.each_dataset[key], schema_dir)
 
     async def upload_file(self, websocket, message):
         """
@@ -746,7 +784,11 @@ class DocumentAPIServer:
             key = dataset.get("name")
             if key:
                 self.graph_schema[key] = dataset
-    
+
+        schema_dir = os.path.dirname(os.path.abspath(self.graph_schema_file))
+        for key in self.graph_schema:
+            _resolve_schema_paths_in_place(self.graph_schema[key], schema_dir)
+
     def read_graph_triplets(self, graph_name: str):
         import csv
         dataset = self.graph_schema[graph_name]
