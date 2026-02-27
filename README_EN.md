@@ -8,7 +8,7 @@
       <img src="figure/logo.png" alt="YiGraph Logo" width="180" />
     </td>
     <td align="left" valign="middle">
-      <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #2c3e50;">End-to-End Intelligent Graph Data<br/>Analysis Agent System Based on AAG Framework</h2>
+      <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #2c3e50;">End-to-End Intelligent Graph Data<br/> Agent System Based on AAG Framework</h2>
     </td>
   </tr>
 </table>
