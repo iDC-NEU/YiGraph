@@ -8,7 +8,7 @@
         <img src="figure/logo.png" alt="YiGraph Logo" width="180" />
       </td>
       <td align="left" valign="middle">
-        <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #2c3e50;">基于分析增强生成的<br/>图数据分析智能体</h2>
+        <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #2c3e50;">基于分析增强生成的<br/>图数据智能体</h2>
       </td>
     </tr>
   </table>
