@@ -359,6 +359,9 @@ document.addEventListener('DOMContentLoaded', function() {
     loadDatasets();
 
     socket.on('chat_response', function(data) {
+        console.log('【WebSocket 调试】收到后端数据:', data);
+        console.log('【WebSocket 调试】数据类型:', data.type, '内容类型:', data.contentType);
+        
         if (!isProcessing && data.type !== 'stream_end' && !data.error) return;
 
         try {
@@ -667,6 +670,97 @@ document.addEventListener('DOMContentLoaded', function() {
         chatInput.focus();
     }
 
+    function handleInteractiveYesClick() {
+        if (!isInteractiveModeEnabled) return;
+        if (isProcessing) return;
+        
+        currentThinkingBlock = null;
+        currentResultBlock = null;
+        currentMessageId = null;
+        currentConversationContainer = null;
+
+        isProcessing = true;
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = SEND_BTN_SPINNING;
+        
+        createMessageBlock('ai', true);
+        
+        const selectedModel = getSelectedModel();
+        socket.emit('chat_request', {
+            dag_confirm: 'yes',
+            dag_id: currentDagId,
+            model: selectedModel,
+            dataset: getSelectedDatasetName(),
+            dataset_type: getSelectedDatasetType() 
+        });
+    }
+
+    function handleInteractiveNoClick() {
+        if (!isInteractiveModeEnabled) return;
+        isDagReviewMode = true;
+        
+        const existingCancelButton = document.querySelector('.cancel-modification-btn');
+        if (existingCancelButton && existingCancelButton.parentNode) {
+            existingCancelButton.parentNode.removeChild(existingCancelButton);
+        }
+        
+        const existingTooltip = document.querySelector('.dag-modification-tooltip');
+        if (existingTooltip && existingTooltip.parentNode) {
+            existingTooltip.parentNode.removeChild(existingTooltip);
+        }
+        
+        const tooltipElement = document.createElement('div');
+        tooltipElement.className = 'dag-modification-tooltip';
+        tooltipElement.innerHTML = `
+            <div class="tooltip-content">
+                <div class="tooltip-arrow"></div>
+                <p class="tooltip-text" data-i18n="tooltip_dag_mod_input">${t('tooltip_dag_mod_input', 'Please enter your dag modification suggestions here (You can press ESC to cancel)')}</p>
+                <button class="tooltip-close">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        `;
+        
+        if (!document.getElementById('dag-tooltip-style')) {
+            const style = document.createElement('style');
+            style.id = 'dag-tooltip-style';
+            style.textContent = `
+                .dag-modification-tooltip { position: absolute; z-index: 10000; animation: fadeInUp 0.3s ease-out; }
+                .tooltip-content { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 16px; border-radius: 12px; position: relative; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); max-width: 400px; text-align: center; }
+                .tooltip-arrow { position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #667eea; }
+                .tooltip-text { margin: 0 24px 0 0; font-size: 14px; line-height: 1.4; font-weight: 500; }
+                .tooltip-close { position: absolute; right: 8px; top: 8px; background: rgba(255, 255, 255, 0.2); border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+                .tooltip-close:hover { background: rgba(255, 255, 255, 0.3); transform: rotate(90deg); }
+                .tooltip-close svg { stroke: white; width: 16px; height: 16px; }
+                @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+                @keyframes fadeOutDown { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(10px); } }
+                .tooltip-fade-out { animation: fadeOutDown 0.2s ease-out forwards; }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        if (!chatInput) return;
+        
+        const inputRect = chatInput.getBoundingClientRect();
+        const bodyRect = document.body.getBoundingClientRect();
+        document.body.appendChild(tooltipElement);
+        
+        const tooltipRect = tooltipElement.getBoundingClientRect();
+        tooltipElement.style.left = `${inputRect.left - bodyRect.left + (inputRect.width / 2) - (tooltipRect.width / 2)}px`;
+        tooltipElement.style.top = `${inputRect.top - bodyRect.top - tooltipRect.height - 8}px`;
+        
+        const currentDagBlock = currentResultBlock || currentThinkingBlock;
+        if (currentDagBlock) {
+            currentDagId = currentDagBlock.dataset.dagId || `dag-${Date.now()}`;
+        }
+        
+        document.addEventListener('keydown', handleEscKey);
+        tooltipElement.querySelector('.tooltip-close').addEventListener('click', exitDagModificationMode);
+        chatInput.focus();
+    }
+
     function exitDagModificationMode() {
         isDagReviewMode = false;
         chatInput.setAttribute('placeholder', t('input_placeholder', 'Type your message...'));
@@ -758,9 +852,9 @@ document.addEventListener('DOMContentLoaded', function() {
         dagWrapper.appendChild(mermaidContainer);
         
         if (isDagModeEnabled) {
+            // 【修改点】专家模式只保留"开始分析"按钮，删除"修改 DAG"按钮
             const buttonContainer = document.createElement('div');
             buttonContainer.className = 'mt-6 flex gap-4 justify-center';
-            // Added data-i18n and t() calls
             buttonContainer.innerHTML = `
                 <button class="dag-yes-btn px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium shadow-md transition-all duration-200 flex items-center gap-2 transform hover:scale-105">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -768,53 +862,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     </svg>
                     <span data-i18n="btn_start_analysis">${t('btn_start_analysis', 'Start Analysing')}</span>
                 </button>
-                <button class="dag-no-btn px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-md transition-all duration-200 flex items-center gap-2 transform hover:scale-105">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-                    </svg>
-                    <span data-i18n="btn_modify_dag">${t('btn_modify_dag', 'Modify DAG')}</span>
-                </button>
             `;
             dagWrapper.appendChild(buttonContainer);
             buttonContainer.querySelector('.dag-yes-btn').addEventListener('click', handleYesClick);
-            buttonContainer.querySelector('.dag-no-btn').addEventListener('click', handleNoClick);
-    
-            const exampleDiv = document.createElement('div');
-            exampleDiv.className = 'mt-6 p-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50 text-left w-full max-w-2xl mx-auto';
-            // Added data-i18n and t() calls for Help Text
-            exampleDiv.innerHTML = `
-                <div class="w-full text-left" style="text-align: left !important;">
-                    <div class="bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                        <h4 class="font-semibold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2 text-left">
-                            <span class="text-blue-500 text-lg" data-i18n="dag_tooltip_edit">${t('dag_tooltip_edit', '✨Edit the DAG by typing these commands directly in the chat box:')}</span>
-                        </h4>
-                        <div class="space-y-4 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                            <div class="flex items-start gap-3">
-                                <span class="text-blue-500 mt-0.5 flex-shrink-0">•</span>
-                                <div class="text-left"><strong class="text-blue-600 dark:text-blue-400" data-i18n="dag_help_add">${t('dag_help_add', 'Add a node:')}</strong><span class="block mt-1" data-i18n="dag_help_add_desc">${t('dag_help_add_desc', 'Insert a new node between node X and node Y: [new content]')}</span></div>
-                            </div>
-                            <div class="flex items-start gap-3">
-                                <span class="text-blue-500 mt-0.5 flex-shrink-0">•</span>
-                                <div class="text-left"><strong class="text-blue-600 dark:text-blue-400" data-i18n="dag_help_mod">${t('dag_help_mod', 'Modify a node:')}</strong><span class="block mt-1" data-i18n="dag_help_mod_desc">${t('dag_help_mod_desc', 'Change node X to: [new full content]')}</span></div>
-                            </div>
-                            <div class="flex items-start gap-3">
-                                <span class="text-blue-500 mt-0.5 flex-shrink-0">•</span>
-                                <div class="text-left"><strong class="text-blue-600 dark:text-blue-400" data-i18n="dag_help_del">${t('dag_help_del', 'Delete a node:')}</strong><span class="block mt-1" data-i18n="dag_help_del_desc">${t('dag_help_del_desc', 'Delete node X')}</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            dagWrapper.appendChild(exampleDiv);
+
+            // 【修改点】删除了 exampleDiv（修改建议提示框）
         }
         
         parentContainer.appendChild(dagWrapper);
 
         let tooltip = document.querySelector('.dag-tooltip');
         if (!tooltip) {
-             tooltip = document.createElement('div');
-             tooltip.className = 'dag-tooltip';
-             tooltip.style.cssText = `
+            tooltip = document.createElement('div');
+            tooltip.className = 'dag-tooltip';
+            tooltip.style.cssText = `
                 position: absolute; background: linear-gradient(135deg, #6ab5d8ff 0%, #4763c1ff 50%, #2464f7ff 100%);
                 color: white; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
                 pointer-events: none; z-index: 9999; opacity: 0; transition: opacity 0.2s, transform 0.2s;
@@ -877,7 +938,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                     return result.join('<br>');
                                 }
 
-                                // i18n applied to tooltip
                                 tooltip.innerHTML = `
                                     <span class="font-bold text-blue-300 drop-shadow-md">${t('tooltip_content', 'Content:')}</span> ${wrapText(escapeHtml(node.label || 'No content available'), 55)}</span><br>
                                     <span class="font-bold text-emerald-400 drop-shadow-md">${t('tooltip_task_type', 'Task Type:')}</span> ${escapeHtml(node.tasktype || 'Unknown')}        
@@ -907,14 +967,258 @@ document.addEventListener('DOMContentLoaded', function() {
                                 textElement.style.fill = '#1e293b';
                                 textElement.style.fontWeight = '500';
                                 textElement.style.fontSize = '13px';
-                            }
+                            } 
                             tooltip.style.opacity = '0';
                             tooltip.style.transform = 'translateY(5px)';
                         });
                     }
-                });
+                }); 
             }).catch(err => {
-                console.error('DAG渲染失败:', err);
+                console.error('DAG 渲染失败:', err);
+                mermaidContainer.style.opacity = '1'; 
+                mermaidContainer.innerHTML = `<p class="text-red-500" data-i18n="error_render">${t('error_render', 'Render Failed')}</p>`;
+            });
+        };
+
+        function getNodeIdFromGroup(nodeGroup, nodeMap) {
+            const nodeGId = nodeGroup.id || '';
+            let matchedNodeId = null;
+            Object.keys(nodeMap).forEach(originalId => {
+                if (nodeGId.includes(originalId) || nodeGroup.querySelector(`*[id*="${originalId}"]`)) {
+                    matchedNodeId = originalId;
+                }
+            });
+            return matchedNodeId;
+        }
+
+        if (document.body.contains(dagWrapper)) {
+            runMermaidRender();
+        } else {
+            mermaidContainer._pendingRender = runMermaidRender;
+        }
+        
+        scrollToBottom();
+    }
+
+    function renderInteractiveDag(dagData, parentContainer) {
+        const dagWrapper = document.createElement('div');
+        dagWrapper.className = 'dag-wrapper my-4';
+        dagWrapper.style.textAlign = 'center'; 
+
+        currentDagId = dagData.id || `dag-${Date.now()}`;
+        currentDagContainer = dagWrapper;
+        
+        const mermaidId = `mermaid-dag-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+        const mermaidContainer = document.createElement('div');
+        mermaidContainer.className = 'mermaid max-w-full overflow-x-auto';
+        mermaidContainer.id = mermaidId;
+        mermaidContainer.style.margin = '0 auto'; 
+        mermaidContainer.style.display = 'inline-block';
+        mermaidContainer.style.opacity = '0'; 
+        mermaidContainer.style.transition = 'opacity 0.3s ease';
+        
+        let mermaidCode = 'graph TD;\n';
+        mermaidCode += '    classDef default fill:#bfdbfe,stroke:#4f46e5,stroke-width:1.5px,rx:8px,ry:8px,text-align:left,font-size:13px,font-weight:500,color:#1e293b;\n';
+
+        dagData.nodes.forEach(node => {
+            const nodeId = node.id || 'unknown';
+            let fullLabel = (node.label || 'Untitled Task').trim();
+            if (!fullLabel) fullLabel = 'Untitled Task';
+
+            let shortContent = fullLabel;
+            
+            const sentenceEnd = fullLabel.search(/[。？！?.！;；]/);
+            if (sentenceEnd > 10 && sentenceEnd < 60) {
+                shortContent = fullLabel.substring(0, sentenceEnd + 1);
+            } else {
+                const words = fullLabel.split(/\s+/);
+                if (words.length > 4) {
+                    shortContent = words.slice(0, 4).join(' ') + '...';
+                } else if (fullLabel.length > 15) {
+                    shortContent = fullLabel.substring(0, 15) + '...';
+                }
+            }
+
+            const MAX_LABEL_LENGTH = 40; 
+            let finalLabel = `${nodeId}: ${shortContent}`;
+            
+            if (finalLabel.length > MAX_LABEL_LENGTH) {
+                const available = Math.max(0, MAX_LABEL_LENGTH - nodeId.length - 2); 
+                if (shortContent.length > available) {
+                    const cutLength = Math.max(0, available - 3);
+                    shortContent = shortContent.substring(0, cutLength) + '...';
+                }
+                finalLabel = `${nodeId}: ${shortContent}`;
+            }
+
+            const escapedLabel = finalLabel.replace(/"/g, '\\"').replace(/]/g, '\\]').replace(/\n/g, ' ');
+            mermaidCode += `    ${node.id}(["${escapedLabel}"])\n`;
+            mermaidCode += `    class ${node.id} default;\n`;
+        });
+
+        dagData.edges.forEach(edge => {
+            mermaidCode += `    ${edge.from} --> ${edge.to};\n`;
+        });
+        mermaidContainer.textContent = mermaidCode;
+        dagWrapper.appendChild(mermaidContainer);
+        
+        // 【修改点】交互模式下始终渲染按钮和提示，不再判断 isDagModeEnabled
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'mt-6 flex gap-4 justify-center';
+        buttonContainer.innerHTML = `
+            <button class="dag-yes-btn px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium shadow-md transition-all duration-200 flex items-center gap-2 transform hover:scale-105">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span data-i18n="btn_start_analysis">${t('btn_start_analysis', 'Start Analysing')}</span>
+            </button>
+            <button class="dag-no-btn px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-md transition-all duration-200 flex items-center gap-2 transform hover:scale-105">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002  0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                </svg>
+                <span data-i18n="btn_modify_dag">${t('btn_modify_dag', 'Modify DAG')}</span>
+            </button>
+        `;
+        dagWrapper.appendChild(buttonContainer);
+        
+        // 绑定交互模式专用的事件处理函数
+        buttonContainer.querySelector('.dag-yes-btn').addEventListener('click', handleInteractiveYesClick);
+        buttonContainer.querySelector('.dag-no-btn').addEventListener('click', handleInteractiveNoClick);
+
+        const exampleDiv = document.createElement('div');
+        exampleDiv.className = 'mt-6 p-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50 text-left w-full max-w-2xl mx-auto';
+        exampleDiv.innerHTML = `
+            <div class="w-full text-left" style="text-align: left !important;">
+                <div class="bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+                    <h4 class="font-semibold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2 text-left">
+                        <span class="text-blue-500 text-lg" data-i18n="dag_tooltip_edit">${t('dag_tooltip_edit', '✨Edit the DAG by typing these commands directly in the chat box:')}</span>
+                    </h4>
+                    <div class="space-y-4 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                        <div class="flex items-start gap-3">
+                            <span class="text-blue-500 mt-0.5 flex-shrink-0">•</span>
+                            <div class="text-left"><strong class="text-blue-600 dark:text-blue-400" data-i18n="dag_help_add">${t('dag_help_add', 'Add a node:')}</strong><span class="block mt-1" data-i18n="dag_help_add_desc">${t('dag_help_add_desc', 'Insert a new node between node X and node Y: [new content]')}</span></div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-blue-500 mt-0.5 flex-shrink-0">•</span>
+                            <div class="text-left"><strong class="text-blue-600 dark:text-blue-400" data-i18n="dag_help_mod">${t('dag_help_mod', 'Modify a node:')}</strong><span class="block mt-1" data-i18n="dag_help_mod_desc">${t('dag_help_mod_desc', 'Change node X to: [new full content]')}</span></div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-blue-500 mt-0.5 flex-shrink-0">•</span>
+                            <div class="text-left"><strong class="text-blue-600 dark:text-blue-400" data-i18n="dag_help_del">${t('dag_help_del', 'Delete a node:')}</strong><span class="block mt-1" data-i18n="dag_help_del_desc">${t('dag_help_del_desc', 'Delete node X')}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        dagWrapper.appendChild(exampleDiv);
+        
+        parentContainer.appendChild(dagWrapper);
+
+        // 以下 Tooltip 逻辑与 renderDag 保持一致
+        let tooltip = document.querySelector('.dag-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.className = 'dag-tooltip';
+            tooltip.style.cssText = `
+                position: absolute; background: linear-gradient(135deg, #6ab5d8ff 0%, #4763c1ff 50%, #2464f7ff 100%);
+                color: white; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
+                pointer-events: none; z-index: 9999; opacity: 0; transition: opacity 0.2s, transform 0.2s;
+                white-space: pre-line; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); transform: translateY(5px);
+            `;
+            document.body.appendChild(tooltip);
+        }
+
+        const runMermaidRender = () => {
+            mermaid.init(undefined, `#${mermaidId}`).then(() => {
+                const svgElement = document.querySelector(`#${mermaidId} svg`);
+                if (!svgElement) return;
+                
+                mermaidContainer.style.opacity = '1';
+                svgElement.style.margin = '0 auto';
+                svgElement.style.display = 'block';
+                
+                const nodeMap = {};
+                dagData.nodes.forEach(node => { nodeMap[node.id] = node; });
+                
+                const defs = svgElement.querySelector('defs') || document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                if (!svgElement.querySelector('defs')) svgElement.insertBefore(defs, svgElement.firstChild);
+                
+                if (!defs.querySelector('#node-gradient')) {
+                    const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                    gradient.setAttribute('id', 'node-gradient');
+                    gradient.setAttribute('x1', '0%');
+                    gradient.setAttribute('y1', '0%');
+                    gradient.setAttribute('x2', '100%');
+                    gradient.setAttribute('y2', '100%');
+                    gradient.innerHTML = '<stop offset="0%" stop-color="#bfdbfe"/><stop offset="100%" stop-color="#93c5fd"/>';
+                    defs.appendChild(gradient);
+                }
+                
+                const nodeGroups = svgElement.querySelectorAll('g[class*="node"]');
+                nodeGroups.forEach(nodeGroup => {
+                    const shape = nodeGroup.querySelector('rect, ellipse, circle');
+                    const textElement = nodeGroup.querySelector('text');
+                    
+                    if (shape) {
+                        nodeGroup.addEventListener('mouseenter', (e) => {
+                            e.stopPropagation();
+                            const nodeId = getNodeIdFromGroup(nodeGroup, nodeMap);
+                            if (nodeId) {
+                                const node = nodeMap[nodeId];
+                                function wrapText(text, maxLength = 50) {
+                                    if (!text || text.length <= maxLength) return text || '';
+                                    const words = text.split(' ');
+                                    let line = '';
+                                    const result = [];
+                                    for (const word of words) {
+                                        if ((line + word).length > maxLength) {
+                                            if (line) result.push(line.trim());
+                                            line = word + ' ';
+                                        } else {
+                                            line += word + ' ';
+                                        }
+                                    }
+                                    if (line) result.push(line.trim());
+                                    return result.join('<br>');
+                                }
+
+                                tooltip.innerHTML = `
+                                    <span class="font-bold text-blue-300 drop-shadow-md">${t('tooltip_content', 'Content:')}</span> ${wrapText(escapeHtml(node.label || 'No content available'), 55)}</span><br>
+                                    <span class="font-bold text-emerald-400 drop-shadow-md">${t('tooltip_task_type', 'Task Type:')}</span> ${escapeHtml(node.tasktype || 'Unknown')}        
+                                `.trim();
+                                tooltip.style.left = `${e.pageX + 10}px`;
+                                tooltip.style.top = `${e.pageY + 10}px`;
+                                tooltip.style.opacity = '1';
+                                tooltip.style.transform = 'translateY(0)';
+                            }
+                        });
+                        
+                        nodeGroup.addEventListener('mousemove', (e) => {
+                            e.stopPropagation();
+                            if (tooltip.style.opacity === '1') {
+                                tooltip.style.left = `${e.pageX + 10}px`;
+                                tooltip.style.top = `${e.pageY + 10}px`;
+                            }
+                        });
+                        
+                        nodeGroup.addEventListener('mouseleave', (e) => {
+                            e.stopPropagation();
+                            shape.style.filter = '';
+                            shape.style.strokeWidth = '1.5';
+                            shape.style.stroke = '#4f46e5';
+                            shape.style.fill = 'url(#node-gradient)';
+                            if (textElement) {
+                                textElement.style.fill = '#1e293b';
+                                textElement.style.fontWeight = '500';
+                                textElement.style.fontSize = '13px';
+                            } 
+                            tooltip.style.opacity = '0';
+                            tooltip.style.transform = 'translateY(5px)';
+                        });
+                    }
+                }); 
+            }).catch(err => {
+                console.error('DAG 渲染失败:', err);
                 mermaidContainer.style.opacity = '1'; 
                 mermaidContainer.innerHTML = `<p class="text-red-500" data-i18n="error_render">${t('error_render', 'Render Failed')}</p>`;
             });
@@ -984,7 +1288,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         else if (contentType === 'dag') {
-            renderDag(content, targetContainer);
+            // 根据当前模式选择渲染函数，实现代码隔离
+            if (isInteractiveModeEnabled) {
+                renderInteractiveDag(content, targetContainer);
+            } else {
+                renderDag(content, targetContainer);
+            }
         }
 
         scrollToBottom();

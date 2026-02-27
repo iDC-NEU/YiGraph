@@ -2,7 +2,7 @@
     "js_vars": {
         "welcome_msg": "Hello, how can I help you?",
         "sender_you": "You",
-        "sender_ai": "EasyGraph",
+        "sender_ai": "YiGraph",
         "status_thinking": " (thinking...)",
         "btn_copy": "Copy",
         "btn_copied": "Copied!",
@@ -35,7 +35,7 @@
         "alert_graph_required_fields": "Please fill in all required fields (marked with *) for Graph dataset."
     },
     "html_map": {
-        "slogan-title": "Easy Graph",
+        "slogan-title": "YiGraph",
         "slogan-sub-text": "from",
         "nav-chat": "Chat",
         "nav-dataset": "Dataset",
