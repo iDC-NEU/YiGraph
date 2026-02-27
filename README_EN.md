@@ -461,7 +461,7 @@ We welcome all forms of contributions:
 
 <div align="center">
 
-| WeChat | Xiaohongshu | Twitter |
+| WeChat | rednote | Twitter |
 |:---:|:---:|:---:|
 | <img src="figure/wechat.png" alt="WeChat" width="200"/> | <img src="figure/redbook.png" alt="Xiaohongshu" width="200"/> | <img src="figure/twitter.png" alt="Twitter" width="200"/> |
 
