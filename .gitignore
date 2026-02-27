@@ -118,11 +118,11 @@ cython_debug/
 docs/_build
 
 
-# Plots
+# Plots (ignore PNG/PDF elsewhere, but track figure/ for docs)
 *.png
 *.pdf
-
 !logo.png
+!figure/*.png
 
 # personnal
 *.csv
