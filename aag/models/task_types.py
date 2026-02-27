@@ -4,6 +4,7 @@ from enum import Enum
 class GraphAnalysisType(Enum):
     GRAPH_ALGORITHM = "graph_algorithm"
     NUMERIC_ANALYSIS = "numeric_analysis"
+    GRAPH_QUERY = "graph_query"
 
 class GraphAnalysisSubType(Enum):
     GRAPH_ALGORITHM = "graph_algorithm"

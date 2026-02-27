@@ -7,7 +7,7 @@ mode: interactive
 # 推理模块（Reasoner）配置
 reasoner:
   llm:
-    provider: "openai" # ollama 或 openai
+    provider: "ollama" # ollama 或 openai
     ollama:
       model_name: "llama3.1:70b"
       device: "cuda:0"
@@ -18,10 +18,11 @@ reasoner:
       api_key: "sk-G30rFStBigqXtuyIOkOo7Zh4QNxO8ZAjfZQ5DYPCgMXbPv8q"
       model: "gpt-4o-mini"
 
-# 检索模块（Expert Search Engine / Retrieval）配置
+# 检索模块配置
 retrieval:
   database:
     vector:
+      collection_name: "graphllm_collection"
       host: "localhost"
       port: 19530
     neo4j:

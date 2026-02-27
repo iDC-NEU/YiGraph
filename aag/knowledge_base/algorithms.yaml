@@ -1366,6 +1366,7 @@
       The algorithm requires edge weights if provided; otherwise, it assumes unit weights.
     time_complexity: O(V log V) (Empirical)
   solvable_questions:
+  - Find the account groups closely connected with Anna.
   - Use the Louvain algorithm for community detection and output the node list of all communities.
   - Run the Louvain method to maximize modularity and provide the best community partition.
   - Based on the multi-level optimization strategy, calculate and return the Louvain community structure of the graph.
@@ -1376,6 +1377,7 @@
   - For precision marketing, please divide the customer network into several natural market segments and list the customers
     in each market.
   - From macro to micro, find the most clear modular organizational forms in the network.
+  - Find the account groups closely connected with Anna.
 - id: modularity
   task_type_id: Clustering & Community
   Deployment_method:

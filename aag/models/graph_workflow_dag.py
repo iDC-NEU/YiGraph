@@ -452,8 +452,12 @@ class GraphWorkflowDAG:
             topological_order = self.topological_order()
             for step_id in topological_order:
                 step = self.steps[step_id]
-                # 将枚举对象转换为字符串值，确保JSON可序列化
-                task_type_str = str(step.task_type) if step.task_type else None
+                # 将枚举对象转换为底层字符串值（如 "graph_algorithm"），确保 JSON 可序列化
+                if step.task_type is not None:
+                    task_type_str = step.task_type.value if hasattr(step.task_type, "value") else str(step.task_type)
+                else:
+                    task_type_str = None
+
                 steps_info[str(step_id)] = {
                     "question": step.question,
                     "task_type": task_type_str,

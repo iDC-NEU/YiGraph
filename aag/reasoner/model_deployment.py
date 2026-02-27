@@ -7,6 +7,7 @@ import requests # deepseek
 from typing import Dict, Literal, Any, List, Optional
 from llama_index.core import Settings
 from llama_index.core.utils import print_text
+from llama_index.core.llms import ChatMessage, MessageRole
 from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.ollama import Ollama
@@ -188,6 +189,7 @@ class OllamaEnv:
         Settings.chunk_overlap = chunk_overlap
         print(
             f"llm_mode_name: {llm_mode_name}, llm_embed_name: {llm_embed_name}, chunk_size: {Settings.chunk_size}, chunk_overlap: {chunk_overlap}")
+
 
     def chat(self, messages: list) -> str:
         response = self.llm.chat(messages=messages)
