@@ -1,25 +1,26 @@
-# 用户上传数据配置
+# User upload / data loading config (used by dataload_main)
+# Paths are relative to repo root (run dataload_main from GraphLLM/); use absolute paths if needed.
 datasets:
   - name: AMLSim1K
-    type: graph   # graph / table / text
+    type: graph   # graph / text
     description: "AMLSim 1K synthetic transaction graph."
     schema:
-      # 节点层定义
+      # Vertex (node) layer
       vertex:
         - type: account
-          path: "/home/chency/GraphLLM/aag/datasets/graphs/transaction_amlsim/1K/accounts.csv"
+          path: "aag/datasets/graphs/transaction_amlsim/1K/accounts.csv"
           format: csv  # yaml / json / csv / gml
-          id_field: acct_id              # 节点唯一标识字段
-          label_field: prior_sar_count           # 节点标签（可选）
-      # 边层定义
+          id_field: acct_id              # Unique node ID field
+          label_field: prior_sar_count  # Node label (optional)
+      # Edge layer
       edge:
         - type: transfer
-          path: "/home/chency/GraphLLM/aag/datasets/graphs/transaction_amlsim/1K/transactions.csv"
+          path: "aag/datasets/graphs/transaction_amlsim/1K/transactions.csv"
           format: csv  # yaml / json / csv / gml
           source_field: orig_acct
           target_field: bene_acct
           label_field: is_sar
-      # 图级别元信息
+      # Graph-level metadata
       graph:
         directed: true
         multigraph: true

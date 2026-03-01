@@ -1,52 +1,48 @@
-# AAG 配置文件
-version: 1.0   # 版本号
+# =============================================================================
+# AAG (Analysis-Augmented Graph) Engine Configuration
+# =============================================================================
 
-# 运行模式： interactive / batch
-mode: interactive
+version: 1.0   # Config version
 
-# 推理模块（Reasoner）配置
+# -----------------------------------------------------------------------------
+# Reasoner - LLM inference
+# -----------------------------------------------------------------------------
 reasoner:
   llm:
-    provider: "openai" # ollama 或 openai
+    # LLM provider: ollama (local) or openai (OpenAI-compatible API, e.g. DeepSeek)
+    provider: "openai"
+    # Ollama config (used when provider is ollama)
     ollama:
       model_name: "llama3.1:70b"
       device: "cuda:0"
       timeout: 150000
       port: 11434
+    # OpenAI-compatible API (used when provider is openai; e.g. OpenAI / DeepSeek / self-hosted)
     openai:
-      base_url: "https://gitaigc.com/v1/"
+      base_url: "https://gitaigc.com/v1/"   # API base URL; must end with /
       api_key: "sk-G30rFStBigqXtuyIOkOo7Zh4QNxO8ZAjfZQ5DYPCgMXbPv8q"
       model: "gpt-4o-mini"
 
-# 检索模块配置
+# -----------------------------------------------------------------------------
+# Retrieval - Vector DB and graph DB
+# -----------------------------------------------------------------------------
 retrieval:
   database:
+    # Vector DB (Milvus) for RAG text retrieval; requires a running Milvus instance (e.g. Docker)
     vector:
-      collection_name: "graphllm_collection"
       host: "localhost"
       port: 19530
+    # Neo4j for graph queries (e.g. Cypher in interactive mode)
     neo4j:
       enabled: true
       uri: "bolt://202.199.13.67:7687"
       user: "neo4j"
       password: "12345678"
 
+  # Embedding model for RAG and vector retrieval
   embedding:
     model_name: "BAAI/bge-large-en-v1.5"
     batch_size: 20
     chunk_size: 512
     chunk_overlap: 20
     device: "cuda:2"
-
-# 性能监控配置
-monitoring:
-  enable_metrics: true
-  log_level: "INFO"
-  save_metrics: true
-  metrics_file: "engine_metrics.json"
-
-# 输出配置
-output:
-  save_intermediate_results: true
-  output_dir: "./output"
-  log_file: "./engine.log"

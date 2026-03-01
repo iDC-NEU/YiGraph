@@ -219,7 +219,7 @@ def load_data_upload_config(yaml_path: str, validate_files: bool = False) -> Dat
                 vertex_schema = [
                     VertexSchemaConfig(
                         type=v.get("type", ""),
-                        path=v.get("original_path", ""),  #path
+                        path=v.get("original_path") or v.get("path", ""),
                         format=v.get("format", ""),
                         id_field=v.get("id_field", ""),
                         query_field=v.get("query_field", ""),
@@ -230,7 +230,7 @@ def load_data_upload_config(yaml_path: str, validate_files: bool = False) -> Dat
                 edge_schema = [
                     EdgeSchemaConfig(
                         type=e.get("type", ""),
-                        path=e.get("original_path", ""), #path
+                        path=e.get("original_path") or e.get("path", ""),
                         format=e.get("format", ""),
                         source_field=e.get("source_field", ""),
                         target_field=e.get("target_field", ""),

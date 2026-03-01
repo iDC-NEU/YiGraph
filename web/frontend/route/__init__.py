@@ -1,12 +1,18 @@
 import logging
 import os
 import atexit
+import sys
 
 from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO 
 
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 from aag.api.async_runtime import start_async_runtime, stop_async_runtime
+
 
 # 日志配置（全局一次即可）
 logging.basicConfig(
