@@ -16,7 +16,7 @@
 <p style="margin-top: 20px;">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
-  <a href="http://superccy.github.io/YiGraphDocs/"><img src="https://img.shields.io/badge/📚-Docs-purple.svg" alt="Docs"></a>
+  <a href="https://idc-neu.github.io/YiGraphDocs/"><img src="https://img.shields.io/badge/📚-Docs-purple.svg" alt="Docs"></a>
   <a href="#-contact-us"><img src="https://img.shields.io/badge/📞-Contact_Us-green.svg" alt="Contact"></a>
 </p>
 
@@ -604,7 +604,7 @@ For more advanced features, parameter descriptions, and usage examples, please r
 
 Access the complete user manual and developer guide:
 
-**[http://superccy.github.io/YiGraphDocs/](http://superccy.github.io/YiGraphDocs/)**
+**[https://idc-neu.github.io/YiGraphDocs/](https://idc-neu.github.io/YiGraphDocs/)**
 
 Documentation includes:
 - **Quick Start**: System installation, configuration, and basic usage
