@@ -232,81 +232,256 @@
   pip install -r requirements.txt
   ```
 
-  ### 3. 配置系统参数
 
-  #### 3.1 配置推理与检索引擎
+---
 
-  编辑配置文件：
+### 3. 配置系统参数
 
-  ```text
-  config/engine_config.yaml
-  ```
+本系统支持大语言模型推理（LLM）、向量检索（Milvus）以及图数据库（Neo4j）联合检索。请根据实际运行环境修改以下配置文件。
 
-  示例配置如下：
+---
 
-  ```yaml
-  # 运行模式： interactive / batch
-  mode: interactive
+#### 3.1 配置推理与检索引擎
 
-  # 推理模块配置
-  reasoner:
-    llm:
-      provider: "openai"   # 可选：ollama / openai
-      openai:
-        base_url: "https://your-api-endpoint/v1/"
-        api_key: "your-api-key"
-        model: "gpt-4o-mini"
+编辑配置文件：
 
-  # 检索模块配置
-  retrieval:
-    database:
+```text
+config/engine_config.yaml
+```
+
+---
+
+#### 1️⃣ 推理模块（LLM）配置
+
+系统支持两种 LLM Provider：
+
+* `ollama`（本地部署模型）
+* `openai`（OpenAI 或兼容 API，例如 DeepSeek、自建服务等）
+
+##### 示例配置：
+
+```yaml
+reasoner:
+  llm:
+    # LLM provider: ollama (local) or openai (OpenAI-compatible API)
+    provider: "openai"
+
+    # Ollama config（当 provider=ollama 时使用）
+    ollama:
+      model_name: "llama3.1:70b"
+      device: "cuda:0"
+      timeout: 150000
+      port: 11434
+
+    # OpenAI-compatible API（当 provider=openai 时使用）
+    openai:
+      base_url: "https://your-api-endpoint/v1/"   # 必须以 / 结尾
+      api_key: "your-api-key"
+      model: "gpt-4o-mini"
+```
+
+##### 参数说明
+
+| 参数         | 说明                            |
+| ---------- | ----------------------------- |
+| provider   | 选择 LLM 类型：`ollama` 或 `openai` |
+| model_name | Ollama 本地模型名称                 |
+| device     | GPU 设备编号（如 `cuda:0`）          |
+| timeout    | 推理超时时间（毫秒）                    |
+| base_url   | OpenAI 兼容 API 地址（必须以 `/` 结尾）  |
+| api_key    | API 密钥                        |
+| model      | 使用的模型名称                       |
+
+> ⚠ 如果使用 OpenAI 兼容 API（如 DeepSeek、自建接口），请确保 `base_url` 正确并以 `/` 结尾。
+
+---
+
+#### 2️⃣ 检索模块配置（Vector + Graph）
+
+系统支持：
+
+* **Milvus**（向量数据库，用于 RAG 检索）
+* **Neo4j**（图数据库，用于图查询）
+
+##### 示例配置：
+
+```yaml
+retrieval:
+  database:
+    # 向量数据库（Milvus）
+    vector:
+      host: "localhost"
+      port: 19530
+
+    # 图数据库（Neo4j）
+    neo4j:
+      enabled: true
+      uri: "bolt://localhost:7687"
+      user: "neo4j"
+      password: "your-password"
+
+  # 嵌入模型配置
+  embedding:
+    model_name: "BAAI/bge-large-en-v1.5"
+    batch_size: 20
+    chunk_size: 512
+    chunk_overlap: 20
+    device: "cuda:2"
+```
+
+---
+
+#### 参数说明
+
+##### 📌 Milvus（向量数据库）
+
+| 参数   | 说明           |
+| ---- | ------------ |
+| host | Milvus 服务器地址 |
+| port | Milvus 端口    |
+
+> 运行前请确保 Milvus 服务已启动（推荐 Docker 部署）。
+
+---
+
+##### 📌 Neo4j（图数据库）
+
+| 参数       | 说明         |
+| -------- | ---------- |
+| enabled  | 是否启用 Neo4j |
+| uri      | Bolt 协议地址  |
+| user     | 数据库用户名     |
+| password | 数据库密码      |
+
+> 若不使用图数据库，可将 `enabled` 设置为 `false`。
+
+---
+
+##### 📌 Embedding（嵌入模型）
+
+| 参数            | 说明               |
+| ------------- | ---------------- |
+| model_name    | HuggingFace 模型名称 |
+| batch_size    | 批处理大小            |
+| chunk_size    | 文本分块大小           |
+| chunk_overlap | 分块重叠长度           |
+| device        | GPU 设备编号         |
+
+---
+
+### 3.2 配置数据集
+
+编辑配置文件：
+
+```text
+config/data_upload_config.yaml
+```
+
+系统支持 **graph** 和 **text** 两种数据类型。
+
+---
+
+#### 图数据示例配置（AMLSim1K）
+
+```yaml
+datasets:
+  - name: AMLSim1K
+    type: graph   # graph / text
+    description: "AMLSim 1K synthetic transaction graph."
+
+    schema:
+      # -----------------------------
+      # 节点（Vertex）层
+      # -----------------------------
+      vertex:
+        - type: account
+          path: "aag/datasets/graphs/transaction_amlsim/1K/accounts.csv"
+          format: csv
+          id_field: acct_id
+          label_field: prior_sar_count   # 可选
+
+      # -----------------------------
+      # 边（Edge）层
+      # -----------------------------
+      edge:
+        - type: transfer
+          path: "aag/datasets/graphs/transaction_amlsim/1K/transactions.csv"
+          format: csv
+          source_field: orig_acct
+          target_field: bene_acct
+          label_field: is_sar            # 可选
+
+      # -----------------------------
+      # 图级别配置
+      # -----------------------------
       graph:
-        space_name: "AMLSim1K"
-        server_ip: "127.0.0.1"
-        server_port: "9669"
-      vector:
-        collection_name: "graphllm_collection"
-        host: "localhost"
-        port: 19530
-    embedding:
-      model_name: "BAAI/bge-large-en-v1.5"
-      device: "cuda:2"
-    rag:
-      graph:
-        k_hop: 2
-      vector:
-        k_similarity: 5
-  ```
+        directed: true
+        multigraph: true
+        weighted: false
+        heterogeneous: false
+```
 
-  #### 3.2 配置数据集
+---
 
-  编辑配置文件：
+#### 参数说明
 
-  ```text
-  config/data_upload_config.yaml
-  ```
+##### 📌 基本信息
 
-  示例配置如下：
+| 参数          | 说明                    |
+| ----------- | --------------------- |
+| name        | 数据集名称                 |
+| type        | 数据类型：`graph` 或 `text` |
+| description | 数据集描述                 |
 
-  ```yaml
-  datasets:
-    - name: AMLSim1K
-      type: graph
-      schema:
-        vertex:
-          - type: account
-            path: "/path/to/accounts.csv"
-            format: csv
-            id_field: acct_id
-        edge:
-          - type: transfer
-            path: "/path/to/transactions.csv"
-            format: csv
-            source_field: orig_acct
-            target_field: bene_acct
-  ```
+---
 
-  > 请将 `path` 修改为你本地真实的数据文件路径。
+##### 📌 节点（vertex）配置
+
+| 参数          | 说明                            |
+| ----------- | ----------------------------- |
+| type        | 节点类型                          |
+| path        | 数据文件路径                        |
+| format      | 文件格式（csv / json / yaml / gml） |
+| id_field    | 唯一节点 ID 字段                    |
+| label_field | 节点标签字段（可选）                    |
+
+---
+
+##### 📌 边（edge）配置
+
+| 参数           | 说明        |
+| ------------ | --------- |
+| type         | 边类型       |
+| path         | 数据文件路径    |
+| source_field | 起点字段      |
+| target_field | 终点字段      |
+| label_field  | 边标签字段（可选） |
+
+---
+
+##### 📌 图级别配置
+
+| 参数            | 说明      |
+| ------------- | ------- |
+| directed      | 是否为有向图  |
+| multigraph    | 是否允许多重边 |
+| weighted      | 是否加权    |
+| heterogeneous | 是否为异构图  |
+
+---
+
+#### ⚠ 注意事项
+
+1. 请将 `path` 修改为你本地真实数据路径。
+2. 确保：
+
+   * Milvus 已启动
+   * Neo4j 已启动（若启用）
+   * 对应 GPU 设备可用
+3. 若使用远程 LLM API，请确保网络连通。
+
+---
+
 
   ### 4. 启动易图
 
