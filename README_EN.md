@@ -231,6 +231,8 @@ cd AAG
 pip install -r requirements.txt
 ```
 
+---
+
 ### 3. System Configuration
 
 This section describes how to configure the LLM reasoning engine, retrieval modules (Milvus + Neo4j), and dataset loading.
