@@ -1,4 +1,0 @@
-networkx>=2.8.0
-python-louvain>=0.16
-numpy>=1.21.0
-scipy>=1.7.0 

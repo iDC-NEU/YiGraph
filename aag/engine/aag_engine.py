@@ -1,6 +1,5 @@
 """
-AAG Engine
-端到端的图分析、检索增强生成和大语言模型框架
+AAG Engine: end-to-end graph analysis, retrieval-augmented generation, and LLM framework.
 """
 
 import os
@@ -10,24 +9,22 @@ from typing import Dict, List, Optional, Any, Union, Callable
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
-# 导入各个组件
 from aag.config.engine_config import EngineConfig   
 from aag.engine.scheduler import Scheduler
 
 
 class AAGEngine:
     """
-    Analytics Augmented Generation Engine - 端到端分析增强生成框架
-    
-    主要功能：
-    1. 图算法定位
-    2. 多模态检索（图检索 + 向量检索）, 向量检索返回论文, 图检索返回图数据
-    3. 图计算框架执行图计算
-    4. LLM生成回答
-    5. 结果后处理和评估
+    Analytics Augmented Generation Engine: end-to-end analysis-augmented generation.
+
+    Main capabilities:
+    1. Graph algorithm selection
+    2. Multi-modal retrieval (graph + vector); vector returns docs, graph returns graph data
+    3. Graph computation execution
+    4. LLM answer generation
+    5. Post-processing and evaluation
     """
 
-    
     def __init__(self, config: EngineConfig):
         self.config = config
         self.scheduler: Optional[Scheduler] = None
@@ -35,7 +32,6 @@ class AAGEngine:
         self._current_dataset_name: Optional[str] = None
         self._current_dataset_type: Optional[str] = None
 
-        # 性能监控
         self.metrics = {
             "retrieval_time": [],
             "generation_time": [],
@@ -47,7 +43,7 @@ class AAGEngine:
         
 
     def _init_scheduler(self):
-        """初始化调度器"""
+        """Initialize the scheduler."""
         try:
             self.scheduler = Scheduler(config = self.config)
             print("✓ Scheduler initialized")
@@ -56,55 +52,51 @@ class AAGEngine:
             raise
     
     def _initialize_components(self):
-        """初始化各个组件"""
+        """Initialize engine components."""
         print("Initializing AAG components...")
-        
-        # 1. 初始化调度器
         self._init_scheduler()
-        
         print("Engine initialization completed!")
     
 
     async def run(
-        self, 
-        query: str, 
+        self,
+        query: str,
         mode: str = "normal",
         callback: Optional[Callable[[Dict[str, Any]], None]] = None
     ) -> Union[str, Dict[str, Any]]:
         """
-        执行查询，支持普通模式和专家模式
-        
+        Run a query (normal or expert mode).
+
         Args:
-            query: 用户查询
-            mode: 执行模式 "normal" | "interact" | "expert"
-            callback: 可选的回调函数，用于实时发送数据（如DAG信息）
-                     签名: callback(data: Dict[str, Any])
-                     注意：仅在 Web 调用时使用，终端调用不传此参数
-        
+            query: User query.
+            mode: "normal" | "interact" | "expert".
+            callback: Optional callback for streaming (e.g. DAG); signature callback(data: Dict).
+                     Used in Web flow only; omit for CLI.
+
         Returns:
-            普通模式: 返回分析结果字符串
-            交互/专家模式: 返回DAG信息字典（包含 dag_info, message 等）
+            Normal: analysis result string.
+            Interact/expert: dict with dag_info, message, etc.
         """
         return await self.scheduler.execute(query, mode=mode, callback=callback)
     
     async def expert_modify_dag(self, modification_request: str) -> Dict[str, Any]:
         """
-        专家模式：修改DAG
-        
+        Expert mode: modify the DAG.
+
         Args:
-            modification_request: 用户修改需求
-        
+            modification_request: User modification request.
+
         Returns:
-            包含更新后DAG信息的字典
+            Dict with updated DAG info.
         """
         return await self.scheduler.expert_modify_dag(modification_request)
     
     async def expert_start_analysis(self) -> str:
         """
-        专家模式：开始执行分析
-        
+        Expert mode: start analysis.
+
         Returns:
-            分析结果字符串
+            Analysis result string.
         """
         return await self.scheduler.expert_start_analysis()
 
@@ -123,13 +115,13 @@ class AAGEngine:
 
 
     def _record_metrics(self, retrieval_time: float, generation_time: float, total_time: float):
-        """记录性能指标"""
+        """Record performance metrics."""
         self.metrics["retrieval_time"].append(retrieval_time)
         self.metrics["generation_time"].append(generation_time)
         self.metrics["total_time"].append(total_time)
     
     def get_performance_summary(self) -> Dict[str, Any]:
-        """获取性能摘要"""
+        """Return a performance summary."""
         if not self.metrics["total_time"]:
             return {"message": "No queries processed yet"}
         
@@ -142,15 +134,12 @@ class AAGEngine:
         }
     
     def clear_metrics(self):
-        """清空性能指标"""
+        """Clear performance metrics."""
         for key in self.metrics:
             self.metrics[key].clear()
      
     async def shutdown(self):
-        """关闭Engine，释放资源"""
+        """Shut down the engine and release resources."""
         print("Shutting down GraphLLM Engine...")
-        
-        #TODO(chaoyi): 释放资源
         await self.scheduler.shutdown()
-        
         print("✓ Engine shutdown completed")

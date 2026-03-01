@@ -31,8 +31,8 @@ logger = logging.getLogger(__name__)
 
 class Scheduler:
     """
-    统一调度器：内部包含4类执行能力（检索 / 图计算 / 图学习 / LLM），
-    并持有 DAG。根据 DAG 的依赖关系决定执行顺序。
+    Unified scheduler: retrieval / graph computation / graph learning / LLM.
+    Holds the DAG and runs steps according to dependencies.
     """
 
     def __init__(self, config: EngineConfig):
@@ -43,7 +43,7 @@ class Scheduler:
         self.dag: Optional[GraphWorkflowDAG] = None
         self.dataset_manager: Optional[DatasetManager] = None
         self.data_dependency_resolver: Optional[DataDependencyResolver] = None
-        self.error_recovery: Optional[ErrorRecovery] = None  # 错误恢复模块
+        self.error_recovery: Optional[ErrorRecovery] = None
 
         self.current_dataset_name: Optional[str] = None  # Dataset-level name (for text datasets, this is the dataset name)
         self.current_dataset: Optional[List[DatasetConfig]] = None  # Original dataset config (text/graph, never changes)
@@ -52,14 +52,13 @@ class Scheduler:
 
         self._initialize_components()
 
-        # 可选回调：用于埋点/日志
         self.on_step_start: Optional[Callable[["WorkflowStep"], None]] = None
         self.on_step_end: Optional[Callable[["WorkflowStep"], None]] = None
 
 
 
     def _initialize_components(self):
-        """初始化各个组件"""
+        """Initialize scheduler components."""
         print("Initializing Scheduler components...")
 
         self._init_reasoner()
@@ -79,7 +78,7 @@ class Scheduler:
         self._init_data_dependency_resolver()
     
     def _init_reasoner(self):
-        """初始化 reasoner 连接"""
+        """Initialize reasoner."""
         try:
             self.reasoner = Reasoner(self.config.reasoner)
             print("✓ Reasoner initialized")
@@ -88,11 +87,9 @@ class Scheduler:
             raise
     
     def _init_computing_engine(self):
-        """初始化 computing engine 连接"""
+        """Initialize computing engine."""
         try:
             self.computing_engine = ComputingEngine()
-            
-            # add gjq: 初始化computing_engine的图查询引擎
             neo4j_config_dict = self.config.retrieval.database.neo4j
             if neo4j_config_dict.get("enabled", False):
                 self.computing_engine.initialize_graph_query_engine(
@@ -107,7 +104,7 @@ class Scheduler:
             raise
     
     def _init_expert_search_engine(self):
-        """初始化 expert search engine 连接"""
+        """Initialize expert search engine."""
         try:
             self.expert_search_engine = ExpertSearchEngine(self.config.retrieval)
             print("✓ ExpertSearchEngine initialized")
@@ -116,7 +113,7 @@ class Scheduler:
             raise
     
     def _init_dataset_manager(self):
-        """初始化 dataset manager 连接"""
+        """Initialize dataset manager."""
         try:
             self.dataset_manager = DatasetManager()
             print("✓ DatasetManager initialized")
@@ -125,7 +122,7 @@ class Scheduler:
             raise
     
     def _init_data_dependency_resolver(self):
-        """初始化 data dependency resolver 连接"""
+        """Initialize data dependency resolver."""
         try:
             # Note: error_recovery will be set after initialization
             self.data_dependency_resolver = DataDependencyResolver(self.reasoner, self.error_recovery)
@@ -151,7 +148,7 @@ class Scheduler:
             raise
 
     def _init_error_recovery(self):
-        """初始化错误恢复模块"""
+        """Initialize error recovery module."""
         try:
             self.error_recovery = ErrorRecovery()
             print("✓ ErrorRecoveryModule initialized")
@@ -192,7 +189,6 @@ class Scheduler:
             graph_nodes, graph_edges = flatten_graph(global_vertices, global_edges)
             self.data_dependency_resolver.set_global_graph(graph_nodes, graph_edges)
             
-            # add gjq: 自动将图数据加载到Neo4j（调用DatasetManager的方法）
             neo4j_config_dict = self.config.retrieval.database.neo4j
             self.dataset_manager.load_graph_to_neo4j(
                 self.current_graph_dataset,
@@ -215,7 +211,7 @@ class Scheduler:
         allowed_modes = {"normal", "interact", "expert"}
         if normalized not in allowed_modes:
             raise ValueError(
-                f"不支持的模式 '{mode}'，请使用 normal / interact / expert"
+                f"Unsupported mode '{mode}'; use normal / interact / expert"
             )
         return normalized
 
@@ -227,19 +223,18 @@ class Scheduler:
         callback: Optional[Callable[[Dict[str, Any]], None]] = None
     ) -> Union[str, Dict[str, Any]]:
         """
-        Execute query with dataset type validation
-        
+        Execute query with dataset type validation.
+
         Args:
-            query: 用户查询
-            decompose: 是否分解查询
-            mode: 执行模式 "normal" | "interact" | "expert"
-            callback: 可选的回调函数，用于实时发送数据（如DAG信息）
-                     签名: callback(data: Dict[str, Any])
-        
+            query: User query.
+            decompose: Whether to decompose the query.
+            mode: "normal" | "interact" | "expert".
+            callback: Optional callback for streaming (e.g. DAG); signature callback(data: Dict).
+
         Returns:
-            普通模式: 返回分析结果字符串
-            交互/专家模式: 返回DAG信息字典（包含 dag_info, message 等）
-        
+            Normal: analysis result string.
+            Interact/expert: dict with dag_info, message, etc.
+
         Validates:
             1. RAG query + graph dataset → Error (graph data cannot do retrieval)
             2. GRAPH query + text dataset → Check if converted graph exists
@@ -247,40 +242,35 @@ class Scheduler:
         try:
             mode = self._normalize_graph_mode(mode)
         except ValueError as mode_err:
-            return f"❌ 错误：{mode_err}"
+            return f"❌ Error: {mode_err}"
 
         decision = self.router.route(query=query)
         logger.info(f"🚦[Router] query_type={decision.query_type}, reason={decision.reason}")
 
         if not self.current_dataset or not self.current_dataset_name:
-            return "⚠️ 未指定数据集，请先设置分析对象"
+            return "⚠️ No dataset selected; please set the analysis target first."
         
         original_type = self.dataset_manager.get_dataset_original_type(self.current_dataset_name)
         
-        # 1) RAG query validation
         if decision.query_type == QueryType.RAG:
             if original_type == "graph":
-                return "❌ 错误：当前数据集是图数据，不支持检索任务。图数据只能用于图分析任务。"
+                return "❌ Error: Current dataset is graph data; retrieval is not supported. Use graph analysis only."
             return await self._execute_rag(query)
 
-        # 2) GRAPH_QUERY - 图查询（模板匹配查询）
         elif decision.query_type == QueryType.GRAPH_QUERY:
             if original_type != "graph":
-                # 检查是否有转换后的图数据
                 converted_graph_config = self.dataset_manager.get_converted_graph_dataset(self.current_dataset_name)
                 if not converted_graph_config:
-                    return "❌ 错误：图查询需要图数据，当前数据集不是图数据且未转换为图数据。"
+                    return "❌ Error: Graph query requires graph data; current dataset is not graph and has no converted graph."
                 self.current_graph_dataset = converted_graph_config
             
             return await self._execute_graph_query(query)
         
-        # 3) GRAPH query validation and graph dataset setup
         elif decision.query_type == QueryType.GRAPH:
             if original_type == "text":
-                # Get converted graph dataset config (returns None if not converted)
                 converted_graph_config = self.dataset_manager.get_converted_graph_dataset(self.current_dataset_name)
                 if not converted_graph_config:
-                    return "❌ 错误：当前数据集是文本数据，且尚未转换为图数据。请先进行文本到图的转换。"
+                    return "❌ Error: Current dataset is text and has not been converted to graph. Please run text-to-graph conversion first."
                 
                 self.current_graph_dataset = converted_graph_config
                 global_vertices, global_edges = self.dataset_manager.get_dataset_content(self.current_graph_dataset)
@@ -290,7 +280,6 @@ class Scheduler:
             
             return await self._execute_graph(query, decompose=decompose, mode=mode, callback=callback)
         
-        # 3) General query
         return self.reasoner.general_query_response(query)
     
 
@@ -302,30 +291,28 @@ class Scheduler:
         callback: Optional[Callable[[Dict[str, Any]], None]] = None
     ) -> Union[str, Dict[str, Any]]:
         """
-        Execute graph analysis query
-        
+        Execute graph analysis query.
+
         Args:
-            query: 用户查询
-            decompose: 是否分解查询
-            mode: 执行模式 "normal" | "interact" | "expert"
-            callback: 可选的回调函数，用于实时发送数据（如DAG信息）
-                     签名: callback(data: Dict[str, Any])
-        
+            query: User query.
+            decompose: Whether to decompose the query.
+            mode: "normal" | "interact" | "expert".
+            callback: Optional callback for streaming (e.g. DAG); signature callback(data: Dict).
+
         Returns:
-            普通模式: 返回分析结果字符串
-            交互/专家模式: 返回DAG信息字典
-        
-        Uses self.current_graph_dataset (which may be converted graph for text datasets)
+            Normal: analysis result string.
+            Interact/expert: DAG info dict.
+
+        Uses self.current_graph_dataset (which may be converted graph for text datasets).
         """
         if not self.computing_engine._initialized:
             await self.computing_engine.initialize()
 
-        # Validate graph dataset is available
         if not self.current_graph_dataset:
-            return "⚠️ 未指定图数据，请先设置分析对象"
+            return "⚠️ No graph dataset selected; please set the analysis target first."
         
         if not self.global_graph:
-            return "⚠️ 图数据未加载，请先加载图数据"
+            return "⚠️ Graph data not loaded; please load graph data first."
 
         mode = self._normalize_graph_mode(mode)
 
@@ -334,26 +321,22 @@ class Scheduler:
 
         self._build_dag_from_query(query, decompose)
         self._find_algorithm()
-        print("✅ 初始 DAG 构建与算法选择完成")
+        print("✅ Initial DAG build and algorithm selection done")
         self.dag.print_dag_info()
         
         if mode == "interact":
             dag_info = self.dag.get_dag_info()
             return {
-                "message": "DAG已生成，请选择下一步操作",
+                "message": "DAG generated; please choose next action.",
                 "dag_info": dag_info
             }
         
-        # 普通模式：继续执行完整流程
         self.dag.refresh_data_dependency(self.reasoner)
         self.dag.print_data_dependency()
-        print("✅ DAG 构建与算法选择完成，准备执行计算流程")
+        print("✅ DAG build and algorithm selection done; starting computation")
         
-        # 执行算法流程
         analysis_result = await self._run_algorithm_pipeline2()
         
-        # 如果提供了 callback（Web 调用），返回包含 DAG 信息的字典
-        # 否则返回字符串（保持终端兼容性）
         if callback and mode == "normal":
             dag_info = self.dag.get_dag_info()
             return {
@@ -421,7 +404,7 @@ class Scheduler:
     def _parse_expert_dag_instruction(self, expert_instruction: str) -> Tuple[Dict[str, Any], Dict[str, str], List[Dict[str, Any]], str]:
         normalized_instruction = (expert_instruction or "").strip()
         if not normalized_instruction:
-            raise ValueError("专家模式输入不能为空")
+            raise ValueError("Expert mode input cannot be empty")
 
         algorithm_library_info = self._get_algorithm_library_info()
         dataset_info = self._get_graph_schema_summary()
@@ -432,11 +415,11 @@ class Scheduler:
         )
 
         if not isinstance(payload, dict):
-            raise ValueError("专家模式输入解析失败：LLM 未返回有效的 subqueries 结构")
+            raise ValueError("Expert mode parse failed: LLM did not return a valid subqueries structure")
 
         subqueries = payload.get("subqueries")
         if not isinstance(subqueries, list) or not subqueries:
-            raise ValueError("专家模式输入缺少 subqueries 列表")
+            raise ValueError("Expert mode input missing subqueries list")
 
         normalized_subqueries = []
         algorithm_hints: Dict[str, str] = {}
@@ -444,18 +427,18 @@ class Scheduler:
 
         for idx, item in enumerate(subqueries, start=1):
             if not isinstance(item, dict):
-                raise ValueError(f"subqueries[{idx}] 必须是对象")
+                raise ValueError(f"subqueries[{idx}] must be an object")
 
             query_id = str(item.get("id", f"q{idx}")).strip() or f"q{idx}"
             question = str(item.get("query") or item.get("question") or "").strip()
             if not question:
-                raise ValueError(f"subqueries[{idx}] 缺少 query/question")
+                raise ValueError(f"subqueries[{idx}] missing query/question")
 
             depends_on = item.get("depends_on", [])
             if depends_on is None:
                 depends_on = []
             if not isinstance(depends_on, list):
-                raise ValueError(f"subqueries[{idx}].depends_on 必须是列表")
+                raise ValueError(f"subqueries[{idx}].depends_on must be a list")
 
             normalized_subqueries.append({
                 "id": query_id,
@@ -475,7 +458,7 @@ class Scheduler:
 
         if missing_algorithm_subqueries:
             raise ValueError(
-                "专家模式要求每个 subquery 必须包含 algorithm 字段，缺失: "
+                "Expert mode requires each subquery to have an algorithm field; missing: "
                 + ", ".join(missing_algorithm_subqueries)
             )
 
@@ -584,7 +567,7 @@ class Scheduler:
 
             if has_out_of_boundary_algorithms:
                 return {
-                    "message": "专家DAG已构建，但检测到超出算法库边界的算法，请修正后再开始分析",
+                    "message": "Expert DAG built, but algorithms outside the library boundary were detected; please fix before starting analysis.",
                     "dag_info": dag_info,
                     "algorithm_validation": {
                         "provided_algorithms": validation.get("provided_algorithms", {}),
@@ -598,9 +581,9 @@ class Scheduler:
 
             instruction_adjustments = validation.get("instruction_algorithm_adjustments", [])
             adjustment_message = str(validation.get("instruction_algorithm_adjustment_summary") or "").strip()
-            base_message = "专家DAG已按指令构建完成"
+            base_message = "Expert DAG built as instructed"
             if adjustment_message:
-                base_message = f"{base_message}。{adjustment_message}"
+                base_message = f"{base_message}. {adjustment_message}"
 
             return {
                 "message": base_message,
@@ -615,25 +598,25 @@ class Scheduler:
                 "can_start_analysis": True
             }
         except Exception as e:
-            logger.error(f"专家模式构建失败: {e}", exc_info=True)
+            logger.error(f"Expert mode build failed: {e}", exc_info=True)
             return {
-                "error": f"专家模式构建失败: {str(e)}",
-                "input_hint": "请直接输入自然语言专家指令，系统会自动生成 subqueries。"
+                "error": f"Expert mode build failed: {str(e)}",
+                "input_hint": "Enter expert instructions in natural language; the system will generate subqueries."
             }
 
     async def expert_modify_dag(self, modification_request: str) -> Dict[str, Any]:
         """
-        交互模式：根据用户需求修改DAG
-        
+        Interact mode: modify DAG per user request.
+
         Args:
-            modification_request: 用户修改需求（自然语言）
-        
+            modification_request: User modification request (natural language).
+
         Returns:
-            包含更新后DAG信息的字典
+            Dict with updated DAG info.
         """
         if not self.dag:
             return {
-                "error": "DAG尚未构建，请先输入问题生成DAG"
+                "error": "DAG not built yet; please enter a question to generate the DAG first."
             }
         
         try:
@@ -641,28 +624,28 @@ class Scheduler:
             self._find_algorithm()
             dag_info = self.dag.get_dag_info()
             return {
-                "message": "DAG已更新",
+                "message": "DAG updated.",
                 "dag_info": dag_info
             }
         except Exception as e:
-            logger.error(f"修改DAG失败: {e}", exc_info=True)
+            logger.error(f"DAG modification failed: {e}", exc_info=True)
             return {
-                "error": f"修改DAG失败: {str(e)}"
+                "error": f"DAG modification failed: {str(e)}"
             }
 
     async def expert_start_analysis(self) -> str:
         """
-        交互模式/专家模式：开始执行分析
-        
+        Interact/expert mode: start analysis.
+
         Returns:
-            分析结果字符串
+            Analysis result string.
         """
         if not self.dag:
-            return "❌ 错误：DAG尚未构建，请先输入问题生成DAG"
+            return "❌ Error: DAG not built yet; please enter a question to generate the DAG first."
                 
         self.dag.refresh_data_dependency(self.reasoner)
         self.dag.print_data_dependency()
-        print("✅ DAG 构建与算法选择完成，准备执行计算流程")
+        print("✅ DAG build and algorithm selection done; starting computation")
         return await self._run_algorithm_pipeline2()
 
     async def _execute_rag(self, query: str) -> str:
@@ -673,11 +656,10 @@ class Scheduler:
         For text datasets, current_dataset is the first file config from the list
         """
         if not self.current_dataset:
-            return "⚠️ 未指定分析数据，请先设置分析对象"
+            return "⚠️ No analysis data selected; please set the analysis target first."
         
-        # Validate dataset type
         if self.dataset_manager.get_dataset_original_type(self.current_dataset_name) != "text":
-            return f"❌ 错误：RAG任务需要文本数据，但当前数据集类型是 {self.current_dataset.type}"
+            return f"❌ Error: RAG requires text data; current dataset type is {self.current_dataset.type}"
         
         file_paths = [config.schema.path for config in self.current_dataset]
 
@@ -690,70 +672,64 @@ class Scheduler:
 
         return self.reasoner.generate_response(prompt)
 
-    # add gjq: 修改为通过 computing_engine 调用图查询
     async def _execute_graph_query(self, query: str) -> str:
         """
-        执行图查询（通过 computing_engine）
-        
+        Execute graph query via computing_engine.
+
         Args:
-            query: 用户查询
-            
+            query: User query.
+
         Returns:
-            查询结果字符串
+            Query result string.
         """
         try:
-            # 通过 computing_engine 执行图查询
             result = self.computing_engine.execute_graph_query(query)
             
             if result.get("success"):
-                # 格式化查询结果
                 results = result.get("results", [])
                 count = result.get("count", 0)
                 query_type = result.get("query_type", "unknown")
                 
-                response = f"✅ 图查询成功！\n"
-                response += f"查询类型: {query_type}\n"
-                response += f"返回结果数: {count}\n\n"
+                response = f"✅ Graph query succeeded!\n"
+                response += f"Query type: {query_type}\n"
+                response += f"Result count: {count}\n\n"
                 
                 if count > 0:
-                    response += "查询结果:\n"
-                    for i, item in enumerate(results[:10], 1):  # 最多显示10条
-                        # 将 Neo4j Node 对象转换为可序列化的字典
+                    response += "Results:\n"
+                    for i, item in enumerate(results[:10], 1):
                         serializable_item = self._convert_neo4j_to_dict(item)
                         response += f"{i}. {json.dumps(serializable_item, ensure_ascii=False, indent=2)}\n"
                     
                     if count > 10:
-                        response += f"\n... 还有 {count - 10} 条结果未显示"
+                        response += f"\n... {count - 10} more results not shown"
                 else:
-                    response += "未找到匹配的结果"
+                    response += "No matching results"
                 
                 return response
             else:
-                error_msg = result.get("error", "未知错误")
-                return f"❌ 图查询失败: {error_msg}"
+                error_msg = result.get("error", "Unknown error")
+                return f"❌ Graph query failed: {error_msg}"
                 
         except Exception as e:
-            logger.error(f"图查询执行失败: {e}", exc_info=True)
-            return f"❌ 图查询执行失败: {str(e)}"
+            logger.error(f"Graph query execution failed: {e}", exc_info=True)
+            return f"❌ Graph query execution failed: {str(e)}"
     
     def _convert_neo4j_to_dict(self, obj):
         """
-        将 Neo4j 对象转换为可 JSON 序列化的字典
-        
+        Convert Neo4j objects (Node, Relationship, Path) to JSON-serializable dicts.
+
         Args:
-            obj: Neo4j 对象（Node, Relationship, Path 等）或普通对象
-            
+            obj: Neo4j object or plain object.
+
         Returns:
-            可序列化的字典或原始对象
+            Serializable dict or original object.
         """
-        # 检查是否是 Neo4j Node 对象（通过检查是否有 labels 和 id 属性）
         if hasattr(obj, 'labels') and hasattr(obj, 'id') and callable(getattr(obj, 'items', None)):
             return {
                 'id': obj.id,
                 'labels': list(obj.labels),
                 'properties': dict(obj)
             }
-        # 检查是否是 Neo4j Relationship 对象（通过检查是否有 type 和 id 属性）
         elif hasattr(obj, 'type') and hasattr(obj, 'id') and callable(getattr(obj, 'items', None)):
             return {
                 'id': obj.id,
@@ -762,49 +738,35 @@ class Scheduler:
                 'end_node': obj.end_node.id if hasattr(obj, 'end_node') else None,
                 'properties': dict(obj)
             }
-        # 检查是否是 Neo4j Path 对象（通过检查是否有 nodes 和 relationships 属性）
         elif hasattr(obj, 'nodes') and hasattr(obj, 'relationships'):
             return {
                 'nodes': [self._convert_neo4j_to_dict(node) for node in obj.nodes],
                 'relationships': [self._convert_neo4j_to_dict(rel) for rel in obj.relationships]
             }
-        # 如果是字典，递归转换其值
         elif isinstance(obj, dict):
             return {k: self._convert_neo4j_to_dict(v) for k, v in obj.items()}
-        # 如果是列表，递归转换其元素
         elif isinstance(obj, list):
             return [self._convert_neo4j_to_dict(item) for item in obj]
-        # 其他类型直接返回
         else:
             return obj
 
     def build_dag_from_subquery_plan(self, subquery_plan: Dict[str, Any]) -> GraphWorkflowDAG:
         """
-        根据 JSON 格式的 subquery 构造 DAG。
-        
+        Build DAG from JSON subquery plan.
+
         Args:
-            subquery_plan: 子查询计划，格式为:
-                {
-                    "subqueries": [
-                        {
-                            "id": "q1",
-                            "query": "问题描述",
-                            "depends_on": ["q0"]  # 依赖的其他子查询ID列表
-                        },
-                        ...
-                    ]
-                }
-        
+            subquery_plan: Subquery plan, format:
+                {"subqueries": [{"id": "q1", "query": "...", "depends_on": ["q0"]}, ...]}
+
         Returns:
-            GraphWorkflowDAG: 构建完成的DAG对象
-            
+            GraphWorkflowDAG instance.
+
         Raises:
-            ValueError: 如果输入格式不正确或存在循环依赖
+            ValueError: If input format is invalid or has circular dependencies.
         """
-        # 创建新的DAG实例并构建
         self.dag = GraphWorkflowDAG()
         query_id_to_step_id = self.dag.build_from_subquery_plan(subquery_plan)
-        logger.info(f"✅ DAG构建成功！拓扑序: {self.dag.topological_order()}")
+        logger.info(f"✅ DAG built; topological order: {self.dag.topological_order()}")
         self.query_id_mapping = query_id_to_step_id
 
         return self.dag
@@ -893,14 +855,14 @@ class Scheduler:
 
     def _build_dag_from_query(self, query: str, decompose: bool = True) -> GraphWorkflowDAG:
         """
-        将用户查询转换为DAG，包含查询重写步骤
-        
+        Convert user query to DAG, including query rewrite.
+
         Args:
-            query: 用户原始查询
-            decompose: 是否分解查询
-            
+            query: User query.
+            decompose: Whether to decompose the query.
+
         Returns:
-            构建完成的DAG对象
+            Built DAG.
         """
         # Step 1: Get algorithm library information
         algorithm_library_info = self._get_algorithm_library_info()
@@ -951,16 +913,13 @@ class Scheduler:
         skip_step_ids: Optional[Set[int]] = None
     ):
         """
-           遍历dag，对每个节点，确定适合执行的图算法
-           函数逻辑：
-             1. 遍历每个dag的节点，对每个节点做：
-                 获取每个节点的 question, 确定每个节点适合执行的算法，并设置每个节点的graph_algorithm字段
+        Walk the DAG and assign a graph algorithm to each step from its question.
         """
         skip_step_ids = skip_step_ids or set()
         for step in self.dag.steps.values():
             if step.step_id in skip_step_ids:
                 logger.warning(
-                    "⚠️ 跳过算法自动匹配（专家模式算法越界）| step=%s | question=%s",
+                    "⚠️ Skipping algorithm auto-match (expert mode out-of-bound) | step=%s | question=%s",
                     step.step_id,
                     step.question,
                 )
@@ -970,69 +929,62 @@ class Scheduler:
                 if not step.task_type:
                     step.task_type = GraphAnalysisType.GRAPH_ALGORITHM
                 logger.info(
-                    "✅ 保留专家预设算法 | step=%s | algorithm=%s",
+                    "✅ Keeping expert-assigned algorithm | step=%s | algorithm=%s",
                     step.step_id,
                     step.graph_algorithm,
                 )
                 continue
 
-            # Step 1: Classify question type (graph_algorithm or numeric_analysis)
             question_classification = self.reasoner.classify_question_type(step.question)
-            logger.info(f"🔍 问题分类结果: {question_classification}")
+            logger.info(f"🔍 Question classification: {question_classification}")
 
             if question_classification is None:
-                error_msg = f"问题分类失败：返回了 None"
-                logger.error(f"❌ {error_msg} | 问题: {step.question}")
+                error_msg = "Question classification failed: returned None"
+                logger.error(f"❌ {error_msg} | question: {step.question}")
                 raise RuntimeError(error_msg)
             
             if "error" in question_classification:
-                error_msg = f"问题分类失败：{question_classification.get('error', 'Unknown error')}"
-                logger.error(f"❌ {error_msg} | 问题: {step.question} | 详情: {question_classification}")
+                error_msg = f"Question classification failed: {question_classification.get('error', 'Unknown error')}"
+                logger.error(f"❌ {error_msg} | question: {step.question} | details: {question_classification}")
                 raise RuntimeError(error_msg)
             
             question_type = question_classification.get("type", "graph_algorithm")
             
             if question_type == "graph_query":
-                # 图查询类型：使用nl_query_engine
                 step.task_type = GraphAnalysisType.GRAPH_QUERY
                 step.graph_algorithm = None
-                logger.info(f"✅ 问题分类为图查询 | ❓ 问题:{step.question}, 🧩 任务类型: {step.task_type}, 原因: {question_classification.get('reason', '')}")
+                logger.info(f"✅ Classified as graph query | question: {step.question}, task_type: {step.task_type}, reason: {question_classification.get('reason', '')}")
             elif question_type == "numeric_analysis":
-                # If numeric analysis, set task type and skip graph algorithm selection
                 step.task_type = GraphAnalysisType.NUMERIC_ANALYSIS
                 step.graph_algorithm = None
-                logger.info(f"✅ 问题分类为数值分析 | ❓ 问题:{step.question}, 🧩 任务类型: {step.task_type}, 原因: {question_classification.get('reason', '')}")
+                logger.info(f"✅ Classified as numeric analysis | question: {step.question}, task_type: {step.task_type}, reason: {question_classification.get('reason', '')}")
             else:
-                # If graph algorithm, proceed with normal algorithm selection flow
-                logger.info(f"📋 开始任务类型选择 | 问题: {step.question}")
+                logger.info(f"📋 Task type selection | question: {step.question}")
                 task_type_list = self.expert_search_engine.retrieve_task_type(step.question)
-                logger.info(f"📋 检索到的任务类型列表: {task_type_list}")
+                logger.info(f"📋 Retrieved task types: {task_type_list}")
                 
                 task_type_result = self.reasoner.select_task_type(step.question, task_type_list)
-                logger.info(f"📋 任务类型选择结果: {task_type_result}")
+                logger.info(f"📋 Task type selection result: {task_type_result}")
                 
-                # Check if task_type_result is None or contains error
                 if task_type_result is None:
-                    error_msg = f"任务类型选择失败：LLM 返回了 None"
-                    logger.error(f"❌ {error_msg} | 问题: {step.question}")
+                    error_msg = "Task type selection failed: LLM returned None"
+                    logger.error(f"❌ {error_msg} | question: {step.question}")
                     raise RuntimeError(error_msg)
                 
                 if "error" in task_type_result:
-                    error_msg = f"任务类型选择失败：{task_type_result.get('error', 'Unknown error')}"
-                    logger.error(f"❌ {error_msg} | 问题: {step.question} | 详情: {task_type_result}")
+                    error_msg = f"Task type selection failed: {task_type_result.get('error', 'Unknown error')}"
+                    logger.error(f"❌ {error_msg} | question: {step.question} | details: {task_type_result}")
                     raise RuntimeError(error_msg)
                 
                 selected_task_type_id = task_type_result.get("id")
                 if not selected_task_type_id:
-                    error_msg = f"任务类型选择失败：返回结果中没有 'id' 字段"
-                    logger.error(f"❌ {error_msg} | 返回结果: {task_type_result}")
+                    error_msg = "Task type selection failed: result missing 'id' field"
+                    logger.error(f"❌ {error_msg} | result: {task_type_result}")
                     raise RuntimeError(error_msg)
                 
-                logger.info(f"🔍 开始算法选择 | 任务类型: {selected_task_type_id}")
+                logger.info(f"🔍 Algorithm selection | task_type: {selected_task_type_id}")
                 algorithm_list = self.expert_search_engine.retrieve_algorithm(step.question, selected_task_type_id)
-                logger.info(f"🔍 检索到的算法列表: {algorithm_list}")
-                
-                # 获取当前数据集的完整schema信息
+                logger.info(f"🔍 Retrieved algorithms: {algorithm_list}")
                 graph_schema_info = None
                 if self.current_graph_dataset:
                     graph_schema_info = {
@@ -1052,28 +1004,27 @@ class Scheduler:
                     }
                 
                 algorithm_result = self.reasoner.select_algorithm(step.question, algorithm_list, graph_schema=graph_schema_info)
-                logger.info(f"🔍 算法选择结果: {algorithm_result}")
+                logger.info(f"🔍 Algorithm selection result: {algorithm_result}")
                 
-                # Check if algorithm_result is None or contains error
                 if algorithm_result is None:
-                    error_msg = f"算法选择失败：LLM 返回了 None"
-                    logger.error(f"❌ {error_msg} | 问题: {step.question} | 任务类型: {selected_task_type_id}")
+                    error_msg = "Algorithm selection failed: LLM returned None"
+                    logger.error(f"❌ {error_msg} | question: {step.question} | task_type: {selected_task_type_id}")
                     raise RuntimeError(error_msg)
                 
                 if "error" in algorithm_result:
-                    error_msg = f"算法选择失败：{algorithm_result.get('error', 'Unknown error')}"
-                    logger.error(f"❌ {error_msg} | 问题: {step.question} | 任务类型: {selected_task_type_id} | 详情: {algorithm_result}")
+                    error_msg = f"Algorithm selection failed: {algorithm_result.get('error', 'Unknown error')}"
+                    logger.error(f"❌ {error_msg} | question: {step.question} | task_type: {selected_task_type_id} | details: {algorithm_result}")
                     raise RuntimeError(error_msg)
                 
                 selected_algorithm_id = algorithm_result.get("id")
                 if not selected_algorithm_id:
-                    error_msg = f"算法选择失败：返回结果中没有 'id' 字段"
-                    logger.error(f"❌ {error_msg} | 返回结果: {algorithm_result}")
+                    error_msg = "Algorithm selection failed: result missing 'id' field"
+                    logger.error(f"❌ {error_msg} | result: {algorithm_result}")
                     raise RuntimeError(error_msg)
                 
                 step.task_type = GraphAnalysisType.GRAPH_ALGORITHM
                 step.graph_algorithm = selected_algorithm_id
-                logger.info(f"✅ 算法已选择 | ❓ 问题:{step.question}, 🧩 选择的任务类型: {selected_task_type_id}, 🔍 选择的算法: {step.graph_algorithm}")
+                logger.info(f"✅ Algorithm selected | question: {step.question}, task_type: {selected_task_type_id}, algorithm: {step.graph_algorithm}")
 
     async def _run_algorithm_pipeline(self):
         analysis_result = ""
@@ -1082,10 +1033,9 @@ class Scheduler:
             step = self.dag.steps[step_id]
 
             if not step.graph_algorithm:
-                self.dag.set_failed(step_id, "未为该节点选择图算法")
-                raise RuntimeError(f"节点 {step_id} 缺少 graph_algorithm")
+                self.dag.set_failed(step_id, "No graph algorithm selected for this step")
+                raise RuntimeError(f"Step {step_id} missing graph_algorithm")
 
-            # step 1. 获取算法描述（doc， tool_metadata)， doc 是 tool_metadata 的字符串形式
             tool_description,  tool_metadata = await self.computing_engine.get_algorithm_description(
                 step.graph_algorithm
             )
@@ -1098,11 +1048,11 @@ class Scheduler:
             )
             
             logger.info(
-                f"✅ LLM 提取的参数: {json.dumps(extraction_result.get('parameters'), ensure_ascii=False)}")
+                f"✅ LLM extracted parameters: {json.dumps(extraction_result.get('parameters'), ensure_ascii=False)}")
 
             if extraction_result.get("post_processing_code"):
                 logger.info(
-                    f"✅ 后处理代码:\n{extraction_result.get('post_processing_code','')[:200]}...")
+                    f"✅ Post-processing code:\n{extraction_result.get('post_processing_code','')[:200]}...")
 
             tool_result = await self.computing_engine.run_algorithm(
                 step.graph_algorithm,
@@ -1110,12 +1060,12 @@ class Scheduler:
                 extraction_result.get("post_processing_code", "")
             )
 
-            logger.info(f"✅ 工具执行: {tool_result.get('summary','完成')}")
+            logger.info(f"✅ Tool execution: {tool_result.get('summary','done')}")
 
             if not tool_result.get("success", False):
-                error_msg = tool_result.get("error", "算法执行失败")
+                error_msg = tool_result.get("error", "Algorithm execution failed")
                 self.dag.set_failed(step_id, error_msg)
-                raise RuntimeError(f"节点 {step_id} 执行失败：{error_msg}")
+                raise RuntimeError(f"Step {step_id} execution failed: {error_msg}")
 
             llm_analysis = self.reasoner.generate_answer_from_algorithm_result(
                 question=step.question,
@@ -1142,7 +1092,6 @@ class Scheduler:
             tool_metadata = None
             tool_result = None 
 
-            # step 1. 上游依赖解析
             data_dependency_parents = [self.dag.steps[pid] for pid in self.dag.get_data_dependency(step_id)]
             data_dependency_context = {
                 "graph_dependencies": [],
@@ -1159,7 +1108,7 @@ class Scheduler:
                     data_dependency_parents=data_dependency_parents
                 )
                 logger.info(
-                    "📊 依赖上下文 | 图依赖:%s | 参数依赖:%s",
+                    "📊 Dependency context | graph deps: %s | param deps: %s",
                     len(data_dependency_context.get("graph_dependencies", [])),
                     len(data_dependency_context.get("parameter_dependencies", [])),
                 )
@@ -1167,20 +1116,18 @@ class Scheduler:
 
             if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
                 if not step.graph_algorithm:
-                    self.dag.set_failed(step_id, "未为该节点选择图算法")
-                    raise RuntimeError(f"节点 {step_id} 缺少 graph_algorithm")
+                    self.dag.set_failed(step_id, "No graph algorithm selected for this step")
+                    raise RuntimeError(f"Step {step_id} missing graph_algorithm")
 
-                 # step 1. 获取算法描述（doc， tool_metadata)， doc 是 tool_metadata 的字符串形式
                 tool_description,  tool_metadata = await self.computing_engine.get_algorithm_description(
                     step.graph_algorithm
                 )
                 
-                # 检查是否成功获取算法描述
                 if tool_metadata is None:
-                    error_msg = f"无法获取算法 '{step.graph_algorithm}' 的描述信息"
+                    error_msg = f"Cannot get algorithm description for '{step.graph_algorithm}'"
                     logger.error(f"❌ {error_msg}")
                     self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"节点 {step_id}: {error_msg}")
+                    raise RuntimeError(f"Step {step_id}: {error_msg}")
                 
                 # logger.info(f"tool_description:{tool_description}")
 
@@ -1190,7 +1137,7 @@ class Scheduler:
                         graph_adapter_result=data_dependency_context.get("graph_input_adapter_result"),
                     )
                 except Exception as graph_err:
-                    self.dag.set_failed(step_id, f"初始化工作图失败: {graph_err}")
+                    self.dag.set_failed(step_id, f"Failed to initialize working graph: {graph_err}")
                     raise
 
                 # extraction_result = self._prepare_parameters_for_execution(
@@ -1202,13 +1149,13 @@ class Scheduler:
                 # )
                 
                 # if extraction_result is None:
-                #     error_msg = "参数提取返回了 None"
+                #     error_msg = "Parameter extraction returned None"
                 #     logger.error(f"❌ {error_msg}")
                 #     self.dag.set_failed(step_id, error_msg)
                 #     raise ValueError(error_msg)
 
                 # logger.info(
-                #     "✅ LLM/依赖提取的参数: %s",
+                #     "✅ LLM/dependency extracted params: %s",
                 #     json.dumps(extraction_result.get("parameters", {}), ensure_ascii=False)
                 # )
 
@@ -1218,7 +1165,7 @@ class Scheduler:
 
                 # if post_processing_info.get("code"):
                 #     logger.info(
-                #         f"✅ 后处理代码:\n{post_processing_info.get('code','')}...")
+                #         f"✅ Post-processing code:\n{post_processing_info.get('code','')}...")
         
                 # tool_result = await self.computing_engine.run_algorithm(
                 #     step.graph_algorithm,
@@ -1228,12 +1175,12 @@ class Scheduler:
                 # )
                 
                 # if tool_result is None:
-                #     error_msg = "算法执行返回了 None"
+                #     error_msg = "Algorithm execution returned None"
                 #     logger.error(f"❌ {error_msg}")
                 #     self.dag.set_failed(step_id, error_msg)
                 #     raise ValueError(error_msg)
                 
-                # # 检查嵌套的 result.error
+                # # Check nested result.error
                 # result_data = tool_result.get("result")
                 # if result_data is not None and isinstance(result_data, dict) and "error" in result_data:
                 #     error_msg = result_data.get("error")
@@ -1242,7 +1189,7 @@ class Scheduler:
                 #     raise RuntimeError(error_msg)
                 
                 # if not tool_result.get("success", False):
-                #     error_msg = tool_result.get("error", "算法执行失败")
+                #     error_msg = tool_result.get("error", "Algorithm execution failed")
                 #     logger.error(f"❌ {error_msg}")
                 #     self.dag.set_failed(step_id, error_msg)
                 #     raise RuntimeError(error_msg)
@@ -1298,22 +1245,20 @@ class Scheduler:
                     self.dag.set_failed(step_id, str(e))
                     raise RuntimeError(str(e))
 
-                ## todo: 保存中间计算结果的模块: 如果图计算的结果规模特别大, 把结果写到一个文件里 
-                # 添加算法执行结果到 step
                 step.add_algorithm_result(
                     tool_name=tool_metadata.get("name", ""),
                     tool_result_data=tool_result.get("result", {}),
                     output_schema=output_schema,
                     is_has_extract_code=is_has_extract_code
                 )
-                logger.info(f"✅ 工具执行: {tool_result.get('summary','完成')}")
+                logger.info(f"✅ Tool execution: {tool_result.get('summary','done')}")
 
                 self.dag.set_success(step_id)
 
             elif step.task_type == GraphAnalysisType.NUMERIC_ANALYSIS:
-                logger.info("🧮 当前任务类型：Numeric Analysis")
+                logger.info("🧮 Task type: Numeric Analysis")
                 
-                # 1. 合并 graph_dependencies 和 parameter_dependencies 成依赖参数项
+                graph_deps = data_dependency_context.get("graph_dependencies", [])
                 graph_deps = data_dependency_context.get("graph_dependencies", [])
                 param_deps = data_dependency_context.get("parameter_dependencies", [])
                 
@@ -1335,7 +1280,6 @@ class Scheduler:
                     vertex_schema = self.global_graph.get_vertex_properties_schema()
                     edge_schema = self.global_graph.get_edge_properties_schema()
                 
-                # 生成数值分析代码
                 code_result = self.reasoner.generate_numeric_analysis_code(
                     question=step.question,
                     dependency_items=dependency_items,
@@ -1346,9 +1290,8 @@ class Scheduler:
                 numeric_analysis_code = code_result.get("numeric_analysis_code", {})
                 generated_code = numeric_analysis_code.get("code", "")
                 output_schema = numeric_analysis_code.get("output_schema", {})
-                logger.info(f"✅ 生成的数值分析代码: {generated_code[:200]}...")
+                logger.info(f"✅ Generated numeric analysis code: {generated_code[:200]}...")
                 
-                # 执行代码
                 code_result_value = self.computing_engine.execute_code(
                     code=generated_code,
                     data=execution_data,
@@ -1356,14 +1299,12 @@ class Scheduler:
                     is_numeric_analysis=True
                 )
 
-                # 检查执行结果
                 if isinstance(code_result_value, dict) and "error" in code_result_value:
                     error_msg = code_result_value.get("error")
                     logger.error(f"❌ {error_msg}")
                     self.dag.set_failed(step_id, error_msg)
                     raise RuntimeError(error_msg)
 
-                # 成功执行
                 step.add_output(
                     task_type=GraphAnalysisSubType.NUMERIC_COMPUTATION,
                     source="numeric analysis code",
@@ -1382,35 +1323,33 @@ class Scheduler:
                     path=None,
                     validate_schema=True
                 )
-                logger.info(f"✅ 数值分析执行完成")
+                logger.info("✅ Numeric analysis completed")
                 self.dag.set_success(step_id)
 
             elif step.task_type == GraphAnalysisType.GRAPH_QUERY:
-                logger.info("🔍 当前任务类型：Graph Query")
+                logger.info("🔍 Task type: Graph Query")
                 try:
-                    # 通过 computing_engine 执行图查询
                     query_result = self.computing_engine.execute_graph_query(step.question)
                     
                     if query_result.get("success"):
-                        # 将查询结果添加到step的输出
                         step.add_output(
                             task_type=GraphAnalysisSubType.SUBGRAPH_EXTRACTION,
                             source="graph_query",
                             output_schema=OutputSchema(
-                                description="图查询结果",
+                                description="Graph query result",
                                 type="list",
                                 fields={
                                     "results": OutputField(
                                         type="list",
-                                        field_description="查询返回的结果列表"
+                                        field_description="List of query results"
                                     ),
                                     "count": OutputField(
                                         type="int",
-                                        field_description="结果数量"
+                                        field_description="Result count"
                                     ),
                                     "query_type": OutputField(
                                         type="str",
-                                        field_description="查询类型"
+                                        field_description="Query type"
                                     )
                                 }
                             ),
@@ -1422,26 +1361,25 @@ class Scheduler:
                             path=None,
                             validate_schema=False
                         )
-                        logger.info(f"✅ 图查询执行完成，返回 {query_result.get('count', 0)} 条结果")
+                        logger.info(f"✅ Graph query done; returned {query_result.get('count', 0)} results")
                         self.dag.set_success(step_id)
                         
-                        # 设置tool_result用于后续的LLM分析
                         tool_result = {
                             "success": True,
                             "result": query_result.get("results", []),
-                            "summary": f"图查询成功，返回 {query_result.get('count', 0)} 条结果"
+                            "summary": f"Graph query succeeded; returned {query_result.get('count', 0)} results"
                         }
                     else:
-                        error_msg = query_result.get("error", "图查询失败")
-                        logger.error(f"❌ 图查询失败 | 错误: {error_msg}")
+                        error_msg = query_result.get("error", "Graph query failed")
+                        logger.error(f"❌ Graph query failed | error: {error_msg}")
                         self.dag.set_failed(step_id, error_msg)
-                        raise RuntimeError(f"节点 {step_id} 图查询失败：{error_msg}")
+                        raise RuntimeError(f"Step {step_id} graph query failed: {error_msg}")
                         
                 except Exception as query_err:
-                    error_msg = f"图查询执行失败: {query_err}"
+                    error_msg = f"Graph query execution failed: {query_err}"
                     logger.error(error_msg, exc_info=True)
                     self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"节点 {step_id} 图查询失败：{query_err}")
+                    raise RuntimeError(f"Step {step_id} graph query failed: {query_err}")
 
             llm_analysis = self.reasoner.generate_answer_from_algorithm_result(
                 question=step.question,
@@ -1459,10 +1397,10 @@ class Scheduler:
         graph_adapter_result: Optional[Dict[str, Any]],
     ) -> Tuple[List[VertexData], List[EdgeData]]:
         """
-        根据依赖上下文初始化当前应使用的图（全图或子图）。
+        Initialize the graph to use (full or subgraph) from dependency context.
         """
         if self.global_graph is None:
-            raise RuntimeError("全局图数据尚未加载，无法执行图算法。")
+            raise RuntimeError("Global graph not loaded; cannot run graph algorithms.")
 
         use_subgraph = bool(graph_dependencies) and bool(graph_adapter_result)
         vertices_to_use = self.global_graph.vertices
@@ -1489,7 +1427,7 @@ class Scheduler:
                     self.global_graph.edges,
                 )
             else:
-                logger.warning("⚠️ 子图依赖缺少有效的节点或边数据，回退至全图。")
+                logger.warning("⚠️ Subgraph dependency has no valid nodes/edges; falling back to full graph.")
                 use_subgraph = False
 
         payload = {
@@ -1501,10 +1439,10 @@ class Scheduler:
 
         result = await self.computing_engine.run_algorithm("initialize_graph", payload)
         if not result.get("success", False):
-            raise RuntimeError(result.get("error", "初始化图数据失败"))
+            raise RuntimeError(result.get("error", "Failed to initialize graph data"))
 
         logger.info(
-            "🗺️ 初始化工作图 | 使用子图:%s | 节点:%s | 边:%s",
+            "🗺️ Working graph initialized | use_subgraph: %s | vertices: %s | edges: %s",
             use_subgraph,
             len(vertices_to_use or []),
             len(edges_to_use or []),
@@ -1523,7 +1461,7 @@ class Scheduler:
         error_history: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
         """
-            根据数据依赖或 LLM 结果准备图算法输入参数。
+        Prepare graph algorithm input parameters from data dependencies or LLM output.
         """
         dependency_parameters = dependency_parameters or {}
         trace = {"step_id": getattr(step, "step_id", None), "op": "prepare_params"}
@@ -1576,16 +1514,15 @@ class Scheduler:
     
     def _extract_dag_structure(self) -> Dict[str, Any]:
         """
-        从当前DAG中提取subquery结构
-        
+        Extract subquery structure from the current DAG.
+
         Returns:
-            包含subqueries列表的字典
+            Dict with a list of subqueries.
         """
         subqueries = []
         for step_id in self.dag.topological_order():
             step = self.dag.steps[step_id]
             
-            # 将内部step_id映射回query_id (如q1, q2等)
             query_id = None
             for qid, sid in self.query_id_mapping.items():
                 if sid == step_id:
@@ -1595,7 +1532,6 @@ class Scheduler:
             if query_id is None:
                 query_id = f"q{step_id}"
             
-            # 获取依赖的query_ids - 使用DAG的in_edges而不是step.depends_on
             depends_on = []
             parent_step_ids = self.dag.parents_of(step_id)
             for dep_step_id in parent_step_ids:
@@ -1616,23 +1552,21 @@ class Scheduler:
     
     def _is_dag_changed(self, old_structure: Dict[str, Any], new_structure: Dict[str, Any]) -> bool:
         """
-        检查DAG结构是否发生变化
-        
+        Check whether the DAG structure has changed.
+
         Args:
-            old_structure: 旧的DAG结构
-            new_structure: 新的DAG结构
-            
+            old_structure: Previous DAG structure.
+            new_structure: New DAG structure.
+
         Returns:
-            True if changed, False otherwise
+            True if changed, False otherwise.
         """
         old_queries = old_structure.get("subqueries", [])
         new_queries = new_structure.get("subqueries", [])
         
-        # 检查节点数量是否变化
         if len(old_queries) != len(new_queries):
             return True
         
-        # 检查每个节点的query和依赖关系是否变化
         for old_q, new_q in zip(old_queries, new_queries):
             if old_q.get("query") != new_q.get("query"):
                 return True
@@ -1643,49 +1577,43 @@ class Scheduler:
     
     def _refine_dag_with_retry(self, max_retries: int = 1) -> Dict[str, Any]:
         """
-        使用LLM优化DAG,确保任务类型边界清晰
-        
+        Refine DAG with LLM to clarify task type boundaries.
+
         Args:
-            max_retries: 最大重试次数
-            
+            max_retries: Maximum number of retries.
+
         Returns:
-            优化后的DAG信息
+            Refined DAG info.
         """
-        logger.info("🔄 开始DAG优化流程...")
+        logger.info("🔄 Starting DAG refinement...")
         
         for retry_count in range(max_retries + 1):
             try:
-                # 获取当前DAG的subquery结构
                 current_dag_structure = self._extract_dag_structure()
                 
-                logger.info(f"📋 当前DAG结构 (尝试 {retry_count + 1}/{max_retries + 1}):")
+                logger.info(f"📋 Current DAG structure (attempt {retry_count + 1}/{max_retries + 1}):")
                 logger.info(json.dumps(current_dag_structure, ensure_ascii=False, indent=2))
                 
-                # 调用LLM进行DAG优化
                 refined_structure = self.reasoner.refine_subqueries(current_dag_structure)
                 
-                logger.info("✅ LLM返回的优化DAG:")
+                logger.info("✅ LLM refined DAG:")
                 logger.info(json.dumps(refined_structure, ensure_ascii=False, indent=2))
                 
-                # 检查是否有实质性变化
                 if self._is_dag_changed(current_dag_structure, refined_structure):
-                    logger.info("🔄 检测到DAG结构变化,重新构建DAG...")
+                    logger.info("🔄 DAG structure changed; rebuilding...")
                     
-                    # 重新构建DAG
                     self.build_dag_from_subquery_plan(refined_structure)
-                    
-                    # 重新为新的节点找算法
                     self._find_algorithm()
                     
-                    logger.info(f"✅ DAG优化完成 (第 {retry_count + 1} 次迭代)")
+                    logger.info(f"✅ DAG refinement done (iteration {retry_count + 1})")
                 else:
-                    logger.info("✅ DAG结构已优化,无需进一步调整")
+                    logger.info("✅ DAG already refined; no further changes")
                     break
                     
             except Exception as e:
-                logger.error(f"❌ DAG优化失败 (尝试 {retry_count + 1}/{max_retries + 1}): {e}")
+                logger.error(f"❌ DAG refinement failed (attempt {retry_count + 1}/{max_retries + 1}): {e}")
                 if retry_count == max_retries:
-                    logger.warning("⚠️ 达到最大重试次数,使用当前DAG继续执行")
+                    logger.warning("⚠️ Max retries reached; continuing with current DAG")
                 continue
         
         return self.dag.get_dag_info()
