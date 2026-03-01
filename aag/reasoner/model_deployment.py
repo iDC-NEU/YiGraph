@@ -350,6 +350,8 @@ Each tool represents a specific graph algorithm (e.g., PageRank, Louvain, Shorte
 - Use simple, intuitive language — avoid jargon and avoid repeating the same summary.
 - If the available data is insufficient to fully answer the question, explicitly state the limitation or missing information.
 - The output format must be in **Markdown** format for clear presentation.
+- Each analysis step must have a clear number and a short title.For example,## 1. **Anna Lee Node Centrality Evaluation (PageRank Result)**
+- The final output **must include a Summary section and a Recommendations section**.
 - Please structure your response based on the following analysis report template.
 
 ----------------------------
