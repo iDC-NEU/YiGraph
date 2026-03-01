@@ -231,9 +231,13 @@ cd AAG
 pip install -r requirements.txt
 ```
 
-### 3. Configure System Parameters
+### 3. System Configuration
 
-#### 3.1 Configure Inference and Retrieval Engine
+This section describes how to configure the LLM reasoning engine, retrieval modules (Milvus + Neo4j), and dataset loading.
+
+---
+
+### 3.1 Configure Reasoning and Retrieval Engine
 
 Edit the configuration file:
 
@@ -241,43 +245,125 @@ Edit the configuration file:
 config/engine_config.yaml
 ```
 
+---
+
+#### 1️⃣ LLM (Reasoning Module) Configuration
+
+The system supports two LLM providers:
+
+* `ollama` (locally deployed models)
+* `openai` (OpenAI or OpenAI-compatible APIs such as DeepSeek or self-hosted services)
+
 Example configuration:
 
 ```yaml
-# Running mode: interactive / batch
-mode: interactive
-
-# Reasoner module configuration
 reasoner:
   llm:
-    provider: "openai"   # Options: ollama / openai
+    # LLM provider: ollama (local) or openai (OpenAI-compatible API)
+    provider: "openai"
+
+    # Ollama config (used when provider = ollama)
+    ollama:
+      model_name: "llama3.1:70b"
+      device: "cuda:0"
+      timeout: 150000
+      port: 11434
+
+    # OpenAI-compatible API (used when provider = openai)
     openai:
-      base_url: "https://your-api-endpoint/v1/"
+      base_url: "https://your-api-endpoint/v1/"   # Must end with "/"
       api_key: "your-api-key"
       model: "gpt-4o-mini"
-
-# Retrieval module configuration
-retrieval:
-  database:
-    graph:
-      space_name: "AMLSim1K"
-      server_ip: "127.0.0.1"
-      server_port: "9669"
-    vector:
-      collection_name: "graphllm_collection"
-      host: "localhost"
-      port: 19530
-  embedding:
-    model_name: "BAAI/bge-large-en-v1.5"
-    device: "cuda:2"
-  rag:
-    graph:
-      k_hop: 2
-    vector:
-      k_similarity: 5
 ```
 
-#### 3.2 Configure Dataset
+##### Parameter Description
+
+| Parameter  | Description                                        |
+| ---------- | -------------------------------------------------- |
+| provider   | Select LLM backend: `ollama` or `openai`           |
+| model_name | Local Ollama model name                            |
+| device     | GPU device ID (e.g., `cuda:0`)                     |
+| timeout    | Inference timeout (milliseconds)                   |
+| base_url   | OpenAI-compatible API endpoint (must end with `/`) |
+| api_key    | API key                                            |
+| model      | Model name                                         |
+
+> ⚠ When using an OpenAI-compatible API (e.g., DeepSeek or self-hosted service), ensure the `base_url` is correct and ends with `/`.
+
+---
+
+#### 2️⃣ Retrieval Configuration (Vector + Graph)
+
+The system supports:
+
+* **Milvus** for vector-based RAG retrieval
+* **Neo4j** for graph-based querying
+
+Example configuration:
+
+```yaml
+retrieval:
+  database:
+    # Vector database (Milvus)
+    vector:
+      host: "localhost"
+      port: 19530
+
+    # Graph database (Neo4j)
+    neo4j:
+      enabled: true
+      uri: "bolt://localhost:7687"
+      user: "neo4j"
+      password: "your-password"
+
+  # Embedding model configuration
+  embedding:
+    model_name: "BAAI/bge-large-en-v1.5"
+    batch_size: 20
+    chunk_size: 512
+    chunk_overlap: 20
+    device: "cuda:2"
+```
+
+---
+
+##### Milvus (Vector Database)
+
+| Parameter | Description           |
+| --------- | --------------------- |
+| host      | Milvus server address |
+| port      | Milvus service port   |
+
+> Ensure that Milvus is running before starting the system (Docker deployment is recommended).
+
+---
+
+##### Neo4j (Graph Database)
+
+| Parameter | Description             |
+| --------- | ----------------------- |
+| enabled   | Whether to enable Neo4j |
+| uri       | Bolt protocol URI       |
+| user      | Database username       |
+| password  | Database password       |
+
+> If graph functionality is not required, set `enabled` to `false`.
+
+---
+
+##### Embedding Model
+
+| Parameter     | Description                       |
+| ------------- | --------------------------------- |
+| model_name    | HuggingFace embedding model name  |
+| batch_size    | Embedding batch size              |
+| chunk_size    | Text chunk size                   |
+| chunk_overlap | Overlapping tokens between chunks |
+| device        | GPU device ID                     |
+
+---
+
+### 3.2 Configure Dataset
 
 Edit the configuration file:
 
@@ -285,27 +371,113 @@ Edit the configuration file:
 config/data_upload_config.yaml
 ```
 
-Example configuration:
+The system supports two dataset types:
+
+* `graph`
+* `text`
+
+---
+
+#### Graph Dataset Example (AMLSim1K)
 
 ```yaml
 datasets:
   - name: AMLSim1K
     type: graph
+    description: "AMLSim 1K synthetic transaction graph."
+
     schema:
+      # -----------------------------
+      # Vertex Layer
+      # -----------------------------
       vertex:
         - type: account
-          path: "/path/to/accounts.csv"
+          path: "aag/datasets/graphs/transaction_amlsim/1K/accounts.csv"
           format: csv
           id_field: acct_id
+          label_field: prior_sar_count   # Optional
+
+      # -----------------------------
+      # Edge Layer
+      # -----------------------------
       edge:
         - type: transfer
-          path: "/path/to/transactions.csv"
+          path: "aag/datasets/graphs/transaction_amlsim/1K/transactions.csv"
           format: csv
           source_field: orig_acct
           target_field: bene_acct
+          label_field: is_sar            # Optional
+
+      # -----------------------------
+      # Graph-Level Settings
+      # -----------------------------
+      graph:
+        directed: true
+        multigraph: true
+        weighted: false
+        heterogeneous: false
 ```
 
-> Please modify `path` to your local actual data file path.
+---
+
+#### Parameter Description
+
+##### Basic Information
+
+| Parameter   | Description                     |
+| ----------- | ------------------------------- |
+| name        | Dataset name                    |
+| type        | Dataset type: `graph` or `text` |
+| description | Dataset description             |
+
+---
+
+##### Vertex Configuration
+
+| Parameter   | Description                                |
+| ----------- | ------------------------------------------ |
+| type        | Node type                                  |
+| path        | Path to data file                          |
+| format      | File format (`csv`, `json`, `yaml`, `gml`) |
+| id_field    | Unique node ID field                       |
+| label_field | Node label field (optional)                |
+
+---
+
+##### Edge Configuration
+
+| Parameter    | Description                 |
+| ------------ | --------------------------- |
+| type         | Edge type                   |
+| path         | Path to data file           |
+| source_field | Source node field           |
+| target_field | Target node field           |
+| label_field  | Edge label field (optional) |
+
+---
+
+##### Graph-Level Configuration
+
+| Parameter     | Description                        |
+| ------------- | ---------------------------------- |
+| directed      | Whether the graph is directed      |
+| multigraph    | Whether multiple edges are allowed |
+| weighted      | Whether edges are weighted         |
+| heterogeneous | Whether the graph is heterogeneous |
+
+---
+
+### ⚠ Notes
+
+1. Update all `path` fields to match your local dataset paths.
+2. Ensure the following services are running before launching the system:
+
+   * Milvus
+   * Neo4j (if enabled)
+   * GPU devices are available (if required)
+3. When using remote LLM APIs, ensure network connectivity is available.
+
+---
 
 ### 4. Start YiGraph
 
