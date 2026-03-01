@@ -5,7 +5,6 @@ from llama_index.core.response_synthesizers.type import *
 
 from typing import Optional
 from aag.expert_search_engine.database.milvus import *
-from aag.expert_search_engine.database.nebulagraph import *
 from aag.expert_search_engine.database.entitiesdb import *
 from aag.rag_engine.rag import RAG
 from aag.config.engine_config import RetrievalConfig
