@@ -8,7 +8,7 @@
       <img src="figure/logo.png" alt="YiGraph Logo" width="180" />
     </td>
     <td align="left" valign="middle">
-      <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #2c3e50;">End-to-End Intelligent Graph Data<br/> Agent System Based on AAG Framework</h2>
+      <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #2c3e50;">End-to-End Intelligent Graph Data<br/>Analysis Agent System Based on AAG Framework</h2>
     </td>
   </tr>
 </table>
@@ -16,7 +16,7 @@
 <p style="margin-top: 20px;">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
-  <a href="https://idc-neu.github.io/YiGraphDocs/"><img src="https://img.shields.io/badge/📚-Docs-purple.svg" alt="Docs"></a>
+  <a href="http://iDC-NEU.github.io/YiGraphDocs/"><img src="https://img.shields.io/badge/📚-Docs-purple.svg" alt="Docs"></a>
   <a href="#-contact-us"><img src="https://img.shields.io/badge/📞-Contact_Us-green.svg" alt="Contact"></a>
 </p>
 
@@ -89,7 +89,7 @@ Built-in **100+ graph algorithms** covering 11 major categories, providing profe
 | [**Distance & Measures**](docs-site/docs/tutorial-algorithm/distance.md) | 8 | Eccentricity, Diameter, Radius, Center/Periphery, Wiener Index, Assortativity Coefficient | Network health check, topology comparison, structural preference analysis |
 | [**Graph Query**](docs-site/docs/tutorial-algorithm/graph_query.md) | 8 | Node Query, Relationship Filtering, Neighbor Query, Path Query, Common Neighbors, Subgraph Extraction, Aggregation Statistics | Data retrieval and filtering, interactive exploration, risk control investigation |
 
-> For detailed algorithm descriptions and usage guides, please refer to **[📚 Online Documentation](https://superccy.github.io/AAG/en/docs/intro)**
+> For detailed algorithm descriptions and usage guides, please refer to **[📚 Online Documentation](http://superccy.github.io/YiGraphDocs/)**
 
 
 ### 5. Flexible Data Support
@@ -221,8 +221,8 @@ After starting Neo4j, you can access the web interface at `http://localhost:7474
 #### 2.1 Download Source Code
 
 ```bash
-git clone https://github.com/superccy/AAG.git
-cd AAG
+git clone https://github.com/iDC-NEU/YiGraph.git
+cd YiGraph
 ```
 
 #### 2.2 Install Dependencies
@@ -231,15 +231,9 @@ cd AAG
 pip install -r requirements.txt
 ```
 
----
+### 3. Configure System Parameters
 
-### 3. System Configuration
-
-This section describes how to configure the LLM reasoning engine, retrieval modules (Milvus + Neo4j), and dataset loading.
-
----
-
-### 3.1 Configure Reasoning and Retrieval Engine
+#### 3.1 Configure Inference and Retrieval Engine
 
 Edit the configuration file:
 
@@ -247,125 +241,43 @@ Edit the configuration file:
 config/engine_config.yaml
 ```
 
----
-
-#### 1️⃣ LLM (Reasoning Module) Configuration
-
-The system supports two LLM providers:
-
-* `ollama` (locally deployed models)
-* `openai` (OpenAI or OpenAI-compatible APIs such as DeepSeek or self-hosted services)
-
 Example configuration:
 
 ```yaml
+# Running mode: interactive / batch
+mode: interactive
+
+# Reasoner module configuration
 reasoner:
   llm:
-    # LLM provider: ollama (local) or openai (OpenAI-compatible API)
-    provider: "openai"
-
-    # Ollama config (used when provider = ollama)
-    ollama:
-      model_name: "llama3.1:70b"
-      device: "cuda:0"
-      timeout: 150000
-      port: 11434
-
-    # OpenAI-compatible API (used when provider = openai)
+    provider: "openai"   # Options: ollama / openai
     openai:
-      base_url: "https://your-api-endpoint/v1/"   # Must end with "/"
+      base_url: "https://your-api-endpoint/v1/"
       api_key: "your-api-key"
       model: "gpt-4o-mini"
-```
 
-##### Parameter Description
-
-| Parameter  | Description                                        |
-| ---------- | -------------------------------------------------- |
-| provider   | Select LLM backend: `ollama` or `openai`           |
-| model_name | Local Ollama model name                            |
-| device     | GPU device ID (e.g., `cuda:0`)                     |
-| timeout    | Inference timeout (milliseconds)                   |
-| base_url   | OpenAI-compatible API endpoint (must end with `/`) |
-| api_key    | API key                                            |
-| model      | Model name                                         |
-
-> ⚠ When using an OpenAI-compatible API (e.g., DeepSeek or self-hosted service), ensure the `base_url` is correct and ends with `/`.
-
----
-
-#### 2️⃣ Retrieval Configuration (Vector + Graph)
-
-The system supports:
-
-* **Milvus** for vector-based RAG retrieval
-* **Neo4j** for graph-based querying
-
-Example configuration:
-
-```yaml
+# Retrieval module configuration
 retrieval:
   database:
-    # Vector database (Milvus)
+    graph:
+      space_name: "AMLSim1K"
+      server_ip: "127.0.0.1"
+      server_port: "9669"
     vector:
+      collection_name: "graphllm_collection"
       host: "localhost"
       port: 19530
-
-    # Graph database (Neo4j)
-    neo4j:
-      enabled: true
-      uri: "bolt://localhost:7687"
-      user: "neo4j"
-      password: "your-password"
-
-  # Embedding model configuration
   embedding:
     model_name: "BAAI/bge-large-en-v1.5"
-    batch_size: 20
-    chunk_size: 512
-    chunk_overlap: 20
     device: "cuda:2"
+  rag:
+    graph:
+      k_hop: 2
+    vector:
+      k_similarity: 5
 ```
 
----
-
-##### Milvus (Vector Database)
-
-| Parameter | Description           |
-| --------- | --------------------- |
-| host      | Milvus server address |
-| port      | Milvus service port   |
-
-> Ensure that Milvus is running before starting the system (Docker deployment is recommended).
-
----
-
-##### Neo4j (Graph Database)
-
-| Parameter | Description             |
-| --------- | ----------------------- |
-| enabled   | Whether to enable Neo4j |
-| uri       | Bolt protocol URI       |
-| user      | Database username       |
-| password  | Database password       |
-
-> If graph functionality is not required, set `enabled` to `false`.
-
----
-
-##### Embedding Model
-
-| Parameter     | Description                       |
-| ------------- | --------------------------------- |
-| model_name    | HuggingFace embedding model name  |
-| batch_size    | Embedding batch size              |
-| chunk_size    | Text chunk size                   |
-| chunk_overlap | Overlapping tokens between chunks |
-| device        | GPU device ID                     |
-
----
-
-### 3.2 Configure Dataset
+#### 3.2 Configure Dataset
 
 Edit the configuration file:
 
@@ -373,113 +285,27 @@ Edit the configuration file:
 config/data_upload_config.yaml
 ```
 
-The system supports two dataset types:
-
-* `graph`
-* `text`
-
----
-
-#### Graph Dataset Example (AMLSim1K)
+Example configuration:
 
 ```yaml
 datasets:
   - name: AMLSim1K
     type: graph
-    description: "AMLSim 1K synthetic transaction graph."
-
     schema:
-      # -----------------------------
-      # Vertex Layer
-      # -----------------------------
       vertex:
         - type: account
-          path: "aag/datasets/graphs/transaction_amlsim/1K/accounts.csv"
+          path: "/path/to/accounts.csv"
           format: csv
           id_field: acct_id
-          label_field: prior_sar_count   # Optional
-
-      # -----------------------------
-      # Edge Layer
-      # -----------------------------
       edge:
         - type: transfer
-          path: "aag/datasets/graphs/transaction_amlsim/1K/transactions.csv"
+          path: "/path/to/transactions.csv"
           format: csv
           source_field: orig_acct
           target_field: bene_acct
-          label_field: is_sar            # Optional
-
-      # -----------------------------
-      # Graph-Level Settings
-      # -----------------------------
-      graph:
-        directed: true
-        multigraph: true
-        weighted: false
-        heterogeneous: false
 ```
 
----
-
-#### Parameter Description
-
-##### Basic Information
-
-| Parameter   | Description                     |
-| ----------- | ------------------------------- |
-| name        | Dataset name                    |
-| type        | Dataset type: `graph` or `text` |
-| description | Dataset description             |
-
----
-
-##### Vertex Configuration
-
-| Parameter   | Description                                |
-| ----------- | ------------------------------------------ |
-| type        | Node type                                  |
-| path        | Path to data file                          |
-| format      | File format (`csv`, `json`, `yaml`, `gml`) |
-| id_field    | Unique node ID field                       |
-| label_field | Node label field (optional)                |
-
----
-
-##### Edge Configuration
-
-| Parameter    | Description                 |
-| ------------ | --------------------------- |
-| type         | Edge type                   |
-| path         | Path to data file           |
-| source_field | Source node field           |
-| target_field | Target node field           |
-| label_field  | Edge label field (optional) |
-
----
-
-##### Graph-Level Configuration
-
-| Parameter     | Description                        |
-| ------------- | ---------------------------------- |
-| directed      | Whether the graph is directed      |
-| multigraph    | Whether multiple edges are allowed |
-| weighted      | Whether edges are weighted         |
-| heterogeneous | Whether the graph is heterogeneous |
-
----
-
-### ⚠ Notes
-
-1. Update all `path` fields to match your local dataset paths.
-2. Ensure the following services are running before launching the system:
-
-   * Milvus
-   * Neo4j (if enabled)
-   * GPU devices are available (if required)
-3. When using remote LLM APIs, ensure network connectivity is available.
-
----
+> Please modify `path` to your local actual data file path.
 
 ### 4. Start YiGraph
 
@@ -604,7 +430,7 @@ For more advanced features, parameter descriptions, and usage examples, please r
 
 Access the complete user manual and developer guide:
 
-**[https://idc-neu.github.io/YiGraphDocs/](https://idc-neu.github.io/YiGraphDocs/)**
+**[http://superccy.github.io/YiGraphDocs/](http://superccy.github.io/YiGraphDocs/)**
 
 Documentation includes:
 - **Quick Start**: System installation, configuration, and basic usage
@@ -635,7 +461,7 @@ We welcome all forms of contributions:
 
 <div align="center">
 
-| WeChat | rednote | Twitter |
+| WeChat | Xiaohongshu | Twitter |
 |:---:|:---:|:---:|
 | <img src="figure/wechat.png" alt="WeChat" width="200"/> | <img src="figure/redbook.png" alt="Xiaohongshu" width="200"/> | <img src="figure/twitter.png" alt="Twitter" width="200"/> |
 
@@ -682,7 +508,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 If this project helps you, please Star ⭐ to support us!
 
-[![Star History Chart](https://api.star-history.com/svg?repos=your-org/AAG&type=Date)](https://star-history.com/#your-org/AAG&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=iDC-NEU/YiGraph&type=Date)](https://star-history.com/#iDC-NEU/YiGraph&Date)
 
 ---
 
