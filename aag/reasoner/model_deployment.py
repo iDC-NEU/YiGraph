@@ -704,42 +704,93 @@ Please consider this schema when selecting the algorithm to ensure compatibility
         # Do NOT return JSON or code — only natural language.
         # """
 
+        # 
         prompt = f"""
-        You are a professional data analyst responsible for interpreting graph algorithm results.
-        Your task is to analyze the computation output of a given tool based on:
-        - a natural-language user question (*question*),
-        - the corresponding tool description (*tool_description*), and
-        - the actual execution result of that tool (*tool_result*).
+You are a professional data analyst responsible for interpreting graph algorithm results. Your task is to analyze the computation output of a given tool based on:
+- The **natural-language user question** (*question*)
+- The **corresponding tool description** (*tool_description*)
+- The **actual execution result of that tool** (*tool_result*)
 
-        Each tool represents a specific graph algorithm (e.g., PageRank representing influence score,
-        Louvain representing community structure, Shortest Path representing connectivity / distance, etc.).
-        You should generate a concise, human-understandable analytical explanation that directly answers
-        the user’s question and helps them understand the real-world meaning behind the numbers.
+Each tool represents a specific graph algorithm (e.g., PageRank, Louvain, Shortest Path, etc.). You should generate a concise, easy-to-understand analysis report that directly answers the user's question, and refer to the following sample analysis report format.
 
-        ------------------------------------------------
-        ## Response Requirements
-        - Base your explanation strictly on the provided computation result — do not hallucinate.
-        - Answer all information needs contained in the user’s question.
-        - When showing ordered results (e.g., top-K ranking), preserve the original ordering.
-        - Explain what the metric/value represents in practical terms (e.g., “higher PageRank means 
-        the user is more influential in the network”).
-        - If the question asks about **paths**, explicitly show the path in the form:`NodeA -> NodeB -> NodeC -> ...`
-        - If the available data is insufficient to fully answer the question, explicitly state the limitation or missing information.
+----------------------------
+## Response Requirements
+- Base your explanation strictly on the provided computation result.
+- Clearly highlight and explain key data points (e.g., top-ranked nodes, cluster counts, path lengths, etc.).
+- Use simple, intuitive language — avoid jargon and avoid repeating the same summary.
+- If the available data is insufficient to fully answer the question, explicitly state the limitation or missing information.
+- The output format must be in **Markdown** format for clear presentation.
+- Each analysis step must have a clear number and a short title.For example,## 1. **Anna Lee Node Centrality Evaluation (PageRank Result)**
+- The final output **must include a Summary section and a Recommendations section**.
+- Please structure your response based on the following analysis report template.
 
-        ------------------------------------------------
-        ## Inputs:
-        ### User Question:
-        {question}
-        ### Tool Description:
-        {tool_description}
-        ### Tool Execution Result:
-        {tool_result}
+----------------------------
+## Inputs:
+### User Question:
+{question}
 
-        ------------------------------------------------
-        ## Output
-        Provide a clear, concise explanation in plain English that directly answers the user’s question.
-        Use only natural language — do NOT output code or JSON.
-        """
+### Tool Description:
+{tool_description}
+
+### Tool Execution Result:
+{tool_result}
+
+----------------------------
+## Output
+
+Provide a clear and concise written explanation in plain English that directly answers the user's question, structured according to the following analysis report format:
+
+----------------------------
+**Analysis Report Example:**
+
+## 1. **Anna Lee Node Centrality Evaluation (PageRank Result)**
+
+First, using the **PageRank graph algorithm**, we quantitatively evaluated the "importance" and "risk association" of all account nodes in the transaction network. The idea behind PageRank is that if an account frequently transacts with multiple high-risk accounts or is in a key structural position in the transaction network, its score will significantly increase, reflecting its potential influence and exposure risk in the network.
+
+The result shows that **Anna Lee**'s PageRank score is in the Top 2% of all clients, significantly higher than other users. This indicates that the account is highly "depended upon" by other nodes in the transaction network, demonstrating strong potential for risk diffusion. Therefore, Anna Lee is preliminarily identified as a high-risk client or key monitoring target.
+
+## 2. **Suspicious Path Identification (DFS Result)**
+
+Next, using the **DFS (Depth-First Search) graph algorithm**, we conducted a full-link penetration of the funds flow related to Anna Lee. After executing the DFS algorithm, we identified a closed suspicious path starting from Anna Lee:
+
+- **Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**.
+
+This path has a typical closed-loop structure: funds are transferred from Anna Lee, pass through multiple intermediary accounts in multiple steps, and then flow back to Anna Lee's account, forming a complete "out → transfer → return" link. This structure is considered a high-risk pattern in anti-money laundering risk identification, often used to obscure the source of the transaction or hide the actual flow of funds.
+
+## 3. **Amount Evaluation (Python Code Statistical Results)**
+
+Based on the path identified in Step 2, AAG automatically generated Python data processing code to extract and summarize the transaction amounts for all transactions involved in this closed loop. The transaction amounts for each step are as follows:
+
+- Anna Lee → Gill Zachary, transaction amount is 879.94 $
+- Gill Zachary → Garcia Marcus, transaction amount is 210.43 $
+- Garcia Marcus → Nunez Mitchell, transaction amount is 472.69 $
+- Nunez Mitchell → Robinson David, transaction amount is 606.94 $
+- Robinson David → Anna Lee, transaction amount is 825.22 $
+
+The total transaction amount for this path is **2995.22 $**.
+
+## 4. **Maximum Transaction Account Identification (Python Code Statistical Results)**
+
+Based on the path identified in Step 2, AAG automatically generated Python data processing code to perform statistical analysis and sorting of the historical transaction amounts for all accounts involved in the path. The results are as follows:
+
+- Anna Lee's total transaction amount is 161272.07 $
+- Nunez Mitchell's total transaction amount is 122984.06 $
+- Garcia Marcus's total transaction amount is 115367.59 $
+- Robinson David's total transaction amount is 96550.65 $
+- Gill Zachary's total transaction amount is 64109.86 $
+
+The results show that Anna Lee and Nunez Mitchell have higher total transaction amounts, suggesting they may play the role of funds centralization points and need further investigation into their business activities and fund flows.
+
+## **Summary**
+
+This analysis used graph algorithms to comprehensively assess Anna Lee's money laundering risk, primarily utilizing the **PageRank centrality algorithm** and the **DFS (Depth-First Search) path algorithm**. First, PageRank quantified the importance and risk association of all accounts in the network, revealing that **Anna Lee's PageRank score is in the Top 2%**, placing her in a highly critical node position with significant risk diffusion potential. Then, DFS was used to penetrate the funds flow starting from Anna Lee, identifying a closed-loop suspicious path: **Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**, with a total transaction amount of **2995.22 $**, showing a typical high-risk structure of “funds out—multi-step transition—returning to the sender”. Additionally, the amount statistics showed that Anna Lee (161272.07 $) and Nunez Mitchell (122984.06 $) have significantly higher historical transaction totals, suggesting they may act as funds centralization or transfer points, with highly suspicious overall characteristics.
+
+## **Recommendations**
+
+1. It is recommended to include Anna Lee and the accounts in the closed-loop path (especially Nunez Mitchell and Robinson David) in the high-risk list and elevate their monitoring level. Strict real-time alerts and limit controls should be set for their subsequent large and cyclical transactions.
+2. A specialized due diligence investigation should be conducted for Anna Lee and key counterparties, focusing on verifying the sources of funds, transaction purposes, and business backgrounds. In addition, longer-period transaction records and external information should be examined to detect potential characteristics of structured splitting and circular flows indicative of money laundering.
+
+----------------------------"""
 
         response = self.client.chat.completions.create(
             model=self.model,
@@ -1154,14 +1205,3 @@ class Reasoner:
 
 
 
-
-if __name__ == '__main__':
-    llm_env = OpenAIEnv("https://gitaigc.com/v1/", "sk-G30rFStBigqXtuyIOkOo7Zh4QNxO8ZAjfZQ5DYPCgMXbPv8q", "gpt-4o-mini")
-    queries = "Recently I discovered that Anna's transaction behavior is anomalous and she might be a potential fraud user. I want to find the potential fraud community around her, suggest possible suspicious transaction paths, and determine how much cash has likely been illegally transferred out."
-    sub_queries = llm_env.plan_subqueries(True,queries)
-    print(type(sub_queries))
-    print(sub_queries)
-
-    # llm_env = OllamaEnv()
-    # queries = "What is the name of the deskmate of the US President's son?"
-    # print(llm_env.plan_subqueries(True,queries))

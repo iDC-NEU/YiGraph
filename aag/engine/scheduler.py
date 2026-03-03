@@ -343,7 +343,7 @@ class Scheduler:
                 "analysis_result": analysis_result,
                 "dag_info": dag_info
             }
-        
+        print(f"analysis_result: {analysis_result}")
         return analysis_result
 
     @staticmethod
@@ -1085,6 +1085,7 @@ class Scheduler:
     
     async def _run_algorithm_pipeline2(self):
         analysis_result = ""
+        analysis_blocks: List[str] = []
 
         for step_id in self.dag.topological_order():
             step = self.dag.steps[step_id]
@@ -1386,9 +1387,26 @@ class Scheduler:
                 tool_description=tool_description,
                 tool_result=tool_result,
             )
+            analysis_blocks.append(llm_analysis)
             analysis_result += llm_analysis
 
-        return analysis_result
+        final_question = (
+            "You will be given the concatenated analysis text generated from "
+            "multiple graph analysis steps. Please reorganize it into a single, "
+            "clear and well-structured Markdown report for the end user."
+        )
+        final_tool_description = (
+            "This tool_result contains intermediate analysis paragraphs from "
+            "multiple steps of a graph analysis workflow. Summarize and refine "
+            "them into one coherent report."
+        )
+        final_report = self.reasoner.generate_answer_from_algorithm_result(
+            question=final_question,
+            tool_description=final_tool_description,
+            tool_result=analysis_result,
+        )
+
+        return final_report
 
     async def _prepare_graph_for_execution(
         self,
