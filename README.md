@@ -1,4 +1,4 @@
-# 易图（YiGraph）
+# YiGraph
 
 <div align="center">
 
@@ -8,7 +8,7 @@
       <img src="figure/logo.png" alt="YiGraph Logo" width="180" />
     </td>
     <td align="left" valign="middle">
-      <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #2c3e50;">基于 AAG 框架的端到端<br/>图数据分析智能体系统</h2>
+      <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #2c3e50;">End-to-End Intelligent Graph Data<br/>Analysis Agent System Based on AAG Framework</h2>
     </td>
   </tr>
 </table>
@@ -16,181 +16,180 @@
 <p style="margin-top: 20px;">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
-  <a href="http://iDC-NEU.github.io/YiGraphDocs/"><img src="https://img.shields.io/badge/📚-用户文档-purple.svg" alt="Docs"></a>
-  <a href="#-联系我们"><img src="https://img.shields.io/badge/📞-联系我们-green.svg" alt="Contact"></a>
+  <a href="http://iDC-NEU.github.io/YiGraphDocs/"><img src="https://img.shields.io/badge/📚-Docs-purple.svg" alt="Docs"></a>
+  <a href="#-contact-us"><img src="https://img.shields.io/badge/📞-Contact_Us-green.svg" alt="Contact"></a>
 </p>
 
-[English](README_EN.md) | 简体中文
+English | [简体中文](README_CN.md)
 
 </div>
 
 ---
 
-## 📖 项目介绍
+## 📖 Project Introduction
 
-**易图（YiGraph）是一套端到端的图数据分析智能体系统**，用于帮助用户从复杂数据中快速洞察关键关联关系。
+**YiGraph is an end-to-end intelligent graph data analysis agent system** designed to help users quickly gain insights into key relationships from complex data.
 
-易图能够从日志、文档、表格等多类原始数据中，自动抽取实体与关系，构建结构化的图数据；用户只需通过**自然语言**描述业务问题，系统即可自动规划分析流程，完成计算，并生成**清晰、可解释、可追溯的分析报告**。
+YiGraph can automatically extract entities and relationships from various raw data sources such as logs, documents, and tables to build structured graph data. Users only need to describe business problems in **natural language**, and the system will automatically plan the analysis process, complete calculations, and generate **clear, interpretable, and traceable analysis reports**.
 
-在系统内部，**大语言模型**负责理解用户意图、拆解分析任务并组织最终输出；而支撑分析结果可靠性的核心技术是 **AAG（Analytics-Augmented Generation，分析增强生成）框架**。AAG 将分析计算作为核心能力，在关键环节调用图算法与图系统完成可验证的计算，再由模型对结果进行解释与汇总。
+Internally, **large language models** are responsible for understanding user intent, breaking down analysis tasks, and organizing final outputs. The core technology supporting the reliability of analysis results is the **AAG (Analytics-Augmented Generation) framework**. AAG treats analytical computation as a core capability, invoking graph algorithms and graph systems at key stages to complete verifiable calculations, which are then interpreted and summarized by the model.
 
-因此，易图并非只"回答问题"的对话式 AI，而是一套能够将业务问题转化为**可执行、可复核分析流程**的图分析智能体。
+Therefore, YiGraph is not just a conversational AI that "answers questions", but an intelligent graph analysis agent that can transform business problems into **executable and reviewable analysis processes**.
 
-### 适用场景
+### Applicable Scenarios
 
-易图可灵活适配不同行业与业务需求，覆盖多类复杂关联数据分析场景，包括但不限于：
+YiGraph can flexibly adapt to different industries and business needs, covering various complex relational data analysis scenarios, including but not limited to:
 
-- **金融反洗钱与可疑交易分析**：将海量交易流水自动构建为交易网络，识别异常资金路径与可疑交易环路
-- **电商风控与羊毛党识别**：融合账号、设备、地址等多源数据建图，发现团伙化作弊与关联作恶行为
-- **企业关联与风险排查**：通过企业、股权、交易等关系建图，穿透复杂结构，识别潜在合规与经营风险
-- **园区/城市事件分析**：将门禁、轨迹、事件数据统一建图，还原人员关系与事件演化过程
-- **供应链风险分析**：整合企业与交易数据构建供应链网络，定位隐蔽关联风险及传导路径
+- **Financial anti-money laundering and suspicious transaction analysis**: Automatically build transaction networks from massive transaction flows to identify abnormal fund paths and suspicious transaction loops
+- **E-commerce risk control and wool party identification**: Integrate multi-source data such as accounts, devices, and addresses to build graphs and discover organized fraud and associated malicious behavior
+- **Enterprise association and risk investigation**: Build graphs through enterprise, equity, and transaction relationships to penetrate complex structures and identify potential compliance and operational risks
+- **Park/city event analysis**: Unify access control, trajectory, and event data into graphs to restore personnel relationships and event evolution processes
+- **Supply chain risk analysis**: Integrate enterprise and transaction data to build supply chain networks, locate hidden associated risks and transmission paths
 
 ---
 
-## ⚡ 核心功能
+## ⚡ Core Features
 
-### 1. 知识驱动的任务规划
+### 1. Knowledge-Driven Task Planning
 
-系统会先理解用户问题"想解决什么"，再把它拆成可执行的分析步骤：
-- 需要哪些数据字段与关系
-- 该构建怎样的图（哪些实体、哪些关系）
-- 该用哪些分析方法与参数
-- 分析结果需要如何解释与呈现
+The system first understands what the user's question "wants to solve", then breaks it down into executable analysis steps:
+- What data fields and relationships are needed
+- What kind of graph should be built (which entities, which relationships)
+- What analysis methods and parameters should be used
+- How analysis results should be interpreted and presented
 
-> 你不需要懂图算法，系统会把"我要查什么"转成"怎么做分析"。
+> You don't need to understand graph algorithms; the system will translate "what I want to query" into "how to do the analysis".
 
-### 2. 以算法为核心的可靠执行
+### 2. Algorithm-Centric Reliable Execution
 
-易图不会让模型随意"写一段不可控的代码再去跑"。相反，它会以"可验证的算法模块"为中心进行调用与组合，让每一步分析：
-- **可复现**：同样输入得到稳定一致的输出
-- **可追溯**：知道用了哪些算法、跑了哪些步骤
-- **更可靠**：关键计算由专业模块完成，而不是纯文本推理
+YiGraph will not let the model arbitrarily "write a piece of uncontrollable code and run it". Instead, it centers on "verifiable algorithm modules" for invocation and combination, making each analysis step:
+- **Reproducible**: Same input yields stable and consistent output
+- **Traceable**: Know which algorithms were used and which steps were executed
+- **More reliable**: Key calculations are completed by professional modules rather than pure text reasoning
 
-### 3. 任务感知的图构建
+### 3. Task-Aware Graph Construction
 
-易图不会把所有原始数据不加区分地建成一张大图。它会根据当前任务需要，选择性抽取与构建"与问题相关的实体与关系"，避免无关结构干扰分析，并把图组织成更适合执行的形式，从而提升效率与结果质量。
+YiGraph will not indiscriminately build all raw data into one large graph. It will selectively extract and construct "entities and relationships relevant to the problem" based on current task needs, avoiding interference from irrelevant structures, and organize the graph into a form more suitable for execution, thereby improving efficiency and result quality.
 
-### 4. 丰富的图算法库
+### 4. Rich Graph Algorithm Library
 
-内置 **100+ 种图算法**，覆盖 11 大类别，为各类图分析场景提供专业算法支持：
+Built-in **100+ graph algorithms** covering 11 major categories, providing professional algorithm support for various graph analysis scenarios:
 
-| 算法类别 | 算法数量 | 典型算法 | 应用场景 |
+| Algorithm Category | Number of Algorithms | Typical Algorithms | Application Scenarios |
 |---------|---------|---------|---------|
-| [**Basics（基础算子）**](docs-site/docs/tutorial-algorithm/basic.md) | 10 个 | BFS、DFS、拓扑排序、DAG 判定、祖先/后代查询 | 图结构校验、依赖分析、层级遍历 |
-| [**Path（路径算法）**](docs-site/docs/tutorial-algorithm/path.md) | 13 个 | Dijkstra、Bellman-Ford、Floyd-Warshall、欧拉路径、DAG 最长路径 | 路径规划、关系链分析、关键路径 |
-| [**Centrality（中心性算法）**](docs-site/docs/tutorial-algorithm/centrality.md) | 14 个 | PageRank、介数中心性、接近中心性、特征向量中心性、HITS、VoteRank | 关键节点识别、影响力评估、种子选择 |
-| [**Connectivity & Components（连通性与组件）**](docs-site/docs/tutorial-algorithm/Connectivity_Components.md) | 13 个 | 连通分量、强连通分量、割点/割边、最小割、节点/边连通度 | 网络稳健性、脆弱性分析、孤岛识别 |
-| [**Clustering & Community（聚类与社区）**](docs-site/docs/tutorial-algorithm/Clustering_Community.md) | 17 个 | Louvain、Leiden、标签传播、k-clique、Girvan-Newman、聚类系数、环检测 | 圈层识别、团伙发现、紧密度分析 |
-| [**Tree & Spanning Tree（树与生成树）**](docs-site/docs/tutorial-algorithm/tree.md) | 3 个 | 最小生成树、最大生成树、随机生成树 | 网络骨架提取、成本优化 |
-| [**Flow & Cut（流与割）**](docs-site/docs/tutorial-algorithm/flow.md) | 5 个 | Edmonds-Karp、最大流、最小割、Gomory-Hu 树 | 容量规划、瓶颈分析、网络韧性 |
-| [**Matching & Coloring（匹配与着色）**](docs-site/docs/tutorial-algorithm/matching_coloring.md) | 6 个 | 最大/最小权重匹配、贪心着色、最小边覆盖 | 资源分配、冲突检测、任务调度 |
-| [**Cliques & Cores（团与核）**](docs-site/docs/tutorial-algorithm/cliques_cores.md) | 4 个 | 极大团枚举、最大权重团、k-core、核数计算 | 紧密群体发现、核心成员识别 |
-| [**Distance & Measures（距离与结构度量）**](docs-site/docs/tutorial-algorithm/distance.md) | 8 个 | 离心率、直径、半径、中心/边缘、维纳指数、同配系数 | 网络体检、拓扑对比、结构偏好分析 |
-| [**Graph Query（图查询）**](docs-site/docs/tutorial-algorithm/graph_query.md) | 8 个 | 节点查询、关系过滤、邻居查询、路径查询、共同邻居、子图抽取、聚合统计 | 数据获取与筛选、交互式探索、风控排查 |
+| [**Basics**](docs-site/docs/tutorial-algorithm/basic.md) | 10 | BFS, DFS, Topological Sort, DAG Detection, Ancestor/Descendant Query | Graph structure validation, dependency analysis, hierarchical traversal |
+| [**Path**](docs-site/docs/tutorial-algorithm/path.md) | 13 | Dijkstra, Bellman-Ford, Floyd-Warshall, Eulerian Path, DAG Longest Path | Path planning, relationship chain analysis, critical path |
+| [**Centrality**](docs-site/docs/tutorial-algorithm/centrality.md) | 14 | PageRank, Betweenness Centrality, Closeness Centrality, Eigenvector Centrality, HITS, VoteRank | Key node identification, influence assessment, seed selection |
+| [**Connectivity & Components**](docs-site/docs/tutorial-algorithm/Connectivity_Components.md) | 13 | Connected Components, Strongly Connected Components, Cut Vertices/Edges, Minimum Cut, Node/Edge Connectivity | Network robustness, vulnerability analysis, island identification |
+| [**Clustering & Community**](docs-site/docs/tutorial-algorithm/Clustering_Community.md) | 17 | Louvain, Leiden, Label Propagation, k-clique, Girvan-Newman, Clustering Coefficient, Cycle Detection | Circle identification, gang discovery, tightness analysis |
+| [**Tree & Spanning Tree**](docs-site/docs/tutorial-algorithm/tree.md) | 3 | Minimum Spanning Tree, Maximum Spanning Tree, Random Spanning Tree | Network skeleton extraction, cost optimization |
+| [**Flow & Cut**](docs-site/docs/tutorial-algorithm/flow.md) | 5 | Edmonds-Karp, Maximum Flow, Minimum Cut, Gomory-Hu Tree | Capacity planning, bottleneck analysis, network resilience |
+| [**Matching & Coloring**](docs-site/docs/tutorial-algorithm/matching_coloring.md) | 6 | Maximum/Minimum Weight Matching, Greedy Coloring, Minimum Edge Cover | Resource allocation, conflict detection, task scheduling |
+| [**Cliques & Cores**](docs-site/docs/tutorial-algorithm/cliques_cores.md) | 4 | Maximal Clique Enumeration, Maximum Weight Clique, k-core, Core Number | Tight group discovery, core member identification |
+| [**Distance & Measures**](docs-site/docs/tutorial-algorithm/distance.md) | 8 | Eccentricity, Diameter, Radius, Center/Periphery, Wiener Index, Assortativity Coefficient | Network health check, topology comparison, structural preference analysis |
+| [**Graph Query**](docs-site/docs/tutorial-algorithm/graph_query.md) | 8 | Node Query, Relationship Filtering, Neighbor Query, Path Query, Common Neighbors, Subgraph Extraction, Aggregation Statistics | Data retrieval and filtering, interactive exploration, risk control investigation |
 
-> 详细的算法说明和使用指南请参考 **[📚 在线文档](http://superccy.github.io/YiGraphDocs/)**
-
-
-### 5. 灵活的数据支持
-
-支持多种数据源输入：
-- **图数据**
-- **文本数据**：文档、日志、报告等非结构化数据
-
-系统会自动从原始数据中抽取实体与关系，构建结构化的图数据。
-
-### 6. 多种运行模式
-
-- **普通模式**：用户只需提交业务问题，易图会自动完成问题解析、选择合适的图算法并执行计算，最终生成分析报告，适合非技术背景或一般业务用户使用。
-- **交互模式**：用户与易图协同完成业务问题分析。对于给定问题，易图会与大模型交互共同确定计算流程与图算法，再依据确定好的方案完成计算并反馈分析报告，适合对业务和图算法都有一定了解的进阶用户。
-- **专家模式**：用户直接给出业务问题以及解决思路、计算步骤与图算法，易图根据用户提供的方案执行计算并输出分析报告，适合深度掌握业务与图算法的专家用户。
-
----
-
-## 🎯 版本发布
-
-### v0.1.0 (当前版本)
-
-**核心能力**
-- ✅ 完整的图计算引擎（基于 NetworkX 和 Neo4j）
-- ✅ 智能任务规划与执行
-- ✅ 100+ 种图算法支持，覆盖 11 大类别
-- ✅ 多数据源支持（图/文本）
-- ✅ 交互式对话界面
+> For detailed algorithm descriptions and usage guides, please refer to **[📚 Online Documentation](http://superccy.github.io/YiGraphDocs/)**
 
 
-### 路线图
+### 5. Flexible Data Support
 
-**v0.2.0（计划中）**
-- 🔄 图算法扩展至200-300个
-- 🔄 新增图学习模块
+Supports multiple data source inputs:
+- **Graph Data**
+- **Text Data**: Documents, logs, reports, and other unstructured data
 
+The system will automatically extract entities and relationships from raw data to build structured graph data.
+
+### 6. Multiple Operating Modes
+
+- **Normal Mode**: Users only need to submit their business questions. YiGraph will automatically parse the problem, select appropriate graph algorithms, execute the computation, and generate an analysis report. This mode is suitable for non-technical or general business users.
+- **Interactive Mode**: Users collaborate with YiGraph to analyze business problems. For a given question, YiGraph interacts with the LLM to determine the computation workflow and graph algorithms, then executes the plan and returns an analysis report. This mode is suitable for advanced users who are familiar with both the business and graph algorithms.
+- **Expert Mode**: Users directly specify the business problem along with the solution approach, computation steps, and graph algorithms. YiGraph then executes the provided plan and returns an analysis report. This mode is intended for expert users with deep knowledge of the business and graph algorithms.
 
 ---
 
-## 🚀 快速开始
+## 🎯 Version Release
 
-### 1. 准备环境
+### v0.1.0 (Current Version)
 
-#### 1.1 Python 版本要求
+**Core Capabilities**
+- ✅ Complete graph computing engine (based on NetworkX and  Neo4j)
+- ✅ Intelligent task planning and execution
+- ✅ 100+ graph algorithms support, covering 11 major categories
+- ✅ Multi-data source support (graph/text)
+- ✅ Interactive dialogue interface
+
+### Roadmap
+
+**v0.2.0 (Planned)**
+- 🔄 Expand the graph algorithm library to 200–300 algorithms
+- 🔄 Add an integrated graph learning module (training/inference)
+
+
+---
+
+## 🚀 Quick Start
+
+### 1. Environment Preparation
+
+#### 1.1 Python Version Requirements
 
 - Python >= **3.11**
 
-请确认当前 Python 版本满足要求：
+Please confirm that the current Python version meets the requirements:
 
 ```bash
 python --version
-# 或
+# or
 python3 --version
 ```
 
-#### 1.2 使用 Conda 创建虚拟环境(推荐)
+#### 1.2 Create Virtual Environment with Conda (Recommended)
 
 ```bash
 conda create -n AAG python=3.11
 conda activate AAG
 ```
 
-#### 1.3 Neo4j 安装与配置
+#### 1.3 Neo4j Installation and Configuration
 
-易图需要使用 Neo4j 作为图数据库。本指南使用 **Neo4j 3.5.25** 版本。
+YiGraph requires Neo4j as the graph database. This guide uses **Neo4j 3.5.25**.
 
-##### 1.3.1 Java 版本要求
+##### 1.3.1 Java Version Requirements
 
-Neo4j 3.5.25 需要 Java 8 或 Java 11。请先检查 Java 版本：
+Neo4j 3.5.25 requires Java 8 or Java 11. Please check your Java version:
 
 ```bash
 java -version
 ```
 
-如果未安装 Java，请先安装对应版本。
+If Java is not installed, please install the appropriate version first.
 
-##### 1.3.2 下载与解压 Neo4j
+##### 1.3.2 Download and Extract Neo4j
 
-1. 从官网下载 Neo4j 3.5.25 安装包（通常是 `.tar.gz` 或 `.zip` 格式）
-2. 解压安装包到指定位置：
+1. Download the Neo4j 3.5.25 installation package from the official website (usually in `.tar.gz` or `.zip` format)
+2. Extract the package to your desired location:
 
-**Linux/Mac 系统（.tar.gz 格式）：**
+**Linux/Mac systems (.tar.gz format):**
 ```bash
 tar -xzf neo4j-community-3.5.25-unix.tar.gz
 cd neo4j-community-3.5.25
 ```
 
-**Windows 系统（.zip 格式）：**
-- 右键点击压缩包，选择"解压到当前文件夹"
-- 或使用命令：`unzip neo4j-community-3.5.25-windows.zip`
-- 进入解压后的目录
+**Windows systems (.zip format):**
+- Right-click the archive and select "Extract to current folder"
+- Or use command: `unzip neo4j-community-3.5.25-windows.zip`
+- Navigate to the extracted directory
 
-##### 1.3.3 配置 Neo4j
+##### 1.3.3 Configure Neo4j
 
-进入 `conf` 目录，编辑 `neo4j.conf` 配置文件：
+Enter the `conf` directory and edit the `neo4j.conf` file:
 
 ```bash
 cd conf
 ```
 
-在 `neo4j.conf` 中添加或修改以下配置：
+Add or modify the following settings in `neo4j.conf`:
 
 ```properties
 dbms.connectors.default_listen_address=0.0.0.0
@@ -200,64 +199,64 @@ dbms.connector.http.listen_address=0.0.0.0:7474
 dbms.connector.https.enabled=true
 ```
 
-##### 1.3.4 启动与停止 Neo4j
+##### 1.3.4 Start and Stop Neo4j
 
-进入 `bin` 目录，执行启动或停止命令：
+Navigate to the `bin` directory to start or stop Neo4j:
 
-**启动 Neo4j：**
+**Start Neo4j:**
 ```bash
 cd bin
 ./neo4j start
 ```
 
-**停止 Neo4j：**
+**Stop Neo4j:**
 ```bash
 ./neo4j stop
 ```
 
-启动 Neo4j 后，可以通过浏览器访问 `http://localhost:7474` 来验证安装是否成功。
+After starting Neo4j, you can access the web interface at `http://localhost:7474` to verify the installation.
 
-### 2. 获取源码并安装依赖
+### 2. Get Source Code and Install Dependencies
 
-#### 2.1 下载源码
+#### 2.1 Download Source Code
 
 ```bash
 git clone https://github.com/iDC-NEU/YiGraph.git
 cd YiGraph
 ```
 
-#### 2.2 安装依赖
+#### 2.2 Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. 配置系统参数
+### 3. Configure System Parameters
 
-#### 3.1 配置推理与检索引擎
+#### 3.1 Configure Inference and Retrieval Engine
 
-编辑配置文件：
+Edit the configuration file:
 
 ```text
 config/engine_config.yaml
 ```
 
-示例配置如下：
+Example configuration:
 
 ```yaml
-# 运行模式： interactive / batch
+# Running mode: interactive / batch
 mode: interactive
 
-# 推理模块配置
+# Reasoner module configuration
 reasoner:
   llm:
-    provider: "openai"   # 可选：ollama / openai
+    provider: "openai"   # Options: ollama / openai
     openai:
       base_url: "https://your-api-endpoint/v1/"
       api_key: "your-api-key"
       model: "gpt-4o-mini"
 
-# 检索模块配置
+# Retrieval module configuration
 retrieval:
   database:
     graph:
@@ -278,15 +277,15 @@ retrieval:
       k_similarity: 5
 ```
 
-#### 3.2 配置数据集
+#### 3.2 Configure Dataset
 
-编辑配置文件：
+Edit the configuration file:
 
 ```text
 config/data_upload_config.yaml
 ```
 
-示例配置如下：
+Example configuration:
 
 ```yaml
 datasets:
@@ -306,162 +305,165 @@ datasets:
           target_field: bene_acct
 ```
 
-> 请将 `path` 修改为你本地真实的数据文件路径。
+> Please modify `path` to your local actual data file path.
 
-### 4. 启动易图
+### 4. Start YiGraph
 
-> **重要提示：** 在启动易图之前，请确保 Neo4j 数据库已经启动并正常运行。如果 Neo4j 未启动，易图将无法连接到图数据库。请参考 [1.3.4 启动与停止 Neo4j](#134-启动与停止-neo4j) 部分启动 Neo4j。
+> **Important Note:** Before starting YiGraph, please ensure that the Neo4j database is already running. If Neo4j is not started, YiGraph will not be able to connect to the graph database. Please refer to [1.3.4 Start and Stop Neo4j](#134-start-and-stop-neo4j) to start Neo4j.
 
-易图支持以下两种运行模式：
+YiGraph supports the following two operating modes:
 
-- **Web 交互模式（推荐）**
-  通过浏览器进行交互式分析，适合日常使用、演示与业务分析场景。
+- **Web Interactive Mode (Recommended)**
+  Perform interactive analysis through a browser, suitable for daily use, demonstrations, and business analysis scenarios.
 
-- **终端交互模式（Terminal）**
-  通过命令行进行交互，适合开发调试、快速验证与批量测试场景。
+- **Terminal Interactive Mode**
+  Interact through the command line, suitable for development debugging, quick verification, and batch testing scenarios.
 
-#### 4.1 Web 交互模式
+#### 4.1 Web Interactive Mode
 
-在项目根目录下执行以下命令启动 Web 服务：
+Execute the following command in the project root directory to start the Web service:
 
 ```bash
 python web/frontend/run.py
 ```
 
-启动成功后，终端会输出可访问的服务地址。请根据提示在浏览器中打开对应地址，即可进入易图的 Web 界面。
+After successful startup, the terminal will output the accessible service address. Please open the corresponding address in your browser according to the prompt to enter YiGraph's Web interface.
 
-在 Web 界面中，用户可以通过自然语言输入业务问题，系统将自动完成分析流程，并展示分析结果与报告。
+In the Web interface, users can input business questions in natural language, and the system will automatically complete the analysis process and display analysis results and reports.
 
-##### Web 界面使用说明
+##### Web Interface Usage Guide
 
-![易图 Web 界面](figure/chat.png)
+![YiGraph Web Interface](figure/chat_en.png)
 
-使用易图 Web 界面进行分析的基本步骤如下：
+Basic steps for using the YiGraph web interface for analysis:
 
-1. **开始对话**：开启一个新对话或者从历史记录中选择一个现有对话。
+1. **Start Conversation**: Start a new conversation or select an existing conversation from history.
 
-2. **选择模式**：选择最适合您的模式。
+2. **Select Mode**: Choose the mode that best suits your needs.
 
-3. **选择数据集**：会将您上传好的数据集列举出来。例如：DocumentDemo。
+3. **Select Dataset**: The system will list your uploaded datasets. For example: DocumentDemo.
 
-4. **输入您的请求**：在输入框中输入您的指令或问题。请尽可能清晰和具体。
+4. **Enter Your Request**: Type your instructions or questions in the input box. Please be as clear and specific as possible.
 
-5. **提交**：点击发送按钮。
+5. **Submit**: Click the send button.
 
-6. **监控进度**：在主聊天区观察状态更新（运行中、规划中、分析中等）。
+6. **Monitor Progress**: Observe status updates in the main chat area (Running, Planning, Analyzing, etc.).
 
-7. **查看结果**：处理完成后，结果将显示在主聊天区。然后您可以提出后续问题或开始新的请求。
+7. **View Results**: After processing is complete, results will be displayed in the main chat area. You can then ask follow-up questions or start a new request.
 
-##### 数据集管理
+##### Dataset Management
 
-![数据集管理界面](figure/dataset.png)
+![Dataset Management Interface](figure/dataset_en.png)
 
-在 Web 界面中，您可以方便地管理数据集：
+In the web interface, you can conveniently manage datasets:
 
-1. **创建数据集**：点击"创建"按钮。
+1. **Create Dataset**: Click the "Create New" button.
 
-2. **填写数据集信息**：
-   - 输入数据集的名称
-   - 选择数据集中文件的类型
+2. **Fill in Dataset Information**:
+   - Enter the dataset name
+   - Select the file type for the dataset
 
-3. **上传数据文件**：根据选择的文件类型上传相应的数据文件。
+3. **Upload Data Files**: Upload corresponding data files based on the selected file type.
 
-4. **保存数据集**：完成配置后保存，数据集将在对话中可供选择使用。
+4. **Save Dataset**: After completing the configuration, save it. The dataset will be available for selection in conversations.
 
-##### 文件管理
+##### File Management
 
-![文件管理界面](figure/file.png)
+![File Management Interface](figure/file_en.png)
 
-在文件管理界面中，您可以对数据集中的文件进行管理和可视化：
+In the file management interface, you can manage and visualize files in datasets:
 
-1. **选择数据集**：从下拉列表中选择对应的数据集。
+1. **Select Dataset**: Choose the corresponding dataset from the dropdown list.
 
-2. **上传文件**：向选定的数据集中上传文件。
+2. **Upload Files**: Upload files to the selected dataset.
 
-3. **查看解析进度**：系统会显示文件的解析进度，实时反馈处理状态。
+3. **View Parsing Progress**: The system will display file parsing progress and provide real-time status feedback.
 
-4. **可视化知识图谱**：文件解析完成后，点击"可视化"按钮，即可查看该数据集对应的知识图谱可视化展示。
+4. **Visualize Knowledge Graph**: After file parsing is complete, click the "Visualization" button to view the knowledge graph visualization for that dataset.
 
-#### 4.2 终端交互模式（Terminal）
+#### 4.2 Terminal Interactive Mode
 
-如果希望直接通过命令行与易图进行交互，可在项目根目录下执行：
+If you want to interact with YiGraph directly through the command line, you can execute in the project root directory:
 
 ```bash
 python aag/main.py
 ```
 
-启动后，系统将进入终端交互模式。用户可按照终端提示输入问题，易图将在命令行中完成分析并输出结果。
+After startup, the system will enter terminal interactive mode. Users can input questions according to terminal prompts, and YiGraph will complete the analysis and output results in the command line.
 
-![终端交互模式](figure/zhongduan.png)
+![Terminal Interactive Mode](figure/zhongduan.png)
 
-##### 终端交互使用说明
+##### Terminal Interactive Usage Guide
 
-使用终端交互模式的基本步骤：
+Basic steps for using terminal interactive mode:
 
-1. **查看可用数据集**：通过指令查看系统中有哪些可用的数据集。
+1. **View Available Datasets**: Use commands to view available datasets in the system.
 
-2. **选择数据集**：根据提示选择要使用的数据集。
+2. **Select Dataset**: Select the dataset you want to use according to the prompts.
 
-3. **输入问题**：直接在终端中输入您的业务问题或分析需求。
+3. **Enter Questions**: Directly input your business questions or analysis requirements in the terminal.
 
-4. **查看结果**：系统会在终端中实时显示分析过程和最终结果。
+4. **View Results**: The system will display the analysis process and final results in real-time in the terminal.
 
-该模式主要用于开发调试、算法验证或快速测试场景。
+This mode is mainly used for development debugging, algorithm verification, or quick testing scenarios.
 
-### 5. 使用易图
+### 5. Using YiGraph
 
-无论采用 Web 模式还是终端模式，易图的基本使用流程一致：
+Whether using Web mode or terminal mode, YiGraph's basic usage process is consistent:
 
-- 启动对应的运行模式
-- 根据提示输入自然语言业务问题
-- 系统自动完成任务理解、分析执行与结果生成
+- Start the corresponding operating mode
+- Input natural language business questions according to prompts
+- The system automatically completes task understanding, analysis execution, and result generation
 
-更多高级功能、参数说明与使用示例，请参考项目的 README 文档或界面中的操作提示。
+For more advanced features, parameter descriptions, and usage examples, please refer to the project's README documentation or operation prompts in the interface.
 
-### 6. 常见问题建议
+### 6. Common Issues and Suggestions
 
-- **GPU 设备不可用**：请确认 `embedding.device` 设置正确
-- **端口冲突**：检查图数据库与向量数据库服务是否已启动
-- **模型无法加载**：确认 API Key 与模型名称是否有效
+- **GPU device unavailable**: Please confirm that `embedding.device` is set correctly
+- **Port conflict**: Check if graph database and vector database services have been started
+- **Model cannot be loaded**: Confirm that API Key and model name are valid
 
 
-## 📖 文档与资源
+## 📖 Documentation & Resources
 
-### 📚 在线文档
+### 📚 Online Documentation
 
-访问完整的用户手册和开发者指南：
+Access the complete user manual and developer guide:
 
 **[http://superccy.github.io/YiGraphDocs/](http://superccy.github.io/YiGraphDocs/)**
 
-文档内容包括：
-- **快速入门**：系统安装、配置和基本使用
-- **核心概念**：AAG 框架原理和架构设计
-- **算法文档**：100+ 种图算法的详细说明和使用示例
-- **API 参考**：完整的 API 接口文档
-- **最佳实践**：典型场景的分析案例和经验总结
-
-## 📞 联系我们
+Documentation includes:
+- **Quick Start**: System installation, configuration, and basic usage
+- **Core Concepts**: AAG framework principles and architecture design
+- **Algorithm Documentation**: Detailed descriptions and usage examples of 100+ graph algorithms
+- **API Reference**: Complete API interface documentation
+- **Best Practices**: Analysis cases and experience summaries for typical scenarios
 
 
-### 贡献指南
 
-我们欢迎各种形式的贡献：
-
-- 🐛 报告 Bug
-- 💡 提出新功能建议
-- 📝 改进文档
-- 🔧 提交代码
+## 📞 Contact Us
 
 
-### 社区交流
+
+### Contribution Guidelines
+
+We welcome all forms of contributions:
+
+- 🐛 Report Bugs
+- 💡 Suggest New Features
+- 📝 Improve Documentation
+- 🔧 Submit Code
+
+
+### Community Communication
 
 
 
 <div align="center">
 
-| 微信 | 小红书 | Twitter |
+| WeChat | Xiaohongshu | Twitter |
 |:---:|:---:|:---:|
-| <img src="figure/wechat.png" alt="微信" width="200"/> | <img src="figure/redbook.png" alt="小红书" width="200"/> | <img src="figure/twitter.png" alt="Twitter" width="200"/> |
+| <img src="figure/wechat.png" alt="WeChat" width="200"/> | <img src="figure/redbook.png" alt="Xiaohongshu" width="200"/> | <img src="figure/twitter.png" alt="Twitter" width="200"/> |
 
 </div>
 
@@ -469,9 +471,9 @@ python aag/main.py
 
 ---
 
-## 📚 引用
+## 📚 Citation
 
-如果您在研究中使用了易图（YiGraph）或 AAG 框架，请引用我们的论文：
+If you use YiGraph or the AAG framework in your research, please cite our paper:
 
 ```bibtex
 @article{YiGraph2026,
@@ -482,29 +484,29 @@ python aag/main.py
 }
 ```
 
-### 致谢
+### Acknowledgments
 
-本项目受益于以下开源项目：
+This project benefits from the following open source projects:
 
-- [NetworkX](https://networkx.org/) - 图分析和算法库
-- [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/) - 图深度学习框架
-- [NebulaGraph](https://www.nebula-graph.io/) - 分布式图数据库
-- [Milvus](https://milvus.io/) - 向量数据库
-- [LlamaIndex](https://www.llamaindex.ai/) - RAG 框架
+- [NetworkX](https://networkx.org/) - Graph analysis and algorithm library
+- [PyTorch Geometric](https://pytorch-geometric.readthedocs.io/) - Graph deep learning framework
+- [NebulaGraph](https://www.nebula-graph.io/) - Distributed graph database
+- [Milvus](https://milvus.io/) - Vector database
+- [LlamaIndex](https://www.llamaindex.ai/) - RAG framework
 
-感谢所有贡献者的辛勤付出！
+Thanks to all contributors for their hard work!
 
 ---
 
-## 📄 许可证
+## 📄 License
 
-本项目采用 [MIT License](LICENSE) 开源协议。
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
 ## ⭐ Star History
 
-如果这个项目对您有帮助，欢迎 Star ⭐ 支持我们！
+If this project helps you, please Star ⭐ to support us!
 
 [![Star History Chart](https://api.star-history.com/svg?repos=iDC-NEU/YiGraph&type=Date)](https://star-history.com/#iDC-NEU/YiGraph&Date)
 
@@ -512,12 +514,11 @@ python aag/main.py
 
 <div align="center">
 
-**让图数据分析更简单、更智能**
+**Making Graph Data Analysis Simpler and Smarter**
 
 </div>
 
 ---
-
 
 
 
