@@ -1500,6 +1500,22 @@
 
 
     </style>
+    
+    <style>
+        /* 默认隐藏页面内容 */
+        body.lang-loading {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.1s ease-in;
+        }
+        /* 加载完成后显示的样式 */
+        body.lang-ready {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+
+    <body class="lang-loading min-w-[320px] bg-slate-100 dark:bg-slate-900">
 </head>
 
 <body class="min-w-[320px] bg-slate-100 dark:bg-slate-900">
