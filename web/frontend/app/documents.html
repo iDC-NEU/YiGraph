@@ -12,6 +12,21 @@
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/app.css') }}">
+   <style>
+    /* 默认隐藏页面内容 */
+    body.lang-loading {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.1s ease-in;
+    }
+    /* 加载完成后显示的样式 */
+    body.lang-ready {
+        opacity: 1;
+        visibility: visible;
+    }
+    </style>
+
+    <body class="lang-loading min-w-[320px] bg-slate-100 dark:bg-slate-900">
 </head>
 
 <body class="min-w-[320px] bg-slate-100 dark:bg-slate-900">
