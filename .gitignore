@@ -126,6 +126,8 @@ docs/_build
 
 # personnal
 *.csv
+# Allow dataset data (e.g. AMLSim1K) to be tracked
+!aag/datasets/data/**/*.csv
 
 # Compiled Object files
 *.slo

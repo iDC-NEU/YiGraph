@@ -1,0 +1,19 @@
+acct_id,dsply_nm,type
+1,马云,Person
+2,阿里巴巴,Company
+3,蚂蚁金服,Company
+4,支付宝,Product
+5,微信支付,Company
+6,Walmart inc.,Company
+7,Sam walton,Person
+8,James 'bud' walton,Person
+9,"Bentonville, arkansas",City
+10,1962,Date
+11,"October 31, 1969",Date
+12,Sam' s club,Company
+13,Flipkart wholesale,Company
+14,United states,Country
+15,Canada,Country
+16,Mexico,Country
+17,Central america,Country
+18,India,Country

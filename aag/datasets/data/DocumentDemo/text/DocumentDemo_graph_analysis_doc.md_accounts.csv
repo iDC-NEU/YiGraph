@@ -1,0 +1,31 @@
+acct_id,dsply_nm,type
+1,张三,Person
+2,李四,Person
+3,公司a,Company
+4,公司b,Company
+5,北京,Location
+6,上海,Location
+7,Louvain算法,Algorithm
+8,社区检测,Organization
+9,Label propagation,Algorithm
+10,Infomap,Infopath analysis
+11,Dijkstra算法,Algorithm
+12,最短路径,Path analysis
+13,Floyd-warshall算法,Algorithm
+14,Dfs,Person
+15,所有路径,Path analysis
+16,Bfs,Path analysis
+17,Neo4j,Company
+18,Graph database,Organization
+19,Nebulagraph,Neo4j
+20,Arangodb,Database
+21,Networkx,Company
+22,Network analysis library,Company
+23,Pytorch geometric,Technology
+24,Deep learning framework,Company
+25,Dgl,Graph_framework
+26,Gephi,Tool
+27,Data visualization tool,Tool
+28,Cytoscape,Tool
+29,D3.js,Tool
+30,Data visualization library,Person

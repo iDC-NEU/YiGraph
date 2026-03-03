@@ -1,0 +1,16 @@
+acct_id,dsply_nm,type
+1,金融机构,Organization
+2,中国,Country
+3,中国人民银行,Company
+4,银保监会,Company
+5,银行,Organization
+6,交易,Company
+7,风险,Organization
+8,客户,Person
+9,Kyc,Person
+10,Risk_level,Organization
+11,《中华人民共和国反洗钱法》,Laws
+12,洗钱,Event
+13,《金融机构反洗钱规定》,Laws
+14,《金融机构大额交易和可疑交易报告管理办法》,Laws
+15,大额交易,Quantity

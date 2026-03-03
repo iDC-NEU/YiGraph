@@ -1,0 +1,10 @@
+tran_id,orig_acct,bene_acct
+1,2,Operates_in
+3,4,Regulated_by
+5,6,Monitors
+5,7,Evaluates
+8,9,Identified_through
+8,10,Risk_level_evaluated
+11,12,Regulates
+13,12,Regulates
+14,15,Regulates
