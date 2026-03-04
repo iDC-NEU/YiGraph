@@ -12,12 +12,16 @@ from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.core.llms import ChatMessage, MessageRole
 
 from aag.config.engine_config import ReasonerConfig
 from aag.reasoner.prompt_template.llm_prompt_en import *
 from aag.reasoner.prompt_template.llm_prompt_zh import *
 from aag.utils.parse_json import extract_json_from_response, parse_openai_json_response
 from aag.error_recovery.enhancer import enhance_prompt
+
+
+
 
 EMBEDD_DIMS = {
     "BAAI/bge-large-en-v1.5": 1024,
@@ -153,6 +157,12 @@ class EmbeddingEnv:
 
 class OllamaEnv:
 
+    ROLE_MAP = {
+        "system": MessageRole.SYSTEM,
+        "user": MessageRole.USER,
+        "assistant": MessageRole.ASSISTANT,
+    }
+
     def __init__(self,
                  llm_mode_name="llama3.1:70b",
                  llm_embed_name="BAAI/bge-large-en-v1.5",
@@ -192,7 +202,17 @@ class OllamaEnv:
 
 
     def chat(self, messages: list) -> str:
+        if messages and isinstance(messages[0], dict):
+            messages = [
+                ChatMessage(
+                    role=self.ROLE_MAP.get(m["role"], MessageRole.USER),
+                    content=m.get("content", "")
+                )
+                for m in messages
+            ]
         response = self.llm.chat(messages=messages)
+        if hasattr(response, "message") and hasattr(response.message, "content"):
+            return response.message.content
         return response.raw
 
     def generate_response(self, query: str):
@@ -467,7 +487,6 @@ This analysis used graph algorithms to comprehensively assess Anna Lee's money l
         )
         return self.execute_prompt(full_prompt, parse_json=True)
     
-    # add gjq
     def nl_query_classify_type(self, question: str, query_templates: dict) -> str:
         """Classify the query type for natural language query engine."""
         full_prompt = nl_query_classify_type_prompt.format(
@@ -477,7 +496,6 @@ This analysis used graph algorithms to comprehensively assess Anna Lee's money l
         response_text = self.execute_prompt(full_prompt, parse_json=False)
         return response_text.strip().strip('"').strip("'")
     
-    # add gjq
     def nl_query_extract_params(self, question: str, query_type: str, template: dict,
                                 schema_info: str, query_modifiers: dict) -> dict:
         """Extract parameters for natural language query engine."""
@@ -1139,7 +1157,6 @@ class Reasoner:
         ]
         return self.chat(messages)
     
-    # add gjq
     def nl_query_classify_type(self, question: str, query_templates: dict) -> str:
         """Classify the query type for natural language query engine."""
         full_prompt = nl_query_classify_type_prompt.format(
@@ -1149,7 +1166,6 @@ class Reasoner:
         response_text = self.env.execute_prompt(full_prompt, parse_json=False)
         return response_text.strip().strip('"').strip("'")
     
-    # add gjq
     def nl_query_extract_params(self, question: str, query_type: str, template: dict,
                                 schema_info: str, query_modifiers: dict) -> dict:
         """Extract parameters for natural language query engine."""
