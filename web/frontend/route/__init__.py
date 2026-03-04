@@ -14,7 +14,7 @@ if PROJECT_ROOT not in sys.path:
 from aag.api.async_runtime import start_async_runtime, stop_async_runtime
 
 
-# 日志配置（全局一次即可）
+# Global logging configuration (set once)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -26,7 +26,7 @@ socketio = SocketIO(cors_allowed_origins="*")
 
 
 def create_app():
-    # 当前文件目录
+    # Current file directory
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
     app = Flask(
@@ -37,7 +37,7 @@ def create_app():
 
     CORS(app)
 
-    # ====== 注册各个蓝图（路由模块） ======
+    # ====== Register blueprints (route modules) ======
     from .routes_pages import bp as pages_bp      
     from .routes_health import bp as health_bp
     from .routes_documents import bp as documents_bp
@@ -50,16 +50,16 @@ def create_app():
     app.register_blueprint(manage_bp)
     app.register_blueprint(models_bp)
 
-    # ====== 初始化 SocketIO ======
+    # ====== Initialize SocketIO and async runtime ======
     socketio.init_app(app)
     start_async_runtime()
     atexit.register(stop_async_runtime)
  
-    # ====== 注册 WebSocket 事件处理 ======
+    # ====== Register WebSocket event handlers ======
     try:
         from . import sockets_chat  
-        logger.info("WebSocket 事件模块 sockets_chat 已加载")
+        logger.info("WebSocket event module sockets_chat loaded")
     except ImportError as e:
-        logger.warning(f"导入 sockets_chat 失败: {e}")
+        logger.warning(f"Failed to import sockets_chat: {e}")
 
     return app
