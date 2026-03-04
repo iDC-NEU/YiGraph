@@ -10,7 +10,7 @@ version: 1.0   # Config version
 reasoner:
   llm:
     # LLM provider: ollama (local) or openai (OpenAI-compatible API, e.g. DeepSeek)
-    provider: "openai"
+    provider: "ollama"
     # Ollama config (used when provider is ollama)
     ollama:
       model_name: "llama3.1:70b"
