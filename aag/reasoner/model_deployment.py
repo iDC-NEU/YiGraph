@@ -15,6 +15,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 from aag.config.engine_config import ReasonerConfig
 from aag.reasoner.prompt_template.llm_prompt_en import *
+from aag.reasoner.prompt_template.llm_prompt_zh import *
 from aag.utils.parse_json import extract_json_from_response, parse_openai_json_response
 from aag.error_recovery.enhancer import enhance_prompt
 
