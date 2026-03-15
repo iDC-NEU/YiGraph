@@ -19,8 +19,8 @@ reasoner:
       port: 11434
     # OpenAI-compatible API (used when provider is openai; e.g. OpenAI / DeepSeek / self-hosted)
     openai:
-      base_url: "https://your-api-endpoint.com/v1/"   # OpenAI-compatible API base URL; must end with /
-      api_key: "your-api-key-here"                    # API key from your provider
+      base_url: "https://gitaigc.com/v1/"   # OpenAI-compatible API base URL; must end with /
+      api_key: "sk-hp2LH8Cb3NZqc1EZRjHWnKyYMF1aRhrnEfr2WxJCk7Wy5biC"    # API key from your provider
       model: "gpt-4o-mini"                            # Model name (e.g. gpt-4o-mini, deepseek-chat)
 
 # -----------------------------------------------------------------------------
@@ -35,7 +35,7 @@ retrieval:
     # Neo4j for graph queries (e.g. Cypher in interactive mode)
     neo4j:
       enabled: true
-      uri: "bolt://202.199.13.67:7687"
+      uri: "bolt://202.199.13.237:7687"
       user: "neo4j"
       password: "12345678"
 
