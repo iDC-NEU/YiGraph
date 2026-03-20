@@ -35,7 +35,7 @@ retrieval:
     # Neo4j for graph queries (e.g. Cypher in interactive mode)
     neo4j:
       enabled: true
-      uri: "bolt://202.199.13.67:7687"
+      uri: "bolt://202.199.13.237:7687"
       user: "neo4j"
       password: "12345678"
 

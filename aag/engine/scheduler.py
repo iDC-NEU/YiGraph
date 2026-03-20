@@ -190,11 +190,11 @@ class Scheduler:
             self.data_dependency_resolver.set_global_graph(graph_nodes, graph_edges)
             
             neo4j_config_dict = self.config.retrieval.database.neo4j
-            self.dataset_manager.load_graph_to_neo4j(
-                self.current_graph_dataset,
-                self.current_dataset_name,
-                neo4j_config_dict
-            )
+            # self.dataset_manager.load_graph_to_neo4j(
+            #     self.current_graph_dataset,
+            #     self.current_dataset_name,
+            #     neo4j_config_dict
+            # )
         else:
             # Text/table dataset
             self.current_graph_dataset = None
@@ -1118,7 +1118,8 @@ class Scheduler:
             if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
                 if not step.graph_algorithm:
                     self.dag.set_failed(step_id, "No graph algorithm selected for this step")
-                    raise RuntimeError(f"Step {step_id} missing graph_algorithm")
+                    logger.error(f"❌ Step {step_id} missing graph_algorithm, skipping")
+                    continue
 
                 tool_description,  tool_metadata = await self.computing_engine.get_algorithm_description(
                     step.graph_algorithm
@@ -1128,7 +1129,7 @@ class Scheduler:
                     error_msg = f"Cannot get algorithm description for '{step.graph_algorithm}'"
                     logger.error(f"❌ {error_msg}")
                     self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"Step {step_id}: {error_msg}")
+                    continue
                 
                 # logger.info(f"tool_description:{tool_description}")
 
@@ -1139,7 +1140,8 @@ class Scheduler:
                     )
                 except Exception as graph_err:
                     self.dag.set_failed(step_id, f"Failed to initialize working graph: {graph_err}")
-                    raise
+                    logger.error(f"❌ Step {step_id} graph init failed: {graph_err}, skipping")
+                    continue
 
                 # extraction_result = self._prepare_parameters_for_execution(
                 #     step=step,
@@ -1220,17 +1222,17 @@ class Scheduler:
 
                     if tool_result is None:
                         raise ValueError("Algorithm execution returned None")
-                    logger.info(f"tool_result:{tool_result} !!!!!!!!!!!!!")
+                    logger.info(f"tool_result:{tool_result}")
 
                     result_data = tool_result.get("result")
                     if isinstance(result_data, dict) and "error" in result_data:
                         raise RuntimeError(result_data.get("error") or "Algorithm execution failed")
-                    logger.info(f"tool_result:{result_data} xxxxxxx")
+                    logger.info(f"tool_result:{result_data}")
 
 
                     if not tool_result.get("success", False):
                         error_msg = tool_result.get("error") or "Algorithm execution failed"
-                        logger.info(f"tool_result:{error_msg} sssssss")
+                        logger.info(f"tool_result:{error_msg}")
                         raise RuntimeError(error_msg)
 
                     return is_has_extract_code, output_schema, tool_result
@@ -1244,7 +1246,8 @@ class Scheduler:
                     )
                 except Exception as e:
                     self.dag.set_failed(step_id, str(e))
-                    raise RuntimeError(str(e))
+                    logger.error(f"❌ Step {step_id} algorithm execution failed: {e}, skipping")
+                    continue
 
                 step.add_algorithm_result(
                     tool_name=tool_metadata.get("name", ""),
@@ -1291,7 +1294,7 @@ class Scheduler:
                 numeric_analysis_code = code_result.get("numeric_analysis_code", {})
                 generated_code = numeric_analysis_code.get("code", "")
                 output_schema = numeric_analysis_code.get("output_schema", {})
-                logger.info(f"✅ Generated numeric analysis code: {generated_code[:200]}...")
+                logger.info(f"✅ Generated numeric analysis code: {generated_code[:200]}")
                 
                 code_result_value = self.computing_engine.execute_code(
                     code=generated_code,
@@ -1302,9 +1305,9 @@ class Scheduler:
 
                 if isinstance(code_result_value, dict) and "error" in code_result_value:
                     error_msg = code_result_value.get("error")
-                    logger.error(f"❌ {error_msg}")
+                    logger.error(f"❌ Step {step_id} numeric analysis failed: {error_msg}, skipping")
                     self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(error_msg)
+                    continue
 
                 step.add_output(
                     task_type=GraphAnalysisSubType.NUMERIC_COMPUTATION,
@@ -1372,23 +1375,29 @@ class Scheduler:
                         }
                     else:
                         error_msg = query_result.get("error", "Graph query failed")
-                        logger.error(f"❌ Graph query failed | error: {error_msg}")
+                        logger.error(f"❌ Step {step_id} graph query failed: {error_msg}, skipping")
                         self.dag.set_failed(step_id, error_msg)
-                        raise RuntimeError(f"Step {step_id} graph query failed: {error_msg}")
+                        continue
                         
                 except Exception as query_err:
                     error_msg = f"Graph query execution failed: {query_err}"
                     logger.error(error_msg, exc_info=True)
                     self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"Step {step_id} graph query failed: {query_err}")
+                    continue
 
-            llm_analysis = self.reasoner.generate_answer_from_algorithm_result(
-                question=step.question,
-                tool_description=tool_description,
-                tool_result=tool_result,
-            )
-            analysis_blocks.append(llm_analysis)
-            analysis_result += llm_analysis
+            if tool_result is not None:
+                try:
+                    llm_analysis = self.reasoner.generate_answer_from_algorithm_result(
+                        question=step.question,
+                        tool_description=tool_description,
+                        tool_result=tool_result,
+                    )
+                    analysis_blocks.append(llm_analysis)
+                    analysis_result += llm_analysis
+                except Exception as analysis_err:
+                    logger.error(f"❌ Step {step_id} LLM analysis generation failed: {analysis_err}, skipping")
+            else:
+                logger.warning(f"⚠️ Step {step_id} skipped (no result), excluded from final report")
 
         final_question = (
             "You will be given the concatenated analysis text generated from "
