@@ -6,7 +6,7 @@ from typing import Optional, Dict
 
 @dataclass
 class RetryPolicy:
-    max_attempts: int = 3          # 总尝试次数（包含第一次）
+    max_attempts: int = 1          # 总尝试次数（包含第一次）
     max_error_history: int = 2     # error_history 最多保留几条
     keep_last_k_in_prompt: int = 2 # 注入 prompt 的错误条数
     extra_constraints: Optional[str] = None

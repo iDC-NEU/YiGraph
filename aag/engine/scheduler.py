@@ -266,7 +266,7 @@ class Scheduler:
             
             return await self._execute_graph_query(query)
         
-        elif decision.query_type == QueryType.GRAPH:
+        elif decision.query_type == QueryType.GRAPH or decision.query_type == QueryType.GENERAL:
             if original_type == "text":
                 converted_graph_config = self.dataset_manager.get_converted_graph_dataset(self.current_dataset_name)
                 if not converted_graph_config:
@@ -1102,23 +1102,29 @@ class Scheduler:
             }
             
             if data_dependency_parents:
-                data_dependency_context = await self.data_dependency_resolver.resolve_dependencies(
-                    step_id=step_id,
-                    step=step,
-                    alg_des_info=tool_metadata,
-                    data_dependency_parents=data_dependency_parents
-                )
-                logger.info(
-                    "📊 Dependency context | graph deps: %s | param deps: %s",
-                    len(data_dependency_context.get("graph_dependencies", [])),
-                    len(data_dependency_context.get("parameter_dependencies", [])),
-                )
+                try:
+                    data_dependency_context = await self.data_dependency_resolver.resolve_dependencies(
+                        step_id=step_id,
+                        step=step,
+                        alg_des_info=tool_metadata,
+                        data_dependency_parents=data_dependency_parents
+                    )
+                    logger.info(
+                        "📊 Dependency context | graph deps: %s | param deps: %s",
+                        len(data_dependency_context.get("graph_dependencies", [])),
+                        len(data_dependency_context.get("parameter_dependencies", [])),
+                    )
+                except Exception as dep_err:
+                    err_msg = f"Failed to resolve dependencies for step {step_id}: {dep_err}"
+                    self.dag.set_failed(step_id, err_msg)
+                    logger.error(f"{err_msg}; skipping step")
+                    continue
                 
 
             if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
                 if not step.graph_algorithm:
                     self.dag.set_failed(step_id, "No graph algorithm selected for this step")
-                    logger.error(f"❌ Step {step_id} missing graph_algorithm, skipping")
+                    logger.error(f"Step {step_id} missing graph_algorithm, skipping")
                     continue
 
                 tool_description,  tool_metadata = await self.computing_engine.get_algorithm_description(
@@ -1127,7 +1133,7 @@ class Scheduler:
                 
                 if tool_metadata is None:
                     error_msg = f"Cannot get algorithm description for '{step.graph_algorithm}'"
-                    logger.error(f"❌ {error_msg}")
+                    logger.error(f"{error_msg}")
                     self.dag.set_failed(step_id, error_msg)
                     continue
                 
@@ -1140,7 +1146,7 @@ class Scheduler:
                     )
                 except Exception as graph_err:
                     self.dag.set_failed(step_id, f"Failed to initialize working graph: {graph_err}")
-                    logger.error(f"❌ Step {step_id} graph init failed: {graph_err}, skipping")
+                    logger.error(f"Step {step_id} graph init  skipping")
                     continue
 
                 # extraction_result = self._prepare_parameters_for_execution(
@@ -1246,7 +1252,7 @@ class Scheduler:
                     )
                 except Exception as e:
                     self.dag.set_failed(step_id, str(e))
-                    logger.error(f"❌ Step {step_id} algorithm execution failed: {e}, skipping")
+                    logger.error(f"Step {step_id} algorithm execution skipping")
                     continue
 
                 step.add_algorithm_result(
@@ -1305,7 +1311,7 @@ class Scheduler:
 
                 if isinstance(code_result_value, dict) and "error" in code_result_value:
                     error_msg = code_result_value.get("error")
-                    logger.error(f"❌ Step {step_id} numeric analysis failed: {error_msg}, skipping")
+                    logger.error(f"Step {step_id} numeric analysis skipping")
                     self.dag.set_failed(step_id, error_msg)
                     continue
 
@@ -1375,7 +1381,7 @@ class Scheduler:
                         }
                     else:
                         error_msg = query_result.get("error", "Graph query failed")
-                        logger.error(f"❌ Step {step_id} graph query failed: {error_msg}, skipping")
+                        logger.error(f"Step {step_id} graph query skipping")
                         self.dag.set_failed(step_id, error_msg)
                         continue
                         
@@ -1395,7 +1401,7 @@ class Scheduler:
                     analysis_blocks.append(llm_analysis)
                     analysis_result += llm_analysis
                 except Exception as analysis_err:
-                    logger.error(f"❌ Step {step_id} LLM analysis generation failed: {analysis_err}, skipping")
+                    logger.error(f"Step {step_id} LLM analysis generation skipping")
             else:
                 logger.warning(f"⚠️ Step {step_id} skipped (no result), excluded from final report")
 

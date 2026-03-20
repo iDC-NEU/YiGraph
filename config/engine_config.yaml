@@ -13,7 +13,7 @@ reasoner:
     provider: "openai"
     # Ollama config (used when provider is ollama)
     ollama:
-      model_name: "llama3.1:70b"
+      model_name: "llama3.1:8b"
       device: "cuda:0"
       timeout: 150000
       port: 11434
