@@ -864,46 +864,46 @@ class Scheduler:
         Returns:
             Built DAG.
         """
-        # Step 1: Get algorithm library information
-        algorithm_library_info = self._get_algorithm_library_info()
-        logger.info("📚 Algorithm library information extracted")
+        # # Step 1: Get algorithm library information
+        # algorithm_library_info = self._get_algorithm_library_info()
+        # logger.info("📚 Algorithm library information extracted")
         
-        # Step 2: Get dataset schema information (optional)
-        dataset_info = self._get_graph_schema_summary()
-        if dataset_info:
-            logger.info("📊 Dataset schema information extracted")
+        # # Step 2: Get dataset schema information (optional)
+        # dataset_info = self._get_graph_schema_summary()
+        # if dataset_info:
+        #     logger.info("📊 Dataset schema information extracted")
         
-        # Step 3: Rewrite query with algorithm context
-        try:
-            rewrite_result = self.reasoner.rewrite_query(
-                original_query=query,
-                algorithm_library_info=algorithm_library_info,
-                dataset_info=dataset_info
-            )
+        # # Step 3: Rewrite query with algorithm context
+        # try:
+        #     rewrite_result = self.reasoner.rewrite_query(
+        #         original_query=query,
+        #         algorithm_library_info=algorithm_library_info,
+        #         dataset_info=dataset_info
+        #     )
             
-            rewritten_query = rewrite_result.get("rewritten_query", query)
-            reasoning = rewrite_result.get("reasoning", "")
-            mapped_concepts = rewrite_result.get("mapped_concepts", [])
-            print(f"rewritten_query: {rewritten_query}")
-            logger.info(f"✍️ Query rewritten successfully")
-            logger.info(f"Original query: {query}")
-            logger.info(f"Rewritten query: {rewritten_query}")
-            logger.info(f"Reasoning: {reasoning}")
+        #     rewritten_query = rewrite_result.get("rewritten_query", query)
+        #     reasoning = rewrite_result.get("reasoning", "")
+        #     mapped_concepts = rewrite_result.get("mapped_concepts", [])
+        #     print(f"rewritten_query: {rewritten_query}")
+        #     logger.info(f"✍️ Query rewritten successfully")
+        #     logger.info(f"Original query: {query}")
+        #     logger.info(f"Rewritten query: {rewritten_query}")
+        #     logger.info(f"Reasoning: {reasoning}")
             
-            if mapped_concepts:
-                logger.info("🔗 Concept mappings:")
-                for mapping in mapped_concepts:
-                    logger.info(f"  - {mapping.get('original_concept')} → {mapping.get('mapped_to')}")
+        #     if mapped_concepts:
+        #         logger.info("🔗 Concept mappings:")
+        #         for mapping in mapped_concepts:
+        #             logger.info(f"  - {mapping.get('original_concept')} → {mapping.get('mapped_to')}")
             
-            # Use rewritten query for planning
-            query_to_use = rewritten_query
+        #     # Use rewritten query for planning
+        #     query_to_use = rewritten_query
             
-        except Exception as e:
-            logger.warning(f"⚠️ Query rewriting failed: {e}, using original query")
-            query_to_use = query
+        # except Exception as e:
+        #     logger.warning(f"⚠️ Query rewriting failed: {e}, using original query")
+        #     query_to_use = query
         
         # Step 4: Continue with existing flow (plan subqueries)
-        subquery_plan = self.reasoner.plan_subqueries(decompose, query_to_use)
+        subquery_plan = self.reasoner.plan_subqueries(decompose, query)
         return self.build_dag_from_subquery_plan(subquery_plan)
 
 

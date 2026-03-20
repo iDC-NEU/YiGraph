@@ -19,9 +19,9 @@ reasoner:
       port: 11434
     # OpenAI-compatible API (used when provider is openai; e.g. OpenAI / DeepSeek / self-hosted)
     openai:
-      base_url: "https://your-api-endpoint.com/v1/"   # OpenAI-compatible API base URL; must end with /
-      api_key: "your-api-key-here"                    # API key from your provider
-      model: "gpt-4o-mini"                            # Model name (e.g. gpt-4o-mini, deepseek-chat)
+      base_url: "https://api.deepseek.com/v1/"   # OpenAI-compatible API base URL; must end with /
+      api_key: "sk-12bc508f621e473ea2429008c4e5ca39"                    # API key from your provider
+      model: "deepseek-chat"                            # Model name (e.g. gpt-4o-mini, deepseek-chat)
 
 # -----------------------------------------------------------------------------
 # Retrieval - Vector DB and graph DB
@@ -45,4 +45,4 @@ retrieval:
     batch_size: 20
     chunk_size: 512
     chunk_overlap: 20
-    device: "cuda:2"
+    device: "cuda:1"

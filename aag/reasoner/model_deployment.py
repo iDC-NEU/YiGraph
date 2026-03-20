@@ -948,7 +948,7 @@ class Reasoner:
                         "query": query,
                         "depends_on": []
                     }]}  
-        full_prompt = plan_subqueries_prompt.format(query=query)
+        full_prompt = plan_subqueries_prompt_zh.format(query=query)
         return self.env.execute_prompt(full_prompt, parse_json=True)
 
     def plan_expert_subqueries_with_algorithms(
