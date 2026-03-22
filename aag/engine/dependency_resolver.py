@@ -202,7 +202,7 @@ class DataDependencyResolver:
                     location=f"step_{current_step.step_id}"
                 )
             except Exception as e:
-                logger.error(f"❌ Dependency analysis failed after retries: {e}")
+                logger.info(f"  Dependency analysis failed after retries: {e}")
                 raise
         else:
             analysis = self.reasoner.analyze_dependency_type_and_locate_dependency_data(
@@ -215,7 +215,7 @@ class DataDependencyResolver:
         logger.info(f"analysis analysis:{analysis}")
 
         if not analysis:
-            logger.error("❌ LLM 返回结果为空，视为无依赖")
+            logger.info("  LLM 返回结果为空，视为无依赖")
             return DataDependencyInfo(
                 parent_step_id=parent_step.step_id,
                 parent_question=parent_step.question,
@@ -228,7 +228,7 @@ class DataDependencyResolver:
         try:
             dep_type = DataDependencyType(dep_type_str)
         except ValueError:
-            logger.error(f"⚠️ 无效 dependency_type='{dep_type_str}'，自动回退为 none")
+            logger.info(f"⚠️ 无效 dependency_type='{dep_type_str}'，自动回退为 none")
             dep_type = DataDependencyType.NONE
 
         selected_outputs = analysis.get("selected_outputs", [])
@@ -244,19 +244,19 @@ class DataDependencyResolver:
             reason = sel.get("reason", "")
 
             if output_id is None:
-                logger.error("❌ selected_outputs 中缺少 output_id 字段")
+                logger.info("  selected_outputs 中缺少 output_id 字段")
                 continue
 
             # 找到对应 StepOutputItem
             match = parent_outputs.get(output_id)
             if match is None:
-                logger.error(f"❌ 未找到父节点 output_id={output_id}")
+                logger.info(f"  未找到父节点 output_id={output_id}")
                 continue
             
             value_dict = match.value or {}
             if field_key not in value_dict:
-                logger.error(
-                    f"❌ 在 output_id={output_id} 中找不到字段 field_key='{field_key}' | 可选字段:{list(value_dict.keys())}"
+                logger.info(
+                    f"  在 output_id={output_id} 中找不到字段 field_key='{field_key}' | 可选字段:{list(value_dict.keys())}"
                 )
                 continue
 
@@ -323,7 +323,7 @@ class DataDependencyResolver:
 
         if not self.global_vertices or not self.global_edges:
             error_msg = "全局图数据未初始化，请先加载图数据集。"
-            logger.error(f"❌ {error_msg}")
+            logger.info(f"  {error_msg}")
             return {
                 "description": error_msg,
                 "converted_graph": None,
@@ -391,7 +391,7 @@ class DataDependencyResolver:
                     "raw_llm_response": llm_resp
                 }
             except Exception as e:
-                logger.error(f"❌ Graph conversion (generate+execute) failed after retries: {e}")
+                logger.info(f"  Graph conversion (generate+execute) failed after retries: {e}")
                 return {
                     "description": str(e),
                     "converted_graph": None,
@@ -536,7 +536,7 @@ class DataDependencyResolver:
                     "reasoning": mapping_result.get("explanation", "")
                 }
             except Exception as e:
-                logger.error(f"❌ Parameter mapping+execute failed after retries: {e}")
+                logger.info(f"  Parameter mapping+execute failed after retries: {e}")
                 return {
                     "mapped_params": {},
                     "mapping_raw": None,
@@ -566,7 +566,7 @@ class DataDependencyResolver:
                     None
                 )
                 if matched_item is None:
-                    logger.error(f"❌ 参数 {param_name} 的依赖字段找不到真实数据源")
+                    logger.info(f"  参数 {param_name} 的依赖字段找不到真实数据源")
                     continue
                 real_value = matched_item.value
                 if extract_code is None:
@@ -577,7 +577,7 @@ class DataDependencyResolver:
                     exec(extract_code, exec_env)
                     final_params[param_name] = exec_env["param_value"]
                 except Exception as e:
-                    logger.error(f"❌ 执行 extract_code 失败: {e}\n参数: {param_name}\n代码:\n{extract_code}")
+                    logger.info(f"  执行 extract_code 失败: {e}\n参数: {param_name}\n代码:\n{extract_code}")
                     continue
             return {
                 "mapped_params": final_params,

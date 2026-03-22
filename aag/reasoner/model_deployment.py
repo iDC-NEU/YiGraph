@@ -365,6 +365,7 @@ Please consider this schema when selecting the algorithm to ensure compatibility
 
 ----------------------------
 ## 响应要求
+- 你必须使用中文。
 - 你的解释必须严格基于给定的计算结果。
 - 清晰突出并解释关键数据点（例如排名靠前的节点、聚类数量、路径长度等）。
 - 使用简单、直观的语言，避免术语堆砌，也不要重复同样的总结。
@@ -431,11 +432,11 @@ Please consider this schema when selecting the algorithm to ensure compatibility
 
 结果表明，Anna Lee 和 Nunez Mitchell 的历史交易总额明显更高，说明它们可能在资金流动中扮演资金归集点的角色，需要进一步核查其业务活动和资金流向。
 
-## **Summary**
+## **总结**
 
 本次分析利用图算法对 Anna Lee 的洗钱风险进行了综合评估，主要使用了 **PageRank 中心性算法** 和 **DFS（深度优先搜索）路径算法**。首先，PageRank 对网络中所有账户的重要性和风险关联性进行了量化，结果显示 **Anna Lee 的 PageRank 得分位于前 2%**，说明其处于高度关键的节点位置，具有较强的风险扩散潜力。随后，DFS 对以 Anna Lee 为起点的资金流进行了穿透分析，识别出一条闭环可疑路径：**Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**，总交易金额为 **2995.22 $**，表现出典型的“资金转出—多步中转—回流原账户”的高风险结构。此外，金额统计结果显示 Anna Lee（161272.07 $）和 Nunez Mitchell（122984.06 $）的历史交易总额显著偏高，进一步表明它们可能是资金归集或中转的关键节点，整体可疑程度较高。
 
-## **Recommendations**
+## **建议**
 
 1. 建议将 Anna Lee 及闭环路径中的相关账户（尤其是 Nunez Mitchell 和 Robinson David）纳入高风险名单，并提升监控等级。对其后续的大额、循环型交易设置严格的实时预警和限额控制。
 2. 建议对 Anna Lee 及关键交易对手开展专项尽职调查，重点核查其资金来源、交易目的和业务背景。同时结合更长周期的交易记录与外部信息，排查是否存在结构化拆分、循环转账等洗钱特征。
@@ -518,10 +519,12 @@ class OpenAIEnv:
     def __init__(self, 
                  base_url,
                  api_key,
-                 model_name):
+                 model_name,
+                 temperature: float = 0.0):
         self.base_url = base_url
         self.api_key = api_key
         self.model = model_name
+        self.temperature = temperature
 
         openai.api_key = self.api_key
         openai.base_url = self.base_url
@@ -539,7 +542,11 @@ class OpenAIEnv:
             Parsed JSON dict if parse_json=True, otherwise raw response text
         """
         messages = [{"role": "user", "content": full_prompt}]
-        request_kwargs = {"model": self.model, "messages": messages}
+        request_kwargs = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": self.temperature,
+        }
         
         if response_format:
             request_kwargs["response_format"] = response_format
@@ -587,6 +594,7 @@ class OpenAIEnv:
             resp = self.client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": query}],
+                temperature=self.temperature,
             )
             return resp.choices[0].message.content
         except Exception as e:
@@ -648,7 +656,8 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             messages=[{"role": "user", "content": select_algorithm_prompt.format(
                 question=question,
                 algorithm_list=algorithm_list
-            ) + schema_context}]
+            ) + schema_context}],
+            temperature=self.temperature,
         )
         response_text = response.choices[0].message.content
         return parse_openai_json_response(response_text, "select_algorithm")
@@ -733,6 +742,7 @@ Please consider this schema when selecting the algorithm to ensure compatibility
 
 ----------------------------
 ## 响应要求
+- 你必须使用中文。
 - 你的解释必须严格基于给定的计算结果。
 - 清晰突出并解释关键数据点（例如排名靠前的节点、聚类数量、路径长度等）。
 - 使用简单、直观的语言，避免术语堆砌，也不要重复同样的总结。
@@ -799,11 +809,11 @@ Please consider this schema when selecting the algorithm to ensure compatibility
 
 结果表明，Anna Lee 和 Nunez Mitchell 的历史交易总额明显更高，说明它们可能在资金流动中扮演资金归集点的角色，需要进一步核查其业务活动和资金流向。
 
-## **Summary**
+## **总结**
 
 本次分析利用图算法对 Anna Lee 的洗钱风险进行了综合评估，主要使用了 **PageRank 中心性算法** 和 **DFS（深度优先搜索）路径算法**。首先，PageRank 对网络中所有账户的重要性和风险关联性进行了量化，结果显示 **Anna Lee 的 PageRank 得分位于前 2%**，说明其处于高度关键的节点位置，具有较强的风险扩散潜力。随后，DFS 对以 Anna Lee 为起点的资金流进行了穿透分析，识别出一条闭环可疑路径：**Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**，总交易金额为 **2995.22 $**，表现出典型的“资金转出—多步中转—回流原账户”的高风险结构。此外，金额统计结果显示 Anna Lee（161272.07 $）和 Nunez Mitchell（122984.06 $）的历史交易总额显著偏高，进一步表明它们可能是资金归集或中转的关键节点，整体可疑程度较高。
 
-## **Recommendations**
+## **建议**
 
 1. 建议将 Anna Lee 及闭环路径中的相关账户（尤其是 Nunez Mitchell 和 Robinson David）纳入高风险名单，并提升监控等级。对其后续的大额、循环型交易设置严格的实时预警和限额控制。
 2. 建议对 Anna Lee 及关键交易对手开展专项尽职调查，重点核查其资金来源、交易目的和业务背景。同时结合更长周期的交易记录与外部信息，排查是否存在结构化拆分、循环转账等洗钱特征。
@@ -812,7 +822,8 @@ Please consider this schema when selecting the algorithm to ensure compatibility
 
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            temperature=self.temperature,
         )
         response_text = response.choices[0].message.content
         if not response_text:
@@ -822,7 +833,8 @@ Please consider this schema when selecting the algorithm to ensure compatibility
     def chat(self, messages: list) -> str:
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=messages
+            messages=messages,
+            temperature=self.temperature,
         )
         response_text = response.choices[0].message.content
         if not response_text:
@@ -930,12 +942,18 @@ class Reasoner:
             base_url = openai_cfg.get("base_url") or "https://api.openai.com/v1"
             api_key = openai_cfg.get("api_key")
             model = openai_cfg.get("model") or "gpt-4o"
+            temperature = openai_cfg.get("temperature", 0.0)
             if not api_key:
                 # Allow environment variable fallback
                 api_key = os.environ.get("OPENAI_API_KEY")
             if not api_key:
                 raise ValueError("OpenAI provider requires an API key via config.reasoner.llm.openai.api_key or env OPENAI_API_KEY")
-            self.env = OpenAIEnv(base_url=base_url, api_key=api_key, model_name=model)
+            self.env = OpenAIEnv(
+                base_url=base_url,
+                api_key=api_key,
+                model_name=model,
+                temperature=temperature,
+            )
         else:
             raise ValueError(f"Unsupported provider: {provider}")
 

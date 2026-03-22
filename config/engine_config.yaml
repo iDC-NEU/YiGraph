@@ -19,9 +19,10 @@ reasoner:
       port: 11434
     # OpenAI-compatible API (used when provider is openai; e.g. OpenAI / DeepSeek / self-hosted)
     openai:
-      base_url: "https://api.deepseek.com/v1/"   # OpenAI-compatible API base URL; must end with /
-      api_key: "sk-12bc508f621e473ea2429008c4e5ca39"                    # API key from your provider
-      model: "deepseek-chat"                            # Model name (e.g. gpt-4o-mini, deepseek-chat)
+      base_url: "https://gitaigc.com/v1/"   # OpenAI-compatible API base URL; must end with /
+      api_key: "sk-Fr1QRaHaTa8tDYwYtKPcpslw98gccUJ0DBgrN2wv4cO1yzh4"                    # API key from your provider
+      model: "gpt-4o-mini"                            # Model name (e.g. gpt-4o-mini, deepseek-chat)
+      temperature: 0.0                               # Sampling temperature for chat completion
 
 # -----------------------------------------------------------------------------
 # Retrieval - Vector DB and graph DB

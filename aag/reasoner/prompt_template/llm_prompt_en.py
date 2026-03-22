@@ -262,6 +262,8 @@ Your task is to classify the given question into one of three categories:
    - The question asks to compare, calculate, or analyze values that already exist (from previous steps or given data)
    - The question can be answered by writing Python code that performs numerical operations
    - Examples:
+    估算潜在洗钱路径中可能非法转出的金额。
+    找出潜在洗钱路径中交易金额最大的账户。
      * "Compare the PageRank values of node A and node B" (assuming PageRank was already computed)
      * "Calculate the average transaction amount for all accounts"
      * "Which community has more nodes: community 1 or community 2?" (assuming communities were already detected)

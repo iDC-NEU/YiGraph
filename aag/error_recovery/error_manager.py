@@ -86,6 +86,7 @@ class ErrorRecovery:
         for attempt in range(max_attempts+1):
             try:
                 result = await operation(error_history)
+                logger.info(f"result:{result}")
                 if attempt > 1:
                     logger.info("✅ %s succeeded on attempt %d/%d", name, attempt, max_attempts)
                 return result

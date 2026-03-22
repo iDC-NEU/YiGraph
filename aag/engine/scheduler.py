@@ -1212,6 +1212,8 @@ class Scheduler:
                         error_history=error_history
                     )
 
+                    
+
                     if extraction_result is None:
                         raise ValueError("Parameter adaptation and post-processing code generation failed, returning an empty result.")
 
