@@ -248,16 +248,34 @@ class ComputingEngine:
             RuntimeError: If execution fails.
         """
         try:
-            return self.code_executor.execute(code, data, global_graph=global_graph, is_numeric_analysis=is_numeric_analysis)
+            value = self.code_executor.execute(code, data, global_graph=global_graph, is_numeric_analysis=is_numeric_analysis)
+            return {
+                "algorithm": "numeric_analysis_code",
+                "success": True,
+                "result": value,
+                "error": None,
+                "summary": "Numeric analysis code executed successfully.",
+        }
         except (ValueError, AttributeError) as e:
             if not fallback_to_direct_exec:
-                raise RuntimeError(f"Code execution failed: {e}")
-            if isinstance(data, dict):
-                namespace = {**data, "__builtins__": __builtins__}
-            else:
-                namespace = {"data": data, "__builtins__": __builtins__}
-            exec(code, namespace)
-            return namespace.get("result", data)
+                return {"success": False, "result": None, "error": str(e), "summary": "Numeric analysis code execution failed."}
+            try:
+                if isinstance(data, dict):
+                    namespace = {**data, "__builtins__": __builtins__}
+                else:
+                    namespace = {"data": data, "__builtins__": __builtins__}
+                exec(code, namespace)
+                return {
+                        "algorithm": "numeric_analysis_code",
+                        "success": True,
+                        "result": namespace.get("result", data),
+                        "error": None,
+                        "summary": "Numeric analysis code executed successfully via direct exec fallback.",
+                }
+            except Exception as fallback_error:
+                return {"success": False, "result": None, "error": str(fallback_error), "summary": "Numeric analysis code execution failed."}
+        except Exception as e:
+            return {"success": False, "result": None, "error": str(e), "summary": "Numeric analysis code execution failed."}
 
     def initialize_graph_query_engine(self, neo4j_config: Dict[str, Any], reasoner):
         """
