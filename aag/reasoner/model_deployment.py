@@ -510,6 +510,21 @@ This analysis used graph algorithms to comprehensively assess Anna Lee's money l
             question=question
         )
         return self.execute_prompt(full_prompt, parse_json=True)
+    # add gjq
+    def nl_query_validate_cypher(self, cypher: str, question: str, query_type: str, 
+                                 params: dict, schema_info: str, template_info: str,
+                                 template_cypher_example: str) -> dict:
+        """Validate Cypher statement for natural language query engine."""
+        full_prompt = nl_query_validate_cypher_prompt.format(
+            schema_info=schema_info,
+            template_info=template_info,
+            template_cypher_example=template_cypher_example,
+            question=question,
+            query_type=query_type,
+            params=json.dumps(params, ensure_ascii=False, indent=2),
+            cypher=cypher
+        )
+        return self.execute_prompt(full_prompt, parse_json=True)
  
 
 
@@ -895,6 +910,21 @@ This analysis used graph algorithms to comprehensively assess Anna Lee's money l
             question=question
         )
         return self.execute_prompt(full_prompt, parse_json=True)
+    # add gjq
+    def nl_query_validate_cypher(self, cypher: str, question: str, query_type: str, 
+                                 params: dict, schema_info: str, template_info: str,
+                                 template_cypher_example: str) -> dict:
+        """Validate Cypher statement for natural language query engine."""
+        full_prompt=nl_query_validate_cypher_prompt.format(
+                schema_info=schema_info,
+                template_info=template_info,
+                template_cypher_example=template_cypher_example,
+                question=question,
+                query_type=query_type,
+                params=json.dumps(params, ensure_ascii=False, indent=2),
+                cypher=cypher
+            )
+        return self.execute_prompt(full_prompt, parse_json=True)
 
 
 class Reasoner:
@@ -1180,6 +1210,20 @@ class Reasoner:
             question=question
         )
         return self.env.execute_prompt(full_prompt, parse_json=True)
+    def nl_query_validate_cypher(self, cypher: str, question: str, query_type: str, 
+                                 params: dict, schema_info: str, template_info: str,
+                                 template_cypher_example: str) -> dict:
+        """Validate Cypher statement for natural language query engine."""
+        full_prompt=nl_query_validate_cypher_prompt.format(
+                schema_info=schema_info,
+                template_info=template_info,
+                template_cypher_example=template_cypher_example,
+                question=question,
+                query_type=query_type,
+                params=json.dumps(params, ensure_ascii=False, indent=2),
+                cypher=cypher
+            )
+        return self.execute_prompt(full_prompt, parse_json=True)
 
     def rewrite_query(
         self,
