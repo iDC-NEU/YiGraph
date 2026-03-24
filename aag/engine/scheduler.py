@@ -1179,7 +1179,7 @@ class Scheduler:
             tool_metadata = None
             tool_result = None 
 
-            data_dependency_parents = [self.dag.steps[pid] for pid in self.dag.get_data_dependency(step_id)]
+            data_dependency_parents = [self.dag.steps[pid] for pid in self.dag.parents_of(step_id)]
             data_dependency_context = {
                 "graph_dependencies": [],
                 "parameter_dependencies": [],
