@@ -96,35 +96,90 @@ class DataDependencyResolver:
 
         logger.info(f"📊 [依赖解析] 当前步骤:{step_id} | 上游节点:{len(data_dependency_parents)}")
 
-        # ---------- Step 1：对每个父节点执行 “分类 + 定位” ----------
-        dependencies: List[DataDependencyInfo] = []
-        parent_step_map = {}
-        for parent_step in data_dependency_parents:
-            parent_step_map[parent_step.step_id]=parent_step
-            if not parent_step.result:
-                logger.warning(
-                    f"⚠️ 父节点 {parent_step.step_id}: {parent_step.question}  没有 result，跳过依赖分析"
-                )
-                continue
-            
-            dep_info = await self._classify_and_locate_dependency(
-                current_step = step,
-                current_algo_desc=alg_des_doc,
-                parent_step=parent_step
-            )
-            dependencies.append(dep_info)
 
-        # Step 2: 把所有依赖项拆分为 graph / parameter 两类
+
+        # # ---------- Step 1：对每个父节点执行 “分类 + 定位” ----------
+        # dependencies: List[DataDependencyInfo] = []
+        # parent_step_map = {}
+        # for parent_step in data_dependency_parents:
+        #     parent_step_map[parent_step.step_id]=parent_step
+        #     if not parent_step.result:
+        #         logger.warning(
+        #             f"⚠️ 父节点 {parent_step.step_id}: {parent_step.question}  没有 result，跳过依赖分析"
+        #         )
+        #         continue
+            
+        #     dep_info = await self._classify_and_locate_dependency(
+        #         current_step = step,
+        #         current_algo_desc=alg_des_doc,
+        #         parent_step=parent_step
+        #     )
+        #     dependencies.append(dep_info)
+        
+
+        # # Step 2: 把所有依赖项拆分为 graph / parameter 两类
+        # graph_items: List[SingleDependencyItem] = []
+        # param_items: List[SingleDependencyItem] = []
+
+        # for dep in dependencies:
+        #     for item in dep.items:
+        #         if item.use_as == "graph":
+        #             graph_items.append(item)
+        #         elif item.use_as == "parameter":
+        #             param_items.append(item)
+
+
+
+        # ---------- Step 1/2：分类 + 定位（空依赖时自动重试） ----------
+        max_dependency_retry = 3
+        parent_step_map = {parent_step.step_id: parent_step for parent_step in data_dependency_parents}
         graph_items: List[SingleDependencyItem] = []
         param_items: List[SingleDependencyItem] = []
 
-        for dep in dependencies:
-            for item in dep.items:
-                if item.use_as == "graph":
-                    graph_items.append(item)
-                elif item.use_as == "parameter":
-                    param_items.append(item)
+        for attempt in range(1, max_dependency_retry + 1):
+            dependencies: List[DataDependencyInfo] = []
+            graph_items = []
+            param_items = []
 
+            for parent_step in data_dependency_parents:
+                if not parent_step.result:
+                    logger.warning(
+                        f"⚠️ 父节点 {parent_step.step_id}: {parent_step.question}  没有 result，跳过依赖分析"
+                    )
+                    continue
+
+                dep_info = await self._classify_and_locate_dependency(
+                    current_step=step,
+                    current_algo_desc=alg_des_doc,
+                    parent_step=parent_step
+                )
+                dependencies.append(dep_info)
+
+            # Step 2: 把所有依赖项拆分为 graph / parameter 两类
+            for dep in dependencies:
+                for item in dep.items:
+                    if item.use_as == "graph":
+                        graph_items.append(item)
+                    elif item.use_as == "parameter":
+                        param_items.append(item)
+
+            if graph_items or param_items:
+                if attempt > 1:
+                    logger.info(
+                        f"✅ 依赖重试成功（attempt={attempt}/{max_dependency_retry}）| "
+                        f"graph={len(graph_items)} | parameter={len(param_items)}"
+                    )
+                break
+
+            if attempt < max_dependency_retry:
+                logger.warning(
+                    f"⚠️ 依赖项为空，重试依赖分析（attempt={attempt}/{max_dependency_retry}）"
+                )
+            else:
+                logger.warning(
+                    f"⚠️ 依赖项为空，已达到最大重试次数（{max_dependency_retry}）"
+                )
+        
         logger.info(
             f"📌 依赖整理完成 | graph={len(graph_items)} | parameter={len(param_items)}"
         ) 
@@ -202,7 +257,7 @@ class DataDependencyResolver:
                     location=f"step_{current_step.step_id}"
                 )
             except Exception as e:
-                logger.error(f"❌ Dependency analysis failed after retries: {e}")
+                logger.info(f"  Dependency analysis failed after retries: {e}")
                 raise
         else:
             analysis = self.reasoner.analyze_dependency_type_and_locate_dependency_data(
@@ -215,7 +270,7 @@ class DataDependencyResolver:
         logger.info(f"analysis analysis:{analysis}")
 
         if not analysis:
-            logger.error("❌ LLM 返回结果为空，视为无依赖")
+            logger.info("  LLM 返回结果为空，视为无依赖")
             return DataDependencyInfo(
                 parent_step_id=parent_step.step_id,
                 parent_question=parent_step.question,
@@ -228,7 +283,7 @@ class DataDependencyResolver:
         try:
             dep_type = DataDependencyType(dep_type_str)
         except ValueError:
-            logger.error(f"⚠️ 无效 dependency_type='{dep_type_str}'，自动回退为 none")
+            logger.info(f"⚠️ 无效 dependency_type='{dep_type_str}'，自动回退为 none")
             dep_type = DataDependencyType.NONE
 
         selected_outputs = analysis.get("selected_outputs", [])
@@ -244,19 +299,19 @@ class DataDependencyResolver:
             reason = sel.get("reason", "")
 
             if output_id is None:
-                logger.error("❌ selected_outputs 中缺少 output_id 字段")
+                logger.info("  selected_outputs 中缺少 output_id 字段")
                 continue
 
             # 找到对应 StepOutputItem
             match = parent_outputs.get(output_id)
             if match is None:
-                logger.error(f"❌ 未找到父节点 output_id={output_id}")
+                logger.info(f"  未找到父节点 output_id={output_id}")
                 continue
             
             value_dict = match.value or {}
             if field_key not in value_dict:
-                logger.error(
-                    f"❌ 在 output_id={output_id} 中找不到字段 field_key='{field_key}' | 可选字段:{list(value_dict.keys())}"
+                logger.info(
+                    f"  在 output_id={output_id} 中找不到字段 field_key='{field_key}' | 可选字段:{list(value_dict.keys())}"
                 )
                 continue
 
@@ -323,7 +378,7 @@ class DataDependencyResolver:
 
         if not self.global_vertices or not self.global_edges:
             error_msg = "全局图数据未初始化，请先加载图数据集。"
-            logger.error(f"❌ {error_msg}")
+            logger.info(f"  {error_msg}")
             return {
                 "description": error_msg,
                 "converted_graph": None,
@@ -391,7 +446,7 @@ class DataDependencyResolver:
                     "raw_llm_response": llm_resp
                 }
             except Exception as e:
-                logger.error(f"❌ Graph conversion (generate+execute) failed after retries: {e}")
+                logger.info(f"  Graph conversion (generate+execute) failed after retries: {e}")
                 return {
                     "description": str(e),
                     "converted_graph": None,
@@ -536,7 +591,7 @@ class DataDependencyResolver:
                     "reasoning": mapping_result.get("explanation", "")
                 }
             except Exception as e:
-                logger.error(f"❌ Parameter mapping+execute failed after retries: {e}")
+                logger.info(f"  Parameter mapping+execute failed after retries: {e}")
                 return {
                     "mapped_params": {},
                     "mapping_raw": None,
@@ -566,7 +621,7 @@ class DataDependencyResolver:
                     None
                 )
                 if matched_item is None:
-                    logger.error(f"❌ 参数 {param_name} 的依赖字段找不到真实数据源")
+                    logger.info(f"  参数 {param_name} 的依赖字段找不到真实数据源")
                     continue
                 real_value = matched_item.value
                 if extract_code is None:
@@ -577,7 +632,7 @@ class DataDependencyResolver:
                     exec(extract_code, exec_env)
                     final_params[param_name] = exec_env["param_value"]
                 except Exception as e:
-                    logger.error(f"❌ 执行 extract_code 失败: {e}\n参数: {param_name}\n代码:\n{extract_code}")
+                    logger.info(f"  执行 extract_code 失败: {e}\n参数: {param_name}\n代码:\n{extract_code}")
                     continue
             return {
                 "mapped_params": final_params,
