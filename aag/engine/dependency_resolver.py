@@ -96,35 +96,90 @@ class DataDependencyResolver:
 
         logger.info(f"📊 [依赖解析] 当前步骤:{step_id} | 上游节点:{len(data_dependency_parents)}")
 
-        # ---------- Step 1：对每个父节点执行 “分类 + 定位” ----------
-        dependencies: List[DataDependencyInfo] = []
-        parent_step_map = {}
-        for parent_step in data_dependency_parents:
-            parent_step_map[parent_step.step_id]=parent_step
-            if not parent_step.result:
-                logger.warning(
-                    f"⚠️ 父节点 {parent_step.step_id}: {parent_step.question}  没有 result，跳过依赖分析"
-                )
-                continue
-            
-            dep_info = await self._classify_and_locate_dependency(
-                current_step = step,
-                current_algo_desc=alg_des_doc,
-                parent_step=parent_step
-            )
-            dependencies.append(dep_info)
 
-        # Step 2: 把所有依赖项拆分为 graph / parameter 两类
+
+        # # ---------- Step 1：对每个父节点执行 “分类 + 定位” ----------
+        # dependencies: List[DataDependencyInfo] = []
+        # parent_step_map = {}
+        # for parent_step in data_dependency_parents:
+        #     parent_step_map[parent_step.step_id]=parent_step
+        #     if not parent_step.result:
+        #         logger.warning(
+        #             f"⚠️ 父节点 {parent_step.step_id}: {parent_step.question}  没有 result，跳过依赖分析"
+        #         )
+        #         continue
+            
+        #     dep_info = await self._classify_and_locate_dependency(
+        #         current_step = step,
+        #         current_algo_desc=alg_des_doc,
+        #         parent_step=parent_step
+        #     )
+        #     dependencies.append(dep_info)
+        
+
+        # # Step 2: 把所有依赖项拆分为 graph / parameter 两类
+        # graph_items: List[SingleDependencyItem] = []
+        # param_items: List[SingleDependencyItem] = []
+
+        # for dep in dependencies:
+        #     for item in dep.items:
+        #         if item.use_as == "graph":
+        #             graph_items.append(item)
+        #         elif item.use_as == "parameter":
+        #             param_items.append(item)
+
+
+
+        # ---------- Step 1/2：分类 + 定位（空依赖时自动重试） ----------
+        max_dependency_retry = 3
+        parent_step_map = {parent_step.step_id: parent_step for parent_step in data_dependency_parents}
         graph_items: List[SingleDependencyItem] = []
         param_items: List[SingleDependencyItem] = []
 
-        for dep in dependencies:
-            for item in dep.items:
-                if item.use_as == "graph":
-                    graph_items.append(item)
-                elif item.use_as == "parameter":
-                    param_items.append(item)
+        for attempt in range(1, max_dependency_retry + 1):
+            dependencies: List[DataDependencyInfo] = []
+            graph_items = []
+            param_items = []
 
+            for parent_step in data_dependency_parents:
+                if not parent_step.result:
+                    logger.warning(
+                        f"⚠️ 父节点 {parent_step.step_id}: {parent_step.question}  没有 result，跳过依赖分析"
+                    )
+                    continue
+
+                dep_info = await self._classify_and_locate_dependency(
+                    current_step=step,
+                    current_algo_desc=alg_des_doc,
+                    parent_step=parent_step
+                )
+                dependencies.append(dep_info)
+
+            # Step 2: 把所有依赖项拆分为 graph / parameter 两类
+            for dep in dependencies:
+                for item in dep.items:
+                    if item.use_as == "graph":
+                        graph_items.append(item)
+                    elif item.use_as == "parameter":
+                        param_items.append(item)
+
+            if graph_items or param_items:
+                if attempt > 1:
+                    logger.info(
+                        f"✅ 依赖重试成功（attempt={attempt}/{max_dependency_retry}）| "
+                        f"graph={len(graph_items)} | parameter={len(param_items)}"
+                    )
+                break
+
+            if attempt < max_dependency_retry:
+                logger.warning(
+                    f"⚠️ 依赖项为空，重试依赖分析（attempt={attempt}/{max_dependency_retry}）"
+                )
+            else:
+                logger.warning(
+                    f"⚠️ 依赖项为空，已达到最大重试次数（{max_dependency_retry}）"
+                )
+        
         logger.info(
             f"📌 依赖整理完成 | graph={len(graph_items)} | parameter={len(param_items)}"
         ) 
