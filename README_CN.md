@@ -502,14 +502,6 @@ python aag/main.py
 
 ---
 
-## ⭐ Star History
-
-如果这个项目对您有帮助，欢迎 Star ⭐ 支持我们！
-
-[![Star History Chart](https://api.star-history.com/svg?repos=iDC-NEU/YiGraph&type=Date)](https://star-history.com/#iDC-NEU/YiGraph&Date)
-
----
-
 <div align="center">
 
 **让图数据分析更简单、更智能**

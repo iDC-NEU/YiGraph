@@ -504,14 +504,6 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-## ⭐ Star History
-
-If this project helps you, please Star ⭐ to support us!
-
-[![Star History Chart](https://api.star-history.com/svg?repos=iDC-NEU/YiGraph&type=Date)](https://star-history.com/#iDC-NEU/YiGraph&Date)
-
----
-
 <div align="center">
 
 **Making Graph Data Analysis Simpler and Smarter**
