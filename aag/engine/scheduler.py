@@ -781,7 +781,7 @@ class Scheduler:
 
     @staticmethod
     def _should_use_anna_forced_dag(query: str) -> bool:
-        return bool(re.search(r"\banna\b", query or "", flags=re.IGNORECASE))
+        return "anna" in (query or "").lower()
 
     def _get_anna_forced_subquery_plan(self) -> Dict[str, Any]:
         return {
