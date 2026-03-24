@@ -3332,6 +3332,7 @@
       max_iter), where V is the number of vertices and E is the number of edges, making it efficient for large-scale graphs.'
     time_complexity: O(k * (V + E)) (Iterative)
   solvable_questions:
+  - 判断用户是否存在洗钱行为
   - Compute the PageRank score of each node in the current graph and output the Top-20 nodes with the highest PageRank.
   - Output the PageRank table for all nodes in the network, sorted in descending order of score.
   - Provide the list of the top 50 nodes ranked by PageRank in the current graph.

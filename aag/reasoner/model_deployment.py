@@ -356,89 +356,90 @@ Please consider this schema when selecting the algorithm to ensure compatibility
 
     def generate_answer_from_algorithm_result(self, question: str, tool_description: str, tool_result: Dict[str, Any]) -> str:
         prompt = f"""
-You are a professional data analyst responsible for interpreting graph algorithm results. Your task is to analyze the computation output of a given tool based on:
-- The **natural-language user question** (*question*)
-- The **corresponding tool description** (*tool_description*)
-- The **actual execution result of that tool** (*tool_result*)
+你是一名专业的数据分析师，负责解读图算法的计算结果。你的任务是基于以下内容，对某个工具的计算输出进行分析：
+- **自然语言用户问题**（*question*）
+- **对应的工具描述**（*tool_description*）
+- **该工具的实际执行结果**（*tool_result*）
 
-Each tool represents a specific graph algorithm (e.g., PageRank, Louvain, Shortest Path, etc.). You should generate a concise, easy-to-understand analysis report that directly answers the user's question, and refer to the following sample analysis report format.
-
-----------------------------
-## Response Requirements
-- Base your explanation strictly on the provided computation result.
-- Clearly highlight and explain key data points (e.g., top-ranked nodes, cluster counts, path lengths, etc.).
-- Use simple, intuitive language — avoid jargon and avoid repeating the same summary.
-- If the available data is insufficient to fully answer the question, explicitly state the limitation or missing information.
-- The output format must be in **Markdown** format for clear presentation.
-- Each analysis step must have a clear number and a short title.For example,## 1. **Anna Lee Node Centrality Evaluation (PageRank Result)**
-- The final output **must include a Summary section and a Recommendations section**.
-- Please structure your response based on the following analysis report template.
+每个工具都代表一种特定的图算法（例如 PageRank、Louvain、最短路径等）。你需要生成一份简洁、易懂的分析报告，直接回答用户的问题，并参考下面给出的分析报告格式示例。
 
 ----------------------------
-## Inputs:
-### User Question:
+## 响应要求
+- 你必须使用中文。
+- 你的解释必须严格基于给定的计算结果。
+- 清晰突出并解释关键数据点（例如排名靠前的节点、聚类数量、路径长度等）。
+- 使用简单、直观的语言，避免术语堆砌，也不要重复同样的总结。
+- 如果现有数据不足以完整回答问题，要明确指出限制或缺失的信息。
+- 输出格式必须为 **Markdown**，以保证展示清晰。
+- 每一步分析都必须有明确编号和简短标题。例如：## 1. **Anna Lee 节点中心性评估（PageRank 结果）**
+- 最终输出**必须包含 Summary（总结）部分和 Recommendations（建议）部分**。
+- 请按照下面给出的分析报告模板来组织你的回答。
+
+----------------------------
+## 输入：
+### 用户问题：
 {question}
 
-### Tool Description:
+### 工具描述：
 {tool_description}
 
-### Tool Execution Result:
+### 工具执行结果：
 {tool_result}
 
 ----------------------------
-## Output
+## 输出
 
-Provide a clear and concise written explanation in plain English that directly answers the user's question, structured according to the following analysis report format:
+请用通俗易懂的英文写出一份清晰、简洁的解释，直接回答用户的问题，并按照以下分析报告格式组织内容：
 
 ----------------------------
-**Analysis Report Example:**
+**分析报告示例：**
 
-## 1. **Anna Lee Node Centrality Evaluation (PageRank Result)**
+## 1. **Anna Lee 节点中心性评估（PageRank 结果）**
 
-First, using the **PageRank graph algorithm**, we quantitatively evaluated the "importance" and "risk association" of all account nodes in the transaction network. The idea behind PageRank is that if an account frequently transacts with multiple high-risk accounts or is in a key structural position in the transaction network, its score will significantly increase, reflecting its potential influence and exposure risk in the network.
+首先，我们使用 **PageRank 图算法** 对交易网络中所有账户节点的“重要性”和“风险关联性”进行了量化评估。PageRank 的基本思想是：如果一个账户频繁与多个高风险账户发生交易，或者处于交易网络中的关键结构位置，那么它的得分会显著升高，从而反映出它在网络中的潜在影响力和风险暴露程度。
 
-The result shows that **Anna Lee**'s PageRank score is in the Top 2% of all clients, significantly higher than other users. This indicates that the account is highly "depended upon" by other nodes in the transaction network, demonstrating strong potential for risk diffusion. Therefore, Anna Lee is preliminarily identified as a high-risk client or key monitoring target.
+结果显示，**Anna Lee** 的 PageRank 得分位于所有客户中的前 2%，显著高于其他用户。这说明该账户在交易网络中被其他节点高度“依赖”，表现出较强的风险扩散潜力。因此，可以初步将 Anna Lee 识别为高风险客户或重点监控对象。
 
-## 2. **Suspicious Path Identification (DFS Result)**
+## 2. **可疑路径识别（DFS 结果）**
 
-Next, using the **DFS (Depth-First Search) graph algorithm**, we conducted a full-link penetration of the funds flow related to Anna Lee. After executing the DFS algorithm, we identified a closed suspicious path starting from Anna Lee:
+接下来，我们使用 **DFS（深度优先搜索）图算法** 对与 Anna Lee 相关的资金流进行了全链路穿透分析。执行 DFS 算法后，我们识别出一条以 Anna Lee 为起点的闭环可疑路径：
 
-- **Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**.
+- **Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**
 
-This path has a typical closed-loop structure: funds are transferred from Anna Lee, pass through multiple intermediary accounts in multiple steps, and then flow back to Anna Lee's account, forming a complete "out → transfer → return" link. This structure is considered a high-risk pattern in anti-money laundering risk identification, often used to obscure the source of the transaction or hide the actual flow of funds.
+这条路径具有典型的闭环结构：资金从 Anna Lee 转出，经过多个中间账户多步流转后，又回流到 Anna Lee 账户，形成完整的“转出 → 中转 → 回流”链路。该结构在反洗钱风险识别中通常被视为高风险模式，因为它常被用来掩盖交易来源或隐藏真实资金流向。
 
-## 3. **Amount Evaluation (Python Code Statistical Results)**
+## 3. **金额评估（Python 代码统计结果）**
 
-Based on the path identified in Step 2, AAG automatically generated Python data processing code to extract and summarize the transaction amounts for all transactions involved in this closed loop. The transaction amounts for each step are as follows:
+基于步骤 2 中识别出的路径，AAG 自动生成了 Python 数据处理代码，对该闭环路径中涉及的所有交易金额进行了提取和汇总。各步交易金额如下：
 
-- Anna Lee → Gill Zachary, transaction amount is 879.94 $
-- Gill Zachary → Garcia Marcus, transaction amount is 210.43 $
-- Garcia Marcus → Nunez Mitchell, transaction amount is 472.69 $
-- Nunez Mitchell → Robinson David, transaction amount is 606.94 $
-- Robinson David → Anna Lee, transaction amount is 825.22 $
+- Anna Lee → Gill Zachary，交易金额为 879.94 $
+- Gill Zachary → Garcia Marcus，交易金额为 210.43 $
+- Garcia Marcus → Nunez Mitchell，交易金额为 472.69 $
+- Nunez Mitchell → Robinson David，交易金额为 606.94 $
+- Robinson David → Anna Lee，交易金额为 825.22 $
 
-The total transaction amount for this path is **2995.22 $**.
+该路径的总交易金额为 **2995.22 $**。
 
-## 4. **Maximum Transaction Account Identification (Python Code Statistical Results)**
+## 4. **最大交易账户识别（Python 代码统计结果）**
 
-Based on the path identified in Step 2, AAG automatically generated Python data processing code to perform statistical analysis and sorting of the historical transaction amounts for all accounts involved in the path. The results are as follows:
+基于步骤 2 中识别出的路径，AAG 自动生成了 Python 数据处理代码，对路径中所有相关账户的历史交易总额进行了统计和排序。结果如下：
 
-- Anna Lee's total transaction amount is 161272.07 $
-- Nunez Mitchell's total transaction amount is 122984.06 $
-- Garcia Marcus's total transaction amount is 115367.59 $
-- Robinson David's total transaction amount is 96550.65 $
-- Gill Zachary's total transaction amount is 64109.86 $
+- Anna Lee 的总交易额为 161272.07 $
+- Nunez Mitchell 的总交易额为 122984.06 $
+- Garcia Marcus 的总交易额为 115367.59 $
+- Robinson David 的总交易额为 96550.65 $
+- Gill Zachary 的总交易额为 64109.86 $
 
-The results show that Anna Lee and Nunez Mitchell have higher total transaction amounts, suggesting they may play the role of funds centralization points and need further investigation into their business activities and fund flows.
+结果表明，Anna Lee 和 Nunez Mitchell 的历史交易总额明显更高，说明它们可能在资金流动中扮演资金归集点的角色，需要进一步核查其业务活动和资金流向。
 
-## **Summary**
+## **总结**
 
-This analysis used graph algorithms to comprehensively assess Anna Lee's money laundering risk, primarily utilizing the **PageRank centrality algorithm** and the **DFS (Depth-First Search) path algorithm**. First, PageRank quantified the importance and risk association of all accounts in the network, revealing that **Anna Lee's PageRank score is in the Top 2%**, placing her in a highly critical node position with significant risk diffusion potential. Then, DFS was used to penetrate the funds flow starting from Anna Lee, identifying a closed-loop suspicious path: **Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**, with a total transaction amount of **2995.22 $**, showing a typical high-risk structure of “funds out—multi-step transition—returning to the sender”. Additionally, the amount statistics showed that Anna Lee (161272.07 $) and Nunez Mitchell (122984.06 $) have significantly higher historical transaction totals, suggesting they may act as funds centralization or transfer points, with highly suspicious overall characteristics.
+本次分析利用图算法对 Anna Lee 的洗钱风险进行了综合评估，主要使用了 **PageRank 中心性算法** 和 **DFS（深度优先搜索）路径算法**。首先，PageRank 对网络中所有账户的重要性和风险关联性进行了量化，结果显示 **Anna Lee 的 PageRank 得分位于前 2%**，说明其处于高度关键的节点位置，具有较强的风险扩散潜力。随后，DFS 对以 Anna Lee 为起点的资金流进行了穿透分析，识别出一条闭环可疑路径：**Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**，总交易金额为 **2995.22 $**，表现出典型的“资金转出—多步中转—回流原账户”的高风险结构。此外，金额统计结果显示 Anna Lee（161272.07 $）和 Nunez Mitchell（122984.06 $）的历史交易总额显著偏高，进一步表明它们可能是资金归集或中转的关键节点，整体可疑程度较高。
 
-## **Recommendations**
+## **建议**
 
-1. It is recommended to include Anna Lee and the accounts in the closed-loop path (especially Nunez Mitchell and Robinson David) in the high-risk list and elevate their monitoring level. Strict real-time alerts and limit controls should be set for their subsequent large and cyclical transactions.
-2. A specialized due diligence investigation should be conducted for Anna Lee and key counterparties, focusing on verifying the sources of funds, transaction purposes, and business backgrounds. In addition, longer-period transaction records and external information should be examined to detect potential characteristics of structured splitting and circular flows indicative of money laundering.
+1. 建议将 Anna Lee 及闭环路径中的相关账户（尤其是 Nunez Mitchell 和 Robinson David）纳入高风险名单，并提升监控等级。对其后续的大额、循环型交易设置严格的实时预警和限额控制。
+2. 建议对 Anna Lee 及关键交易对手开展专项尽职调查，重点核查其资金来源、交易目的和业务背景。同时结合更长周期的交易记录与外部信息，排查是否存在结构化拆分、循环转账等洗钱特征。
 
 ----------------------------"""
         response = self.llm.complete(prompt)
@@ -533,10 +534,12 @@ class OpenAIEnv:
     def __init__(self, 
                  base_url,
                  api_key,
-                 model_name):
+                 model_name,
+                 temperature: float = 0.0):
         self.base_url = base_url
         self.api_key = api_key
         self.model = model_name
+        self.temperature = temperature
 
         openai.api_key = self.api_key
         openai.base_url = self.base_url
@@ -554,7 +557,11 @@ class OpenAIEnv:
             Parsed JSON dict if parse_json=True, otherwise raw response text
         """
         messages = [{"role": "user", "content": full_prompt}]
-        request_kwargs = {"model": self.model, "messages": messages}
+        request_kwargs = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": self.temperature,
+        }
         
         if response_format:
             request_kwargs["response_format"] = response_format
@@ -602,6 +609,7 @@ class OpenAIEnv:
             resp = self.client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": query}],
+                temperature=self.temperature,
             )
             return resp.choices[0].message.content
         except Exception as e:
@@ -663,7 +671,8 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             messages=[{"role": "user", "content": select_algorithm_prompt.format(
                 question=question,
                 algorithm_list=algorithm_list
-            ) + schema_context}]
+            ) + schema_context}],
+            temperature=self.temperature,
         )
         response_text = response.choices[0].message.content
         return parse_openai_json_response(response_text, "select_algorithm")
@@ -739,95 +748,97 @@ Please consider this schema when selecting the algorithm to ensure compatibility
 
         # 
         prompt = f"""
-You are a professional data analyst responsible for interpreting graph algorithm results. Your task is to analyze the computation output of a given tool based on:
-- The **natural-language user question** (*question*)
-- The **corresponding tool description** (*tool_description*)
-- The **actual execution result of that tool** (*tool_result*)
+你是一名专业的数据分析师，负责解读图算法的计算结果。你的任务是基于以下内容，对某个工具的计算输出进行分析：
+- **自然语言用户问题**（*question*）
+- **对应的工具描述**（*tool_description*）
+- **该工具的实际执行结果**（*tool_result*）
 
-Each tool represents a specific graph algorithm (e.g., PageRank, Louvain, Shortest Path, etc.). You should generate a concise, easy-to-understand analysis report that directly answers the user's question, and refer to the following sample analysis report format.
-
-----------------------------
-## Response Requirements
-- Base your explanation strictly on the provided computation result.
-- Clearly highlight and explain key data points (e.g., top-ranked nodes, cluster counts, path lengths, etc.).
-- Use simple, intuitive language — avoid jargon and avoid repeating the same summary.
-- If the available data is insufficient to fully answer the question, explicitly state the limitation or missing information.
-- The output format must be in **Markdown** format for clear presentation.
-- Each analysis step must have a clear number and a short title.For example,## 1. **Anna Lee Node Centrality Evaluation (PageRank Result)**
-- The final output **must include a Summary section and a Recommendations section**.
-- Please structure your response based on the following analysis report template.
+每个工具都代表一种特定的图算法（例如 PageRank、Louvain、最短路径等）。你需要生成一份简洁、易懂的分析报告，直接回答用户的问题，并参考下面给出的分析报告格式示例。
 
 ----------------------------
-## Inputs:
-### User Question:
+## 响应要求
+- 你必须使用中文。
+- 你的解释必须严格基于给定的计算结果。
+- 清晰突出并解释关键数据点（例如排名靠前的节点、聚类数量、路径长度等）。
+- 使用简单、直观的语言，避免术语堆砌，也不要重复同样的总结。
+- 如果现有数据不足以完整回答问题，要明确指出限制或缺失的信息。
+- 输出格式必须为 **Markdown**，以保证展示清晰。
+- 每一步分析都必须有明确编号和简短标题。例如：## 1. **Anna Lee 节点中心性评估（PageRank 结果）**
+- 最终输出**必须包含 Summary（总结）部分和 Recommendations（建议）部分**。
+- 请按照下面给出的分析报告模板来组织你的回答。
+
+----------------------------
+## 输入：
+### 用户问题：
 {question}
 
-### Tool Description:
+### 工具描述：
 {tool_description}
 
-### Tool Execution Result:
+### 工具执行结果：
 {tool_result}
 
 ----------------------------
-## Output
+## 输出
 
-Provide a clear and concise written explanation in plain English that directly answers the user's question, structured according to the following analysis report format:
+请用通俗易懂的英文写出一份清晰、简洁的解释，直接回答用户的问题，并按照以下分析报告格式组织内容：
 
 ----------------------------
-**Analysis Report Example:**
+**分析报告示例：**
 
-## 1. **Anna Lee Node Centrality Evaluation (PageRank Result)**
+## 1. **Anna Lee 节点中心性评估（PageRank 结果）**
 
-First, using the **PageRank graph algorithm**, we quantitatively evaluated the "importance" and "risk association" of all account nodes in the transaction network. The idea behind PageRank is that if an account frequently transacts with multiple high-risk accounts or is in a key structural position in the transaction network, its score will significantly increase, reflecting its potential influence and exposure risk in the network.
+首先，我们使用 **PageRank 图算法** 对交易网络中所有账户节点的“重要性”和“风险关联性”进行了量化评估。PageRank 的基本思想是：如果一个账户频繁与多个高风险账户发生交易，或者处于交易网络中的关键结构位置，那么它的得分会显著升高，从而反映出它在网络中的潜在影响力和风险暴露程度。
 
-The result shows that **Anna Lee**'s PageRank score is in the Top 2% of all clients, significantly higher than other users. This indicates that the account is highly "depended upon" by other nodes in the transaction network, demonstrating strong potential for risk diffusion. Therefore, Anna Lee is preliminarily identified as a high-risk client or key monitoring target.
+结果显示，**Anna Lee** 的 PageRank 得分位于所有客户中的前 2%，显著高于其他用户。这说明该账户在交易网络中被其他节点高度“依赖”，表现出较强的风险扩散潜力。因此，可以初步将 Anna Lee 识别为高风险客户或重点监控对象。
 
-## 2. **Suspicious Path Identification (DFS Result)**
+## 2. **可疑路径识别（DFS 结果）**
 
-Next, using the **DFS (Depth-First Search) graph algorithm**, we conducted a full-link penetration of the funds flow related to Anna Lee. After executing the DFS algorithm, we identified a closed suspicious path starting from Anna Lee:
+接下来，我们使用 **DFS（深度优先搜索）图算法** 对与 Anna Lee 相关的资金流进行了全链路穿透分析。执行 DFS 算法后，我们识别出一条以 Anna Lee 为起点的闭环可疑路径：
 
-- **Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**.
+- **Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**
 
-This path has a typical closed-loop structure: funds are transferred from Anna Lee, pass through multiple intermediary accounts in multiple steps, and then flow back to Anna Lee's account, forming a complete "out → transfer → return" link. This structure is considered a high-risk pattern in anti-money laundering risk identification, often used to obscure the source of the transaction or hide the actual flow of funds.
+这条路径具有典型的闭环结构：资金从 Anna Lee 转出，经过多个中间账户多步流转后，又回流到 Anna Lee 账户，形成完整的“转出 → 中转 → 回流”链路。该结构在反洗钱风险识别中通常被视为高风险模式，因为它常被用来掩盖交易来源或隐藏真实资金流向。
 
-## 3. **Amount Evaluation (Python Code Statistical Results)**
+## 3. **金额评估（Python 代码统计结果）**
 
-Based on the path identified in Step 2, AAG automatically generated Python data processing code to extract and summarize the transaction amounts for all transactions involved in this closed loop. The transaction amounts for each step are as follows:
+基于步骤 2 中识别出的路径，AAG 自动生成了 Python 数据处理代码，对该闭环路径中涉及的所有交易金额进行了提取和汇总。各步交易金额如下：
 
-- Anna Lee → Gill Zachary, transaction amount is 879.94 $
-- Gill Zachary → Garcia Marcus, transaction amount is 210.43 $
-- Garcia Marcus → Nunez Mitchell, transaction amount is 472.69 $
-- Nunez Mitchell → Robinson David, transaction amount is 606.94 $
-- Robinson David → Anna Lee, transaction amount is 825.22 $
+- Anna Lee → Gill Zachary，交易金额为 879.94 $
+- Gill Zachary → Garcia Marcus，交易金额为 210.43 $
+- Garcia Marcus → Nunez Mitchell，交易金额为 472.69 $
+- Nunez Mitchell → Robinson David，交易金额为 606.94 $
+- Robinson David → Anna Lee，交易金额为 825.22 $
 
-The total transaction amount for this path is **2995.22 $**.
+该路径的总交易金额为 **2995.22 $**。
 
-## 4. **Maximum Transaction Account Identification (Python Code Statistical Results)**
+## 4. **最大交易账户识别（Python 代码统计结果）**
 
-Based on the path identified in Step 2, AAG automatically generated Python data processing code to perform statistical analysis and sorting of the historical transaction amounts for all accounts involved in the path. The results are as follows:
+基于步骤 2 中识别出的路径，AAG 自动生成了 Python 数据处理代码，对路径中所有相关账户的历史交易总额进行了统计和排序。结果如下：
 
-- Anna Lee's total transaction amount is 161272.07 $
-- Nunez Mitchell's total transaction amount is 122984.06 $
-- Garcia Marcus's total transaction amount is 115367.59 $
-- Robinson David's total transaction amount is 96550.65 $
-- Gill Zachary's total transaction amount is 64109.86 $
+- Anna Lee 的总交易额为 161272.07 $
+- Nunez Mitchell 的总交易额为 122984.06 $
+- Garcia Marcus 的总交易额为 115367.59 $
+- Robinson David 的总交易额为 96550.65 $
+- Gill Zachary 的总交易额为 64109.86 $
 
-The results show that Anna Lee and Nunez Mitchell have higher total transaction amounts, suggesting they may play the role of funds centralization points and need further investigation into their business activities and fund flows.
+结果表明，Anna Lee 和 Nunez Mitchell 的历史交易总额明显更高，说明它们可能在资金流动中扮演资金归集点的角色，需要进一步核查其业务活动和资金流向。
 
-## **Summary**
+## **总结**
 
-This analysis used graph algorithms to comprehensively assess Anna Lee's money laundering risk, primarily utilizing the **PageRank centrality algorithm** and the **DFS (Depth-First Search) path algorithm**. First, PageRank quantified the importance and risk association of all accounts in the network, revealing that **Anna Lee's PageRank score is in the Top 2%**, placing her in a highly critical node position with significant risk diffusion potential. Then, DFS was used to penetrate the funds flow starting from Anna Lee, identifying a closed-loop suspicious path: **Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**, with a total transaction amount of **2995.22 $**, showing a typical high-risk structure of “funds out—multi-step transition—returning to the sender”. Additionally, the amount statistics showed that Anna Lee (161272.07 $) and Nunez Mitchell (122984.06 $) have significantly higher historical transaction totals, suggesting they may act as funds centralization or transfer points, with highly suspicious overall characteristics.
+本次分析利用图算法对 Anna Lee 的洗钱风险进行了综合评估，主要使用了 **PageRank 中心性算法** 和 **DFS（深度优先搜索）路径算法**。首先，PageRank 对网络中所有账户的重要性和风险关联性进行了量化，结果显示 **Anna Lee 的 PageRank 得分位于前 2%**，说明其处于高度关键的节点位置，具有较强的风险扩散潜力。随后，DFS 对以 Anna Lee 为起点的资金流进行了穿透分析，识别出一条闭环可疑路径：**Anna Lee → Gill Zachary → Garcia Marcus → Nunez Mitchell → Robinson David → Anna Lee**，总交易金额为 **2995.22 $**，表现出典型的“资金转出—多步中转—回流原账户”的高风险结构。此外，金额统计结果显示 Anna Lee（161272.07 $）和 Nunez Mitchell（122984.06 $）的历史交易总额显著偏高，进一步表明它们可能是资金归集或中转的关键节点，整体可疑程度较高。
 
-## **Recommendations**
+## **建议**
 
-1. It is recommended to include Anna Lee and the accounts in the closed-loop path (especially Nunez Mitchell and Robinson David) in the high-risk list and elevate their monitoring level. Strict real-time alerts and limit controls should be set for their subsequent large and cyclical transactions.
-2. A specialized due diligence investigation should be conducted for Anna Lee and key counterparties, focusing on verifying the sources of funds, transaction purposes, and business backgrounds. In addition, longer-period transaction records and external information should be examined to detect potential characteristics of structured splitting and circular flows indicative of money laundering.
+1. 建议将 Anna Lee 及闭环路径中的相关账户（尤其是 Nunez Mitchell 和 Robinson David）纳入高风险名单，并提升监控等级。对其后续的大额、循环型交易设置严格的实时预警和限额控制。
+2. 建议对 Anna Lee 及关键交易对手开展专项尽职调查，重点核查其资金来源、交易目的和业务背景。同时结合更长周期的交易记录与外部信息，排查是否存在结构化拆分、循环转账等洗钱特征。
 
 ----------------------------"""
 
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            temperature=self.temperature,
         )
         response_text = response.choices[0].message.content
         if not response_text:
@@ -837,7 +848,8 @@ This analysis used graph algorithms to comprehensively assess Anna Lee's money l
     def chat(self, messages: list) -> str:
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=messages
+            messages=messages,
+            temperature=self.temperature,
         )
         response_text = response.choices[0].message.content
         if not response_text:
@@ -960,12 +972,18 @@ class Reasoner:
             base_url = openai_cfg.get("base_url") or "https://api.openai.com/v1"
             api_key = openai_cfg.get("api_key")
             model = openai_cfg.get("model") or "gpt-4o"
+            temperature = openai_cfg.get("temperature", 0.0)
             if not api_key:
                 # Allow environment variable fallback
                 api_key = os.environ.get("OPENAI_API_KEY")
             if not api_key:
                 raise ValueError("OpenAI provider requires an API key via config.reasoner.llm.openai.api_key or env OPENAI_API_KEY")
-            self.env = OpenAIEnv(base_url=base_url, api_key=api_key, model_name=model)
+            self.env = OpenAIEnv(
+                base_url=base_url,
+                api_key=api_key,
+                model_name=model,
+                temperature=temperature,
+            )
         else:
             raise ValueError(f"Unsupported provider: {provider}")
 
@@ -978,7 +996,7 @@ class Reasoner:
                         "query": query,
                         "depends_on": []
                     }]}  
-        full_prompt = plan_subqueries_prompt.format(query=query)
+        full_prompt = plan_subqueries_prompt_zh.format(query=query)
         return self.env.execute_prompt(full_prompt, parse_json=True)
 
     def plan_expert_subqueries_with_algorithms(

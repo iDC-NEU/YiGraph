@@ -15,7 +15,7 @@
 
 - id: Path
   task_type: "Path"
-  description: Algorithms for finding shortest paths, Eulerian paths, longest paths, and circular paths
+  description: Algorithms for finding shortest paths, Eulerian paths, longest paths, and circular paths,可以解决列出围绕 用户 的潜在洗钱路径
   algorithm:
     - find_cycle
     - shortest_path
@@ -34,7 +34,7 @@
 
 - id: Centrality
   task_type: "Centrality"
-  description: Measures of node and edge importance within the graph
+  description: Measures of node and edge importance within the graph,可以解决问题：判断用户是否存在洗钱行为
   algorithm:
     - degree_centrality
     - in_degree_centrality

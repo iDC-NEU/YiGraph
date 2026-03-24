@@ -120,6 +120,7 @@ def create_engine_config(
                 "base_url": kwargs.get("openai_base_url", "https://api.openai.com/v1"),
                 "api_key": kwargs.get("openai_api_key"),
                 "model": kwargs.get("openai_model", "gpt-4o"),
+                "temperature": kwargs.get("openai_temperature", 0.0),
             },
         )
     else:
@@ -135,6 +136,7 @@ def create_engine_config(
                 "base_url": kwargs.get("openai_base_url", "https://api.openai.com/v1"),
                 "api_key": kwargs.get("openai_api_key"),
                 "model": kwargs.get("openai_model", "gpt-4o"),
+                "temperature": kwargs.get("openai_temperature", 0.0),
             },
         )
 
