@@ -13,16 +13,15 @@ reasoner:
     provider: "openai"
     # Ollama config (used when provider is ollama)
     ollama:
-      model_name: "llama3.1:8b"
+      model_name: "llama3.1:70b"
       device: "cuda:0"
       timeout: 150000
       port: 11434
     # OpenAI-compatible API (used when provider is openai; e.g. OpenAI / DeepSeek / self-hosted)
     openai:
-      base_url: "https://gitaigc.com/v1/"   # OpenAI-compatible API base URL; must end with /
-      api_key: "sk-Fr1QRaHaTa8tDYwYtKPcpslw98gccUJ0DBgrN2wv4cO1yzh4"                    # API key from your provider
+      base_url: "https://your-api-endpoint.com/v1/"   # OpenAI-compatible API base URL; must end with /
+      api_key: "your-api-key-here"                    # API key from your provider
       model: "gpt-4o-mini"                            # Model name (e.g. gpt-4o-mini, deepseek-chat)
-      temperature: 0.0                               # Sampling temperature for chat completion
 
 # -----------------------------------------------------------------------------
 # Retrieval - Vector DB and graph DB
@@ -46,4 +45,4 @@ retrieval:
     batch_size: 20
     chunk_size: 512
     chunk_overlap: 20
-    device: "cuda:1"
+    device: "cuda:2"
