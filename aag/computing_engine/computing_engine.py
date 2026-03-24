@@ -9,7 +9,7 @@ from aag.utils.path_utils import DEFAULT_CONFIG_SERVER_PATH
 from aag.computing_engine.mcp_client import GraphMCPClient
 from aag.computing_engine.code_executor import DynamicCodeExecutor
 from aag.expert_search_engine.database.datatype import GraphData
-from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine
+from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine, LLMInterface
 from aag.computing_engine.graph_query.graph_query import Neo4jGraphClient, Neo4jConfig
 
 
@@ -304,7 +304,9 @@ class ComputingEngine:
             logger.info(f"📝 Creating Neo4jGraphClient, uri={config.uri}")
             db_client = Neo4jGraphClient(config)
             logger.info("📝 Creating NaturalLanguageQueryEngine")
-            self.nl_query_engine = NaturalLanguageQueryEngine(db_client, reasoner)
+            # Wrap reasoner in LLMInterface
+            llm_interface = LLMInterface(reasoner)
+            self.nl_query_engine = NaturalLanguageQueryEngine(db_client, llm_interface)
             self.nl_query_engine.initialize()
             logger.info("✓ NaturalLanguageQueryEngine initialized in ComputingEngine")
         except Exception as e:

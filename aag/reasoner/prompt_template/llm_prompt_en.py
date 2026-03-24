@@ -2076,157 +2076,6 @@ Current Plan: {current_plan}
 User Request: {user_request}
 """
 
-# add gjq
-# Prompt for classifying query type in natural language query engine
-nl_query_classify_type_prompt = """You are a Neo4j query assistant.
-User question: {question}
-Available query types and descriptions:
-{query_templates}
-Please determine which query type the user question belongs to. Return only the type name (e.g., "node_lookup"), with no additional content.
-"""
-
-# add gjq
-# Prompt for extracting parameters in natural language query engine
-nl_query_extract_params_prompt = """{schema_info}
-## Query Template Information
-Query type: {query_type}
-Description: {template_description}
-Invocation method: {template_method}
-Required parameters: {required_params}
-Query-specific optional parameters: {optional_params}
-## Universal Modifiers (Applicable to any query)
-{query_modifiers}
-## User Question
-{question}
-## Task
-**Important: You must strictly reference the Schema information (node types, properties, relationship types, etc.) provided above to fill in the parameters.**
-Based on the Schema information and query template requirements, extract parameter values from the user question and return them in JSON format.
-**Key improvement: You must clearly indicate which universal modifiers need to be used!**
-Requirements:
-1. Required parameters must be filled
-2. **label must be selected from the node types in the Schema** (refer to the "Node Types and Properties" section above)
-3. **key selection rules (important)**：
-   - **Check the property list for the label in the Schema**
-   - If the Schema has a `node_key` property, **must use node_key first**
-   - only consider other properties (like id, acct_id, etc.) if there is no node_key
-4. **value/v1/v2 extraction rules (important)**:
-   - **Extract based on the format of the key's corresponding Schema example values**
-   - If key is node_key, and Schema example is name format, extract full name from question
-   - Name format is typically "last_name first_name" (e.g., "Collins Steven", "Nunez Mitchell")
-   - For path_query and common_neighbor, extract two names as v1 and v2
-   - If question is "A to B" or "A and B", A is v1, B is v2
-   - Do not extract unrelated values (e.g., base_amt, amount, transaction)
-5. **rel_type selection rules**:
-   - **must be selected from the "Relationship Types and Properties" section of the Schema**
-   - Match relationship types based on keywords in the question (e.g., "transaction", "transfer")
-   - If the question does not explicitly specify a relationship type, do not set it (use default all relationships)
-6. **Universal modifier judgment rules (new, very important)**:
-   **You must include a "modifiers" field in the JSON, listing the modifiers to be used!**
-   a) **order_by and order_direction**:
-      - Only used when the question explicitly mentions sorting needs like "sort", "order by", "largest to smallest", "smallest to largest", "largest", "smallest", etc.
-      - If sorting is needed, must select the correct field name from the Schema
-      - **Field name format (based on query type)**：
-        * **neighbor_query**：
-          - Relationship property: firstRel.property_name (e.g., firstRel.base_amt)
-          - Node properties: `nbr.property_name` (e.g., `nbr.name`)
-        * **common_neighbor**：
-          - Relationship properties: `rA.property_name` or `rB.property_name` (e.g., `rA.base_amt`)
-          - Node properties: `C.property_name` (e.g., `C.node_key`)
-        * **path_query (path query)**:
-          - Path length: hops
-          - Node properties: need to use the node variables in the path
-      - order_direction: "ASC" (ascending) or "DESC" (descending)
-      - **If the question does not require sorting, do not include order_by in modifiers**
-   b) **limit**：
-      - Only used when the question explicitly mentions quantity limits (e.g., "first N", "at most N", "N items")
-      - If the question contains "all", "entire", etc., **do not use limit**
-      - If it's an aggregation query (just count/sum, etc.), **do not use limit**
-      - **If the question does not have a quantity limit, do not include limit in modifiers**
-   c) **where**：
-      - Only used when the question explicitly mentions filtering conditions (e.g., "amount greater than 1000", "balance over 500")
-      - **Condition format (varies by query type)**:
-        * **neighbor_query**：
-          - Node properties: `nbr.property_name operator value` (e.g., `nbr.balance > 1000`)
-          - Relationship properties: `firstRel.property_name operator value` (e.g., `firstRel.base_amt > 500`)
-        * **common_neighbor**：
-          - Node properties: `C.property_name operator value` (e.g., `C.balance > 1000`)
-          - Relationship properties: `rA.property_name operator value` or `rB.property_name operator value`
-        * **path_query**:
-          - Path length: `hops operator value` (e.g., `hops <= 3`)
-      - **If the question does not have filtering conditions, do not include where in modifiers**
-   d) **aggregate and aggregate_field**:
-      - Only used when the question contains aggregate keywords (e.g., "count", "number of", "how many", "sum", "average")
-      - aggregate 类型:count、sum、avg、max、min
-      - **If the question is not an aggregate query, do not include aggregate in modifiers**
-7. **JSON output format (important)**:
-   Must contain two top-level fields:
-   - "params": query parameters (required parameters + query-specific optional parameters)
-   - "modifiers": universal modifiers to be used (only include needed modifiers)
-Example Output 1 (Basic query - no modifiers):
-{{{{
-"params": {{{{
-"label": "Account",
-"key": "node_key",
-"value": "Lee Alex"
-}}}},
-"modifiers": {{{{}}}}
-}}}}
-Example Output 2 (With sorting and limit):
-{{{{
-"params": {{{{
-"label": "Account",
-"key": "node_key",
-"value": "Collins Steven",
-"hops": 1
-}}}},
-"modifiers": {{{{
-"order_by": "firstRel.base_amt",
-"order_direction": "DESC",
-"limit": 5
-}}}}
-}}}}
-Example Output 3 (With filtering condition):
-{{{{
-"params": {{{{
-"label": "Account",
-"key": "node_key",
-"value": "Collins Steven",
-"hops": 1
-}}}},
-"modifiers": {{{{
-"where": "firstRel.base_amt > 1000"
-}}}}
-}}}}
-Example Output 4 (Aggregate query):
-{{{{
-"params": {{{{
-"label": "Account",
-"key": "node_key",
-"value": "Collins Steven",
-"hops": 1
-}}}},
-"modifiers": {{{{
-"aggregate": "count"
-}}}}
-}}}}
-Example Output 5 (Combined modifiers):
-{{{{
-"params": {{{{
-"label": "Account",
-"key": "node_key",
-"value": "Collins Steven",
-"hops": 1
-}}}},
-"modifiers": {{{{
-"where": "firstRel.base_amt > 500",
-"order_by": "firstRel.base_amt",
-"order_direction": "DESC",
-"limit": 3
-}}}}
-}}}}
-Begin:
-"""
-
 rewrite_query_prompt = """
 You are an expert in graph analytics and query optimization. Your task is to rewrite vague or ambiguous user queries into concrete, specific, and executable tasks that align with the system's algorithm capabilities.
 
@@ -2371,4 +2220,1131 @@ This Query mixes "Graph Query" (finding neighbors/subgraph) and "Graph Algorithm
 }}
 
 **Start Refactoring**:
+"""
+
+# add gjq
+# Prompts for natural language query engine parameter extraction
+
+# add gjq - Node lookup extractor prompt
+nl_query_node_lookup_prompt = """{schema_info}
+
+## Query Type: node_lookup
+
+### Function Description
+Find a single node by unique key, or filter multiple nodes by property conditions.
+
+### Parameter Description
+**Required Parameters**:
+- `label`: Node label (select from Schema)
+
+**Optional Parameters (choose one of two modes)**:
+1. **Single Node Mode**:
+   - `key`: Property key (usually node_key)
+   - `value`: Property value (e.g., person name)
+   - `return_fields`: List of fields to return (optional)
+
+2. **Multi-Node Filter Mode**:
+   - `conditions`: Property condition dictionary (e.g., {{"country": "US", "state": "VT"}})
+   - `return_fields`: List of fields to return (optional)
+
+### Key Rules
+
+1. **Mode Determination**:
+   - If user provides unique identifier (e.g., person name, ID) → Use single node mode (key + value)
+   - If user provides filter conditions (e.g., country, state) → Use multi-node filter mode (conditions)
+
+2. **return_fields Extraction**:
+   - When user says "return...fields" or lists specific fields, **must** extract return_fields
+   - Field names must exactly match property names in Schema
+   - Common mappings: account number→acct_id, account status→acct_stat, account open date→acct_open_date
+
+3. **Range Condition Format**:
+   - Simple equality: {{"property": value}}
+   - Range condition: {{"property": [operator, value]}}
+   - Operators: ">", "<", ">=", "<=", "!=", "IN", "CONTAINS", "STARTS WITH"
+   - Example: {{"initial_deposit": [">", 500000]}}
+
+4. **Boolean Format**:
+   - Use lowercase in JSON: true / false (not True / False)
+
+### Error Examples
+
+❌ **Error 1**: Treating filter query as single node lookup
+```json
+// Question: "Query customers living in US with state VT"
+// Wrong:
+{{
+  "params": {{
+    "label": "Account",
+    "key": "node_key",
+    "value": "US VT"  // ❌ Wrong! This is not a unique identifier
+  }}
+}}
+
+// Correct:
+{{
+  "params": {{
+    "label": "Account",
+    "conditions": {{"country": "US", "state": "VT"}}  // ✅ Use conditions
+  }}
+}}
+```
+
+❌ **Error 2**: Ignoring user-specified return fields
+```json
+// Question: "Query Collins Steven's account, return acct_id and acct_stat"
+// Wrong:
+{{
+  "params": {{
+    "label": "Account",
+    "key": "node_key",
+    "value": "Collins Steven"
+    // ❌ Missing return_fields
+  }}
+}}
+
+// Correct:
+{{
+  "params": {{
+    "label": "Account",
+    "key": "node_key",
+    "value": "Collins Steven",
+    "return_fields": ["acct_id", "acct_stat"]  // ✅ Add return_fields
+  }}
+}}
+```
+
+### User Question
+{question}
+
+### Task
+Based on the above rules, extract parameters from the user question and return in JSON format:
+{{
+  "params": {{...}},
+  "modifiers": {{...}}
+}}
+"""
+
+# add gjq - Relationship filter extractor prompt
+nl_query_relationship_filter_prompt = """{schema_info}
+
+## Query Type: relationship_filter
+
+### Function Description
+Filter relationships based on relationship property conditions, return relationships and related node information that meet the conditions.
+
+### Parameter Description
+**Required Parameters**:
+- `rel_type`: Relationship type (select from Schema)
+
+**Optional Parameters**:
+- `start_label`: Start node label
+- `end_label`: End node label
+- `rel_conditions`: Relationship property condition dictionary
+- `return_fields`: List of fields to return
+- `aggregate`: Aggregation function (COUNT/SUM/AVG, etc.)
+
+### Key Rules
+
+1. **rel_conditions Format**:
+   - Simple equality: {{"property": value}}
+   - Range condition: {{"property": [operator, value]}}
+   - Operators: ">", "<", ">=", "<=", "!=", "IN", "CONTAINS", "STARTS WITH"
+   - Example: {{"base_amt": [">", 400]}}
+
+2. **Date Condition Handling**:
+   - Use STARTS WITH operator for date matching
+   - Example: {{"tran_timestamp": ["STARTS WITH", "2025-05-01"]}}
+
+3. **Schema Validation Rules**:
+   - **rel_conditions**: Can only contain relationship properties (e.g., tran_id, base_amt)
+   - **where modifier**: Used for node properties (e.g., from.acct_id, to.acct_id)
+   - Don't confuse relationship properties with node properties!
+
+4. **return_fields Format**:
+   - Relationship properties: Use property name directly (e.g., "tran_id", "base_amt")
+   - Start node properties: Use "from." prefix (e.g., "from.acct_id")
+   - End node properties: Use "to." prefix (e.g., "to.acct_id")
+
+### Error Examples
+
+❌ **Error 1**: Putting node properties in rel_conditions
+```json
+// Question: "Transactions with orig_acct 1111"
+// Wrong:
+{{
+  "params": {{
+    "rel_type": "TRANSFER",
+    "rel_conditions": {{"orig_acct": 1111}}  // ❌ orig_acct is not a relationship property!
+  }}
+}}
+
+// Correct:
+{{
+  "params": {{
+    "rel_type": "TRANSFER",
+    "start_label": "Account",
+    "end_label": "Account"
+  }},
+  "modifiers": {{
+    "where": "from.acct_id = 1111"  // ✅ Use where modifier
+  }}
+}}
+```
+
+❌ **Error 2**: Adding conditions not mentioned by user
+```json
+// Question: "Transaction type is TRANSFER"
+// Wrong:
+{{
+  "params": {{
+    "rel_type": "TRANSFER",
+    "rel_conditions": {{"base_amt": [">", 400]}}  // ❌ User didn't mention amount condition!
+  }}
+}}
+
+// Correct:
+{{
+  "params": {{
+    "rel_type": "TRANSFER",
+    "start_label": "Account",
+    "end_label": "Account"
+  }}
+}}
+```
+
+### User Question
+{question}
+
+### Task
+Based on the above rules, extract parameters from the user question and return in JSON format:
+{{
+  "params": {{...}},
+  "modifiers": {{...}}
+}}
+"""
+
+# add gjq
+# Prompt for classifying query type in natural language query engine
+nl_query_classify_type_prompt = """You are a Neo4j query assistant.
+User question: {question}
+Available query types and descriptions:
+{query_templates}
+⚠️ Key: Template Selection Guide (Must Read)
+
+1. **node_lookup**: Find/filter nodes
+   - Single node exact lookup: Provide unique identifier (e.g., person name, ID)
+   - Multiple node conditional filtering: Provide property conditions (e.g., country=US, state=VT)
+   - Keywords: find, query, return...customer/account
+   - Returns: Node data or specified fields
+   - ⚠️ Does not include aggregation functions (COUNT/SUM/AVG, etc.)
+
+2. **relationship_filter**: Relationship property filtering (⭐ Focus: Returns raw data, not aggregation)
+   - Filter relationships based on relationship properties (e.g., amount>400)
+   - **Returns list of relationships that meet conditions** (raw data)
+   - Keywords: find, list, return, query...transactions
+   - Returns: Relationship data + related node information (e.g., transaction ID, amount, sender/receiver accounts)
+   - ⚠️ **Judgment criteria**:
+     * If question requires returning **specific transaction records/list** → relationship_filter
+     * If question requires returning **statistical values** (count/total/average, etc.) → aggregation_query
+   - Examples:
+     * ✅ "Find transactions with amount greater than 400, return transaction ID and amount" → relationship_filter (returns list)
+     * ❌ "Count transactions with amount greater than 400" → aggregation_query (returns value)
+
+3. **aggregation_query**: Aggregation statistical query (⭐ Focus: **Only for GROUP BY aggregation**)
+   - **⚠️ Key**: aggregation_query **only for grouped aggregation** (GROUP BY), not for global aggregation!
+   - **Must include grouping**: `group_by_node` or `group_by_property`
+   
+   **⚠️ Conditions for aggregation_query (any one satisfied)**:
+   
+   **1️⃣ Return result format is 「value / table」**:
+      - Count / times / total / average / maximum / minimum
+      - Top N / sort / ranking
+      - Y for each X (e.g., "transaction count for each account")
+      - Return format: table/list (e.g., "Account A: 100 times, Account B: 80 times")
+   
+   **2️⃣ Question keywords matched**:
+      - **Grouping keywords**: **"each", "every", "per", "by...group"**
+      - **Aggregation keywords**: count | calculate | number | times | total | sum | average | maximum | minimum
+      - **Ranking keywords**: Top | top N | sort | rank | percentage
+      - **Existence query**: whether exists (based on count / exists)
+   
+   **3️⃣ Clearly 「global scan + grouping」**:
+      - "each account / each branch / each status"
+      - **No specific node ID given** (if there's a specific name/ID, should be neighbor_query + aggregate modifier)
+   
+   **⚠️ Judgment criteria (key)**:
+     * ✅ If question contains "each", "every", "per" → aggregation_query (grouped aggregation)
+     * ✅ If question requires "Top N", "ranking", "sort" + grouping → aggregation_query
+     * ❌ If question contains specific name/ID + aggregation keywords → neighbor_query + aggregate modifier
+     * ❌ If question is just "count...number", "calculate...total" (no "each") → relationship_filter + aggregate
+   
+   **Examples**:
+     * ✅ "Count transaction times for each account" → aggregation_query (has "each")
+     * ✅ "Calculate total outgoing transaction amount for each account" → aggregation_query (has "each")
+     * ✅ "Return top 5 accounts with most transactions" → aggregation_query (Top N + grouping)
+     * ✅ "Count number of accounts under each branch_id" → aggregation_query (each + grouping)
+     * ❌ "Count transactions initiated by Collins Steven" → neighbor_query + aggregate (has specific name)
+     * ❌ "Count total amount of TRANSFER type transactions" → relationship_filter + aggregate (no "each")
+     * ❌ "Count transactions on 2025-05-01" → relationship_filter + aggregate (no "each")
+     * ❌ "Count total amount of transactions with base_amt > 300" → relationship_filter + aggregate (no "each")
+   
+   **⚠️ Correct approach for global aggregation (no grouping)**:
+   - "Count transactions initiated by Collins Steven" → neighbor_query + aggregate modifier
+   - "Count transactions on 2025-05-01" → relationship_filter + aggregate
+   - "Count total amount of transactions with base_amt > 300" → relationship_filter + aggregate + rel_conditions
+
+4. **neighbor_query**: Neighbor query (⭐ Key distinction)
+   - Query **specific node's** neighbors or N-hop relationships
+   - ⚠️ **Key**: Question **must have clear starting node** (e.g., person name, ID, specific account)
+   - Can return detailed information for each edge (hops=1 + return_fields)
+   - Keywords:
+     * Clear starting point: **someone's** neighbors, **some account's** counterparties, **Collins Steven's** transactions
+     * Relationship description: directly transacted with, as sender account
+   - Returns: Neighbor nodes + relationship information
+   - Examples:
+     * ✅ "Query all counterparty accounts that Steven Collins directly transacted with" → neighbor_query (has starting point: Steven Collins)
+     * ✅ "Query all transactions where Collins Steven is the sender account" → neighbor_query (has starting point: Collins Steven)
+     * ❌ "Query all TRANSFER type transactions" → relationship_filter (no clear starting point)
+     * ❌ "Query transaction paths on 2025-05-01" → relationship_filter (no clear starting point, only time condition)
+   - ⚠️ **Judgment criteria**: If question doesn't have specific name, ID or account identifier, it's not neighbor_query!
+
+5. **path_query**: Path query
+   - Query paths between two nodes
+   - Keywords: path, how to reach, from A to B
+   - Returns: Path information
+
+6. **common_neighbor**: Common neighbors (supports relationship property filtering + aggregation ranking)
+   - Query common neighbors of two **specific nodes**
+   - ⚠️ Important: Both nodes must be specific node identifiers (e.g., person names, IDs), not conditions
+   - Keywords: common, mutual, both...of, both people, simultaneously
+   - Returns: Common neighbor nodes (optional: + properties of both relationships + aggregation statistics)
+   - Supports three modes:
+     * **Simple mode**: No relationship property filtering, e.g., "common neighbors of Collins Steven and Nunez Mitchell"
+     * **Filter mode**: With relationship property filtering, e.g., "find common transaction neighbors of Steven Collins and Samantha Cook where transaction amounts are both greater than 400"
+     * **Aggregation ranking mode**: Count transaction times of common neighbors and rank, e.g., "find recipients that both Steven Collins and Samantha Cook transferred to, give Top-5 ranking by common transfer count"
+   - ⚠️ **Judgment criteria**:
+     * If question contains "both people", "simultaneously", "common" + two specific names → common_neighbor
+     * If question requires "rank by...", "Top-N" → common_neighbor + aggregate modifier
+   - ❌ Wrong example: "both transacted with A and accounts with prior_sar_count=true" → This is not common_neighbor!
+   - ✅ Correct examples:
+     * "Common neighbors of Collins Steven and Nunez Mitchell" → common_neighbor (simple mode)
+     * "Find common transaction neighbors of Steven Collins and Samantha Cook where transaction amounts are both greater than 400" → common_neighbor (filter mode)
+     * "Find recipients that both Steven Collins and Samantha Cook transferred to, give Top-5 ranking by common transfer count" → common_neighbor (aggregation ranking mode)
+
+7. **subgraph**: Subgraph extraction (supports three modes)
+   - Extract subgraph (nodes + relationships)
+   - Keywords: subgraph, extract, retrieve
+   - Returns: Node set + relationship set
+   - Supports three modes:
+     * **Single center node mode**: N-hop subgraph centered on a node, e.g., "2-hop subgraph around Collins Steven"
+     * **Relationship property filter mode**: Extract subgraph based on relationship property conditions, e.g., "extract subgraph of all transactions on 2025-05-01"
+   - ⚠️ **Judgment criteria**:
+     * Has specific node identifier (name, ID) → single center node mode
+     * Has relationship property conditions (time, amount, etc.) → relationship property filter mode
+
+8. **subgraph_by_nodes**: Multi-node subgraph extraction (⭐ Key distinction)
+   - Extract subgraph based on node list (multiple specified nodes and their mutual relationships)
+   - ⚠️ **Key**: Question **must contain multiple nodes** (e.g., node list [A,B,C])
+   - Keywords:
+     * Node list: [A,B,C], A, B, C
+     * Mutual relationships: between each other, mutually, edges between
+     * Contains: containing nodes, containing...and their
+   - Returns: Specified nodes + relationships between them
+   - Examples:
+     * ✅ "Get subgraph containing node list [A,B,C] and all edges between them" → subgraph_by_nodes (has node list)
+     * ✅ "Extract accounts A, B, C and transfer relationships between them" → subgraph_by_nodes (has multiple nodes)
+     * ❌ "2-hop subgraph around Collins Steven" → subgraph (only one center node)
+   - ⚠️ **Judgment criteria**: If question has multiple node identifiers (list, comma-separated, etc.), it's subgraph_by_nodes!
+
+⚠️ Special note: aggregation_query vs relationship_filter
+- "Count transaction times for each account" → aggregation_query (GROUP BY + COUNT)
+- "Find transactions with amount greater than 400" → relationship_filter (WHERE filtering)
+- "Calculate total amount for each account" → aggregation_query (GROUP BY + SUM)
+- "List count of transactions with is_sar=False" → relationship_filter (global COUNT)
+
+Please determine which query type the user question belongs to. Only return the type name (e.g., "node_lookup"), no other content.
+"""
+
+# add gjq
+# Prompt for extracting parameters in natural language query engine
+nl_query_extract_params_prompt = """{schema_info}
+## Query Template Information
+Query type: {query_type}
+Description: {template_description}
+Invocation method: {template_method}
+Required parameters: {required_params}
+Query-specific optional parameters: {optional_params}
+## Universal Modifiers (Applicable to any query)
+{query_modifiers}
+## User Question
+{question}
+## Task
+**Important: You must strictly reference the Schema information (node types, properties, relationship types, etc.) provided above to fill in the parameters.**
+Based on the Schema information and query template requirements, extract parameter values from the user question and return them in JSON format.
+**Key improvement: You must clearly indicate which universal modifiers need to be used!**
+Requirements:
+1. Required parameters must be filled
+2. **label must be selected from the node types in the Schema** (refer to the "Node Types and Properties" section above)
+3. **key selection rules (important)**：
+   - **Check the property list for the label in the Schema**
+   - If the Schema has a `node_key` property, **must use node_key first**
+   - only consider other properties (like id, acct_id, etc.) if there is no node_key
+4. **value/v1/v2 extraction rules (important)**:
+   - **Extract based on the format of the key's corresponding Schema example values**
+   - If key is node_key, and Schema example is name format, extract full name from question
+   - Name format is typically "last_name first_name" (e.g., "Collins Steven", "Nunez Mitchell")
+   - For path_query and common_neighbor, extract two names as v1 and v2
+   - If question is "A to B" or "A and B", A is v1, B is v2
+   - Do not extract unrelated values (e.g., base_amt, amount, transaction)
+5. **rel_type selection rules**:
+   - **must be selected from the "Relationship Types and Properties" section of the Schema**
+   - Match relationship types based on keywords in the question (e.g., "transaction", "transfer")
+   - If the question does not explicitly specify a relationship type, do not set it (use default all relationships)
+6. **Universal modifier judgment rules (new, very important)**:
+   **You must include a "modifiers" field in the JSON, listing the modifiers to be used!**
+   a) **order_by and order_direction**:
+      - Only used when the question explicitly mentions sorting needs like "sort", "order by", "largest to smallest", "smallest to largest", "largest", "smallest", etc.
+      - If sorting is needed, must select the correct field name from the Schema
+      - **Field name format (based on query type)**：
+        * **neighbor_query**：
+          - Relationship property: firstRel.property_name (e.g., firstRel.base_amt)
+          - Node properties: `nbr.property_name` (e.g., `nbr.name`)
+        * **common_neighbor**：
+          - Relationship properties: `rA.property_name` or `rB.property_name` (e.g., `rA.base_amt`)
+          - Node properties: `C.property_name` (e.g., `C.node_key`)
+        * **path_query (path query)**:
+          - Path length: hops
+          - Node properties: need to use the node variables in the path
+      - order_direction: "ASC" (ascending) or "DESC" (descending)
+      - **If the question does not require sorting, do not include order_by in modifiers**
+   b) **limit**：
+      - Only used when the question explicitly mentions quantity limits (e.g., "first N", "at most N", "N items")
+      - If the question contains "all", "entire", etc., **do not use limit**
+      - If it's an aggregation query (just count/sum, etc.), **do not use limit**
+      - **If the question does not have a quantity limit, do not include limit in modifiers**
+   c) **where**：
+      - Only used when the question explicitly mentions filtering conditions (e.g., "amount greater than 1000", "balance over 500")
+      - **Condition format (varies by query type)**:
+        * **neighbor_query**：
+          - Node properties: `nbr.property_name operator value` (e.g., `nbr.balance > 1000`)
+          - Relationship properties: `firstRel.property_name operator value` (e.g., `firstRel.base_amt > 500`)
+        * **common_neighbor**：
+          - Node properties: `C.property_name operator value` (e.g., `C.balance > 1000`)
+          - Relationship properties: `rA.property_name operator value` or `rB.property_name operator value`
+        * **path_query**:
+          - Path length: `hops operator value` (e.g., `hops <= 3`)
+      - **If the question does not have filtering conditions, do not include where in modifiers**
+   d) **aggregate and aggregate_field**:
+      - Only used when the question contains aggregate keywords (e.g., "count", "number of", "how many", "sum", "average")
+      - aggregate 类型:count、sum、avg、max、min
+      - **If the question is not an aggregate query, do not include aggregate in modifiers**
+7. **JSON output format (important)**:
+   Must contain two top-level fields:
+   - "params": query parameters (required parameters + query-specific optional parameters)
+   - "modifiers": universal modifiers to be used (only include needed modifiers)
+Example Output 1 (Basic query - no modifiers):
+{{{{
+"params": {{{{
+"label": "Account",
+"key": "node_key",
+"value": "Lee Alex"
+}}}},
+"modifiers": {{{{}}}}
+}}}}
+Example Output 2 (With sorting and limit):
+{{{{
+"params": {{{{
+"label": "Account",
+"key": "node_key",
+"value": "Collins Steven",
+"hops": 1
+}}}},
+"modifiers": {{{{
+"order_by": "firstRel.base_amt",
+"order_direction": "DESC",
+"limit": 5
+}}}}
+}}}}
+Example Output 3 (With filtering condition):
+{{{{
+"params": {{{{
+"label": "Account",
+"key": "node_key",
+"value": "Collins Steven",
+"hops": 1
+}}}},
+"modifiers": {{{{
+"where": "firstRel.base_amt > 1000"
+}}}}
+}}}}
+Example Output 4 (Aggregate query):
+{{{{
+"params": {{{{
+"label": "Account",
+"key": "node_key",
+"value": "Collins Steven",
+"hops": 1
+}}}},
+"modifiers": {{{{
+"aggregate": "count"
+}}}}
+}}}}
+Example Output 5 (Combined modifiers):
+{{{{
+"params": {{{{
+"label": "Account",
+"key": "node_key",
+"value": "Collins Steven",
+"hops": 1
+}}}},
+"modifiers": {{{{
+"where": "firstRel.base_amt > 500",
+"order_by": "firstRel.base_amt",
+"order_direction": "DESC",
+"limit": 3
+}}}}
+}}}}
+Begin:
+"""
+
+# add gjq
+# Prompt for validating Cypher statements in natural language query engine
+nl_query_validate_cypher_prompt = """You are a Neo4j Cypher statement validation expert (Neo4j 3.5.25 version). Please verify if the following query meets the requirements.
+
+{schema_info}
+
+{template_info}
+
+{template_cypher_example}
+
+## User Question
+{question}
+
+## Query Type
+{query_type}
+
+## Extracted Parameters
+{params}
+
+## Parameter Description (for understanding query intent)
+```
+{cypher}
+```
+
+## ⚠️ CRITICAL: Common LLM Error Patterns and Correction Guide
+
+### 🔴 Error 1: WHERE Condition Syntax Errors - Most basic but most common!
+**Problem Description**: Basic syntax and logic errors when handling relationship or node property conditions.
+
+**Common Errors**:
+1. **Range Query Errors**:
+   ```cypher
+   // ❌ Wrong: Using dictionary syntax for range (this is a serious syntax error!)
+   MATCH (a)-[r:TRANSFER]->(b)
+   WHERE r.base_amt = {{"min": 300, "max": 500}}
+   RETURN r
+   
+   // ✅ Correct: Use standard comparison operators
+   MATCH (a)-[r:TRANSFER]->(b)
+   WHERE r.base_amt >= 300 AND r.base_amt <= 500
+   RETURN r
+   ```
+
+2. **Path Length Understanding Errors**:
+   ```cypher
+   // ❌ Wrong: User requires "neighbors exactly two hops away", but used *1..2 (one to two hops)
+   MATCH (a:Account {{node_key: "Collins Steven"}})-[*1..2]-(b)
+   RETURN DISTINCT b
+   
+   // ✅ Correct: Use *2 for exactly two hops
+   MATCH (a:Account {{node_key: "Collins Steven"}})-[*2]-(b)
+   RETURN DISTINCT b
+   
+   // 📝 Explanation:
+   // *1..2 = one or two hops (includes direct neighbors)
+   // *2 = exactly two hops (excludes direct neighbors)
+   // *2..3 = two or three hops
+   ```
+
+3. **IN Operator Misuse**:
+   ```cypher
+   // ❌ Wrong: Directly assigning list to property
+   MATCH (a)-[r:TRANSFER]->(b)
+   WHERE r.tx_type = ["WIRE", "ACH"]
+   RETURN r
+   
+   // ✅ Correct: Use IN operator
+   MATCH (a)-[r:TRANSFER]->(b)
+   WHERE r.tx_type IN ["WIRE", "ACH"]
+   RETURN r
+   ```
+
+4. **Date Range Query Errors**:
+   ```cypher
+   // ❌ Wrong: Using dictionary syntax
+   MATCH (a)-[r:TRANSFER]->(b)
+   WHERE r.tran_timestamp = {{"start": "2025-05-01", "end": "2025-05-02"}}
+   RETURN r
+   
+   // ✅ Correct: Use comparison operators
+   MATCH (a)-[r:TRANSFER]->(b)
+   WHERE r.tran_timestamp >= "2025-05-01" AND r.tran_timestamp < "2025-05-02"
+   RETURN r
+   ```
+
+**Checklist**:
+- [ ] Check if all WHERE conditions use dictionary syntax `= {{"min": x, "max": y}}`
+- [ ] For range queries, must use `>= AND <=` or `BETWEEN` (Neo4j 3.5.25 supports)
+- [ ] Check path length expressions:
+  - "exactly N hops away" / "exactly N hops" → use `*N`
+  - "within N hops" / "at most N hops" → use `*1..N`
+  - "N to M hops" → use `*N..M`
+- [ ] Check if IN operator is used correctly
+- [ ] Check if date/time range queries use correct comparison operators
+
+### 🔴 Error 2: Directionality Confusion - Most serious!
+**Problem Description**: LLM tends to incorrectly "correct" queries with clear direction to undirected bidirectional queries `-[rel]-`, thinking bidirectional is "safer", but this violates the user's precise intent.
+
+**Key Principles**:
+1. **Default to directed relationships** `-[rel]->`, unless user explicitly indicates "bidirectional", "between", "mutual"
+2. **Transfer/receipt direction must be precise**:
+   - "send out" / "initiate" / "as sender account" / "transfer to..." → `-[rel]->` (from starting point)
+   - "receive" / "accept" / "as receiver account" / "receive from..." → `<-[rel]-` (pointing to starting point)
+   - "recipient" / "receiver" / "both transferred to" → must be arrow target `-[rel]->`
+   - "payer" / "sender" / "both received from" → must be arrow source `<-[rel]-`
+
+**Wrong Examples**:
+```cypher
+// ❌ Wrong: User says "recipients that both transferred to", intent is (A)->(C) and (B)->(C)
+MATCH (a)-[rA]-(c), (b)-[rB]-(c)  // Wrong! Used bidirectional relationship
+WHERE ...
+RETURN c
+
+// ✅ Correct: Must use directed relationship, arrow points to recipient
+MATCH (a)-[rA]->(c), (b)-[rB]->(c)  // Correct! Arrow points to recipient
+WHERE ...
+RETURN c
+```
+
+```cypher
+// ❌ Wrong: User says "accounts that received transfers from both", intent is (A)->(C) and (B)->(C)
+MATCH (a)-[rA]-(c), (b)-[rB]-(c)  // Wrong! Used bidirectional relationship
+WHERE ...
+RETURN c
+
+// ✅ Correct: Must use directed relationship, arrow points to receiver
+MATCH (a)-[rA]->(c), (b)-[rB]->(c)  // Correct! Arrow points to receiver
+WHERE ...
+RETURN c
+```
+
+**Checklist**:
+- [ ] Check direction keywords in user question: "send out", "receive", "recipient", "payer", "initiate", "accept", "transfer to..."
+- [ ] If there's clear direction, Cypher must use `->` or `<-`, cannot use `-`
+- [ ] "recipient" / "both transferred to" = arrow target node `-[rel]->`
+- [ ] "payer" / "both received from" = arrow source `<-[rel]-`
+- [ ] Only "between", "mutual", "bidirectional", "transacted with" (no clear direction) use `-[rel]-`
+
+### 🔴 Error 3: Calculation and Statistics Errors
+**Problem Description**: Frequent errors in aggregation and sorting.
+
+**Common Errors**:
+1. **MAX/MIN Misuse**:
+   ```cypher
+   // ❌ Wrong: Thinking MAX() can return the entire record with max value
+   RETURN MAX(r.base_amt) AS max_record
+   
+   // ✅ Correct: Use ORDER BY + LIMIT 1
+   RETURN r.base_amt, r.tran_id, a, b
+   ORDER BY r.base_amt DESC
+   LIMIT 1
+   ```
+
+2. **Aggregation Target Confusion**:
+   ```cypher
+   // ❌ Wrong: Confused "neighbor count" with "relationship count"
+   MATCH (a)-[r]->(b)
+   RETURN a, COUNT(r) AS neighbor_count  // Wrong! This is relationship count
+   
+   // ✅ Correct: Neighbor count should COUNT DISTINCT nodes
+   MATCH (a)-[r]->(b)
+   RETURN a, COUNT(DISTINCT b) AS neighbor_count
+   ```
+
+3. **Incomplete Multiple Aggregation Results**:
+   ```cypher
+   // ❌ Wrong: User requires "sum" and "max contributor", only returned sum
+   MATCH (a)-[r]->(b)
+   RETURN SUM(r.base_amt) AS total
+   
+   // ✅ Correct: Need to calculate separately or use WITH clause
+   MATCH (a)-[r]->(b)
+   WITH a, SUM(r.base_amt) AS total_per_a
+   ORDER BY total_per_a DESC
+   LIMIT 1
+   RETURN a AS max_contributor, total_per_a AS max_amount
+   ```
+
+**Checklist**:
+- [ ] If need "record with max/min value", use `ORDER BY ... LIMIT 1`, not `MAX()/MIN()`
+- [ ] Distinguish "neighbor count" `COUNT(DISTINCT b)` from "relationship count" `COUNT(r)`
+- [ ] If user requires multiple aggregation results, ensure all are returned
+
+### 🔴 Error 4: Syntax Hallucination
+**Problem Description**: LLM borrows from other languages (like SQL) or "invents" syntax that doesn't exist in Cypher.
+
+**Common Hallucinations**:
+1. **SQL-style SELECT Subqueries**:
+   ```cypher
+   // ❌ Wrong: Cypher doesn't support SELECT subqueries
+   MATCH (a)
+   WHERE a.id IN (SELECT b.id FROM Account b WHERE b.balance > 1000)
+   RETURN a
+   
+   // ✅ Correct: Use WITH clause or direct MATCH
+   MATCH (a:Account)
+   WHERE a.balance > 1000
+   RETURN a
+   ```
+
+2. **GROUP BY Clause**:
+   ```cypher
+   // ❌ Wrong: Neo4j 3.5.25 doesn't support explicit GROUP BY
+   MATCH (a)-[r]->(b)
+   RETURN a, SUM(r.base_amt) AS total
+   GROUP BY a
+   
+   // ✅ Correct: Aggregation is implicit, no GROUP BY needed
+   MATCH (a)-[r]->(b)
+   RETURN a, SUM(r.base_amt) AS total
+   ```
+
+3. **JOIN Syntax**:
+   ```cypher
+   // ❌ Wrong: Cypher doesn't support JOIN
+   MATCH (a) JOIN (b) ON a.id = b.ref_id
+   
+   // ✅ Correct: Use MATCH pattern matching
+   MATCH (a), (b)
+   WHERE a.id = b.ref_id
+   ```
+
+**Checklist**:
+- [ ] Don't use `SELECT`, `FROM`, `JOIN`, `GROUP BY` and other SQL keywords
+- [ ] Aggregation queries use aggregation functions directly in RETURN, no GROUP BY needed
+- [ ] Subqueries use `WITH` clause, not `SELECT`
+
+## Validation Requirements
+
+### 1. Syntax Correctness (Neo4j 3.5.25)
+- Check if Cypher syntax is correct
+- Check if parentheses and quotes are matched
+- Check if keywords are spelled correctly
+- ⚠️ **Key**: If using relationship properties in RETURN (like rel.base_amt), must define relationship variable in MATCH (like [rel:TRANSFER])
+- ⚠️ **Important**: Neo4j 3.5.25 **does not support** SQL-style `GROUP BY` syntax!
+  - ❌ Wrong: `RETURN a, SUM(r.base_amt) AS total GROUP BY a`
+  - ✅ Correct: `RETURN a, SUM(r.base_amt) AS total` (aggregation is implicit, no GROUP BY needed)
+- ⚠️ **Important**: Correct syntax for aggregation queries:
+  - When using aggregation functions (SUM, COUNT, AVG, etc.) in RETURN, all non-aggregated fields automatically become grouping keys
+  - Example: `MATCH (a)-[r]->(b) RETURN a.name, COUNT(r) AS cnt ORDER BY cnt DESC`
+
+### ⚠️ **CRITICAL: Multiple MATCH Statements and Semicolon Separation Errors**
+- ❌ **Error 1: Multiple Independent MATCH Clauses**
+  - Including multiple independent MATCH clauses in one query without using WITH to pass context
+  - Wrong example:
+    ```cypher
+    MATCH (a:Account {{{{node_key: "Collins Steven"}}}}
+    MATCH (b:Account {{{{node_key: "Cook Samantha"}}}}
+    MATCH (a)-[rA:TRANSFER]->(c)
+    MATCH (b)-[rB:TRANSFER]->(c)
+    WHERE rA.base_amt > 400 AND rB.base_amt > 400
+    RETURN c
+    ```
+  - ✅ Correct approach: Merge all MATCH into one query, or use WITH to pass context
+    ```cypher
+    MATCH (a:Account {{{{node_key: "Collins Steven"}}}}, (b:Account {{{{node_key: "Cook Samantha"}}}}
+    MATCH (a)-[rA:TRANSFER]->(c), (b)-[rB:TRANSFER]->(c)
+    WHERE rA.base_amt > 400 AND rB.base_amt > 400
+    RETURN c
+    ```
+
+- ❌ **Error 2: Using Semicolons to Separate Multiple Queries**
+  - Sending multiple query statements separated by semicolons `;` in one request
+  - This is not allowed in most Cypher execution environments
+  - Wrong example:
+    ```cypher
+    MATCH (a:Account) RETURN a LIMIT 10;
+    MATCH (b:Account) RETURN b LIMIT 10;
+    ```
+  - ✅ Correct approach: Execute one query at a time, or use UNION to merge results
+    ```cypher
+    MATCH (a:Account) RETURN a LIMIT 10
+    UNION
+    MATCH (b:Account) RETURN b LIMIT 10
+    ```
+
+- **Check Points**:
+  1. Count occurrences of MATCH keyword in query
+  2. Check if there are semicolons `;` separating multiple statements
+  3. If there are multiple MATCHes, check if WITH clause is used to connect them
+  4. Ensure all MATCH clauses are logically coherent
+
+### 2. Semantic Correctness
+- Check if user question is correctly understood
+- Check if all necessary conditions are included
+- Check if important filtering conditions are missing
+
+### 3. Special Checks (for different query types)
+
+#### neighbor_query (Neighbor Query)
+- ⚠️ **Key**: If need to return relationship properties (like rel.base_amt), must define relationship variable in MATCH
+- Wrong example: `MATCH (a)-[:TRANSFER]->(b) RETURN rel.base_amt` ❌ (rel not defined)
+- Correct example: `MATCH (a)-[rel:TRANSFER]->(b) RETURN rel.base_amt` ✅
+
+#### common_neighbor (Common Neighbor Query)
+If user question contains "and", "also", "simultaneously" keywords, indicating need to filter relationships:
+- ✅ Correct: Use WHERE clause to filter both relationships
+- ❌ Wrong: Only find common neighbors, no relationship property filtering
+
+**Example**:
+- Question: "Find common transaction neighbors of Steven Collins and Samantha Cook where transaction amounts must be greater than 400"
+- Requirement: Must filter both relationships (Steven Collins → neighbor and Samantha Cook → neighbor) with base_amt > 400
+- Correct Cypher should include:
+  ```cypher
+  WHERE rA.base_amt > 400 AND rB.base_amt > 400
+  ```
+
+#### relationship_filter (Relationship Filter Query)
+- Check if relationship property filtering conditions are correctly applied
+- Check if correct operators are used (>, <, =, STARTS WITH, etc.)
+
+#### aggregation_query (Aggregation Query)
+- Check if aggregation functions are correctly used (COUNT, SUM, AVG, etc.)
+- Check if grouping is correctly done (GROUP BY)
+- Check if aggregate_field is correct
+
+### 4. Schema Validation (⚠️ Most Important)
+- ⚠️ **Key**: Must use node labels and relationship types that actually exist in Schema
+- ⚠️ **Key**: Must use property names that actually exist in Schema
+- Check if node labels are in Schema's "Node Types and Properties"
+- Check if relationship types are in Schema's "Relationship Types and Properties"
+- Check if property names are in corresponding node/relationship property list
+- ❌ Wrong example: Using non-existent relationship type `[:NEIGHBOR]` (not in Schema)
+- ✅ Correct example: Using relationship type that exists in Schema, like `[:TRANSFER]`
+
+### 5. Relationship Direction Validation (⚠️ Very Important)
+- ⚠️ **CRITICAL**: Correct understanding of "between", "related to" and other bidirectional relationships
+- **Problem Manifestation**: When user's natural language mentions "between A and B", "related to A" or "mutual" transactions,
+  it usually means the relationship is bidirectional (A could be sender or receiver), but generated Cypher only considers unidirectional relationship
+- **Wrong Examples**:
+  * ❌ "transactions with Hernandez Alexis" → using `-[rel]->` (unidirectional)
+  * ❌ "Steven Collins, Samantha Cook and all direct transactions between them" → using `-[rel]->` (unidirectional)
+  * ❌ "suspicious transactions related to Steven Collins" → using `-[rel]->` (unidirectional)
+- **Correct Approach**:
+  * ✅ "transactions with Hernandez Alexis" → using `-[rel]-` (bidirectional)
+  * ✅ "Steven Collins, Samantha Cook and all direct transactions between them" → using `-[rel]-` (bidirectional)
+  * ✅ "suspicious transactions related to Steven Collins" → using `-[rel]-` (bidirectional)
+- **Keyword Recognition**:
+  * "between", "mutual", "each other", "mutually" → must use bidirectional `-[rel]-`
+  * "related to...", "associated with...", "involving" → must use bidirectional `-[rel]-`
+  * "occurred", "exists", "had" → must use bidirectional `-[rel]-`
+  * "as sender account", "as receiver account", "from...to..." → use unidirectional `-[rel]->`
+- **Check Points**:
+  1. Check if user question contains bidirectional relationship keywords
+  2. If yes, check if Cypher uses undirected matching pattern `-[rel]-`
+  3. If using unidirectional arrow `-[rel]->` or `<-[rel]-`, mark as error
+  4. Only questions with explicitly specified direction (like "from A to B", "A transfers to B") should use unidirectional arrow
+
+### 6. Filter Condition Completeness Check (⚠️ Very Important)
+- ⚠️ **CRITICAL**: When query requires relationships to occur "within" or "between" a specific group, filter conditions must be applied to both ends of the relationship
+- **Problem Manifestation**: Only applied property filtering to one end of relationship, not the same requirement to the other end
+- **Wrong Examples**:
+  * ❌ "transfers between accounts with branch_id 1" → `MATCH (a {{{{branch_id: 1}}}}-[r]->(b)` (only filtered a)
+  * ❌ "transactions between Pagetown customers" → `MATCH (a {{{{city: "Pagetown"}}}}-[r]->(b)` (only filtered a)
+- **Correct Approach**:
+  * ✅ "transfers between accounts with branch_id 1" → `MATCH (a {{{{branch_id: 1}}}}-[r]-(b {{{{branch_id: 1}}}}`
+  * ✅ "transactions between Pagetown customers" → `MATCH (a {{{{city: "Pagetown"}}}}-[r]-(b {{{{city: "Pagetown"}}}}`
+- **Keyword Recognition**:
+  * "between", "among each other", "within", "mutually" → must apply same filter condition to both end nodes
+  * "same", "identical", "both are" → must apply same filter condition to both end nodes
+- **Check Points**:
+  1. Check if user question contains "between", "mutual", "within" keywords
+  2. Check if specific group properties are specified (like branch_id, city, country, etc.)
+  3. If yes, check if Cypher applies same filter condition to both end nodes of relationship
+  4. If only one end node is filtered, mark as error
+
+### 7. Common Error Checks
+- Are conditions explicitly mentioned by user missing
+- Are non-existent property names used
+- Are wrong node labels or relationship types used
+- ⚠️ **Most Important**: If variables (like rA, rB, rel) are used in WHERE or RETURN, the variable must be defined in MATCH
+
+### ⚠️ **CRITICAL: Relationship Variable Definition Check (Most Common Error!)**
+**Problem Description**: Using relationship variables (like `rA.base_amt`) in WHERE or RETURN clause, but the variable is not defined in MATCH clause.
+
+**Wrong Example**:
+```cypher
+// ❌ Wrong: rA and rB used in WHERE, but not defined in MATCH
+MATCH (a:Account {{{{node_key: 'Collins Steven'}}}}-[:TRANSFER]->(c),
+      (b:Account {{{{node_key: 'Cook Samantha'}}}}-[:TRANSFER]->(c)
+WHERE rA.base_amt > 0 AND rB.base_amt > 0  // Wrong! rA and rB not defined
+RETURN c
+```
+
+**Correct Approach**:
+```cypher
+// ✅ Correct: Define relationship variables in MATCH
+MATCH (a:Account {{{{node_key: 'Collins Steven'}}}}-[rA:TRANSFER]->(c),
+      (b:Account {{{{node_key: 'Cook Samantha'}}}}-[rB:TRANSFER]->(c)
+WHERE rA.base_amt > 0 AND rB.base_amt > 0  // Correct! rA and rB defined
+RETURN c
+```
+
+**Checklist**:
+- [ ] Scan WHERE clause, find all used relationship variables (like `rA.xxx`, `rB.xxx`, `rel.xxx`)
+- [ ] Scan RETURN clause, find all used relationship variables
+- [ ] For each relationship variable, check if there's corresponding definition in MATCH clause (like `[rA:TRANSFER]`)
+- [ ] If MATCH uses `[:TRANSFER]` instead of `[rA:TRANSFER]`, this is wrong!
+- [ ] **Self-check**: Before generating corrected_cypher, check again if all variables are defined
+
+## Output Format
+
+Please return validation result in JSON format:
+
+```json
+{{{{
+  "is_valid": true/false,
+  "issues": [
+    "Issue 1 description",
+    "Issue 2 description"
+  ],
+  "suggestions": [
+    "Suggestion 1",
+    "Suggestion 2"
+  ],
+  "corrected_cypher": "Corrected Cypher statement (if correction needed)"
+}}}}
+```
+
+**Notes**:
+1. If parameter or logic issues are found, **must** provide corrected Cypher statement in `corrected_cypher`
+2. Corrected Cypher must reference template information and examples above
+3. For subgraph queries, ensure returning **all** 1-hop and 2-hop neighbors, don't miss any
+4. ⚠️ **CRITICAL**: Before generating corrected_cypher, **must** perform self-check:
+   - Check if all variables used in WHERE and RETURN are defined in MATCH
+   - If using `rA.xxx`, MATCH must have `[rA:...]`
+   - If using `rB.xxx`, MATCH must have `[rB:...]`
+   - If using `rel.xxx`, MATCH must have `[rel:...]`
+5. If parameters are completely correct and no correction needed, return:
+```json
+{{{{
+  "is_valid": true,
+  "issues": [],
+  "suggestions": [],
+  "corrected_cypher": null
+}}}}
+```
+"""
+
+# add gjq - Aggregation query extractor prompt
+nl_query_aggregation_query_prompt = """{schema_info}
+
+## Query Type: aggregation_query
+
+### Function Description
+Aggregation statistical query, supports grouping by node or property, calculates COUNT/SUM/AVG/MAX/MIN  etc.
+**⚠️ Key**：aggregation_query **only for grouped aggregation**（GROUP BY），not for global aggregation！
+
+### Parameter Description
+**Required Parameters**：
+- `aggregate_type`: Aggregation type（"COUNT", "SUM", "AVG", "MAX", "MIN"）
+- `group_by_node`: Group by node（"start" or "end"）
+- `node_label`: Node label
+- `rel_type`: Relationship type
+- `direction`: Direction（"out", "in", "both"）
+
+**Optional Parameters**：
+- `aggregate_field`: Aggregation field（SUM/AVG/MAX/MIN required when，COUNT not needed when）
+- `return_fields`: Node fields to return
+- `order_by`: Sort field（"count" or "total"）
+- `order_direction`: Sort Direction（"ASC" or "DESC"）
+- `limit`: Result count limit
+
+### User Question
+{question}
+
+### Task
+Based on the above rules, extract parameters from user question and return in JSON format：
+{{
+  "params": {{...}},
+  "modifiers": {{...}}
+}}
+"""
+
+# add gjq - Neighbor query extractor prompt
+nl_query_neighbor_query_prompt = """{schema_info}
+
+## Query Type: neighbor_query
+
+### Function Description
+Query neighbors or N-hop relationships of a specific node, supports returning detailed information for each edge。
+**⚠️ Key**：Question **must have a clear starting node**（such as person name, ID, specific account）。
+
+### Parameter Description
+**Required Parameters**：
+- `label`: Node label
+- `key`: Property key（usually node_key）
+- `value`: Property value（Identifier of starting node）
+
+**Optional Parameters**：
+- `hops`: Hops（default 1）
+- `rel_type`: Relationship type
+- `direction`: Direction（"out", "in", "both"）
+- `return_fields`: List of fields to return
+
+### User Question
+{question}
+
+### Task
+Based on the above rules, extract parameters from user question and return in JSON format：
+{{
+  "params": {{...}},
+  "modifiers": {{...}}
+}}
+"""
+
+# add gjq - Path query extractor prompt
+nl_query_path_query_prompt = """{schema_info}
+
+## Query Type: path_query
+
+### Function Description
+Query paths between two nodes, supports complex filtering, sorting and calculation logic。
+
+### Parameter Description
+**Required Parameters**：
+- `label`: Node label
+- `key`: Property key（usually node_key）
+- `v1`: Starting node value
+- `v2`: Ending node value
+
+**Optional Parameters**：
+- `rel_type`: Relationship type
+- `direction`: Direction（"out", "in", "both"）
+- `min_hops`: minimumHops（default 1）
+- `max_hops`: maximumHops（default 5）
+
+### User Question
+{question}
+
+### Task
+Based on the above rules, extract parameters from user question and return in JSON format：
+{{
+  "params": {{...}},
+  "modifiers": {{...}}
+}}
+"""
+
+# add gjq - Common neighbor extractor prompt
+nl_query_common_neighbor_prompt = """{schema_info}
+
+## Query Type: common_neighbor
+
+### Function Description
+Query common neighbors of two nodes，支持Relationship property filtering。
+
+⚠️ **Important concept**：Common neighbor query uses AND logic, not OR logic！
+- ✅ Correct：Find nodes **simultaneously** connected to both A and B（A→n AND B→n）
+- ❌ Wrong：Find nodes connected to A **or** B（A→n OR B→n）
+
+### Parameter Description
+**Required Parameters**：
+- `label`: Node label
+- `key`: Property key（usually node_key）
+- `v1`: First node value
+- `v2`: Second node value
+
+**Optional Parameters**：
+- `rel_type`: Relationship type
+- `direction`: Direction（"out", "in", "both"）
+- `rel_conditions`: Relationship propertiesFilter conditions
+- `return_fields`: List of fields to return
+
+### User Question
+{question}
+
+### Task
+Based on the above rules, extract parameters from user question and return in JSON format：
+{{
+  "params": {{...}},
+  "modifiers": {{...}}
+}}
+"""
+
+# add gjq - Subgraph extractor prompt
+nl_query_subgraph_prompt = """{schema_info}
+
+## Query Type: subgraph
+
+### Function Description
+Extract subgraph (nodes + relationships), supports two modes。
+
+### Parameter Description
+**Two Modes**：
+
+1. **Single center node mode**：
+   - `label`: Node label
+   - `key`: Property key
+   - `value`: Node value
+   - `hops`: Hops
+   - Optional：`rel_type`, `direction`, `limit_paths`
+
+2. **Relationship propertiesFilter mode**：
+   - `rel_type`: Relationship type
+   - `rel_conditions`: Relationship property conditions
+   - `start_label`: start node label
+   - `end_label`: end node label
+   - Optional：`limit`
+
+### User Question
+{question}
+
+### Task
+Based on the above rules, extract parameters from user question and return in JSON format：
+{{
+  "params": {{...}},
+  "modifiers": {{...}}
+}}
+"""
+
+# add gjq - Subgraph by nodes extractor prompt
+nl_query_subgraph_by_nodes_prompt = """{schema_info}
+
+## Query Type: subgraph_by_nodes
+
+### Function Description
+Extract subgraph based on node list (multiple specified nodes and their mutual relationships)。
+**⚠️ Key**：Question中**must contain multiple nodes**（such as node list [A,B,C]）。
+
+### Parameter Description
+**Required Parameters**：
+- `label`: Node label
+- `key`: Property key（usually node_key）
+- `values`: Node value list (array)
+
+**Optional Parameters**：
+- `include_internal`: whether to include internal edges (default true)
+- `rel_type`: Relationship type
+- `direction`: Direction
+
+### User Question
+{question}
+
+### Task
+Based on the above rules, extract parameters from user question and return in JSON format：
+{{
+  "params": {{...}},
+  "modifiers": {{...}}
+}}
 """
