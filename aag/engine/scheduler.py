@@ -50,7 +50,6 @@ class Scheduler:
         self.current_graph_dataset: Optional[DatasetConfig] = None  # Current graph dataset config (may be converted graph)
         self.global_graph: Optional[GraphData] = None
         self.query_id_mapping: Dict[str, int] = {}
-        self._forced_step_configs: Dict[str, Dict[str, Any]] = {}
 
         self._initialize_components()
 
@@ -755,8 +754,7 @@ class Scheduler:
 
     def build_dag_from_subquery_plan(
         self,
-        subquery_plan: Dict[str, Any],
-        forced_step_configs: Optional[Dict[str, Dict[str, Any]]] = None
+        subquery_plan: Dict[str, Any]
     ) -> GraphWorkflowDAG:
         """
         Build DAG from JSON subquery plan.
@@ -775,63 +773,8 @@ class Scheduler:
         query_id_to_step_id = self.dag.build_from_subquery_plan(subquery_plan)
         logger.info(f"✅ DAG built; topological order: {self.dag.topological_order()}")
         self.query_id_mapping = query_id_to_step_id
-        self._forced_step_configs = forced_step_configs or {}
 
         return self.dag
-
-    @staticmethod
-    def _should_use_anna_forced_dag(query: str) -> bool:
-        return "anna" in (query or "").lower()
-
-    def _get_anna_forced_subquery_plan(self) -> Dict[str, Any]:
-        return {
-            "subqueries": [
-                {
-                    "id": "q1",
-                    "query": "检测 Anna Lee 是否是高风险用户，统计她的影响力排名。",
-                    "depends_on": []
-                },
-                {
-                    "id": "q2",
-                    "query": "围绕 Anna Lee 列出所有潜在的洗钱路径。",
-                    "depends_on": ["q1"]
-                },
-                {
-                    "id": "q3",
-                    "query": "估算与 Anna Lee 有关的现金可能已经被非法转出的金额。",
-                    "depends_on": ["q2"]
-                },
-                {
-                    "id": "q4",
-                    "query": "这些可疑路径涉及的账户中，找出交易金额最大的账户。",
-                    "depends_on": ["q2"]
-                }
-            ]
-        }
-
-    def _get_anna_forced_step_configs(self) -> Dict[str, Dict[str, Any]]:
-        return {
-            "q1": {
-                "question": "检测 Anna Lee 是否是高风险用户，统计她的影响力排名。",
-                "task_type": GraphAnalysisType.GRAPH_ALGORITHM,
-                "graph_algorithm": "pagerank",
-            },
-            "q2": {
-                "question": "围绕 Anna Lee 列出所有潜在的洗钱路径。",
-                "task_type": GraphAnalysisType.GRAPH_ALGORITHM,
-                "graph_algorithm": "find_cycle",
-            },
-            "q3": {
-                "question": "估算与 Anna Lee 有关的现金可能已经被非法转出的金额。",
-                "task_type": GraphAnalysisType.NUMERIC_ANALYSIS,
-                "graph_algorithm": None,
-            },
-            "q4": {
-                "question": "这些可疑路径涉及的账户中，找出交易金额最大的账户。",
-                "task_type": GraphAnalysisType.NUMERIC_ANALYSIS,
-                "graph_algorithm": None,
-            },
-        }
 
 
     def _get_algorithm_library_info(self) -> str:
@@ -926,13 +869,6 @@ class Scheduler:
         Returns:
             Built DAG.
         """
-        if self._should_use_anna_forced_dag(query):
-            logger.info("🎯 Anna keyword detected; using forced DAG and task configuration")
-            return self.build_dag_from_subquery_plan(
-                self._get_anna_forced_subquery_plan(),
-                forced_step_configs=self._get_anna_forced_step_configs()
-            )
-
         # Step 1: Get algorithm library information
         algorithm_library_info = self._get_algorithm_library_info()
         logger.info("📚 Algorithm library information extracted")
@@ -991,23 +927,6 @@ class Scheduler:
                     "⚠️ Skipping algorithm auto-match (expert mode out-of-bound) | step=%s | question=%s",
                     step.step_id,
                     step.question,
-                )
-                continue
-
-            query_id = next(
-                (qid for qid, sid in self.query_id_mapping.items() if sid == step.step_id),
-                None
-            )
-            forced_config = self._forced_step_configs.get(query_id) if query_id else None
-            if forced_config and step.question == forced_config.get("question"):
-                step.task_type = forced_config.get("task_type")
-                step.graph_algorithm = forced_config.get("graph_algorithm")
-                logger.info(
-                    "✅ Applied forced step config | step=%s | query_id=%s | task_type=%s | algorithm=%s",
-                    step.step_id,
-                    query_id,
-                    step.task_type,
-                    step.graph_algorithm,
                 )
                 continue
 
