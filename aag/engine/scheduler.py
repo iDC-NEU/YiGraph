@@ -24,6 +24,7 @@ from aag.expert_search_engine.database.datatype import VertexData, EdgeData, Gra
 from aag.utils.graph_conversion import flatten_graph, reconstruct_graph
 from aag.utils.data_utils import take_sample
 from aag.rag_engine.vector_rag import VectorRAG
+from aag.rag_engine.graph_rag import GraphRAG
 from aag.reasoner.prompt_template.llm_prompt_en import rag_prompt
 from aag.error_recovery.error_manager import ErrorRecovery
 
@@ -41,6 +42,9 @@ class Scheduler:
         self.computing_engine: Optional[ComputingEngine] = None
         self.expert_search_engine: Optional[ExpertSearchEngine] = None
         self.dag: Optional[GraphWorkflowDAG] = None
+        self.rag_engine: Optional[VectorRAG] = None
+        self.graph_rag_engine: Optional[GraphRAG] = None
+        
         self.dataset_manager: Optional[DatasetManager] = None
         self.data_dependency_resolver: Optional[DataDependencyResolver] = None
         self.error_recovery: Optional[ErrorRecovery] = None
@@ -72,7 +76,9 @@ class Scheduler:
         self._init_router()
 
         self._init_rag_engine()
-        
+
+        self._init_graph_rag_engine()
+
         self._init_error_recovery()
 
         self._init_data_dependency_resolver()
@@ -145,6 +151,20 @@ class Scheduler:
             print(f"✓ RAGEngine initialized")
         except Exception as e:
             print(f"✗ RAGEngineinitialization failed: {e}")
+            raise
+
+    def _init_graph_rag_engine(self):
+        try:
+            self.graph_rag_engine = GraphRAG(
+                self.config.retrieval,
+                llm_env_=self.reasoner,
+                pruning=30,
+                data_type="qa",
+                pruning_mode="embedding_for_perentity",
+            )
+            print("✓ GraphRAG initialized")
+        except Exception as e:
+            print(f"✗ GraphRAG initialization failed: {e}")
             raise
 
     def _init_error_recovery(self):
@@ -254,8 +274,9 @@ class Scheduler:
         
         if decision.query_type == QueryType.RAG:
             if original_type == "graph":
-                return "❌ Error: Current dataset is graph data; retrieval is not supported. Use graph analysis only."
-            return await self._execute_rag(query)
+                return await self._execute_graph_rag(query)
+            else:
+                return await self._execute_rag(query)
 
         elif decision.query_type == QueryType.GRAPH_QUERY:
             if original_type != "graph":
@@ -648,6 +669,23 @@ class Scheduler:
         print("✅ DAG build and algorithm selection done; starting computation")
         return await self._run_algorithm_pipeline2()
 
+    async def _execute_graph_rag(self, query: str) -> str:
+        """Execute GraphRAG retrieval + generation pipeline."""
+        if not self.current_dataset:
+            return "⚠️ No analysis data selected; please set the analysis target first."
+        if self.graph_rag_engine is None:
+            return "❌ GraphRAG is not initialized."
+        try:
+            nodes, retrieve_info = self.graph_rag_engine.retrieve(query)
+            logger.info(f"GraphRAG retrieve info: {retrieve_info}")
+            if not nodes:
+                return "❌ GraphRAG retrieval returned empty context."
+            response = self.graph_rag_engine.generation(query, nodes)
+            return str(response)
+        except Exception as e:
+            logger.error(f"GraphRAG execution failed: {e}", exc_info=True)
+            return f"❌ GraphRAG execution failed: {str(e)}"
+            
     async def _execute_rag(self, query: str) -> str:
         """
         Execute RAG query
