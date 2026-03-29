@@ -383,7 +383,7 @@ class GraphRAG(RAG):
         self.chunk_overlap = self.config.embedding.get("chunk_overlap", 50)
 
         if not self.llm_embed_name or not isinstance(self.llm_embed_name, str):
-            raise ValueError("embedding.model_name 配置缺失或非法")
+            raise ValueError("The embedding.model_name configuration is missing or invalid")
 
         name_lower = self.llm_embed_name.lower()
         is_openai = name_lower.startswith("text-embedding") or "openai" in name_lower
@@ -777,17 +777,10 @@ class GraphRAG(RAG):
             return "No information was retrieved, LLM cannot generate a response"
         return self.generation(question, nodes)
     
-    def query_with_entity(self, entities):  #TODO
-        """
-          entities 是一个list类型的参数实体列表，
-          算法：遍历每个entities，从neo4j查询每个实体的子图， 并把将这些子图转成边表形式 edges: List[Tuple]
-        """
-        pass
-
     def get_all_edges(self):
         """
-            从neo4j中获取所有边,整张图的边表
+                Retrieve all edges from Neo4j, representing the edge table of the entire graph.
             Returns:
-                List[Tuple[str, str, str]]: 每个元素为(head, relation, tail)
+                List[Tuple[str, str, str]]: Each element is a tuple of (head, relation, tail).
         """
         return self.graph_db.get_all_edges()

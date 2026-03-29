@@ -271,7 +271,7 @@ class Scheduler:
             return "⚠️ No dataset selected; please set the analysis target first."
         
         original_type = self.dataset_manager.get_dataset_original_type(self.current_dataset_name)
-        
+
         if decision.query_type == QueryType.RAG:
             if original_type == "graph":
                 return await self._execute_graph_rag(query)

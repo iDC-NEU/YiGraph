@@ -1214,7 +1214,7 @@ class Neo4jGraphClient:
         if limit is not None:
             params["limit"] = limit
         
-        return self.run(cypher, params)
+        return self.run(cypher, params,show_query=False)
 
     # =========================================================
     # 3. 公共邻居
