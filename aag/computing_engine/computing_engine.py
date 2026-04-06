@@ -2,6 +2,9 @@ import importlib
 import yaml
 import logging
 import json
+import os
+import shutil
+import sys
 from pathlib import Path
 from typing import Dict, Any, Optional
 from aag.utils.path_utils import DEFAULT_CONFIG_SERVER_PATH
@@ -43,8 +46,9 @@ class ComputingEngine:
         self._parse_algorithm_tool_mapping(config.get("engine_supported_algorithms", {}))
         
         for engine_name, server in config.get("servers", {}).items():
+            server_command = self._resolve_server_command(server.get("command", "python"))
             client = GraphMCPClient(
-                server_command=server.get("command", "python"),
+                server_command=server_command,
                 server_args=server.get("args", [])
             )
             ok = await client.connect()
@@ -64,6 +68,39 @@ class ComputingEngine:
         self._initialized = True
         logger.info(f"✅ Loaded {len(self.clients)} computing engines")
         # logger.info(f"🧠 Annotation modules loaded: {list(self.parameter_modules.keys())}")
+
+    def _resolve_server_command(self, command: Optional[str]) -> str:
+        """Resolve MCP server command and fallback to current Python executable when needed."""
+        raw = (command or "").strip()
+        if not raw:
+            return sys.executable
+
+        expanded = os.path.expandvars(os.path.expanduser(raw))
+        if expanded.lower() in {"python", "python3", "py"}:
+            # Always reuse the current interpreter to avoid PATH pointing to a different env.
+            return sys.executable
+
+        looks_like_path = any(sep in expanded for sep in ("/", "\\")) or bool(Path(expanded).drive)
+
+        if looks_like_path:
+            if Path(expanded).exists():
+                return expanded
+            logger.warning(
+                "⚠️ MCP server command '%s' not found; fallback to current interpreter: %s",
+                raw,
+                sys.executable,
+            )
+            return sys.executable
+
+        if shutil.which(expanded):
+            return expanded
+
+        logger.warning(
+            "⚠️ MCP server command '%s' not found in PATH; fallback to current interpreter: %s",
+            raw,
+            sys.executable,
+        )
+        return sys.executable
 
 
     def _load_config(self) -> dict:

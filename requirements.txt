@@ -126,6 +126,7 @@ ollama==0.6.1
 langgraph==1.1.6
 langchain==1.2.15
 langchain-core==1.2.26
+langchain-openai==1.0.3
 langchain-ollama==1.0.1
 
 # OpenAI dependencies

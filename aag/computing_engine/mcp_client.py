@@ -61,7 +61,26 @@ class GraphMCPClient:
             
         except Exception as e:
             logger.error(f"❌ Failed to connect to MCP server: {e}")
+            await self._cleanup_failed_connect()
             return False
+
+    async def _cleanup_failed_connect(self):
+        """Best-effort cleanup for partially opened MCP resources after connect failures."""
+        try:
+            if self.session:
+                await self.session.__aexit__(None, None, None)
+        except Exception:
+            pass
+        finally:
+            self.session = None
+
+        try:
+            if hasattr(self, 'stdio_client') and self.stdio_client:
+                await self.stdio_client.__aexit__(None, None, None)
+        except Exception:
+            pass
+        finally:
+            self.stdio_client = None
     
     async def disconnect(self):
         """Disconnect from the MCP server."""
