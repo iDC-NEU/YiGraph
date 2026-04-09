@@ -537,7 +537,7 @@ def register_pyg_tools(
             logger.warning(f"⚠️ PyG 不包含卷积层: {conv_name}")
             continue
 
-        tool_name = f"pyg_{conv_name.lower()}"
+        tool_name = f"run_pyg_{conv_name.lower()}"
 
         try:
             conv_class = getattr(conv, conv_name)
