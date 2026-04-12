@@ -1,11 +1,21 @@
 datasets:
-- name: new_500.csv
-  description: new_500.csv（CSV 边表，待自动推断字段与建图）
+- name: 副本new_500.csv
+  description: 副本new_500.csv（CSV 边表，待自动推断字段与建图）
   type: csv_graph
-  graph_status: pending
-  parsing_rate: 0
-  create_time: '2026-04-12 14:03:23'
+  graph_status: completed
+  parsing_rate: 1.0
+  create_time: '2026-04-12 14:17:11'
   schema:
-    path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/1/text/new_500.csv
-    original_path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/1/text/new_500.csv
+    path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/1/text/副本new_500.csv
+    original_path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/1/text/副本new_500.csv
     format: csv
+- name: example.txt
+  description: example.txt doc
+  type: markdown
+  graph_status: completed
+  parsing_rate: 0
+  create_time: '2026-04-12 14:19:38'
+  schema:
+    path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/1/process_text/example.txt.md
+    original_path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/1/text/example.txt
+    format: md

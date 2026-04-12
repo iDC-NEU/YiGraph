@@ -1,0 +1,40 @@
+acct_id,dsply_nm,type
+1,2022 citrus bowl,Event
+2,Citrus bowl,Event
+3,63-7,Quantity
+4,9-3,Quantity
+5,5-3,Quantity
+6,10-3,Quantity
+7,7-2,Quantity
+8,99 yards,Quantity
+9,Vrbo,Company
+10,Homeaway,Company
+11,Expedia,Company
+12,Kentucky wildcats,Organization
+13,Iowa hawkeyes,Organization
+14,Southeastern conference,Organization
+15,Big ten conference,Organization
+16,Big ten west division,Event
+17,Camping world stadium,Other
+18,"Orlando, florida",City
+19,2023 citrus bowl,Event
+20,Lsu tigers,Organization
+21,Purdue boilermakers,Organization
+22,56 point margin,Quantity
+23,Kellogg's,Company
+24,Cheez-it,Company
+25,65-7,Quantity
+26,Cfp national championship game,Event
+27,Georgia,State
+28,Tcu,Organization
+29,Quad wilson,Person
+30,99 yards touchdown,Quantity
+31,Jack albers,Person
+32,"January 1, 2022",Date
+33,"January 2, 2023",Date
+34,2021-22 bowl games,Event
+35,2022-23 bowl games,Event
+36,No. 22,Quantity
+37,No. 15,Quantity
+38,Vrbo citrus bowl,Event
+39,Cheez-it citrus bowl,Event

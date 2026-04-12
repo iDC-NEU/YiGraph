@@ -65,8 +65,12 @@ def _llm_text(raw: Any) -> str:
 
 
 def read_user_csv(path: str, max_body_rows: int = 8000) -> Tuple[List[str], List[Dict[str, str]]]:
-    """读取 CSV，返回表头与行字典列表。"""
-    def _read(enc: str):
+    """
+    读取 CSV，返回表头与行字典列表。
+    依次尝试多种编码：UTF-8 与 GB 系列混用时，仅试 GBK 常会误伤 UTF-8 文件（如 0xBB 为 UTF-8 多字节片段），
+    因此增加 gb18030、latin-1 等兜底（latin-1 永不因解码失败抛错）。
+    """
+    def _read(enc: str) -> Tuple[List[str], List[Dict[str, str]]]:
         with open(path, "r", encoding=enc, newline="") as f:
             reader = csv.DictReader(f)
             if not reader.fieldnames:
@@ -79,10 +83,23 @@ def read_user_csv(path: str, max_body_rows: int = 8000) -> Tuple[List[str], List
                 rows.append({k: (v.strip() if isinstance(v, str) else v) for k, v in row.items() if k})
             return fields, rows
 
-    try:
-        return _read("utf-8-sig")
-    except UnicodeDecodeError:
-        return _read("gbk")
+    last_err: Optional[Exception] = None
+    for enc in (
+        "utf-8-sig",
+        "utf-8",
+        "gb18030",
+        "gbk",
+        "big5",
+        "cp936",
+        "latin-1",
+    ):
+        try:
+            return _read(enc)
+        except UnicodeDecodeError as e:
+            last_err = e
+            continue
+    assert last_err is not None
+    raise last_err
 
 
 def infer_csv_schema_with_llm(
@@ -173,8 +190,10 @@ def materialize_text_csv_graph(
     infer: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
-    生成与 Text2Graph.save_graph_with_entity 相同文件命名与 graph_schemas 结构（单文档 append 由调用方处理）。
-    边 CSV 列：tran_id, orig_acct, bene_acct —— 与现有 read_graph_triplets / graph_schemas 示例一致。
+    生成 process_text 下 *_accounts.csv / *_transactions.csv 与 graph_schemas 边条目。
+
+    边表列顺序：**tran_id**（边序号）, **orig_acct**（头结点 id）, **bene_acct**（尾结点 id）,
+    其后依次为 LLM 推断的 **关系列**（若有）与 **边属性列**，列名写入 schema 的 **attribute_fields**。
     """
     os.makedirs(process_text_dir, exist_ok=True)
     src_f = infer["source_field"]
@@ -182,20 +201,21 @@ def materialize_text_csv_graph(
     rel_f = infer.get("edge_relation_field")
     edge_attrs = infer.get("edge_attribute_fields") or []
 
+    # 边文件尾部列：关系列在前，其余边属性按推断顺序；与 tran_id/orig_acct/bene_acct 不重名
+    tail_specs: List[str] = []
+    if rel_f:
+        tail_specs.append(rel_f)
+    for a in edge_attrs:
+        if a not in tail_specs:
+            tail_specs.append(a)
+    only_synthetic_tail = False
+    if not tail_specs:
+        tail_specs = ["predicate"]
+        only_synthetic_tail = True
+
     nodes: Dict[str, Dict[str, str]] = {}
-    edges_out: List[Tuple[int, int, str, Dict[str, str]]] = []
+    edge_records: List[Tuple[str, str, Dict[str, str]]] = []
 
-    def _rel_text(row: Dict[str, str]) -> str:
-        parts = []
-        if rel_f and row.get(rel_f, "") != "":
-            parts.append(str(row[rel_f]))
-        for a in edge_attrs:
-            v = row.get(a, "")
-            if v is not None and str(v) != "":
-                parts.append(f"{a}={v}")
-        return " | ".join(parts) if parts else "RELATED_TO"
-
-    seen_eid = 0
     for row in rows:
         s = (row.get(src_f) or "").strip()
         t = (row.get(tgt_f) or "").strip()
@@ -204,9 +224,7 @@ def materialize_text_csv_graph(
         for nid in (s, t):
             if nid not in nodes:
                 nodes[nid] = {"dsply_nm": nid, "type": infer.get("vertex_type_default") or "OTHER"}
-        seen_eid += 1
-        extra = {a: row.get(a, "") for a in edge_attrs}
-        edges_out.append((seen_eid, s, t, {"rel": _rel_text(row), **extra}))
+        edge_records.append((s, t, row))
 
     sorted_ids = sorted(nodes.keys(), key=lambda x: (len(x), x))
     entity2id = {nid: i + 1 for i, nid in enumerate(sorted_ids)}
@@ -224,13 +242,21 @@ def materialize_text_csv_graph(
         for nid in sorted_ids:
             w.writerow([entity2id[nid], nodes[nid]["dsply_nm"], nodes[nid]["type"]])
 
+    header = ["tran_id", "orig_acct", "bene_acct"] + tail_specs
     with open(triplets_csv_path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["tran_id", "orig_acct", "bene_acct"])
-        for eid, s, t, _meta in edges_out:
-            w.writerow([entity2id[s], entity2id[t], _meta["rel"]])
+        w.writerow(header)
+        for eid, (s, t, row) in enumerate(edge_records, start=1):
+            tail_vals: List[str] = []
+            for _col in tail_specs:
+                if only_synthetic_tail:
+                    tail_vals.append("RELATED_TO")
+                else:
+                    v = row.get(_col, "")
+                    tail_vals.append("" if v is None else str(v).strip())
+            w.writerow([eid, entity2id[s], entity2id[t]] + tail_vals)
 
-    n_edges = len(edges_out)
+    n_edges = len(edge_records)
     if n_edges == 0:
         raise ValueError("未解析到任何有效边（请检查源/目标列或过滤空行后是否仍有数据）")
     n_verts = len(entity2id)
@@ -238,6 +264,8 @@ def materialize_text_csv_graph(
     if isinstance(dr, str):
         dr = dr.strip().lower() in ("true", "1", "yes", "y")
     directed_str = "true" if dr else "false"
+    # 用于三元组展示的「关系」列：取尾部第一列（与 read_graph_triplets 的 label_field 一致）
+    label_col = tail_specs[0] if tail_specs else "predicate"
     schema_dict = {
         "description": f"{graph_name} graph generated from CSV {user_csv_path}",
         "name": graph_name,
@@ -258,13 +286,13 @@ def materialize_text_csv_graph(
             ],
             "edge": [
                 {
-                    "attribute_fields": [],
+                    "attribute_fields": list(tail_specs),
                     "format": "csv",
-                    "label_field": "bene_acct",
+                    "label_field": label_col,
                     "path": triplets_csv_path,
                     "original_path": user_csv_path,
-                    "source_field": "tran_id",
-                    "target_field": "orig_acct",
+                    "source_field": "orig_acct",
+                    "target_field": "bene_acct",
                     "type": "transfer",
                     "weight_field": None,
                 }
