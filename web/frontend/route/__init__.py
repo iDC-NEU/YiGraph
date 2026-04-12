@@ -11,7 +11,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from aag.api.async_runtime import start_async_runtime, stop_async_runtime
+# from aag.api.async_runtime import start_async_runtime, stop_async_runtime
 
 
 # Global logging configuration (set once)
@@ -52,8 +52,8 @@ def create_app():
 
     # ====== Initialize SocketIO and async runtime ======
     socketio.init_app(app)
-    start_async_runtime()
-    atexit.register(stop_async_runtime)
+    # start_async_runtime()
+    # atexit.register(stop_async_runtime)
  
     # ====== Register WebSocket event handlers ======
     try:

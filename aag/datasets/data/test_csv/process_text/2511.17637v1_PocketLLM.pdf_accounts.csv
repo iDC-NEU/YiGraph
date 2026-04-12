@@ -1,0 +1,685 @@
+acct_id,dsply_nm,type
+1,Pocketllm,Event
+2,Ye tian,Person
+3,Chengcheng wang,Person
+4,Jing han,Person
+5,Yehui tang,Person
+6,Kai han,Person
+7,Huawei noah's ark lab,Organization
+8,Beijing university of posts and telecommunications,Organization
+9,University of sydney,Organization
+10,Huawei,Company
+11,School of artificial intelligence,Organization
+12,2023,Year
+13,Llama 2-7b by 10×,Quantity
+14,Pruning,Other
+15,Llm compression,Event
+16,Quantization,Other
+17,Walmart inc.,Company
+18,Sam walton,Person
+19,James 'bud' walton,Person
+20,"Bentonville, arkansas",City
+21,1962,Date
+22,"October 31, 1969",Date
+23,Sam's club,Company
+24,Flipkart wholesale,Company
+25,United states,Country
+26,Canada,Country
+27,Mexico,Country
+28,Central america,Region
+29,India,Country
+30,Vptq,Event
+31,Li et al. 2024,Year
+32,Qtip,Event
+33,Tseng et al. 2024b,Year
+34,Soa,Other
+35,16×,Quantity
+36,Acceptable performance loss at 16× compression,Quantity
+37,Secondorder optimization,Other
+38,Trellis coded quantization,Other
+39,Llm-pruner,Event
+40,"Ma, fang, and wang 2023",Person
+41,Sparsegpt,Event
+42,Frantar and alistarh 2023,Person
+43,Wanda,Method
+44,Sun et al. 2023,Year
+45,Non-critical stacked multi-head self-attention modules,Other
+46,Low-rank adaptation (lora),Other
+47,Extremely large-scale instances of sparse regression,Event
+48,Priority of each weight by the product of its magnitude and the norm of the corresponding gradient,Other
+49,Transformer,Model
+50,Interleavedly stacked multi-head self-attention modules and feed-forward network blocks,Other
+51,Self-attention,Event
+52,Softmax(qk^t/√d)v,Other
+53,Q,Quantity
+54,W_q x,Other
+55,K,Person
+56,W_k x,Other
+57,V,Quantity
+58,W_v x,Other
+59,Gptq,Company
+60,2022,Year
+61,Zeroquant,Company
+62,Omniquant,Event
+63,Tseng et al.,Person
+64,2024a,Year
+65,Liu et al.,Person
+66,2024,Year
+67,2024b,Year
+68,Baalen et al.,Person
+69,Egiazarian et al.,Person
+70,Post-training method,Event
+71,Hardware-friendly quantization scheme,Other
+72,Quantization framework,Event
+73,Llm compression framework,Organization
+74,Latents spaces,Other
+75,Meta-networks,Other
+76,Encoder network,Organization
+77,Codebook,Other
+78,Discrete vector set,Quantity
+79,Vector quantization,Event
+80,Vq,Other
+81,Ffn module,Other
+82,About 8d2 parameters,Quantity
+83,Self-attention module,Event
+84,About 4d2 parameters,Quantity
+85,Llama,Organization
+86,12d2 parameters,Quantity
+87,Meta encoder,Other
+88,Meta decoder,Other
+89,Weight vectors,Quantity
+90,Latent spaces,Other
+91,Representation vectors,Other
+92,Weight subvector,Other
+93,Closest representation in codebook,Other
+94,Decoder,Organization
+95,Representation vectors back to original space,Other
+96,Ln,Other
+97,Transformer network,Other
+98,Sequence input embeddings,Other
+99,Weight subvectors,Other
+100,Weight matrix,Quantity
+101,Subvectors,Other
+102,Rows of weight matrix,Other
+103,Training,Event
+104,Encoder discarded,Other
+105,Index in codebook,Quantity
+106,S,Other
+107,Rn×d,Quantity
+108,Z,Other
+109,F_e,Other
+110,S_i,Other
+111,Rln,Event
+112,Reshaped layer normalization,Event
+113,Mlp,Company
+114,Llm,Other
+115,Distribution relationship,Other
+116,Effect,Quantity
+117,Additional parameter,Quantity
+118,Computational overhead,Quantity
+119,Layer normalization,Other
+120,Bengio,Person
+121,Straight-through estimator,Other
+122,Leónard,Person
+123,Courville,Person
+124,Sakaguchi,Person
+125,Winogrande,Event
+126,Tata,Person
+127,Piqa,Event
+128,Patel,Person
+129,Zellers,Person
+130,Hellaswag,Event
+131,True,Other
+132,Llama 2-7b,Company
+133,Compression,Other
+134,Ffn,Other
+135,3,Quantity
+136,215,Quantity
+137,8,Quantity
+138,N×d,Quantity
+139,Mse,Quantity
+140,Codebook optimization,Other
+141,Rmse,Quantity
+142,Decoder loss minimization,Event
+143,Fp32,Quantity
+144,32-bit,Quantity
+145,Compression ratio analysis,Other
+146,Compression ratio,Quantity
+147,Algorithm process overview,Event
+148,Five zero-shot tasks,Event
+149,Algorithm1:pocketllm:weightcompressionforllms,Event
+150,Merity et al. 2016,Other
+151,Wikitext-,Other
+152,Raffel et al. 2020,Year
+153,C4,Dataset
+154,Ratko et al. 2018,Other
+155,Arc-challenge,Event
+156,K-means,Algorithm
+157,Lora,Other
+158,Perplexity,Quantity
+159,Accuracy,Quantity
+160,8×,Quantity
+161,10×,Quantity
+162,20×,Quantity
+163,Float32,Quantity
+164,Arc-easy,Event
+165,Arc,Event
+166,Llama2-7b,Company
+167,Qwen3-14b,Company
+168,Yang et al. 2025,Year
+169,Huggingface,Organization
+170,Touvron et al. 2023b,Other
+171,Gelu,Other
+172,Hendrycks and gimpel 2016,Person
+173,Mmlu,Event
+174,Pocketllm evaluation,Event
+175,Hendrycks et al. 2020,Event
+176,Redpajama,Organization
+177,Calibration dataset,Other
+178,Weber et al. 2024,Year
+179,Alpaca,Company
+180,Tao et al. 2023,Year
+181,Fine-tuning pocketllm,Event
+182,32,Quantity
+183,64,Quantity
+184,Effectiveness in pocketllm,Other
+185,Codebook initialization,Other
+186,Comparable performance to aqlm,Company
+187,Comparable performance to qtip,Other
+188,Other methods,Other
+189,8× compression,Quantity
+190,10× compression,Quantity
+191,16× compression,Quantity
+192,20× compression,Quantity
+193,7 benchmarks,Quantity
+194,64.95,Quantity
+195,63.10,Quantity
+196,64.07,Quantity
+197,60.61,Quantity
+198,55.45,Quantity
+199,37.91,Quantity
+200,71.30,Quantity
+201,70.19,Quantity
+202,64.29,Quantity
+203,71.23,Quantity
+204,3.98,Quantity
+205,2.98,Quantity
+206,2.02,Quantity
+207,1.60,Quantity
+208,3.02,Quantity
+209,3.00,Quantity
+210,Zero-shot tasks,Event
+211,Attention layers,Other
+212,Accuracy loss,Quantity
+213,Ffn layers,Other
+214,Distribution uniformity,Quantity
+215,Latent vectors,Other
+216,Ours,Other
+217,Table 1,Event
+218,Table 2,Event
+219,Spqr,Company
+220,Aqlm,Company
+221,Duquant,Company
+222,Bolaco,Organization
+223,Sola,Company
+224,Sobp,Other
+225,Gptvq,Company
+226,Smoothquant,Company
+227,Rtn,Method
+228,Awq,Company
+229,Pocketllm*,Company
+230,No fine-tuning,Other
+231,5.12,Quantity
+232,6.63,Quantity
+233,256,Quantity
+234,5.54,Quantity
+235,8.6e-5,Quantity
+236,0.36,Quantity
+237,1024,Quantity
+238,3.12,Quantity
+239,4.2e-5,Quantity
+240,0.22,Quantity
+241,4.00,Quantity
+242,5.49,Quantity
+243,7.20,Quantity
+244,4096,Quantity
+245,2.41,Quantity
+246,2.2e-5,Quantity
+247,0.16,Quantity
+248,5.28,Quantity
+249,6.87,Quantity
+250,16384,Quantity
+251,0.38,Quantity
+252,1.3e-5,Quantity
+253,0.10,Quantity
+254,Quip#,Company
+255,4.02,Quantity
+256,5.29,Quantity
+257,6.86,Quantity
+258,32768,Quantity
+259,0.06,Quantity
+260,8.9e-6,Quantity
+261,0.08,Quantity
+262,6.08,Quantity
+263,7.79,Quantity
+264,4.04,Quantity
+265,5.21,Quantity
+266,6.75,Quantity
+267,4.01,Quantity
+268,5.64,Quantity
+269,7.13,Quantity
+270,5.17,Quantity
+271,6.69,Quantity
+272,5.27,Quantity
+273,Sobp*,Company
+274,11.20,Quantity
+275,8.64,Quantity
+276,Wanda*,Company
+277,8.00,Quantity
+278,6.42,Quantity
+279,Duquant*,Company
+280,6.28,Quantity
+281,7.90,Quantity
+282,5.74,Quantity
+283,7.49,Quantity
+284,8.51,Quantity
+285,4.5e-5,Quantity
+286,0.89,Quantity
+287,2.36,Quantity
+288,1.23,Quantity
+289,9.2e-6,Quantity
+290,0.25,Quantity
+291,45.34,Quantity
+292,56.69,Quantity
+293,45.84,Quantity
+294,56.43,Quantity
+295,46.10,Quantity
+296,56.12,Quantity
+297,45.72,Quantity
+298,56.35,Quantity
+299,Q layers,Other
+300,8.3%,Quantity
+301,"Q,k layers",Other
+302,16.6%,Quantity
+303,Table 3,Event
+304,Perplexity of quantized llama 2-7b models,Event
+305,Table 5,Event
+306,Optimal number of model layers for the encoder and decoder,Quantity
+307,Table 6,Event
+308,Ablation study on llama2-7b models with different codebook size,Event
+309,Table 7,Event
+310,Ablation study on the proposed rln module and codebook initialization,Event
+311,Figure 3,Event
+312,"Reconstruction results of q, up, down weight vectors for different compression ratios",Event
+313,Some parameters,Other
+314,Mse loss,Quantity
+315,Top100 values,Quantity
+316,Mse top100,Quantity
+317,Mse loss top100,Quantity
+318,Vq loss,Quantity
+319,Rln module,Event
+320,Initial,Other
+321,16,Quantity
+322,Up layers,Other
+323,Down layers,Other
+324,4bits,Quantity
+325,2bits,Quantity
+326,1.6bits,Quantity
+327,D=4,Quantity
+328,D=8,Quantity
+329,Loss=9e-6,Quantity
+330,Loss=3e-5,Quantity
+331,Loss=5e-5,Quantity
+332,Ablation study,Event
+333,Slicegpt,Company
+334,Large language model compression,Event
+335,Reconstruction effect,Event
+336,Encoder-decoder meta-networks,Other
+337,Original weights,Other
+338,Nonlinear factors,Other
+339,Compact codebook,Other
+340,Performance comparable to the dense model,Other
+341,Dense model's accuracy,Quantity
+342,Huang x.,Person
+343,Huang y.-l.,Person
+344,Wen z.,Person
+345,Ashkboos s.,Person
+346,Croci m. l.,Person
+347,Do nascimento m. g.,Person
+348,Hoefler t.,Person
+349,Hensman j.,Person
+350,Baalen m. v.,Person
+351,Related work on compression,Other
+352,Ji y.,Person
+353,Xiang y.,Person
+354,Li j.,Person
+355,Xia q.,Person
+356,Ye z.,Person
+357,Duan x.,Person
+358,Wang z.,Person
+359,Chen k.,Person
+360,Zhang m.,Person
+361,Aaai conference on artificial intelligence,Event
+362,Proceedings,Event
+363,Proceedings of the aaai conference on artificial intelligence,Event
+364,Slicegpt paper,Event
+365,Sola paper,Event
+366,"Whatmough, p.",Person
+367,Workshop on efficient via bayesian optimization,Event
+368,Systems for foundation models ii @ icml 2024,Event
+369,"Bengio, y.",Person
+370,Estimating or propagating gradients through stochastic neurons for conditional computation,Event
+371,Arxiv,Other
+372,"Kaplan, j.",Person
+373,Scaling laws for neural language models,Event
+374,"Kim, s.",Person
+375,Squeezellm: dense-and-sparse quantization,Event
+376,"Chee, j.",Person
+377,Quip,Company
+378,"Deng, j.",Person
+379,Llm-codebook,Event
+380,"Dettmers, t.",Person
+381,"Kurtic, e.",Person
+382,Sparse fine-tuning for inference acceleration of large language models,Event
+383,"Liao, h.",Person
+384,Spark,Other
+385,"Borzunov, a.",Person
+386,"Alistarh, d.",Person
+387,"Frantar, e.",Person
+388,"Egiazarian, v.",Person
+389,"Kuznedelev, d.",Person
+390,"Hoefler, t.",Person
+391,"Gholami, a.",Person
+392,Squeezellm,Company
+393,"Dong, z.",Person
+394,"Li, x.",Person
+395,"Shen, s.",Person
+396,"Mahoney, m. w.",Person
+397,"Keutzer, k.",Person
+398,"Cai, y.",Person
+399,"Kuleshov, v.",Person
+400,"Sa, c. d.",Person
+401,"Li, s.",Person
+402,"Wang, c.",Person
+403,"Gu, h.",Person
+404,"Shen, h.",Person
+405,"Huang, k.",Person
+406,"Mccandlish, s.",Person
+407,"Henighan, t.",Person
+408,"Brown, t. b.",Person
+409,"Chess, b.",Person
+410,"Child, r.",Person
+411,"Gray, s.",Person
+412,"Radford, a.",Person
+413,"Wu, j.",Person
+414,"Boratko, m.",Person
+415,"Padigela, h.",Person
+416,"Mikkilineni, d.",Person
+417,"Yuvraj, p.",Person
+418,"Das, r.",Person
+419,"Mccallum, a.",Person
+420,"Classification of knowledge, reasoning, and context within the arc dataset",Event
+421,"Chang, m.",Person
+422,"Fokoue-nkoutche, a.",Person
+423,"Kapanipathi, p.",Person
+424,"Mattei, n.",Person
+425,"Léonard, n.",Person
+426,"Courville, a.",Person
+427,Findings of the association for computational linguistics: emnlp 2024,Event
+428,Emnlp 2024,Event
+429,"Miami, florida, usa",City
+430,2013,Year
+431,2020,Year
+432,2018,Year
+433,2025,Year
+434,Gumiho,Other
+435,"Barsoum, e.",Person
+436,2-bit,Quantity
+437,Llm quantization,Other
+438,Near-lossless llm weight compression,Event
+439,Dense-and-sparse quantization,Event
+440,2-bit quantization of large language models with guarantees,Event
+441,A. babenko,Person
+442,Extreme compression of large language models via additive quantization,Event
+443,D. alistarh,Person
+444,H. lin,Person
+445,Duquant: distributing out-,Event
+446,H. xu,Person
+447,Y. wu,Person
+448,J. cui,Person
+449,Y. zhang,Person
+450,L. mou,Person
+451,Z. sun,Person
+452,Y. wei,Person
+453,E. frantar,Person
+454,Sparsegpt: massive language models can be accurately pruned in one-shot,Event
+455,Gptq: accurate post-training quantization for generative pre-trained transformers,Event
+456,S. ashkboos,Person
+457,T. hoefler,Person
+458,Y. liu,Person
+459,Vptq: extreme low-bit vector post-training quantization for large language models,Event
+460,J. wen,Person
+461,Y. wang,Person
+462,S. ye,Person
+463,L. l. zhang,Person
+464,T. cao,Person
+465,C. li,Person
+466,M. yang,Person
+467,T. gunter,Person
+468,Apple intelligence foundation language models,Organization
+469,Z. wang,Person
+470,C. wang,Person
+471,R. pang,Person
+472,A. narayanan,Person
+473,A. zhang,Person
+474,B. zhang,Person
+475,C. chen,Person
+476,C.-c. chiu,Person
+477,D. qiu,Person
+478,X. ma,Person
+479,Llm-pruner: on the structural pruning of large language models,Event
+480,G. fang,Person
+481,X. wang,Person
+482,J. guo,Person
+483,Compressing large language models by joint sparsification and quantization,Event
+484,J. wu,Person
+485,J. liu,Person
+486,G. yang,Person
+487,Y. ding,Person
+488,R. gong,Person
+489,H. qin,Person
+490,X. liu,Person
+491,S. merity,Person
+492,Pointer sentinel mixture models,Event
+493,C. xiong,Person
+494,J. bradbury,Person
+495,R. socher,Person
+496,D. hendrycks,Person
+497,Measuring massive multi-task language understanding,Event
+498,C. burns,Person
+499,S. basart,Person
+500,A. zou,Person
+501,M. mazeika,Person
+502,D. song,Person
+503,J. steinhardt,Person
+504,Openai,Company
+505,Chatgpt (mar 14 version),Event
+506,Association for computational linguistics,Organization
+507,Conference on empirical methods in natural language processing,Event
+508,Miami,City
+509,Florida,State
+510,Usa,Country
+511,8181–8196,Quantity
+512,"Hendrycks, d.",Person
+513,Gaussian error linear units (gelus),Other
+514,"Gimpel, k.",Person
+515,"Raffel, c.",Person
+516,Exploring the limits of transfer learning with a unified text-to-text transformer,Event
+517,"Shazeer, n.",Person
+518,"Roberts, a.",Person
+519,"Lee, k.",Person
+520,"Narang, s.",Person
+521,"Hu, e. j.",Person
+522,Lora: low-rank adaptation of large language models,Event
+523,"Shen, y.",Person
+524,"Wallis, p.",Person
+525,"Allen-zhu, z.",Person
+526,"Li, y.",Person
+527,"Wang, s.",Person
+528,"Wang, l.",Person
+529,"Chen, w.",Person
+530,"Sakaguchi, k.",Person
+531,Winogrande: an adversarial winograd schema challenge at scale,Event
+532,"Bras, r. l.",Person
+533,"Bhagavatula, c.",Person
+534,"Choi, y.",Person
+535,"Wei, j.",Person
+536,Structured optimal brain pruning for large language models,Event
+537,"Lu, q.",Person
+538,"Jiang, n.",Person
+539,"Xiang, j.",Person
+540,"Chen, j.",Person
+541,"Liu, y.",Person
+542,"Shao, w.",Person
+543,Omniquant: omnidirectionally calibrated quantization for large language models,Event
+544,"Chen, m.",Person
+545,"Zhang, z.",Person
+546,"Xu, p.",Person
+547,"Zhao, l.",Person
+548,"Li, z.",Person
+549,"Zhang, k. z.",Person
+550,"Gao, p.",Person
+551,"Qiao, y.",Person
+552,"Luo, p.",Person
+553,"Sun, m.",Person
+554,A simple and effective pruning approach for large language models,Event
+555,"Liu, z.",Person
+556,"Bair, a.",Person
+557,"Kolter, j. z.",Person
+558,"Taori, r.",Person
+559,Stanford alpaca: an instruction-following llama model,Event
+560,"Gulrajani, i.",Person
+561,"Zhang, t.",Person
+562,"Dubois, y.",Person
+563,"Guestrin, c.",Person
+564,"Liang, p.",Person
+565,"Hashimoto, t. b.",Person
+566,"Tata, s.",Person
+567,Piqa: an algebra for querying protein datasets,Event
+568,"Patel, j. m.",Person
+569,"Xu, y.",Person
+570,Qa-lora: quantization-aware low-rank adaptation of large language models,Event
+571,"Xie, l.",Person
+572,"Gu, x.",Person
+573,"Chen, x.",Person
+574,"Chang, h.",Person
+575,"Zhang, h.",Person
+576,"Chen, z.",Person
+577,"Zhang, x.",Person
+578,"Tian, q.",Person
+579,"Xu, z.",Person
+580,Drivegpt4: interpretable end-to-end autonomous driving via large language model,Event
+581,"Zhang, y.",Person
+582,"Xie, e.",Person
+583,"Zhao, z.",Person
+584,"Guo, y.",Person
+585,"Wong, k.-y.",Person
+586,"Zhao, h.",Person
+587,Arxiv:1606.08415,Other
+588,Journal of machine learning research,Organization
+589,International conference on learning representations,Event
+590,Communications of the acm,Organization
+591,Proceedings of the 2024 conference on empirical methods in natural language processing,Event
+592,Arxiv:2308.13137,Other
+593,Arxiv:2306.11695,Other
+594,Github,Organization
+595,Https://github.com/tatsu-lab/stanford_alpaca,Other
+596,Arxiv:2309.14717,Other
+597,Ieee robotics and automation letters,Organization
+598,International conference on scientific and statistical database management,Event
+599,Stanford alpaca,Event
+600,Instruction-following llama model,Event
+601,Adversarial winograd schema challenge,Event
+602,Dataset,Other
+603,Low-rank adaptation method,Other
+604,Activation function,Other
+605,Quantization method,Other
+606,Qa-lora,Event
+607,Quantization-aware low-rank adaptation method,Other
+608,Drivegpt4,Event
+609,Autonomous driving system,Other
+610,2023a,Year
+611,Qwen3,Company
+612,Fingpt,Company
+613,2019,Year
+614,Arxiv preprint arxiv:2302.13971,Event
+615,Arxiv preprint arxiv:2505.09388,Event
+616,Arxiv:2306.06031,Other
+617,Arxiv:2206.01861,Other
+618,Llama 2,Event
+619,Arxiv:2307.09288,Other
+620,Arxiv:2402.04396,Other
+621,Acl 2019,Event
+622,Proceedings of the 57th conference of the association for computational linguistics,Event
+623,"Florence, italy",City
+624,"July 28- august 2, 2019",Event
+625,"Touvron, h.",Person
+626,"Lavril, t.",Person
+627,"Izacard, g.",Person
+628,"Martinet, x.",Person
+629,"Lachaux, m.-a.",Person
+630,"Zellers, r.",Person
+631,"Holtzman, a.",Person
+632,"Bisk, y.",Person
+633,"Farhadi, a.",Person
+634,"He, y.",Person
+635,"Yang, h.",Person
+636,"Liu, x.-y.",Person
+637,"Wang, c. d.",Person
+638,"Tseng, a.",Person
+639,"Sun, q.",Person
+640,Tseng a.,Person
+641,Sun q.,Person
+642,Hou d.,Person
+643,De c.,Person
+644,Xu y.,Person
+645,Zheng w.,Person
+646,Xia x.,Person
+647,Tam w.l.,Person
+648,Ma z.,Person
+649,Xue y.,Person
+650,Globerson a.,Person
+651,Glm-130b,Company
+652,Mackey l.,Person
+653,Belgrave d.,Person
+654,Fan a.,Person
+655,Paquet j.,Person
+656,Wang j.,Person
+657,Slmquant,Event
+658,Zeng y.,Person
+659,Guo j.,Person
+660,Ma y.,Person
+661,Liu a.,Person
+662,Liu x.,Person
+663,Weber m.,Person
+664,Fu d.y.,Person
+665,Anthony q.,Person
+666,Oren y.,Person
+667,Adams s.,Person
+668,Alexandrov a.,Person
+669,Lyu x.,Person
+670,Nguyen h.,Person
+671,Yao x.,Person
+672,Adams v.,Person
+673,Athiwaratkun b.,Person
+674,Chalamala r.,Person
+675,Ryabinin m.,Person
+676,Dao t.,Person
+677,Liang p.,Person
+678,Ré c.,Person
+679,Rish i.,Person
+680,Zhang c.,Person
+681,Iclr,Event
+682,3rd international workshop on rich media with generative ai,Event
+683,Neurips datasets and benchmarks track,Event
+684,"Curran associates, inc.",Organization

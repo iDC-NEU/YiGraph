@@ -1,0 +1,35 @@
+datasets:
+- description: 2511.17637v1_PocketLLM.pdf graph generated from /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/test_csv/process_text/2511.17637v1_PocketLLM.pdf.md
+  name: 2511.17637v1_PocketLLM.pdf
+  type: graph
+  graph_status: completed
+  create_time: '2026-04-09 22:43:14'
+  schema:
+    vertex:
+    - attribute_fields: []
+      format: csv
+      id_field: acct_id
+      label_field: dsply_nm
+      path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/test_csv/process_text/2511.17637v1_PocketLLM.pdf_accounts.csv
+      type: account
+    edge:
+    - attribute_fields: []
+      format: csv
+      label_field: bene_acct
+      path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/test_csv/process_text/2511.17637v1_PocketLLM.pdf_transactions.csv
+      source_field: tran_id
+      target_field: orig_acct
+      type: transfer
+      weight_field: null
+    graph:
+      directed: 'true'
+      heterogeneous: 'false'
+      multigraph: 'false'
+      weighted: 'false'
+    graph_store_info:
+      backend: nebula_graph
+      edge_count: 668
+      space_name: 2511.17637v1_PocketLLM.pdf
+      status: success
+      version: 'null'
+      vertex_count: 684

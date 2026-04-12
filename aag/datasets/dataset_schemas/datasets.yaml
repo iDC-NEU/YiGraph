@@ -23,3 +23,10 @@ datasets:
   updated_at: '2026-03-20 10:00:00'
   status: active
   data_path: Debug0320
+- name: test_csv
+  type: text
+  description: test_csv documents.
+  created_at: '2026-04-09 22:22:40'
+  updated_at: '2026-04-09 22:22:40'
+  status: active
+  data_path: test_csv

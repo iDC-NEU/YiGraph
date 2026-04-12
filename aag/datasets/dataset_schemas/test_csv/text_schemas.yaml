@@ -1,0 +1,11 @@
+datasets:
+- name: 2511.17637v1_PocketLLM.pdf
+  description: 2511.17637v1_PocketLLM.pdf doc
+  type: markdown
+  graph_status: completed
+  parsing_rate: 0.9411764705882353
+  create_time: '2026-04-09 22:23:04'
+  schema:
+    path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/test_csv/process_text/2511.17637v1_PocketLLM.pdf.md
+    original_path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/test_csv/text/2511.17637v1_PocketLLM.pdf
+    format: md
