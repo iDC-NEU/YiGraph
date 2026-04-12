@@ -3,7 +3,7 @@ datasets:
   name: 副本new_500.csv
   type: graph
   graph_status: completed
-  create_time: '2026-04-12 14:18:49'
+  create_time: '2026-04-12 14:23:12'
   schema:
     vertex:
     - attribute_fields: []
@@ -14,13 +14,7 @@ datasets:
       original_path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/1/text/副本new_500.csv
       type: account
     edge:
-    - attribute_fields:
-      - tx_type
-      - tran_id
-      - base_amt
-      - tran_timestamp
-      - is_sar
-      - alert_id
+    - attribute_fields: [tx_type, base_amt, tran_timestamp, is_sar, alert_id]
       format: csv
       label_field: tx_type
       path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/1/process_text/副本new_500.csv_transactions.csv
@@ -41,37 +35,3 @@ datasets:
       status: success
       version: 'null'
       vertex_count: 349
-- description: example.txt graph generated from /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/1/process_text/example.txt.md
-  name: example.txt
-  type: graph
-  graph_status: completed
-  create_time: '2026-04-12 14:20:32'
-  schema:
-    vertex:
-    - attribute_fields: []
-      format: csv
-      id_field: acct_id
-      label_field: dsply_nm
-      path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/1/process_text/example.txt_accounts.csv
-      type: account
-    edge:
-    - attribute_fields: []
-      format: csv
-      label_field: bene_acct
-      path: /home/zhangzh/aag_apitest/YiGraph/aag/datasets/data/1/process_text/example.txt_transactions.csv
-      source_field: tran_id
-      target_field: orig_acct
-      type: transfer
-      weight_field: null
-    graph:
-      directed: 'true'
-      heterogeneous: 'false'
-      multigraph: 'false'
-      weighted: 'false'
-    graph_store_info:
-      backend: nebula_graph
-      edge_count: 43
-      space_name: example.txt
-      status: success
-      version: 'null'
-      vertex_count: 39

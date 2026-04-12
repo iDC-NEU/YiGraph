@@ -208,6 +208,9 @@ def materialize_text_csv_graph(
     for a in edge_attrs:
         if a not in tail_specs:
             tail_specs.append(a)
+    # 避免与边表固定列名冲突（否则 CSV 会出现重复表头）
+    _reserved_edge_cols = {"tran_id", "orig_acct", "bene_acct"}
+    tail_specs = [c for c in tail_specs if c not in _reserved_edge_cols]
     only_synthetic_tail = False
     if not tail_specs:
         tail_specs = ["predicate"]
@@ -318,7 +321,11 @@ def materialize_text_csv_graph(
 
 def merge_graph_schema_yaml(schema_path: str, schema_dict: Dict[str, Any]) -> None:
     """将 schema_dict 按 name 合并写入 graph_schemas.yaml（单文档）。"""
+    import copy
     import yaml
+
+    # 延迟导入，避免与 DocumentAPI 的循环依赖在模块加载阶段触发
+    from aag.api.DocumentAPI import _FlowStyleList, _GraphSchemaDumper
 
     name = schema_dict.get("name")
     existing: List[Dict[str, Any]] = []
@@ -329,6 +336,20 @@ def merge_graph_schema_yaml(schema_path: str, schema_dict: Dict[str, Any]) -> No
             ds = doc.get("datasets")
             if isinstance(ds, list):
                 existing = [d for d in ds if d.get("name") != name]
-    existing.append(schema_dict)
+
+    to_append = copy.deepcopy(schema_dict)
+    for ed in (to_append.get("schema") or {}).get("edge") or []:
+        af = ed.get("attribute_fields")
+        if isinstance(af, list) and len(af) > 0:
+            ed["attribute_fields"] = _FlowStyleList(af)
+
+    existing.append(to_append)
     with open(schema_path, "w", encoding="utf-8") as f:
-        yaml.dump({"datasets": existing}, f, allow_unicode=True, sort_keys=False)
+        yaml.dump(
+            {"datasets": existing},
+            f,
+            Dumper=_GraphSchemaDumper,
+            sort_keys=False,
+            allow_unicode=True,
+            width=2**31 - 1,
+        )

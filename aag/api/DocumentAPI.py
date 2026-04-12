@@ -1009,6 +1009,7 @@ class DocumentAPIServer:
         source_field = schema["edge"][0]["source_field"]
         target_field = schema["edge"][0]["target_field"]
         label_field_edge = schema["edge"][0].get("label_field", "type")
+        attr_fields = schema["edge"][0].get("attribute_fields") or []
 
         triplets = []
         with open(edge_path, newline="", encoding="utf-8") as f:
@@ -1020,7 +1021,10 @@ class DocumentAPIServer:
             for row in reader:
                 src_name = id_to_name.get(row[source_field], row[source_field])
                 tgt_name = id_to_name.get(row[target_field], row[target_field])
-                label = row.get(label_field_edge, "")
+                if isinstance(attr_fields, (list, tuple)) and len(attr_fields) > 0:
+                    label = " ".join(str(row.get(f, "")).strip() for f in attr_fields)
+                else:
+                    label = str(row.get(label_field_edge, "")).strip()
                 triplets.append([src_name, label, tgt_name])
         return triplets
 
@@ -1154,7 +1158,10 @@ class DocumentAPIServer:
                     src = row[edge_src_field]
                     dst = row[edge_dst_field]
                     #rel = row[edge_rel_field]
-                    rel = "  ".join([row[field] for field in edge_relation_field])
+                    if isinstance(edge_relation_field, (list, tuple)) and edge_relation_field:
+                        rel = " ".join(str(row.get(field, "")).strip() for field in edge_relation_field)
+                    else:
+                        rel = ""
                     # 如果顶点文件存在，替换 id -> name
                     if id2name:
                         src = id2name.get(src, src)
