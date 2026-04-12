@@ -23,6 +23,7 @@ from time import sleep
 logger = logging.getLogger(__name__)
 from aag.utils.path_utils import DATASETS_DIR, DATASETS_DATA_DIR, DATASETS_SCHEMA_DIR, DATASETS_INDEX_PATH
 from aag.data_pipeline.data_transformer.text_2_graph.text_2_graph import Text2Graph
+from aag.data_pipeline import csv_graph_llm
 
 
 def _resolve_schema_paths_in_place(dataset_dict: dict, schema_dir: str) -> None:
@@ -785,19 +786,16 @@ class DocumentAPIServer:
                 "content": f"file '{file_name}' don't exist."
             }, ensure_ascii=False))
             return
-        if self.each_dataset[file_name].get("type") == "csv_graph":
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": "CSV 边表自动建图解析尚未实现，敬请期待。",
-            }, ensure_ascii=False))
-            return
         if self.each_dataset[file_name].get("graph_status", "") != "pending":
             await websocket.send(json.dumps({
                 "type": "error",
                 "contentType": "text",
                 "content": f"file '{file_name}' already parse."
             }, ensure_ascii=False))
+            return
+
+        if self.each_dataset[file_name].get("type") == "csv_graph":
+            await self._parsing_csv_graph_file(websocket, message)
             return
         
         try:
@@ -876,6 +874,93 @@ class DocumentAPIServer:
                 "file_name": file_name,
                 "ds_name": ds_name,
                 "content": f"解析失败 {str(e)}"
+            }, ensure_ascii=False))
+
+    async def _parsing_csv_graph_file(self, websocket, message):
+        """文本知识库 CSV：LLM 推断列 → 生成与 Text2Graph 一致的 accounts/transactions CSV 并写入 graph_schemas.yaml。"""
+        file_name = message["file_name"]
+        ds_name = message["ds_name"]
+        llm_type = message.get("type", "ollama")
+        api_key = message.get("api_key", "")
+        base_url = message.get("base_url", None)
+        llm_name = message.get("llm_name", "glm-5")
+
+        def _persist_text_schema():
+            out = [self.each_dataset[k] for k in self.each_dataset]
+            with open(self.each_dataset_schema_file, "w", encoding="utf-8") as f:
+                yaml.dump({"datasets": out}, f, sort_keys=False, allow_unicode=True)
+
+        try:
+            self.each_dataset[file_name]["graph_status"] = "parsing"
+            _persist_text_schema()
+
+            await websocket.send(json.dumps({"type": "status", "message": "正在用 LLM 推断 CSV 列语义（源/目标/关系/边属性）..."}))
+
+            user_csv = self.each_dataset[file_name]["schema"]["path"]
+            columns, rows = csv_graph_llm.read_user_csv(user_csv)
+            if len(columns) < 2:
+                raise ValueError("CSV 至少需要 2 列")
+
+            try:
+                raw_infer = csv_graph_llm.infer_csv_schema_with_llm(
+                    columns, rows, llm_type, llm_name, api_key, base_url
+                )
+                infer = csv_graph_llm._validate_infer(columns, raw_infer)
+            except Exception as ex:
+                logger.warning("CSV LLM 列推断失败，使用启发式: %s", ex)
+                infer = csv_graph_llm._validate_infer(columns, csv_graph_llm._heuristic_schema(columns))
+
+            await websocket.send(json.dumps({"type": "status", "message": "正在生成顶点/边表并写入 graph_schemas..."}))
+
+            process_dir = os.path.join(self.dataset_data_dir, f"{ds_name}/process_text")
+            os.makedirs(process_dir, exist_ok=True)
+            schema_dict = csv_graph_llm.materialize_text_csv_graph(
+                user_csv_path=user_csv,
+                process_text_dir=process_dir,
+                graph_name=file_name,
+                rows=rows,
+                infer=infer,
+            )
+
+            graph_schema_file = os.path.join(self.dataset_schema_dir, f"{ds_name}/graph_schemas.yaml")
+            if not os.path.exists(graph_schema_file):
+                with open(graph_schema_file, "w", encoding="utf-8") as f:
+                    f.write("datasets: []\n")
+            csv_graph_llm.merge_graph_schema_yaml(graph_schema_file, schema_dict)
+
+            self.each_dataset[file_name]["graph_status"] = "completed"
+            self.each_dataset[file_name]["parsing_rate"] = 1.0
+            _persist_text_schema()
+
+            n_edges = schema_dict["schema"]["graph_store_info"].get("edge_count", 0)
+            response_data = {
+                "type": "data",
+                "contentType": "json",
+                "content": {
+                    "success": True,
+                    "data": {
+                        "id": len(self.each_dataset),
+                        "名称": file_name,
+                        "三元组个数": n_edges,
+                        "创建时间": schema_dict["create_time"],
+                    },
+                },
+            }
+            await websocket.send(json.dumps(response_data, ensure_ascii=False))
+        except Exception as e:
+            logger.exception("CSV 建图解析失败")
+            try:
+                self.each_dataset[file_name]["graph_status"] = "pending"
+                self.each_dataset[file_name]["parsing_rate"] = 0
+                _persist_text_schema()
+            except Exception:
+                pass
+            await websocket.send(json.dumps({
+                "type": "error",
+                "contentType": "text",
+                "file_name": file_name,
+                "ds_name": ds_name,
+                "content": f"CSV 解析失败 {str(e)}",
             }, ensure_ascii=False))
 
     def load_each_dataset_graph_schema(self, ds_name: str):
