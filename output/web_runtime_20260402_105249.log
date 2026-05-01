@@ -1,0 +1,960 @@
+2026-04-02 10:52:49,121 [INFO] __main__ - run.py:89 - Web runtime logs are being written to /home/hdd3/wangzh/projects/YiGraph-dev/output/web_runtime_20260402_105249.log
+/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/llama_index/legacy/download/module.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+2026-04-02 10:52:57,531 [INFO] aag.api.services.engine_service - engine_service.py:45 - Initializing AAG engine; config: /home/hdd3/wangzh/projects/YiGraph-dev/config/engine_config.yaml
+2026-04-02 10:52:57,535 [INFO] aag.engine.scheduler - scheduler.py:64 - Initializing Scheduler components
+2026-04-02 10:52:57,535 [INFO] aag.engine.scheduler - scheduler.py:86 - Reasoner initialized
+2026-04-02 10:52:57,535 [INFO] aag.computing_engine.computing_engine - computing_engine.py:291 - 📝 Initializing graph query engine; config: {'enabled': True, 'uri': 'bolt://202.199.13.237:7687', 'user': 'neo4j', 'password': '12345678'}
+2026-04-02 10:52:57,535 [INFO] aag.computing_engine.computing_engine - computing_engine.py:298 - 📝 Neo4j enabled; creating connection...
+2026-04-02 10:52:57,535 [INFO] aag.computing_engine.computing_engine - computing_engine.py:304 - 📝 Creating Neo4jGraphClient, uri=bolt://202.199.13.237:7687
+2026-04-02 10:52:57,535 [INFO] aag.computing_engine.computing_engine - computing_engine.py:306 - 📝 Creating NaturalLanguageQueryEngine
+2026-04-02 10:52:57,536 [INFO] root - nl_query_engine.py:842 - ✅ 使用重构后的参数提取器路由器
+2026-04-02 10:52:57,536 [INFO] root - nl_query_engine.py:848 - ✅ Cypher 验证器已启用（包含 Schema 验证）
+
+🔍 正在分析图数据库结构...
+✅ Schema 加载完成
+   节点类型: ['Account']
+   关系类型: ['TRANSFER']
+
+2026-04-02 10:52:57,701 [INFO] aag.computing_engine.computing_engine - computing_engine.py:311 - ✓ NaturalLanguageQueryEngine initialized in ComputingEngine
+2026-04-02 10:52:57,701 [INFO] aag.engine.scheduler - scheduler.py:101 - ComputingEngine with GraphQueryEngine initialized
+2026-04-02 10:52:57,702 [INFO] aag.expert_search_engine.search - search.py:91 - Initializing ExpertSearchEngine components
+2026-04-02 10:52:58,228 [INFO] aag.expert_search_engine.search - search.py:142 - 构建完成: 任务=12 算法=106
+2026-04-02 10:52:58,229 [INFO] aag.expert_search_engine.search - search.py:116 - Hierarchical knowledge base initialized
+2026-04-02 10:52:58,229 [INFO] aag.engine.scheduler - scheduler.py:112 - ExpertSearchEngine initialized
+2026-04-02 10:52:58,232 [INFO] nebula3.logger - ConnectionPool.py:202 - Get connection to ('127.0.0.1', 9669)
+2026-04-02 10:52:58,234 [INFO] aag.data_pipeline.data_transformer.graph_loader - graph_loader.py:37 - ✅ Initialized NebulaGraphClient instance
+2026-04-02 10:52:58,242 [INFO] aag.engine.scheduler - scheduler.py:121 - DatasetManager initialized
+2026-04-02 10:52:58,242 [INFO] aag.engine.scheduler - scheduler.py:139 - QueryRouter initialized
+2026-04-02 10:52:58,244 [INFO] sentence_transformers.SentenceTransformer - SentenceTransformer.py:227 - Load pretrained SentenceTransformer: BAAI/bge-large-en-v1.5
+2026-04-02 10:52:58,247 [WARNING] sentence_transformers.SentenceTransformer - SentenceTransformer.py:2047 - No sentence-transformers model found with name BAAI/bge-large-en-v1.5. Creating a new one with mean pooling.
+2026-04-02 10:52:58,248 [ERROR] aag.rag_engine.vector_rag - vector_rag.py:137 - Embedding model initialization failed: (MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))"), '(Request ID: 23ffae74-9a95-4c53-83e0-c3ada7f4829d)')
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 198, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/connection.py", line 85, in create_connection
+    raise err
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+ConnectionRefusedError: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 773, in urlopen
+    self._prepare_proxy(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 1042, in _prepare_proxy
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 753, in connect
+    self.sock = sock = self._new_conn()
+                       ~~~~~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 213, in _new_conn
+    raise NewConnectionError(
+        self, f"Failed to establish a new connection: {e}"
+    ) from e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/rag_engine/vector_rag.py", line 118, in _init_embedding_model
+    Settings.embed_model = HuggingFaceEmbedding(
+                           ~~~~~~~~~~~~~~~~~~~~^
+        model_name=self.llm_embed_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        embed_batch_size=self.embed_batch_size,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        device=self.device,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/llama_index/embeddings/huggingface/base.py", line 160, in __init__
+    model = SentenceTransformer(
+        model_name,
+    ...<9 lines>...
+        **model_kwargs,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 339, in __init__
+    modules = self._load_auto_model(
+        model_name_or_path,
+    ...<8 lines>...
+        has_modules=has_modules,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 2061, in _load_auto_model
+    transformer_model = Transformer(
+        model_name_or_path,
+    ...<4 lines>...
+        backend=self.backend,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 87, in __init__
+    config, is_peft_model = self._load_config(model_name_or_path, cache_dir, backend, config_args)
+                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 128, in _load_config
+    find_adapter_config_file(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        model_name_or_path,
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        local_files_only=config_args.get("local_files_only", False),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/peft_utils.py", line 88, in find_adapter_config_file
+    adapter_cached_filename = cached_file(
+        model_id,
+    ...<12 lines>...
+        _raise_exceptions_for_connection_errors=False,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 312, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 557, in cached_files
+    raise e
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 470, in cached_files
+    hf_hub_download(
+    ~~~~~~~~~~~~~~~^
+        path_or_repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        local_files_only=local_files_only,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1010, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+        # Destination
+    ...<14 lines>...
+        force_download=force_download,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1073, in _hf_hub_download_to_cache_dir
+    (url_to_download, etag, commit_hash, expected_size, xet_file_data, head_call_error) = _get_metadata_or_catch_error(
+                                                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        repo_id=repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        relative_filename=relative_filename,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1546, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+        url=url, proxies=proxies, timeout=etag_timeout, headers=headers, token=token, endpoint=endpoint
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1463, in get_hf_file_metadata
+    r = _request_wrapper(
+        method="HEAD",
+    ...<5 lines>...
+        timeout=timeout,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 286, in _request_wrapper
+    response = _request_wrapper(
+        method=method,
+    ...<2 lines>...
+        **params,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 309, in _request_wrapper
+    response = http_backoff(method=method, url=url, **params, retry_on_exceptions=(), retry_on_status_codes=(429,))
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 310, in http_backoff
+    response = session.request(method=method, url=url, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 96, in send
+    return super().send(request, *args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/adapters.py", line 694, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: (MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))"), '(Request ID: 23ffae74-9a95-4c53-83e0-c3ada7f4829d)')
+2026-04-02 10:52:58,257 [ERROR] aag.engine.scheduler - scheduler.py:149 - RAGEngine initialization failed: (MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))"), '(Request ID: 23ffae74-9a95-4c53-83e0-c3ada7f4829d)')
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 198, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/connection.py", line 85, in create_connection
+    raise err
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+ConnectionRefusedError: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 773, in urlopen
+    self._prepare_proxy(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 1042, in _prepare_proxy
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 753, in connect
+    self.sock = sock = self._new_conn()
+                       ~~~~~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 213, in _new_conn
+    raise NewConnectionError(
+        self, f"Failed to establish a new connection: {e}"
+    ) from e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/scheduler.py", line 146, in _init_rag_engine
+    self.rag_engine = VectorRAG(self.config.retrieval)
+                      ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/rag_engine/vector_rag.py", line 58, in __init__
+    self._init_embedding_model()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/rag_engine/vector_rag.py", line 118, in _init_embedding_model
+    Settings.embed_model = HuggingFaceEmbedding(
+                           ~~~~~~~~~~~~~~~~~~~~^
+        model_name=self.llm_embed_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        embed_batch_size=self.embed_batch_size,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        device=self.device,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/llama_index/embeddings/huggingface/base.py", line 160, in __init__
+    model = SentenceTransformer(
+        model_name,
+    ...<9 lines>...
+        **model_kwargs,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 339, in __init__
+    modules = self._load_auto_model(
+        model_name_or_path,
+    ...<8 lines>...
+        has_modules=has_modules,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 2061, in _load_auto_model
+    transformer_model = Transformer(
+        model_name_or_path,
+    ...<4 lines>...
+        backend=self.backend,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 87, in __init__
+    config, is_peft_model = self._load_config(model_name_or_path, cache_dir, backend, config_args)
+                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 128, in _load_config
+    find_adapter_config_file(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        model_name_or_path,
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        local_files_only=config_args.get("local_files_only", False),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/peft_utils.py", line 88, in find_adapter_config_file
+    adapter_cached_filename = cached_file(
+        model_id,
+    ...<12 lines>...
+        _raise_exceptions_for_connection_errors=False,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 312, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 557, in cached_files
+    raise e
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 470, in cached_files
+    hf_hub_download(
+    ~~~~~~~~~~~~~~~^
+        path_or_repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        local_files_only=local_files_only,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1010, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+        # Destination
+    ...<14 lines>...
+        force_download=force_download,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1073, in _hf_hub_download_to_cache_dir
+    (url_to_download, etag, commit_hash, expected_size, xet_file_data, head_call_error) = _get_metadata_or_catch_error(
+                                                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        repo_id=repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        relative_filename=relative_filename,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1546, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+        url=url, proxies=proxies, timeout=etag_timeout, headers=headers, token=token, endpoint=endpoint
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1463, in get_hf_file_metadata
+    r = _request_wrapper(
+        method="HEAD",
+    ...<5 lines>...
+        timeout=timeout,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 286, in _request_wrapper
+    response = _request_wrapper(
+        method=method,
+    ...<2 lines>...
+        **params,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 309, in _request_wrapper
+    response = http_backoff(method=method, url=url, **params, retry_on_exceptions=(), retry_on_status_codes=(429,))
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 310, in http_backoff
+    response = session.request(method=method, url=url, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 96, in send
+    return super().send(request, *args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/adapters.py", line 694, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: (MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))"), '(Request ID: 23ffae74-9a95-4c53-83e0-c3ada7f4829d)')
+2026-04-02 10:52:58,264 [ERROR] aag.engine.aag_engine - aag_engine.py:55 - Scheduler initialization failed: (MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))"), '(Request ID: 23ffae74-9a95-4c53-83e0-c3ada7f4829d)')
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 198, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/connection.py", line 85, in create_connection
+    raise err
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+ConnectionRefusedError: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 773, in urlopen
+    self._prepare_proxy(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 1042, in _prepare_proxy
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 753, in connect
+    self.sock = sock = self._new_conn()
+                       ~~~~~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 213, in _new_conn
+    raise NewConnectionError(
+        self, f"Failed to establish a new connection: {e}"
+    ) from e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/aag_engine.py", line 52, in _init_scheduler
+    self.scheduler = Scheduler(config = self.config)
+                     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/scheduler.py", line 55, in __init__
+    self._initialize_components()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/scheduler.py", line 76, in _initialize_components
+    self._init_rag_engine()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/scheduler.py", line 146, in _init_rag_engine
+    self.rag_engine = VectorRAG(self.config.retrieval)
+                      ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/rag_engine/vector_rag.py", line 58, in __init__
+    self._init_embedding_model()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/rag_engine/vector_rag.py", line 118, in _init_embedding_model
+    Settings.embed_model = HuggingFaceEmbedding(
+                           ~~~~~~~~~~~~~~~~~~~~^
+        model_name=self.llm_embed_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        embed_batch_size=self.embed_batch_size,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        device=self.device,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/llama_index/embeddings/huggingface/base.py", line 160, in __init__
+    model = SentenceTransformer(
+        model_name,
+    ...<9 lines>...
+        **model_kwargs,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 339, in __init__
+    modules = self._load_auto_model(
+        model_name_or_path,
+    ...<8 lines>...
+        has_modules=has_modules,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 2061, in _load_auto_model
+    transformer_model = Transformer(
+        model_name_or_path,
+    ...<4 lines>...
+        backend=self.backend,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 87, in __init__
+    config, is_peft_model = self._load_config(model_name_or_path, cache_dir, backend, config_args)
+                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 128, in _load_config
+    find_adapter_config_file(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        model_name_or_path,
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        local_files_only=config_args.get("local_files_only", False),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/peft_utils.py", line 88, in find_adapter_config_file
+    adapter_cached_filename = cached_file(
+        model_id,
+    ...<12 lines>...
+        _raise_exceptions_for_connection_errors=False,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 312, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 557, in cached_files
+    raise e
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 470, in cached_files
+    hf_hub_download(
+    ~~~~~~~~~~~~~~~^
+        path_or_repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        local_files_only=local_files_only,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1010, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+        # Destination
+    ...<14 lines>...
+        force_download=force_download,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1073, in _hf_hub_download_to_cache_dir
+    (url_to_download, etag, commit_hash, expected_size, xet_file_data, head_call_error) = _get_metadata_or_catch_error(
+                                                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        repo_id=repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        relative_filename=relative_filename,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1546, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+        url=url, proxies=proxies, timeout=etag_timeout, headers=headers, token=token, endpoint=endpoint
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1463, in get_hf_file_metadata
+    r = _request_wrapper(
+        method="HEAD",
+    ...<5 lines>...
+        timeout=timeout,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 286, in _request_wrapper
+    response = _request_wrapper(
+        method=method,
+    ...<2 lines>...
+        **params,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 309, in _request_wrapper
+    response = http_backoff(method=method, url=url, **params, retry_on_exceptions=(), retry_on_status_codes=(429,))
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 310, in http_backoff
+    response = session.request(method=method, url=url, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 96, in send
+    return super().send(request, *args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/adapters.py", line 694, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: (MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))"), '(Request ID: 23ffae74-9a95-4c53-83e0-c3ada7f4829d)')
+2026-04-02 10:52:58,270 [ERROR] aag.api.services.engine_service - engine_service.py:53 - AAG engine initialization failed: (MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))"), '(Request ID: 23ffae74-9a95-4c53-83e0-c3ada7f4829d)')
+2026-04-02 10:52:58,270 [ERROR] aag.api.async_runtime - async_runtime.py:43 - Failed to initialize async runtime components
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 198, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/connection.py", line 85, in create_connection
+    raise err
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+ConnectionRefusedError: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 773, in urlopen
+    self._prepare_proxy(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 1042, in _prepare_proxy
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 753, in connect
+    self.sock = sock = self._new_conn()
+                       ~~~~~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 213, in _new_conn
+    raise NewConnectionError(
+        self, f"Failed to establish a new connection: {e}"
+    ) from e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/api/async_runtime.py", line 36, in _initialize_components
+    engine = chat_service.engine_service.get_engine()
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/api/services/engine_service.py", line 49, in get_engine
+    self._engine = AAGEngine(config)
+                   ~~~~~~~~~^^^^^^^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/aag_engine.py", line 46, in __init__
+    self._init_scheduler()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/aag_engine.py", line 52, in _init_scheduler
+    self.scheduler = Scheduler(config = self.config)
+                     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/scheduler.py", line 55, in __init__
+    self._initialize_components()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/scheduler.py", line 76, in _initialize_components
+    self._init_rag_engine()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/scheduler.py", line 146, in _init_rag_engine
+    self.rag_engine = VectorRAG(self.config.retrieval)
+                      ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/rag_engine/vector_rag.py", line 58, in __init__
+    self._init_embedding_model()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/rag_engine/vector_rag.py", line 118, in _init_embedding_model
+    Settings.embed_model = HuggingFaceEmbedding(
+                           ~~~~~~~~~~~~~~~~~~~~^
+        model_name=self.llm_embed_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        embed_batch_size=self.embed_batch_size,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        device=self.device,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/llama_index/embeddings/huggingface/base.py", line 160, in __init__
+    model = SentenceTransformer(
+        model_name,
+    ...<9 lines>...
+        **model_kwargs,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 339, in __init__
+    modules = self._load_auto_model(
+        model_name_or_path,
+    ...<8 lines>...
+        has_modules=has_modules,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 2061, in _load_auto_model
+    transformer_model = Transformer(
+        model_name_or_path,
+    ...<4 lines>...
+        backend=self.backend,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 87, in __init__
+    config, is_peft_model = self._load_config(model_name_or_path, cache_dir, backend, config_args)
+                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 128, in _load_config
+    find_adapter_config_file(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        model_name_or_path,
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        local_files_only=config_args.get("local_files_only", False),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/peft_utils.py", line 88, in find_adapter_config_file
+    adapter_cached_filename = cached_file(
+        model_id,
+    ...<12 lines>...
+        _raise_exceptions_for_connection_errors=False,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 312, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 557, in cached_files
+    raise e
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 470, in cached_files
+    hf_hub_download(
+    ~~~~~~~~~~~~~~~^
+        path_or_repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        local_files_only=local_files_only,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1010, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+        # Destination
+    ...<14 lines>...
+        force_download=force_download,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1073, in _hf_hub_download_to_cache_dir
+    (url_to_download, etag, commit_hash, expected_size, xet_file_data, head_call_error) = _get_metadata_or_catch_error(
+                                                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        repo_id=repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        relative_filename=relative_filename,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1546, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+        url=url, proxies=proxies, timeout=etag_timeout, headers=headers, token=token, endpoint=endpoint
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1463, in get_hf_file_metadata
+    r = _request_wrapper(
+        method="HEAD",
+    ...<5 lines>...
+        timeout=timeout,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 286, in _request_wrapper
+    response = _request_wrapper(
+        method=method,
+    ...<2 lines>...
+        **params,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 309, in _request_wrapper
+    response = http_backoff(method=method, url=url, **params, retry_on_exceptions=(), retry_on_status_codes=(429,))
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 310, in http_backoff
+    response = session.request(method=method, url=url, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 96, in send
+    return super().send(request, *args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/adapters.py", line 694, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: (MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))"), '(Request ID: 23ffae74-9a95-4c53-83e0-c3ada7f4829d)')
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 198, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/connection.py", line 85, in create_connection
+    raise err
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+ConnectionRefusedError: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 773, in urlopen
+    self._prepare_proxy(conn)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 1042, in _prepare_proxy
+    conn.connect()
+    ~~~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 753, in connect
+    self.sock = sock = self._new_conn()
+                       ~~~~~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connection.py", line 213, in _new_conn
+    raise NewConnectionError(
+        self, f"Failed to establish a new connection: {e}"
+    ) from e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused
+
+The above exception was the direct cause of the following exception:
+
+urllib3.exceptions.ProxyError: ('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/web/frontend/run.py", line 97, in <module>
+    app = create_app()
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/web/frontend/route/__init__.py", line 55, in create_app
+    start_async_runtime()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/api/async_runtime.py", line 77, in start_async_runtime
+    fut.result()  # Propagate initialization failures immediately
+    ~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/concurrent/futures/_base.py", line 456, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/api/async_runtime.py", line 36, in _initialize_components
+    engine = chat_service.engine_service.get_engine()
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/api/services/engine_service.py", line 49, in get_engine
+    self._engine = AAGEngine(config)
+                   ~~~~~~~~~^^^^^^^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/aag_engine.py", line 46, in __init__
+    self._init_scheduler()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/aag_engine.py", line 52, in _init_scheduler
+    self.scheduler = Scheduler(config = self.config)
+                     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/scheduler.py", line 55, in __init__
+    self._initialize_components()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/scheduler.py", line 76, in _initialize_components
+    self._init_rag_engine()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/engine/scheduler.py", line 146, in _init_rag_engine
+    self.rag_engine = VectorRAG(self.config.retrieval)
+                      ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/rag_engine/vector_rag.py", line 58, in __init__
+    self._init_embedding_model()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/hdd3/wangzh/projects/YiGraph-dev/aag/rag_engine/vector_rag.py", line 118, in _init_embedding_model
+    Settings.embed_model = HuggingFaceEmbedding(
+                           ~~~~~~~~~~~~~~~~~~~~^
+        model_name=self.llm_embed_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        embed_batch_size=self.embed_batch_size,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        device=self.device,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/llama_index/embeddings/huggingface/base.py", line 160, in __init__
+    model = SentenceTransformer(
+        model_name,
+    ...<9 lines>...
+        **model_kwargs,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 339, in __init__
+    modules = self._load_auto_model(
+        model_name_or_path,
+    ...<8 lines>...
+        has_modules=has_modules,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/SentenceTransformer.py", line 2061, in _load_auto_model
+    transformer_model = Transformer(
+        model_name_or_path,
+    ...<4 lines>...
+        backend=self.backend,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 87, in __init__
+    config, is_peft_model = self._load_config(model_name_or_path, cache_dir, backend, config_args)
+                            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py", line 128, in _load_config
+    find_adapter_config_file(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        model_name_or_path,
+        ^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        local_files_only=config_args.get("local_files_only", False),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/peft_utils.py", line 88, in find_adapter_config_file
+    adapter_cached_filename = cached_file(
+        model_id,
+    ...<12 lines>...
+        _raise_exceptions_for_connection_errors=False,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 312, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 557, in cached_files
+    raise e
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/transformers/utils/hub.py", line 470, in cached_files
+    hf_hub_download(
+    ~~~~~~~~~~~~~~~^
+        path_or_repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        local_files_only=local_files_only,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1010, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+        # Destination
+    ...<14 lines>...
+        force_download=force_download,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1073, in _hf_hub_download_to_cache_dir
+    (url_to_download, etag, commit_hash, expected_size, xet_file_data, head_call_error) = _get_metadata_or_catch_error(
+                                                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        repo_id=repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        relative_filename=relative_filename,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1546, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+        url=url, proxies=proxies, timeout=etag_timeout, headers=headers, token=token, endpoint=endpoint
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 1463, in get_hf_file_metadata
+    r = _request_wrapper(
+        method="HEAD",
+    ...<5 lines>...
+        timeout=timeout,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 286, in _request_wrapper
+    response = _request_wrapper(
+        method=method,
+    ...<2 lines>...
+        **params,
+    )
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/file_download.py", line 309, in _request_wrapper
+    response = http_backoff(method=method, url=url, **params, retry_on_exceptions=(), retry_on_status_codes=(429,))
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 310, in http_backoff
+    response = session.request(method=method, url=url, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/huggingface_hub/utils/_http.py", line 96, in send
+    return super().send(request, *args, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangzh/miniconda3/envs/graphllm/lib/python3.13/site-packages/requests/adapters.py", line 694, in send
+    raise ProxyError(e, request=request)
+requests.exceptions.ProxyError: (MaxRetryError("HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /BAAI/bge-large-en-v1.5/resolve/main/adapter_config.json (Caused by ProxyError('Unable to connect to proxy', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7756364fce10>: Failed to establish a new connection: [Errno 111] Connection refused')))"), '(Request ID: 23ffae74-9a95-4c53-83e0-c3ada7f4829d)')
