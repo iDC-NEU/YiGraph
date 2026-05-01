@@ -1,6 +1,6 @@
 servers:
   networkx:
-    command: "python"
+    command: "/home/chency/anaconda3/envs/graphllmenv/bin/python"
     args: ["-m", "aag.computing_engine.networkx_server.mcp_server"]
 
 

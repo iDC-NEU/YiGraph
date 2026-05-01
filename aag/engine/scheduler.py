@@ -5,7 +5,6 @@ import logging
 import json
 import difflib
 import re
-import os
 from argparse import OPTIONAL
 from dataclasses import asdict
 from typing import Any, Dict, Optional, Callable, List, Tuple, Union, Set
@@ -27,13 +26,6 @@ from aag.utils.data_utils import take_sample
 from aag.rag_engine.vector_rag import VectorRAG
 from aag.reasoner.prompt_template.llm_prompt_en import rag_prompt
 from aag.error_recovery.error_manager import ErrorRecovery
-from aag.engine.agentic_dag_builder import (
-    build_langchain_llm_from_reasoner_config,
-    run_agentic_dag_builder,
-    set_dag_builder_llm,
-)
-from aag.engine.algorithm_matching_agent import AlgorithmMatchingAgent
-from aag.engine.algorithm_matching_agent.state import MatchingOrchestratorState
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +40,6 @@ class Scheduler:
         self.reasoner: Optional[Reasoner] = None
         self.computing_engine: Optional[ComputingEngine] = None
         self.expert_search_engine: Optional[ExpertSearchEngine] = None
-        self.algorithm_matching_agent: Optional[AlgorithmMatchingAgent] = None
-        self.matching_app: Optional[Any] = None
         self.dag: Optional[GraphWorkflowDAG] = None
         self.dataset_manager: Optional[DatasetManager] = None
         self.data_dependency_resolver: Optional[DataDependencyResolver] = None
@@ -60,7 +50,6 @@ class Scheduler:
         self.current_graph_dataset: Optional[DatasetConfig] = None  # Current graph dataset config (may be converted graph)
         self.global_graph: Optional[GraphData] = None
         self.query_id_mapping: Dict[str, int] = {}
-        self.use_agentic_dag_builder: bool = os.environ.get("AAG_USE_LANGGRAPH_DAG_BUILDER", "1") == "1"
 
         self._initialize_components()
 
@@ -79,8 +68,6 @@ class Scheduler:
 
         self._init_expert_search_engine()
 
-        self._init_algorithm_matching_agent()
-
         self._init_dataset_manager()
         
         self._init_router()
@@ -96,49 +83,9 @@ class Scheduler:
         try:
             self.reasoner = Reasoner(self.config.reasoner)
             print("✓ Reasoner initialized")
-
-            if self.use_agentic_dag_builder:
-                try:
-                    dag_builder_llm = build_langchain_llm_from_reasoner_config(self.config.reasoner)
-                    set_dag_builder_llm(dag_builder_llm)
-                    logger.info("✓ Agentic DAG Builder LLM initialized")
-                except Exception as dag_init_err:
-                    self.use_agentic_dag_builder = False
-                    logger.warning(
-                        "Agentic DAG Builder disabled due to LLM init failure: %s",
-                        dag_init_err,
-                    )
         except Exception as e:
             print(f"✗ Reasoner initialization failed: {e}")
             raise
-
-    def _build_available_tools_for_dag_builder(self) -> List[Dict[str, Any]]:
-        """Build available tool list for agentic DAG builder prompts.
-
-        Returns:
-            A list of lightweight tool metadata dictionaries.
-        """
-
-        if not self.expert_search_engine or not self.expert_search_engine.algo_index:
-            return []
-
-        available_tools: List[Dict[str, Any]] = []
-        for algo_id, algo_data in self.expert_search_engine.algo_index.items():
-            if not isinstance(algo_data, dict):
-                continue
-
-            available_tools.append(
-                {
-                    "id": str(algo_id),
-                    "name": str(algo_id),
-                    "task_type": algo_data.get("task_type", ""),
-                    "description": algo_data.get("description", ""),
-                    "input_schema": algo_data.get("parameters", {}),
-                    "output_schema": algo_data.get("output_schema", {}),
-                }
-            )
-
-        return available_tools
     
     def _init_computing_engine(self):
         """Initialize computing engine."""
@@ -164,19 +111,6 @@ class Scheduler:
             print("✓ ExpertSearchEngine initialized")
         except Exception as e:
             print(f"✗ ExpertSearchEngine initialization failed: {e}")
-            raise
-
-    def _init_algorithm_matching_agent(self):
-        """Initialize LangGraph-based algorithm matching agent."""
-        try:
-            self.algorithm_matching_agent = AlgorithmMatchingAgent(
-                reasoner=self.reasoner,
-                expert_search_engine=self.expert_search_engine,
-            )
-            self.matching_app = self.algorithm_matching_agent.compile()
-            print("✓ AlgorithmMatchingAgent initialized")
-        except Exception as e:
-            print(f"✗ AlgorithmMatchingAgent initialization failed: {e}")
             raise
     
     def _init_dataset_manager(self):
@@ -384,10 +318,10 @@ class Scheduler:
         mode = self._normalize_graph_mode(mode)
 
         if mode == "expert":
-            return await self._execute_graph_expert_mode(query)
+            return self._execute_graph_expert_mode(query)
 
         self._build_dag_from_query(query, decompose)
-        await self._run_algorithm_matching_agent()
+        self._find_algorithm()
 
         print("✅ Initial DAG build and algorithm selection done")
         self.dag.print_dag_info()
@@ -613,7 +547,7 @@ class Scheduler:
 
         return validation
 
-    async def _execute_graph_expert_mode(self, expert_instruction: str) -> Dict[str, Any]:
+    def _execute_graph_expert_mode(self, expert_instruction: str) -> Dict[str, Any]:
         """
         Expert mode:
         - Expert provides high-quality instruction in natural language
@@ -624,7 +558,7 @@ class Scheduler:
             validation = self._build_dag_from_expert_instruction(expert_instruction)
             unsupported_step_ids = set(validation.get("unsupported_step_ids", []))
 
-            await self._run_algorithm_matching_agent(
+            self._find_algorithm(
                 respect_preassigned=True,
                 skip_step_ids=unsupported_step_ids
             )
@@ -689,7 +623,7 @@ class Scheduler:
         
         try:
             self.dag.modify_dag(self.reasoner, modification_request)
-            await self._run_algorithm_matching_agent()
+            self._find_algorithm()
             dag_info = self.dag.get_dag_info()
             return {
                 "message": "DAG updated.",
@@ -935,23 +869,6 @@ class Scheduler:
         Returns:
             Built DAG.
         """
-        if self.use_agentic_dag_builder:
-            try:
-                available_tools = self._build_available_tools_for_dag_builder()
-                generated_dag = run_agentic_dag_builder(
-                    question=query,
-                    available_tools=available_tools,
-                )
-                self.dag = generated_dag
-                self.query_id_mapping = {}
-                logger.info("✅ DAG generated by LangGraph DAG Builder")
-                return self.dag
-            except Exception as agentic_err:
-                logger.warning(
-                    "Agentic DAG Builder failed, fallback to legacy path: %s",
-                    agentic_err,
-                )
-
         # Step 1: Get algorithm library information
         algorithm_library_info = self._get_algorithm_library_info()
         logger.info("📚 Algorithm library information extracted")
@@ -995,79 +912,15 @@ class Scheduler:
         return self.build_dag_from_subquery_plan(subquery_plan)
 
 
-    async def _run_algorithm_matching_agent(
+    def _find_algorithm(
         self,
         respect_preassigned: bool = False,
         skip_step_ids: Optional[Set[int]] = None
-    ) -> Dict[str, Any]:
+    ):
         """
-        Bridge method: run AlgorithmMatchingAgent and write results back to DAG objects.
+        Walk the DAG and assign a graph algorithm to each step from its question.
         """
-        if not self.dag:
-            raise RuntimeError("DAG not built yet")
-
-        if self.matching_app is None:
-            self._init_algorithm_matching_agent()
-
         skip_step_ids = skip_step_ids or set()
-
-        dag_payload = self.dag.get_dag_info()
-        dataset_schema_str = self._get_graph_schema_summary() or ""
-
-        initial_state: MatchingOrchestratorState = {
-            "dag_payload": dag_payload,
-            "dataset_schema": {"schema_summary": dataset_schema_str},
-            "matched_nodes": {},
-            "global_error": "",
-        }
-
-        final_state = self.matching_app.invoke(initial_state)
-        if not isinstance(final_state, dict):
-            raise RuntimeError("AlgorithmMatchingAgent returned a non-dict state")
-
-        updated_dag_payload = final_state.get("dag_payload")
-        matched_nodes = final_state.get("matched_nodes")
-
-        if not isinstance(updated_dag_payload, dict):
-            updated_dag_payload = {}
-        if not isinstance(matched_nodes, dict):
-            matched_nodes = {}
-
-        subquery_plan = updated_dag_payload.get("subquery_plan") or {}
-        subqueries = subquery_plan.get("subqueries") or []
-        payload_by_query_id: Dict[str, Dict[str, Any]] = {}
-        if isinstance(subqueries, list):
-            for item in subqueries:
-                if not isinstance(item, dict):
-                    continue
-                query_id = str(item.get("id") or "").strip()
-                if query_id:
-                    payload_by_query_id[query_id] = item
-
-        if not matched_nodes:
-            for query_id, item in payload_by_query_id.items():
-                matched_nodes[query_id] = {
-                    "task_type": item.get("task_type"),
-                    "algorithm": item.get("algorithm"),
-                }
-
-        query_id_mapping = dict(self.query_id_mapping or {})
-        if not query_id_mapping:
-            try:
-                query_id_mapping = self.dag.get_query_id_mapping()
-                if not isinstance(query_id_mapping, dict):
-                    query_id_mapping = {}
-                else:
-                    self.query_id_mapping = query_id_mapping
-            except Exception:
-                query_id_mapping = {}
-
-        step_to_query_id = {
-            step_id: query_id
-            for query_id, step_id in query_id_mapping.items()
-            if isinstance(step_id, int)
-        }
-
         for step in self.dag.steps.values():
             if step.step_id in skip_step_ids:
                 logger.warning(
@@ -1087,38 +940,96 @@ class Scheduler:
                 )
                 continue
 
-            query_id = step_to_query_id.get(step.step_id, f"q{step.step_id}")
-            matched = matched_nodes.get(query_id) or payload_by_query_id.get(query_id) or {}
-            if not isinstance(matched, dict):
-                matched = {}
+            question_classification = self.reasoner.classify_question_type(step.question)
+            logger.info(f"🔍 Question classification: {question_classification}")
 
-            question_type = str(matched.get("task_type") or "").strip().lower()
-            selected_algorithm = matched.get("algorithm")
-
-            if question_type == GraphAnalysisType.GRAPH_QUERY.value:
+            if question_classification is None:
+                error_msg = "Question classification failed: returned None"
+                logger.error(f"❌ {error_msg} | question: {step.question}")
+                raise RuntimeError(error_msg)
+            
+            if "error" in question_classification:
+                error_msg = f"Question classification failed: {question_classification.get('error', 'Unknown error')}"
+                logger.error(f"❌ {error_msg} | question: {step.question} | details: {question_classification}")
+                raise RuntimeError(error_msg)
+            
+            question_type = question_classification.get("type", "graph_algorithm")
+            
+            if question_type == "graph_query":
                 step.task_type = GraphAnalysisType.GRAPH_QUERY
                 step.graph_algorithm = None
-                logger.info("✅ Classified as graph query | step=%s", step.step_id)
-            elif question_type == GraphAnalysisType.NUMERIC_ANALYSIS.value:
+                logger.info(f"✅ Classified as graph query | question: {step.question}, task_type: {step.task_type}, reason: {question_classification.get('reason', '')}")
+            elif question_type == "numeric_analysis":
                 step.task_type = GraphAnalysisType.NUMERIC_ANALYSIS
                 step.graph_algorithm = None
-                logger.info("✅ Classified as numeric analysis | step=%s", step.step_id)
-            elif selected_algorithm:
-                step.task_type = GraphAnalysisType.GRAPH_ALGORITHM
-                step.graph_algorithm = str(selected_algorithm)
-                logger.info(
-                    "✅ Algorithm selected by agent | step=%s | algorithm=%s",
-                    step.step_id,
-                    step.graph_algorithm,
-                )
+                logger.info(f"✅ Classified as numeric analysis | question: {step.question}, task_type: {step.task_type}, reason: {question_classification.get('reason', '')}")
             else:
-                logger.warning(
-                    "⚠️ Algorithm matching returned empty result | step=%s | query_id=%s",
-                    step.step_id,
-                    query_id,
-                )
-
-        return final_state
+                logger.info(f"📋 Task type selection | question: {step.question}")
+                task_type_list = self.expert_search_engine.retrieve_task_type(step.question)
+                logger.info(f"📋 Retrieved task types: {task_type_list}")
+                
+                task_type_result = self.reasoner.select_task_type(step.question, task_type_list)
+                logger.info(f"📋 Task type selection result: {task_type_result}")
+                
+                if task_type_result is None:
+                    error_msg = "Task type selection failed: LLM returned None"
+                    logger.error(f"❌ {error_msg} | question: {step.question}")
+                    raise RuntimeError(error_msg)
+                
+                if "error" in task_type_result:
+                    error_msg = f"Task type selection failed: {task_type_result.get('error', 'Unknown error')}"
+                    logger.error(f"❌ {error_msg} | question: {step.question} | details: {task_type_result}")
+                    raise RuntimeError(error_msg)
+                
+                selected_task_type_id = task_type_result.get("id")
+                if not selected_task_type_id:
+                    error_msg = "Task type selection failed: result missing 'id' field"
+                    logger.error(f"❌ {error_msg} | result: {task_type_result}")
+                    raise RuntimeError(error_msg)
+                
+                logger.info(f"🔍 Algorithm selection | task_type: {selected_task_type_id}")
+                algorithm_list = self.expert_search_engine.retrieve_algorithm(step.question, selected_task_type_id)
+                logger.info(f"🔍 Retrieved algorithms: {algorithm_list}")
+                graph_schema_info = None
+                if self.current_graph_dataset:
+                    graph_schema_info = {
+                        "dataset_name": self.current_dataset_name,
+                        "graph_properties": {
+                            "directed": self.current_graph_dataset.schema.graph.directed if hasattr(self.current_graph_dataset.schema, 'graph') else True,
+                            "heterogeneous": self.current_graph_dataset.schema.graph.heterogeneous if hasattr(self.current_graph_dataset.schema, 'graph') else False,
+                            "multigraph": self.current_graph_dataset.schema.graph.multigraph if hasattr(self.current_graph_dataset.schema, 'graph') else False,
+                            "weighted": self.current_graph_dataset.schema.graph.weighted if hasattr(self.current_graph_dataset.schema, 'graph') else False,
+                        },
+                        "vertex_types": [v.type for v in self.current_graph_dataset.schema.vertex] if hasattr(self.current_graph_dataset.schema, 'vertex') else [],
+                        "edge_types": [e.type for e in self.current_graph_dataset.schema.edge] if hasattr(self.current_graph_dataset.schema, 'edge') else [],
+                        "vertex_configs": [{"type": v.type, "query_field": v.query_field, "attribute_fields": v.attribute_fields}
+                                          for v in self.current_graph_dataset.schema.vertex] if hasattr(self.current_graph_dataset.schema, 'vertex') else [],
+                        "edge_configs": [{"type": e.type, "source_field": e.source_field, "target_field": e.target_field, "weight_field": e.weight_field}
+                                        for e in self.current_graph_dataset.schema.edge] if hasattr(self.current_graph_dataset.schema, 'edge') else [],
+                    }
+                
+                algorithm_result = self.reasoner.select_algorithm(step.question, algorithm_list, graph_schema=graph_schema_info)
+                logger.info(f"🔍 Algorithm selection result: {algorithm_result}")
+                
+                if algorithm_result is None:
+                    error_msg = "Algorithm selection failed: LLM returned None"
+                    logger.error(f"❌ {error_msg} | question: {step.question} | task_type: {selected_task_type_id}")
+                    raise RuntimeError(error_msg)
+                
+                if "error" in algorithm_result:
+                    error_msg = f"Algorithm selection failed: {algorithm_result.get('error', 'Unknown error')}"
+                    logger.error(f"❌ {error_msg} | question: {step.question} | task_type: {selected_task_type_id} | details: {algorithm_result}")
+                    raise RuntimeError(error_msg)
+                
+                selected_algorithm_id = algorithm_result.get("id")
+                if not selected_algorithm_id:
+                    error_msg = "Algorithm selection failed: result missing 'id' field"
+                    logger.error(f"❌ {error_msg} | result: {algorithm_result}")
+                    raise RuntimeError(error_msg)
+                
+                step.task_type = GraphAnalysisType.GRAPH_ALGORITHM
+                step.graph_algorithm = selected_algorithm_id
+                logger.info(f"✅ Algorithm selected | question: {step.question}, task_type: {selected_task_type_id}, algorithm: {step.graph_algorithm}")
 
     async def _run_algorithm_pipeline(self):
         analysis_result = ""
@@ -1741,7 +1652,7 @@ class Scheduler:
         
         return False
     
-    async def _refine_dag_with_retry(self, max_retries: int = 1) -> Dict[str, Any]:
+    def _refine_dag_with_retry(self, max_retries: int = 1) -> Dict[str, Any]:
         """
         Refine DAG with LLM to clarify task type boundaries.
 
@@ -1769,7 +1680,7 @@ class Scheduler:
                     logger.info("🔄 DAG structure changed; rebuilding...")
                     
                     self.build_dag_from_subquery_plan(refined_structure)
-                    await self._run_algorithm_matching_agent()
+                    self._find_algorithm()
                     
                     logger.info(f"✅ DAG refinement done (iteration {retry_count + 1})")
                 else:

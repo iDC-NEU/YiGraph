@@ -22,9 +22,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Flask 3 removes RequestContext.session setter; disable SocketIO managed session
-# to avoid assigning ctx.session during event handling.
-socketio = SocketIO(cors_allowed_origins="*", manage_session=False)
+socketio = SocketIO(cors_allowed_origins="*")
 
 
 def create_app():

@@ -32,19 +32,12 @@ class GraphDataLoader:
         if schema_path:
             self._load_yaml()                
 
-    def _ensure_graphdb_client(self) -> bool:
-        """Lazily initialize Nebula client only when graph DB access is required."""
-        if self.graphdb_client is not None:
-            return True
-
         try:
             self.graphdb_client = NebulaGraphClient()
             logger.info("✅ Initialized NebulaGraphClient instance")
-            return True
         except Exception as e:
             logger.warning(f"⚠️ Failed to initialize NebulaGraphClient: {e}")
             self.graphdb_client = None
-            return False
                       
 
     
@@ -241,7 +234,7 @@ class GraphDataLoader:
         从图数据库中加载指定数据集的完整图结构。
         自动切换空间并返回标准化的顶点与边对象列表。
         """
-        if not self._ensure_graphdb_client():
+        if not self.graphdb_client:
             raise RuntimeError("❌ GraphDB 客户端未初始化，请检查连接状态")
 
         space_name = dataset_config.schema.graph_store_info.space_name
