@@ -3,7 +3,11 @@ servers:
     command: "/home/chency/anaconda3/envs/graphllmenv/bin/python"
     args: ["-m", "aag.computing_engine.networkx_server.mcp_server"]
 
+  pyg:
+      command: "python"
+      args: ["-m", "aag.computing_engine.pyg.mcp_server"]
 
+      
 engine_supported_algorithms:
   networkx:
     initialize_graph:
@@ -314,3 +318,55 @@ engine_supported_algorithms:
     
     find_cycle:
       - tool: find_cycle
+
+  pyg:
+    gcnconv:
+      - tool: pyg_gcnconv
+    sageconv:
+      - tool: pyg_sageconv
+    gatconv:
+      - tool: pyg_gatconv
+    gatv2conv:
+      - tool: pyg_gatv2conv
+    transformerconv:
+      - tool: pyg_transformerconv
+    resgatedgraphconv:
+      - tool: pyg_resgatedgraphconv
+    gravnetconv:
+      - tool: pyg_gravnetconv
+    supergatconv:
+      - tool: pyg_supergatconv
+    egconv:
+      - tool: pyg_egconv
+    pdnconv:
+      - tool: pyg_pdnconv
+    generalconv:
+      - tool: pyg_generalconv
+    hypergraphconv:
+      - tool: pyg_hypergraphconv
+    leconv:
+      - tool: pyg_leconv
+    clustergcnconv:
+      - tool: pyg_clustergcnconv
+    genconv:
+      - tool: pyg_genconv
+    filmconv:
+      - tool: pyg_filmconv
+    mfconv:
+      - tool: pyg_mfconv
+    feastconv:
+      - tool: pyg_feastconv
+    pointtransformerconv:
+      - tool: pyg_pointtransformerconv
+    heteroconv:
+      - tool: pyg_heteroconv
+    mixhopconv:
+      - tool: pyg_mixhopconv
+    ssgconv:
+      - tool: pyg_ssgconv
+    armaconv:
+      - tool: pyg_armaconv
+    sgconv:
+      - tool: pyg_sgconv
+    tagconv:
+      - tool: pyg_tagconv

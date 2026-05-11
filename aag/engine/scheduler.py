@@ -24,6 +24,7 @@ from aag.expert_search_engine.database.datatype import VertexData, EdgeData, Gra
 from aag.utils.graph_conversion import flatten_graph, reconstruct_graph
 from aag.utils.data_utils import take_sample
 from aag.rag_engine.vector_rag import VectorRAG
+from aag.rag_engine.graph_rag import GraphRAG
 from aag.reasoner.prompt_template.llm_prompt_en import rag_prompt
 from aag.error_recovery.error_manager import ErrorRecovery
 
@@ -41,6 +42,9 @@ class Scheduler:
         self.computing_engine: Optional[ComputingEngine] = None
         self.expert_search_engine: Optional[ExpertSearchEngine] = None
         self.dag: Optional[GraphWorkflowDAG] = None
+        self.rag_engine: Optional[VectorRAG] = None
+        self.graph_rag_engine: Optional[GraphRAG] = None
+        
         self.dataset_manager: Optional[DatasetManager] = None
         self.data_dependency_resolver: Optional[DataDependencyResolver] = None
         self.error_recovery: Optional[ErrorRecovery] = None
@@ -49,6 +53,7 @@ class Scheduler:
         self.current_dataset: Optional[List[DatasetConfig]] = None  # Original dataset config (text/graph, never changes)
         self.current_graph_dataset: Optional[DatasetConfig] = None  # Current graph dataset config (may be converted graph)
         self.global_graph: Optional[GraphData] = None
+        self.query_id_mapping: Dict[str, int] = {}
 
         self._initialize_components()
 
@@ -72,7 +77,9 @@ class Scheduler:
         self._init_router()
 
         self._init_rag_engine()
-        
+
+        self._init_graph_rag_engine()
+
         self._init_error_recovery()
 
         self._init_data_dependency_resolver()
@@ -145,6 +152,20 @@ class Scheduler:
             print(f"✓ RAGEngine initialized")
         except Exception as e:
             print(f"✗ RAGEngineinitialization failed: {e}")
+            raise
+
+    def _init_graph_rag_engine(self):
+        try:
+            self.graph_rag_engine = GraphRAG(
+                self.config.retrieval,
+                llm_env_=self.reasoner,
+                pruning=30,
+                data_type="qa",
+                pruning_mode="embedding_for_perentity",
+            )
+            print("✓ GraphRAG initialized")
+        except Exception as e:
+            print(f"✗ GraphRAG initialization failed: {e}")
             raise
 
     def _init_error_recovery(self):
@@ -251,11 +272,12 @@ class Scheduler:
             return "⚠️ No dataset selected; please set the analysis target first."
         
         original_type = self.dataset_manager.get_dataset_original_type(self.current_dataset_name)
-        
+
         if decision.query_type == QueryType.RAG:
             if original_type == "graph":
-                return "❌ Error: Current dataset is graph data; retrieval is not supported. Use graph analysis only."
-            return await self._execute_rag(query)
+                return await self._execute_graph_rag(query)
+            else:
+                return await self._execute_rag(query)
 
         elif decision.query_type == QueryType.GRAPH_QUERY:
             if original_type != "graph":
@@ -321,6 +343,7 @@ class Scheduler:
 
         self._build_dag_from_query(query, decompose)
         self._find_algorithm()
+
         print("✅ Initial DAG build and algorithm selection done")
         self.dag.print_dag_info()
         
@@ -648,6 +671,23 @@ class Scheduler:
         print("✅ DAG build and algorithm selection done; starting computation")
         return await self._run_algorithm_pipeline2()
 
+    async def _execute_graph_rag(self, query: str) -> str:
+        """Execute GraphRAG retrieval + generation pipeline."""
+        if not self.current_dataset:
+            return "⚠️ No analysis data selected; please set the analysis target first."
+        if self.graph_rag_engine is None:
+            return "❌ GraphRAG is not initialized."
+        try:
+            nodes, retrieve_info = self.graph_rag_engine.retrieve(query)
+            logger.info(f"GraphRAG retrieve info: {retrieve_info}")
+            if not nodes:
+                return "❌ GraphRAG retrieval returned empty context."
+            response = self.graph_rag_engine.generation(query, nodes)
+            return str(response)
+        except Exception as e:
+            logger.error(f"GraphRAG execution failed: {e}", exc_info=True)
+            return f"❌ GraphRAG execution failed: {str(e)}"
+            
     async def _execute_rag(self, query: str) -> str:
         """
         Execute RAG query
@@ -750,7 +790,10 @@ class Scheduler:
         else:
             return obj
 
-    def build_dag_from_subquery_plan(self, subquery_plan: Dict[str, Any]) -> GraphWorkflowDAG:
+    def build_dag_from_subquery_plan(
+        self,
+        subquery_plan: Dict[str, Any]
+    ) -> GraphWorkflowDAG:
         """
         Build DAG from JSON subquery plan.
 
@@ -1052,7 +1095,7 @@ class Scheduler:
 
             if extraction_result.get("post_processing_code"):
                 logger.info(
-                    f"✅ Post-processing code:\n{extraction_result.get('post_processing_code','')[:200]}...")
+                    f"✅ Post-processing code:\n{extraction_result.get('post_processing_code','')}...")
 
             tool_result = await self.computing_engine.run_algorithm(
                 step.graph_algorithm,
@@ -1093,7 +1136,7 @@ class Scheduler:
             tool_metadata = None
             tool_result = None 
 
-            data_dependency_parents = [self.dag.steps[pid] for pid in self.dag.get_data_dependency(step_id)]
+            data_dependency_parents = [self.dag.steps[pid] for pid in self.dag.parents_of(step_id)]
             data_dependency_context = {
                 "graph_dependencies": [],
                 "parameter_dependencies": [],
@@ -1118,7 +1161,8 @@ class Scheduler:
             if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
                 if not step.graph_algorithm:
                     self.dag.set_failed(step_id, "No graph algorithm selected for this step")
-                    raise RuntimeError(f"Step {step_id} missing graph_algorithm")
+                    logger.error(f"❌ Step {step_id} missing graph_algorithm, skipping")
+                    continue
 
                 tool_description,  tool_metadata = await self.computing_engine.get_algorithm_description(
                     step.graph_algorithm
@@ -1128,7 +1172,7 @@ class Scheduler:
                     error_msg = f"Cannot get algorithm description for '{step.graph_algorithm}'"
                     logger.error(f"❌ {error_msg}")
                     self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"Step {step_id}: {error_msg}")
+                    continue
                 
                 # logger.info(f"tool_description:{tool_description}")
 
@@ -1139,7 +1183,8 @@ class Scheduler:
                     )
                 except Exception as graph_err:
                     self.dag.set_failed(step_id, f"Failed to initialize working graph: {graph_err}")
-                    raise
+                    logger.error(f"❌ Step {step_id} graph init failed: {graph_err}, skipping")
+                    continue
 
                 # extraction_result = self._prepare_parameters_for_execution(
                 #     step=step,
@@ -1220,17 +1265,17 @@ class Scheduler:
 
                     if tool_result is None:
                         raise ValueError("Algorithm execution returned None")
-                    logger.info(f"tool_result:{tool_result} !!!!!!!!!!!!!")
+                    logger.info(f"tool_result:{tool_result}")
 
                     result_data = tool_result.get("result")
                     if isinstance(result_data, dict) and "error" in result_data:
                         raise RuntimeError(result_data.get("error") or "Algorithm execution failed")
-                    logger.info(f"tool_result:{result_data} xxxxxxx")
+                    logger.info(f"tool_result:{result_data}")
 
 
                     if not tool_result.get("success", False):
                         error_msg = tool_result.get("error") or "Algorithm execution failed"
-                        logger.info(f"tool_result:{error_msg} sssssss")
+                        logger.info(f"tool_result:{error_msg}")
                         raise RuntimeError(error_msg)
 
                     return is_has_extract_code, output_schema, tool_result
@@ -1244,7 +1289,8 @@ class Scheduler:
                     )
                 except Exception as e:
                     self.dag.set_failed(step_id, str(e))
-                    raise RuntimeError(str(e))
+                    logger.error(f"❌ Step {step_id} algorithm execution failed: {e}, skipping")
+                    continue
 
                 step.add_algorithm_result(
                     tool_name=tool_metadata.get("name", ""),
@@ -1260,12 +1306,15 @@ class Scheduler:
                 logger.info("🧮 Task type: Numeric Analysis")
                 
                 graph_deps = data_dependency_context.get("graph_dependencies", [])
-                graph_deps = data_dependency_context.get("graph_dependencies", [])
                 param_deps = data_dependency_context.get("parameter_dependencies", [])
                 
                 dependency_items = []
                 execution_data = {}
-                for dep_item in graph_deps + param_deps:   
+                tool_description = (
+                    "##This step is a numeric analysis task executed by a generated Python function.\n\n"
+                    "Inputs are dependency fields extracted from the workflow context.\n"
+                )
+                for dep_item in graph_deps + param_deps:
                     value = take_sample(dep_item.value)
                     execution_data[dep_item.field_key] = value
                     dependency_items.append({
@@ -1274,6 +1323,11 @@ class Scheduler:
                         "field_desc": dep_item.field_desc,
                         "value": value
                     })
+                    tool_description += (
+                        f"- `{dep_item.field_key}`: {dep_item.field_desc or ''} "
+                        f"(type: {str(dep_item.field_type) if dep_item.field_type else 'unknown'})\n"
+                    )
+                
             
                 vertex_schema = {}
                 edge_schema = {}
@@ -1281,31 +1335,51 @@ class Scheduler:
                     vertex_schema = self.global_graph.get_vertex_properties_schema()
                     edge_schema = self.global_graph.get_edge_properties_schema()
                 
-                code_result = self.reasoner.generate_numeric_analysis_code(
-                    question=step.question,
-                    dependency_items=dependency_items,
-                    vertex_schema=vertex_schema,
-                    edge_schema=edge_schema
-                )
-                
-                numeric_analysis_code = code_result.get("numeric_analysis_code", {})
-                generated_code = numeric_analysis_code.get("code", "")
-                output_schema = numeric_analysis_code.get("output_schema", {})
-                logger.info(f"✅ Generated numeric analysis code: {generated_code[:200]}...")
-                
-                code_result_value = self.computing_engine.execute_code(
-                    code=generated_code,
-                    data=execution_data,
-                    global_graph=self.global_graph,
-                    is_numeric_analysis=True
-                )
+                async def op_generate_and_execute_numeric_analysis(error_history):
+                    code_result = self.reasoner.generate_numeric_analysis_code(
+                        question=step.question,
+                        dependency_items=dependency_items,
+                        vertex_schema=vertex_schema,
+                        edge_schema=edge_schema
+                    )
+                    if code_result is None:
+                        raise ValueError("Numeric analysis code generation returned None")
 
-                if isinstance(code_result_value, dict) and "error" in code_result_value:
-                    error_msg = code_result_value.get("error")
-                    logger.error(f"❌ {error_msg}")
-                    self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(error_msg)
+                    numeric_analysis_code = code_result.get("numeric_analysis_code", {})
+                    generated_code = numeric_analysis_code.get("code", "")
+                    output_schema = numeric_analysis_code.get("output_schema", {})
+                    if not generated_code or not generated_code.strip():
+                        raise ValueError("Generated numeric analysis code is empty")
 
+                    logger.info(f"✅ Generated numeric analysis code: {generated_code}")
+                    code_result_value = self.computing_engine.execute_code(
+                        code=generated_code,
+                        data=execution_data,
+                        global_graph=self.global_graph,
+                        is_numeric_analysis=True
+                    )
+
+                    if not isinstance(code_result_value, dict):
+                        raise RuntimeError("Numeric analysis executor returned non-dict result")
+
+                    if code_result_value.get("error"):
+                        raise RuntimeError(code_result_value.get("error") or "Numeric analysis execution failed")
+
+                    return output_schema, code_result_value
+
+                try:
+                    output_schema, code_result_value = await self.error_recovery.run(
+                        op_generate_and_execute_numeric_analysis,
+                        name=f"generate_numeric_code+execute(step={step_id})",
+                        operation_type="generic",
+                        location=f"step_{step_id}"
+                    )
+                except Exception as e:
+                    self.dag.set_failed(step_id, str(e))
+                    logger.error(f"❌ Step {step_id} numeric analysis failed: {e}, skipping")
+                    continue
+
+                result = code_result_value.get("result")
                 step.add_output(
                     task_type=GraphAnalysisSubType.NUMERIC_COMPUTATION,
                     source="numeric analysis code",
@@ -1320,10 +1394,27 @@ class Scheduler:
                             for name, info in output_schema.get("fields", {}).items()
                         }
                     ) if output_schema else None,
-                    value=code_result_value if isinstance(code_result_value, dict) else {"result": code_result_value},
+                    value = result if isinstance(result, dict) else {"result": result},
                     path=None,
                     validate_schema=True
                 )
+                # Describe expected outputs for the generated function.
+                tool_description += "\nExpected output:\n"
+                if output_schema:
+                    output_fields = output_schema.get("fields", {}) or {}
+                    if output_fields:
+                        for name, info in output_fields.items():
+                            tool_description += (
+                                f"- `{name}`: {info.get('field_description', '')} "
+                                f"(type: {info.get('type', '')})\n"
+                            )
+                    else:
+                        tool_description += f"- Output type: {output_schema.get('type', 'dict')}\n"
+                else:
+                    tool_description += "- Output: numeric analysis result\n"
+
+                tool_result = code_result_value
+                
                 logger.info("✅ Numeric analysis completed")
                 self.dag.set_success(step_id)
 
@@ -1372,23 +1463,29 @@ class Scheduler:
                         }
                     else:
                         error_msg = query_result.get("error", "Graph query failed")
-                        logger.error(f"❌ Graph query failed | error: {error_msg}")
+                        logger.error(f"❌ Step {step_id} graph query failed: {error_msg}, skipping")
                         self.dag.set_failed(step_id, error_msg)
-                        raise RuntimeError(f"Step {step_id} graph query failed: {error_msg}")
+                        continue
                         
                 except Exception as query_err:
                     error_msg = f"Graph query execution failed: {query_err}"
                     logger.error(error_msg, exc_info=True)
                     self.dag.set_failed(step_id, error_msg)
-                    raise RuntimeError(f"Step {step_id} graph query failed: {query_err}")
+                    continue
 
-            llm_analysis = self.reasoner.generate_answer_from_algorithm_result(
-                question=step.question,
-                tool_description=tool_description,
-                tool_result=tool_result,
-            )
-            analysis_blocks.append(llm_analysis)
-            analysis_result += llm_analysis
+            if tool_result is not None:
+                try:
+                    llm_analysis = self.reasoner.generate_answer_from_algorithm_result(
+                        question=step.question,
+                        tool_description=tool_description,
+                        tool_result=tool_result,
+                    )
+                    analysis_blocks.append(llm_analysis)
+                    analysis_result += llm_analysis
+                except Exception as analysis_err:
+                    logger.error(f"❌ Step {step_id} LLM analysis generation failed: {analysis_err}, skipping")
+            else:
+                logger.warning(f"⚠️ Step {step_id} skipped (no result), excluded from final report")
 
         final_question = (
             "You will be given the concatenated analysis text generated from "

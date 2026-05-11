@@ -532,6 +532,22 @@ def _proxy_env_lines() -> List[str]:
         if val:
             lines.append(f"{key}={val!r}")
     return lines
+    # add gjq
+    def nl_query_validate_cypher(self, cypher: str, question: str, query_type: str, 
+                                 params: dict, schema_info: str, template_info: str,
+                                 template_cypher_example: str) -> dict:
+        """Validate Cypher statement for natural language query engine."""
+        full_prompt = nl_query_validate_cypher_prompt.format(
+            schema_info=schema_info,
+            template_info=template_info,
+            template_cypher_example=template_cypher_example,
+            question=question,
+            query_type=query_type,
+            params=json.dumps(params, ensure_ascii=False, indent=2),
+            cypher=cypher
+        )
+        return self.execute_prompt(full_prompt, parse_json=True)
+ 
 
 
 class OpenAIEnv:
@@ -539,10 +555,12 @@ class OpenAIEnv:
     def __init__(self, 
                  base_url,
                  api_key,
-                 model_name):
+                 model_name,
+                 temperature: float = 0.0):
         self.base_url = base_url
         self.api_key = api_key
         self.model = model_name
+        self.temperature = temperature
 
         openai.api_key = self.api_key
         openai.base_url = self.base_url
@@ -572,7 +590,11 @@ class OpenAIEnv:
             Parsed JSON dict if parse_json=True, otherwise raw response text
         """
         messages = [{"role": "user", "content": full_prompt}]
-        request_kwargs = {"model": self.model, "messages": messages}
+        request_kwargs = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": self.temperature,
+        }
         
         if response_format:
             request_kwargs["response_format"] = response_format
@@ -648,6 +670,7 @@ class OpenAIEnv:
             resp = self.client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": query}],
+                temperature=self.temperature,
             )
             text = resp.choices[0].message.content
             elapsed = time.perf_counter() - t0
@@ -730,7 +753,8 @@ Please consider this schema when selecting the algorithm to ensure compatibility
             messages=[{"role": "user", "content": select_algorithm_prompt.format(
                 question=question,
                 algorithm_list=algorithm_list
-            ) + schema_context}]
+            ) + schema_context}],
+            temperature=self.temperature,
         )
         response_text = response.choices[0].message.content
         return parse_openai_json_response(response_text, "select_algorithm")
@@ -894,7 +918,8 @@ This analysis used graph algorithms to comprehensively assess Anna Lee's money l
 
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            temperature=self.temperature,
         )
         response_text = response.choices[0].message.content
         if not response_text:
@@ -904,7 +929,8 @@ This analysis used graph algorithms to comprehensively assess Anna Lee's money l
     def chat(self, messages: list) -> str:
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=messages
+            messages=messages,
+            temperature=self.temperature,
         )
         response_text = response.choices[0].message.content
         if not response_text:
@@ -977,6 +1003,21 @@ This analysis used graph algorithms to comprehensively assess Anna Lee's money l
             question=question
         )
         return self.execute_prompt(full_prompt, parse_json=True)
+    # add gjq
+    def nl_query_validate_cypher(self, cypher: str, question: str, query_type: str, 
+                                 params: dict, schema_info: str, template_info: str,
+                                 template_cypher_example: str) -> dict:
+        """Validate Cypher statement for natural language query engine."""
+        full_prompt=nl_query_validate_cypher_prompt.format(
+                schema_info=schema_info,
+                template_info=template_info,
+                template_cypher_example=template_cypher_example,
+                question=question,
+                query_type=query_type,
+                params=json.dumps(params, ensure_ascii=False, indent=2),
+                cypher=cypher
+            )
+        return self.execute_prompt(full_prompt, parse_json=True)
 
 
 class Reasoner:
@@ -1012,12 +1053,18 @@ class Reasoner:
             base_url = openai_cfg.get("base_url") or "https://api.openai.com/v1"
             api_key = openai_cfg.get("api_key")
             model = openai_cfg.get("model") or "gpt-4o"
+            temperature = openai_cfg.get("temperature", 0.0)
             if not api_key:
                 # Allow environment variable fallback
                 api_key = os.environ.get("OPENAI_API_KEY")
             if not api_key:
                 raise ValueError("OpenAI provider requires an API key via config.reasoner.llm.openai.api_key or env OPENAI_API_KEY")
-            self.env = OpenAIEnv(base_url=base_url, api_key=api_key, model_name=model)
+            self.env = OpenAIEnv(
+                base_url=base_url,
+                api_key=api_key,
+                model_name=model,
+                temperature=temperature,
+            )
         else:
             raise ValueError(f"Unsupported provider: {provider}")
 
@@ -1262,6 +1309,20 @@ class Reasoner:
             question=question
         )
         return self.env.execute_prompt(full_prompt, parse_json=True)
+    def nl_query_validate_cypher(self, cypher: str, question: str, query_type: str, 
+                                 params: dict, schema_info: str, template_info: str,
+                                 template_cypher_example: str) -> dict:
+        """Validate Cypher statement for natural language query engine."""
+        full_prompt=nl_query_validate_cypher_prompt.format(
+                schema_info=schema_info,
+                template_info=template_info,
+                template_cypher_example=template_cypher_example,
+                question=question,
+                query_type=query_type,
+                params=json.dumps(params, ensure_ascii=False, indent=2),
+                cypher=cypher
+            )
+        return self.execute_prompt(full_prompt, parse_json=True)
 
     def rewrite_query(
         self,
