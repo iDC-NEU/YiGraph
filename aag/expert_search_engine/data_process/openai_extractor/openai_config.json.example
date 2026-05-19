@@ -1,0 +1,6 @@
+{
+    "_comment": "将 api_key 设置为你的实际密钥，或通过环境变量 OPENAI_API_KEY 注入",
+    "base_url": "https://gitaigc.com/v1/",
+    "api_key": "YOUR_API_KEY",
+    "model": "gpt-4o"
+}
