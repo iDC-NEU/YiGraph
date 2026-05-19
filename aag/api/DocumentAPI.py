@@ -21,8 +21,14 @@ import datetime
 import logging
 from time import sleep
 import time
+
 logger = logging.getLogger(__name__)
-from aag.utils.path_utils import DATASETS_DIR, DATASETS_DATA_DIR, DATASETS_SCHEMA_DIR, DATASETS_INDEX_PATH
+from aag.utils.path_utils import (
+    DATASETS_DIR,
+    DATASETS_DATA_DIR,
+    DATASETS_SCHEMA_DIR,
+    DATASETS_INDEX_PATH,
+)
 from aag.data_pipeline.data_transformer.text_2_graph.text_2_graph import Text2Graph
 from aag.data_pipeline import csv_graph_llm
 
@@ -124,18 +130,28 @@ class DocumentAPIServer:
         name = message.get("name")
         type = message.get("type")
         if not name:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": "缺少 db_name 参数"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": "缺少 db_name 参数",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
         if name in self.datasets:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"Dataset '{name}' already exists."
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"Dataset '{name}' already exists.",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
 
         try:
@@ -143,7 +159,7 @@ class DocumentAPIServer:
             logger.info(f"0111Creating dataset directory: {self.dataset_schema_dir}")
             dataset_path = os.path.join(self.dataset_schema_dir, f"{name}")
             logger.info(f"0222Creating dataset directory: {dataset_path}")
-            os.makedirs(dataset_path, exist_ok=True)        
+            os.makedirs(dataset_path, exist_ok=True)
             # 创建数据目录
             dataset_path = os.path.join(self.dataset_data_dir, f"{name}/{type}")
             os.makedirs(dataset_path, exist_ok=True)
@@ -155,7 +171,7 @@ class DocumentAPIServer:
                 "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "updated_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "status": "active",
-                "data_path": name   
+                "data_path": name,
             }
 
             output_file = []
@@ -168,37 +184,52 @@ class DocumentAPIServer:
             with open(self.dataset_index_path, "w", encoding="utf-8") as f:
                 yaml.dump(final_schema, f, sort_keys=False, allow_unicode=True)
 
-            original_schema_file = os.path.join(self.dataset_schema_dir, f"{name}/{type}_schemas.yaml")
+            original_schema_file = os.path.join(
+                self.dataset_schema_dir, f"{name}/{type}_schemas.yaml"
+            )
             with open(original_schema_file, "w", encoding="utf-8") as f:
                 f.write("datasets:\n")
 
-            await websocket.send(json.dumps({
-                "type": "data",
-                "contentType": "json",
-                "content": {
-                    "success": True,
-                    "data": {
-                        "db_name": name,
-                        "message": f"Dataset '{name}' created successfully."
-                    }
-                }
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "data",
+                        "contentType": "json",
+                        "content": {
+                            "success": True,
+                            "data": {
+                                "db_name": name,
+                                "message": f"Dataset '{name}' created successfully.",
+                            },
+                        },
+                    },
+                    ensure_ascii=False,
+                )
+            )
         except Exception as e:
             print("Error creating dataset:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"create error {str(e)}"
-            }, ensure_ascii=False))
-    
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"create error {str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
+
     def load_each_dataset(self, db_name: str):
-        self.each_dataset_schema_file = os.path.join(self.dataset_schema_dir, f"{db_name}/{self.datasets[db_name]['type']}_schemas.yaml")
+        self.each_dataset_schema_file = os.path.join(
+            self.dataset_schema_dir,
+            f"{db_name}/{self.datasets[db_name]['type']}_schemas.yaml",
+        )
         with open(self.each_dataset_schema_file, "r", encoding="utf-8") as f:
             yaml_data = yaml.safe_load(f)
 
         if not yaml_data or "datasets" not in yaml_data:
             raise ValueError(f"YAML 中不包含 datasets 字段: {self.graph_schema_file}")
-        
+
         datasets_list = yaml_data.get("datasets")
         if not isinstance(datasets_list, list):
             datasets_list = []
@@ -224,30 +255,45 @@ class DocumentAPIServer:
         file_name = message.get("file_name")
         ds_name = message.get("ds_name")
         if not file_name or not ds_name:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": "缺少 file_name 或 ds_name 参数"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": "缺少 file_name 或 ds_name 参数",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
-        
+
         dataset_schema = self.datasets.get(ds_name)
         if dataset_schema is None:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"Dataset '{ds_name}' does not exist."
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"Dataset '{ds_name}' does not exist.",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
-        
+
         self.load_each_dataset(ds_name)
 
         if file_name in self.each_dataset:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"File '{file_name}' already exists in dataset '{ds_name}'."
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"File '{file_name}' already exists in dataset '{ds_name}'.",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
 
         if dataset_schema["type"] == "text":
@@ -259,18 +305,25 @@ class DocumentAPIServer:
         elif dataset_schema["type"] == "graph":
             await self.upload_graph_file(message, websocket, file_name, ds_name)
         else:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"Unsupported dataset type for '{ds_name}'."
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"Unsupported dataset type for '{ds_name}'.",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
 
     async def upload_text_file(self, websocket, file_name, ds_name):
         file_path = os.path.join(self.dataset_data_dir, f"{ds_name}/text/{file_name}")
         md_folder = os.path.join(self.dataset_data_dir, f"{ds_name}/process_text/")
         os.makedirs(md_folder, exist_ok=True)
-        md_file_path = os.path.join(self.dataset_data_dir, f"{ds_name}/process_text/{file_name}.md")
+        md_file_path = os.path.join(
+            self.dataset_data_dir, f"{ds_name}/process_text/{file_name}.md"
+        )
 
         ext = os.path.splitext(file_name)[1].lower()
         error_msg = None
@@ -281,27 +334,30 @@ class DocumentAPIServer:
             else:
                 # 1️⃣ 转成 Markdown
                 from markitdown import MarkItDown
+
                 md = MarkItDown()
                 result = md.convert(file_path)
                 markdown_text = result.text_content
                 # 2️⃣ 保存 Markdown 文件
                 with open(md_file_path, "w", encoding="utf-8") as f:
                     f.write(markdown_text)
-                
+
                 new_schema = {
                     "name": file_name,
                     "description": f"{file_name} doc",
                     "type": "markdown",
                     "graph_status": "pending",
                     "parsing_rate": 0,
-                    "create_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "create_time": datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    ),
                     "schema": {
                         "path": md_file_path,
                         "original_path": file_path,
-                        "format": "md"
+                        "format": "md",
                     },
                 }
-                
+
                 output_file = []
                 for key in self.each_dataset:
                     output_file.append(self.each_dataset[key])
@@ -317,16 +373,23 @@ class DocumentAPIServer:
 
         # 返回状态和错误信息
         if error_msg:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"上传失败 {str(error_msg)}"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"上传失败 {str(error_msg)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
     def _graph_schemas_yaml_path(self, ds_name: str) -> str:
         return os.path.join(self.dataset_schema_dir, f"{ds_name}/graph_schemas.yaml")
 
-    def _remove_named_entry_from_graph_schemas_yaml(self, ds_name: str, entry_name: str) -> None:
+    def _remove_named_entry_from_graph_schemas_yaml(
+        self, ds_name: str, entry_name: str
+    ) -> None:
         graph_schema_file = self._graph_schemas_yaml_path(ds_name)
         if not os.path.exists(graph_schema_file):
             return
@@ -373,21 +436,31 @@ class DocumentAPIServer:
             with open(self.each_dataset_schema_file, "w", encoding="utf-8") as f:
                 yaml.dump(final_schema, f, sort_keys=False, allow_unicode=True)
 
-            await websocket.send(json.dumps({
-                "type": "data",
-                "contentType": "json",
-                "content": {
-                    "success": True,
-                    "data": {"file_name": file_name, "type": "csv_graph"},
-                },
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "data",
+                        "contentType": "json",
+                        "content": {
+                            "success": True,
+                            "data": {"file_name": file_name, "type": "csv_graph"},
+                        },
+                    },
+                    ensure_ascii=False,
+                )
+            )
         except Exception as e:
             error_msg = str(e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"上传失败 {error_msg}",
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"上传失败 {error_msg}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
     async def upload_graph_file(self, message, websocket, file_name, ds_name):
         """
@@ -403,27 +476,30 @@ class DocumentAPIServer:
         edge_source_field = message.get("source_field")
         edge_target_field = message.get("target_field")
         import ast
+
         edge_relation_field_str = message.get("relation_field", None)
         if edge_relation_field_str is None:
             edge_relation_field = None
         else:
             edge_relation_field = ast.literal_eval(edge_relation_field_str)
-        
+
         vertex_attribute_field_srt = message.get("vertex_attribute_field", None)
         vertex_name_field_str = message.get("vertex_name_field", vertex_id_field)
         vertex_query_field = message.get("vertex_query_field", None)
         is_directed = message.get("is_directed", True)
 
         try:
-
             # ----------------------------------------------------
             # 1. 先读取边文件
             # ----------------------------------------------------
-            edge_file_path = os.path.join(self.dataset_data_dir, f"{ds_name}/graph/{file_name}")
+            edge_file_path = os.path.join(
+                self.dataset_data_dir, f"{ds_name}/graph/{file_name}"
+            )
             edges = []
             all_node_names = set()
 
             import csv
+
             with open(edge_file_path, "r", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
 
@@ -438,7 +514,7 @@ class DocumentAPIServer:
 
                     if src == "" or dst == "":
                         continue
-                    
+
                     # # 读取多个 relation 列
                     # if edge_relation_field is None:
                     #     rel = ""
@@ -451,7 +527,9 @@ class DocumentAPIServer:
                     #     # 你可以选择把多个字段拼起来（常见做法）
                     #     rel = ",".join(rel_values)
 
-                    edges.append([src, dst] + [row[field] for field in edge_relation_field])
+                    edges.append(
+                        [src, dst] + [row[field] for field in edge_relation_field]
+                    )
                     all_node_names.add(src)
                     all_node_names.add(dst)
 
@@ -462,25 +540,37 @@ class DocumentAPIServer:
 
             if vertex_file_name:
                 # ========== 用户提供顶点文件 ==========
-                vertex_file_path = os.path.join(self.dataset_data_dir, f"{ds_name}/graph/{vertex_file_name}")
+                vertex_file_path = os.path.join(
+                    self.dataset_data_dir, f"{ds_name}/graph/{vertex_file_name}"
+                )
                 if not os.path.exists(vertex_file_path):
-                    raise FileNotFoundError(f"Vertex file does not exist: {vertex_file_path}")
+                    raise FileNotFoundError(
+                        f"Vertex file does not exist: {vertex_file_path}"
+                    )
 
                 if not vertex_id_field or not vertex_name_field_str:
-                    raise ValueError("vertex_id_field and vertex_name_field must be provided when vertex_file_path exists.")
+                    raise ValueError(
+                        "vertex_id_field and vertex_name_field must be provided when vertex_file_path exists."
+                    )
 
                 # 1. 解析用户传入的 attribute 列（字符串形式）
                 vertex_attribute_fields = []
                 if vertex_attribute_field_srt:
-                    vertex_attribute_fields = ast.literal_eval(vertex_attribute_field_srt)  # -> list
+                    vertex_attribute_fields = ast.literal_eval(
+                        vertex_attribute_field_srt
+                    )  # -> list
 
                 # 2. 规范化 name 列为 list（支持单列名或字符串形式的列表）
-                if isinstance(vertex_name_field_str, str) and vertex_name_field_str.strip().startswith("["):
+                if isinstance(
+                    vertex_name_field_str, str
+                ) and vertex_name_field_str.strip().startswith("["):
                     vertex_name_fields = ast.literal_eval(vertex_name_field_str)
                 elif isinstance(vertex_name_field_str, str):
                     vertex_name_fields = [vertex_name_field_str]
                 else:
-                    vertex_name_fields = list(vertex_name_field_str)  # 已经是 list 的情况
+                    vertex_name_fields = list(
+                        vertex_name_field_str
+                    )  # 已经是 list 的情况
 
                 # 3. 读取 CSV 并在必要时自动选择属性列
                 vertex2attributes = {}  # vid -> {attr_name: attr_value} 或 vid -> 拼接字符串
@@ -492,16 +582,24 @@ class DocumentAPIServer:
                     # 基础列存在性检查
                     for field in [vertex_id_field] + vertex_name_fields:
                         if field not in reader.fieldnames:
-                            raise ValueError(f"Vertex file missing required column: {field}")
+                            raise ValueError(
+                                f"Vertex file missing required column: {field}"
+                            )
 
                     # 如果没有显式给出属性列，就把 CSV 中除 id 和 name 列外的所有列当作属性列
                     if not vertex_attribute_fields:
-                        vertex_attribute_fields = [c for c in reader.fieldnames if c not in ([vertex_id_field] + vertex_name_fields)]
+                        vertex_attribute_fields = [
+                            c
+                            for c in reader.fieldnames
+                            if c not in ([vertex_id_field] + vertex_name_fields)
+                        ]
 
                     # 可选：再次检查属性列是否都存在
                     for field in vertex_attribute_fields:
                         if field not in reader.fieldnames:
-                            raise ValueError(f"Vertex file missing attribute column: {field}")
+                            raise ValueError(
+                                f"Vertex file missing attribute column: {field}"
+                            )
 
                     for row in reader:
                         vid = row[vertex_id_field]
@@ -512,7 +610,9 @@ class DocumentAPIServer:
                         id2name_list[vid] = name_parts
 
                         # 读取属性列：保存为 字段名 -> 值 的字典，便于按列写出
-                        vertex2attributes[vid] = {f: row[f] for f in vertex_attribute_fields}
+                        vertex2attributes[vid] = {
+                            f: row[f] for f in vertex_attribute_fields
+                        }
 
                 # 检查：边文件中的 name 是否在顶点文件里
                 for id in all_node_names:
@@ -522,11 +622,12 @@ class DocumentAPIServer:
                             f"Edge file must use names consistent with vertex file."
                         )
 
-            
             # ============================================================
             # 3. 存储到 process_graph 目录
             # ============================================================
-            process_dir = os.path.join(self.dataset_data_dir, f"{ds_name}/process_graph")
+            process_dir = os.path.join(
+                self.dataset_data_dir, f"{ds_name}/process_graph"
+            )
             os.makedirs(process_dir, exist_ok=True)
 
             # ------------------------------------------------------------
@@ -535,8 +636,10 @@ class DocumentAPIServer:
             edge_out_path = os.path.join(process_dir, f"{file_name}_edges.csv")
             with open(edge_out_path, "w", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f)
-                writer.writerow([edge_source_field, edge_target_field] + edge_relation_field)
-                
+                writer.writerow(
+                    [edge_source_field, edge_target_field] + edge_relation_field
+                )
+
                 for src, dst, *rel_values in edges:
                     writer.writerow([src, dst] + rel_values)
 
@@ -548,12 +651,18 @@ class DocumentAPIServer:
                 with open(vertex_out_path, "w", encoding="utf-8", newline="") as f:
                     writer = csv.writer(f)
                     # 表头：id, name + 各属性字段名（每个字段一列，保留字段与值的对应关系）
-                    writer.writerow([vertex_id_field] + vertex_name_fields + vertex_attribute_fields)
+                    writer.writerow(
+                        [vertex_id_field] + vertex_name_fields + vertex_attribute_fields
+                    )
                     for vid in id2name:
                         name = id2name[vid]
                         attrs_dict = vertex2attributes.get(vid, {})
-                        #vertex_real_name = name.split(",")
-                        row_values = [vid] + id2name_list[vid] + [attrs_dict.get(f, "") for f in vertex_attribute_fields]
+                        # vertex_real_name = name.split(",")
+                        row_values = (
+                            [vid]
+                            + id2name_list[vid]
+                            + [attrs_dict.get(f, "") for f in vertex_attribute_fields]
+                        )
                         writer.writerow(row_values)
 
             if os.path.exists(self.each_dataset_schema_file):
@@ -570,7 +679,9 @@ class DocumentAPIServer:
             # 2. 构造当前 dataset 的 schema
             # ------------------------------------------------------------
             edge_schema_entry = {
-                "attribute_fields": _FlowStyleList(parse_list_like_string(edge_relation_field_str)),
+                "attribute_fields": _FlowStyleList(
+                    parse_list_like_string(edge_relation_field_str)
+                ),
                 "format": "csv",
                 "label_field": None,
                 "path": edge_out_path,
@@ -578,20 +689,24 @@ class DocumentAPIServer:
                 "source_field": edge_source_field,
                 "target_field": edge_target_field,
                 "type": "edge",
-                "weight_field": None
+                "weight_field": None,
             }
 
             vertex_schema_entry = None
             if vertex_file_name:
                 vertex_schema_entry = {
-                    "attribute_fields": _FlowStyleList(parse_list_like_string(vertex_attribute_field_srt)),
+                    "attribute_fields": _FlowStyleList(
+                        parse_list_like_string(vertex_attribute_field_srt)
+                    ),
                     "format": "csv",
-                    "query_field": _FlowStyleList(parse_list_like_string(vertex_query_field or "")),  # 用户名字字段，可能是多列
+                    "query_field": _FlowStyleList(
+                        parse_list_like_string(vertex_query_field or "")
+                    ),  # 用户名字字段，可能是多列
                     "id_field": vertex_id_field,
                     "label_field": None,
                     "path": vertex_out_path,
                     "original_path": vertex_file_path,
-                    "type": "vertex"
+                    "type": "vertex",
                 }
 
             dataset_entry = {
@@ -605,12 +720,12 @@ class DocumentAPIServer:
                         "directed": is_directed,
                         "heterogeneous": False,
                         "multigraph": True,
-                        "weighted": False
+                        "weighted": False,
                     },
                     "graph_store_info": {},
-                    "vertex": [vertex_schema_entry] if vertex_schema_entry else []
+                    "vertex": [vertex_schema_entry] if vertex_schema_entry else [],
                 },
-                "type": "graph"
+                "type": "graph",
             }
 
             # ------------------------------------------------------------
@@ -626,8 +741,15 @@ class DocumentAPIServer:
             # 4. 写回 YAML（列表用 flow 风格：attribute_fields: [tx_type, base_amt, ...]）
             # ------------------------------------------------------------
             with open(self.each_dataset_schema_file, "w", encoding="utf-8") as f:
-                yaml.dump(existing_schema, f, Dumper=_GraphSchemaDumper, sort_keys=False, allow_unicode=True, width=2**31 - 1)
-            
+                yaml.dump(
+                    existing_schema,
+                    f,
+                    Dumper=_GraphSchemaDumper,
+                    sort_keys=False,
+                    allow_unicode=True,
+                    width=2**31 - 1,
+                )
+
             self.each_dataset[ds_name] = dataset_entry
 
             # 构建前端要求的数据
@@ -639,19 +761,24 @@ class DocumentAPIServer:
                     "data": {
                         "三元组个数": len(edges),
                         "创建时间": self.each_dataset[ds_name]["create_time"],
-                    }
-                }
+                    },
+                },
             }
 
             await websocket.send(json.dumps(response_data, ensure_ascii=False))
 
         except Exception as e:
             print("Error creating knowledge base:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"添加失败 {str(e)}"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"添加失败 {str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
     async def delete_file(self, websocket, message):
         """
@@ -664,25 +791,38 @@ class DocumentAPIServer:
         file_name = message.get("file_name")
         ds_name = message.get("ds_name")
         if not file_name:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": "缺少 graph_name 参数"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": "缺少 graph_name 参数",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
 
         self.load_each_dataset(ds_name)
 
         if not file_name in self.each_dataset:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"{file_name} 不存在"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"{file_name} 不存在",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
 
         try:
-            if self.each_dataset[file_name]["type"] == "graph" or self.each_dataset[file_name].get("graph_status", "") == "completed":
+            if (
+                self.each_dataset[file_name]["type"] == "graph"
+                or self.each_dataset[file_name].get("graph_status", "") == "completed"
+            ):
                 self.load_each_dataset_graph_schema(ds_name)
                 schema = self.graph_schema[file_name].get("schema", {})
                 # 删除顶点文件
@@ -692,7 +832,9 @@ class DocumentAPIServer:
                         os.remove(path)
                     if self.each_dataset[file_name]["type"] == "graph":
                         original_vertex_path = v.get("original_path")
-                        if original_vertex_path and os.path.exists(original_vertex_path):
+                        if original_vertex_path and os.path.exists(
+                            original_vertex_path
+                        ):
                             os.remove(original_vertex_path)
                 # 删除边文件
                 for e in schema.get("edge", []):
@@ -712,7 +854,9 @@ class DocumentAPIServer:
                         all_data = yaml.safe_load(f) or {}
 
                     datasets = all_data.get("datasets", [])
-                    all_data["datasets"] = [d for d in datasets if d.get("name") != file_name]
+                    all_data["datasets"] = [
+                        d for d in datasets if d.get("name") != file_name
+                    ]
 
                     with open(self.graph_schema_file, "w", encoding="utf-8") as f:
                         yaml.dump(all_data, f, sort_keys=False, allow_unicode=True)
@@ -732,40 +876,58 @@ class DocumentAPIServer:
                 del self.each_dataset[file_name]
                 # 更新 YAML 文件：先读全部，再去掉这个文本文件
                 if os.path.exists(self.each_dataset_schema_file):
-                    with open(self.each_dataset_schema_file, "r", encoding="utf-8") as f:
+                    with open(
+                        self.each_dataset_schema_file, "r", encoding="utf-8"
+                    ) as f:
                         all_data = yaml.safe_load(f) or {}
 
                     datasets = all_data.get("datasets", [])
-                    all_data["datasets"] = [d for d in datasets if d.get("name") != file_name]
+                    all_data["datasets"] = [
+                        d for d in datasets if d.get("name") != file_name
+                    ]
 
-                    with open(self.each_dataset_schema_file, "w", encoding="utf-8") as f:
+                    with open(
+                        self.each_dataset_schema_file, "w", encoding="utf-8"
+                    ) as f:
                         yaml.dump(all_data, f, sort_keys=False, allow_unicode=True)
                 # 仅 CSV 图占位在 graph_schemas.yaml；普通 markdown/txt 等删除逻辑保持原样，不碰 graph_schemas
                 if text_entry_type == "csv_graph":
                     self._remove_named_entry_from_graph_schemas_yaml(ds_name, file_name)
-                        
+
             # 成功返回
-            await websocket.send(json.dumps({
-                "type": "data",
-                "contentType": "json",
-                "content": {
-                    "success": True,
-                    "data": {
-                        "id": file_name,
-                        "名称": file_name,
-                        "删除时间": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    }
-                }
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "data",
+                        "contentType": "json",
+                        "content": {
+                            "success": True,
+                            "data": {
+                                "id": file_name,
+                                "名称": file_name,
+                                "删除时间": datetime.datetime.now().strftime(
+                                    "%Y-%m-%d %H:%M:%S"
+                                ),
+                            },
+                        },
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
         except Exception as e:
             print("删除知识库失败:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"删除失败：{str(e)}"
-            }, ensure_ascii=False))
-      
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"删除失败：{str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
+
     async def parsing_text_file(self, websocket, message):
         file_name = message["file_name"]
         ds_name = message["ds_name"]
@@ -777,28 +939,37 @@ class DocumentAPIServer:
         thread_count = message.get("thread_count", 1)
         chunk_size = message.get("chunk_size", 512)
 
-
         self.load_each_dataset(ds_name)
 
         if not file_name in self.each_dataset:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"file '{file_name}' don't exist."
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"file '{file_name}' don't exist.",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
         if self.each_dataset[file_name].get("graph_status", "") != "pending":
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"file '{file_name}' already parse."
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"file '{file_name}' already parse.",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
 
         if self.each_dataset[file_name].get("type") == "csv_graph":
             await self._parsing_csv_graph_file(websocket, message)
             return
-        
+
         try:
             self.each_dataset[file_name]["graph_status"] = "parsing"
             output_file = []
@@ -808,7 +979,9 @@ class DocumentAPIServer:
             with open(self.each_dataset_schema_file, "w", encoding="utf-8") as f:
                 yaml.dump(final_schema, f, sort_keys=False, allow_unicode=True)
 
-            await websocket.send(json.dumps({"type": "status", "message": "Starting Text2Graph..."}))
+            await websocket.send(
+                json.dumps({"type": "status", "message": "Starting Text2Graph..."})
+            )
             file_path = self.each_dataset[file_name]["schema"]["path"]
             graph_name = file_name
             text_2_graph = Text2Graph(
@@ -819,25 +992,37 @@ class DocumentAPIServer:
                 llm_name=llm_name,
                 api_key=api_key,
                 chunk_size=chunk_size,
-                thread_count=thread_count
+                thread_count=thread_count,
             )
 
-            await websocket.send(json.dumps({"type": "status", "message": "Extracting triplets and entities..."}))
+            await websocket.send(
+                json.dumps(
+                    {"type": "status", "message": "Extracting triplets and entities..."}
+                )
+            )
 
             if mode == "single":
-                triplets, entity2id, entity2type, parse_metrics = text_2_graph.extract_graph_and_entity_by_LLM(
-                    self.each_dataset, file_name, self.each_dataset_schema_file
+                triplets, entity2id, entity2type, parse_metrics = (
+                    text_2_graph.extract_graph_and_entity_by_LLM(
+                        self.each_dataset, file_name, self.each_dataset_schema_file
+                    )
                 )
             elif mode == "multiple":
-                triplets, entity2id, entity2type, parse_metrics = text_2_graph.extract_graph_and_entity_by_LLM_with_mutiple(
-                    self.each_dataset, file_name, self.each_dataset_schema_file
+                triplets, entity2id, entity2type, parse_metrics = (
+                    text_2_graph.extract_graph_and_entity_by_LLM_with_mutiple(
+                        self.each_dataset, file_name, self.each_dataset_schema_file
+                    )
                 )
             else:
                 raise ValueError(f"Invalid mode: {mode}")
 
-            await websocket.send(json.dumps({"type": "status", "message": "Saving graph..."}))
+            await websocket.send(
+                json.dumps({"type": "status", "message": "Saving graph..."})
+            )
 
-            graph_schema_file = os.path.join(self.dataset_schema_dir, f"{ds_name}/graph_schemas.yaml")
+            graph_schema_file = os.path.join(
+                self.dataset_schema_dir, f"{ds_name}/graph_schemas.yaml"
+            )
             if not os.path.exists(graph_schema_file):
                 # 创建空的 graph_schemas.yaml 文件
                 with open(graph_schema_file, "w", encoding="utf-8") as f:
@@ -938,21 +1123,26 @@ class DocumentAPIServer:
                         "名称": graph_name,
                         "三元组个数": len(triplets),
                         "创建时间": new_schema["create_time"],
-                    }
-                }
+                    },
+                },
             }
 
             await websocket.send(json.dumps(response_data, ensure_ascii=False))
 
         except Exception as e:
             print("Error creating knowledge base:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "file_name": file_name,
-                "ds_name": ds_name,
-                "content": f"解析失败 {str(e)}"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "file_name": file_name,
+                        "ds_name": ds_name,
+                        "content": f"解析失败 {str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
     async def _parsing_csv_graph_file(self, websocket, message):
         """文本知识库 CSV：LLM 推断列 → 生成与 Text2Graph 一致的 accounts/transactions CSV 并写入 graph_schemas.yaml。"""
@@ -973,7 +1163,14 @@ class DocumentAPIServer:
             self.each_dataset[file_name]["graph_status"] = "parsing"
             _persist_text_schema()
 
-            await websocket.send(json.dumps({"type": "status", "message": "正在用 LLM 推断 CSV 列语义（源/目标/关系/边属性）..."}))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "status",
+                        "message": "正在用 LLM 推断 CSV 列语义（源/目标/关系/边属性）...",
+                    }
+                )
+            )
 
             user_csv = self.each_dataset[file_name]["schema"]["path"]
             columns, rows = csv_graph_llm.read_user_csv(user_csv)
@@ -998,9 +1195,18 @@ class DocumentAPIServer:
             except Exception as ex:
                 logger.warning("CSV LLM 列推断失败，使用启发式: %s", ex)
                 fallback_used = True
-                infer = csv_graph_llm._validate_infer(columns, csv_graph_llm._heuristic_schema(columns))
+                infer = csv_graph_llm._validate_infer(
+                    columns, csv_graph_llm._heuristic_schema(columns)
+                )
 
-            await websocket.send(json.dumps({"type": "status", "message": "正在生成顶点/边表并写入 graph_schemas..."}))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "status",
+                        "message": "正在生成顶点/边表并写入 graph_schemas...",
+                    }
+                )
+            )
 
             process_dir = os.path.join(self.dataset_data_dir, f"{ds_name}/process_text")
             os.makedirs(process_dir, exist_ok=True)
@@ -1012,7 +1218,9 @@ class DocumentAPIServer:
                 infer=infer,
             )
 
-            graph_schema_file = os.path.join(self.dataset_schema_dir, f"{ds_name}/graph_schemas.yaml")
+            graph_schema_file = os.path.join(
+                self.dataset_schema_dir, f"{ds_name}/graph_schemas.yaml"
+            )
             if not os.path.exists(graph_schema_file):
                 with open(graph_schema_file, "w", encoding="utf-8") as f:
                     f.write("datasets: []\n")
@@ -1023,23 +1231,52 @@ class DocumentAPIServer:
             _persist_text_schema()
 
             n_edges = schema_dict["schema"]["graph_store_info"].get("edge_count", 0)
-            n_vertices = schema_dict["schema"]["graph_store_info"].get("vertex_count", 0)
+            n_vertices = schema_dict["schema"]["graph_store_info"].get(
+                "vertex_count", 0
+            )
             elapsed_ms = int((time.perf_counter() - t_total) * 1000)
             metrics_log = {
                 "event": "CSV_TEXT_DATASET_PARSE_METRICS",
                 "dataset": ds_name,
                 "file": file_name,
-                "elapsed_ms": {"value": elapsed_ms, "desc": "从进入 CSV 解析分支到完成写入 schema 的总耗时(毫秒)"},
-                "llm_elapsed_ms": {"value": llm_metrics.get("llm_elapsed_ms"), "desc": "仅 LLM 字段推断请求耗时(毫秒)"},
-                "row_count": {"value": len(rows), "desc": "读取到的 CSV 行数（不含表头）"},
+                "elapsed_ms": {
+                    "value": elapsed_ms,
+                    "desc": "从进入 CSV 解析分支到完成写入 schema 的总耗时(毫秒)",
+                },
+                "llm_elapsed_ms": {
+                    "value": llm_metrics.get("llm_elapsed_ms"),
+                    "desc": "仅 LLM 字段推断请求耗时(毫秒)",
+                },
+                "row_count": {
+                    "value": len(rows),
+                    "desc": "读取到的 CSV 行数（不含表头）",
+                },
                 "edge_count": {"value": n_edges, "desc": "最终生成的边数量"},
                 "vertex_count": {"value": n_vertices, "desc": "最终生成的顶点数量"},
-                "prompt_tokens": {"value": llm_metrics.get("prompt_tokens"), "desc": "提示词 token 数（OpenAI usage，可空）"},
-                "completion_tokens": {"value": llm_metrics.get("completion_tokens"), "desc": "模型输出 token 数（OpenAI usage，可空）"},
-                "total_tokens": {"value": llm_metrics.get("total_tokens"), "desc": "总 token 数（OpenAI usage，可空）"},
-                "model": {"value": llm_metrics.get("model", llm_name), "desc": "模型名称"},
-                "provider": {"value": llm_metrics.get("provider", llm_type), "desc": "模型提供方"},
-                "fallback_used": {"value": fallback_used, "desc": "是否触发了启发式回退（true=LLM推断失败后回退）"},
+                "prompt_tokens": {
+                    "value": llm_metrics.get("prompt_tokens"),
+                    "desc": "提示词 token 数（OpenAI usage，可空）",
+                },
+                "completion_tokens": {
+                    "value": llm_metrics.get("completion_tokens"),
+                    "desc": "模型输出 token 数（OpenAI usage，可空）",
+                },
+                "total_tokens": {
+                    "value": llm_metrics.get("total_tokens"),
+                    "desc": "总 token 数（OpenAI usage，可空）",
+                },
+                "model": {
+                    "value": llm_metrics.get("model", llm_name),
+                    "desc": "模型名称",
+                },
+                "provider": {
+                    "value": llm_metrics.get("provider", llm_type),
+                    "desc": "模型提供方",
+                },
+                "fallback_used": {
+                    "value": fallback_used,
+                    "desc": "是否触发了启发式回退（true=LLM推断失败后回退）",
+                },
             }
             logger.info(
                 "\n================ CSV 文本数据集解析指标 ================\n%s\n=======================================================",
@@ -1068,25 +1305,34 @@ class DocumentAPIServer:
                 _persist_text_schema()
             except Exception:
                 pass
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "file_name": file_name,
-                "ds_name": ds_name,
-                "content": f"CSV 解析失败 {str(e)}",
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "file_name": file_name,
+                        "ds_name": ds_name,
+                        "content": f"CSV 解析失败 {str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
     def load_each_dataset_graph_schema(self, ds_name: str):
-        self.graph_schema_file = os.path.join(self.dataset_schema_dir, f"{ds_name}/graph_schemas.yaml")
+        self.graph_schema_file = os.path.join(
+            self.dataset_schema_dir, f"{ds_name}/graph_schemas.yaml"
+        )
         if not os.path.exists(self.graph_schema_file):
-            raise FileNotFoundError(f"Graph schema file does not exist: {self.graph_schema_file}")
-        
+            raise FileNotFoundError(
+                f"Graph schema file does not exist: {self.graph_schema_file}"
+            )
+
         with open(self.graph_schema_file, "r", encoding="utf-8") as f:
             yaml_data = yaml.safe_load(f)
 
         if not yaml_data or "datasets" not in yaml_data:
             raise ValueError(f"YAML 中不包含 datasets 字段: {self.graph_schema_file}")
-        
+
         datasets_list = yaml_data.get("datasets")
         if not isinstance(datasets_list, list):
             datasets_list = []
@@ -1103,6 +1349,7 @@ class DocumentAPIServer:
 
     def read_graph_triplets(self, graph_name: str):
         import csv
+
         dataset = self.graph_schema[graph_name]
         schema = dataset.get("schema", {})
 
@@ -1127,7 +1374,9 @@ class DocumentAPIServer:
         triplets = []
         with open(edge_path, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
-            total = sum(1 for _ in open(edge_path, "r", encoding="utf-8")) - 1  # 不算 header
+            total = (
+                sum(1 for _ in open(edge_path, "r", encoding="utf-8")) - 1
+            )  # 不算 header
             f.seek(0)
             next(reader)  # skip header
             count = 0
@@ -1150,59 +1399,85 @@ class DocumentAPIServer:
         ds_name = message["ds_name"]
         graph_name = message["file_name"]
         if not graph_name:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": "缺少 graph_name 参数"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": "缺少 graph_name 参数",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
         self.load_each_dataset(ds_name)
         if not graph_name in self.each_dataset:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"file '{graph_name}' don't exist."
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"file '{graph_name}' don't exist.",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
         if self.each_dataset[graph_name].get("graph_status", "") != "completed":
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"file '{graph_name}' not parse yet."
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"file '{graph_name}' not parse yet.",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
         self.load_each_dataset_graph_schema(ds_name)
 
-
         if not graph_name in self.graph_schema:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"file '{graph_name}' don't exist graph."
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"file '{graph_name}' don't exist graph.",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
-        
+
         try:
             triplets = self.read_graph_triplets(graph_name)
 
             # 完成后返回数据
-            await websocket.send(json.dumps({
-                "type": "data",
-                "contentType": "json",
-                "content": {
-                    "success": True,
-                    "data": triplets
-                }
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "data",
+                        "contentType": "json",
+                        "content": {"success": True, "data": triplets},
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
         except Exception as e:
             print("获取三元组失败:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"获取三元组失败: {str(e)}"
-            }, ensure_ascii=False))
-    
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"获取三元组失败: {str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
+
     async def get_triplets_for_each_graph_for_graph_dataset(self, websocket, message):
         """
         异步返回指定知识库的三元组给前端
@@ -1215,11 +1490,16 @@ class DocumentAPIServer:
             for key in self.each_dataset:
                 graph_name = key
             if not graph_name in self.each_dataset:
-                await websocket.send(json.dumps({
-                    "type": "error",
-                    "contentType": "text",
-                    "content": f"file '{graph_name}' don't exist."
-                }, ensure_ascii=False))
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "type": "error",
+                            "contentType": "text",
+                            "content": f"file '{graph_name}' don't exist.",
+                        },
+                        ensure_ascii=False,
+                    )
+                )
                 return
 
             graph_schema = self.each_dataset[graph_name].get("schema", {})
@@ -1228,6 +1508,7 @@ class DocumentAPIServer:
             # 读取顶点文件（可选）
             # -----------------------
             import csv
+
             vertex_schema = graph_schema.get("vertex")
             if vertex_schema and len(vertex_schema) > 0:
                 vertex_path = vertex_schema[0]["path"]
@@ -1244,11 +1525,18 @@ class DocumentAPIServer:
                     use_attributes_column = vertex_attributes_field in fieldnames
                     for row in reader:
                         vid = row.get(vertex_id_field, "")
-                        name = '  '.join(row.get(namefieldeach,'') for namefieldeach in vertex_name_field)
+                        name = "  ".join(
+                            row.get(namefieldeach, "")
+                            for namefieldeach in vertex_name_field
+                        )
                         if use_attributes_column:
                             attrs = row.get(vertex_attributes_field, "")
                         else:
-                            attrs = {k: row.get(k, "") for k in fieldnames if k not in (vertex_id_field, vertex_name_field)}
+                            attrs = {
+                                k: row.get(k, "")
+                                for k in fieldnames
+                                if k not in (vertex_id_field, vertex_name_field)
+                            }
                         id2name[vid] = name
                         name2attribute[name] = attrs
             else:
@@ -1262,7 +1550,7 @@ class DocumentAPIServer:
             edge_path = edge_schema["path"]
             edge_src_field = edge_schema["source_field"]
             edge_dst_field = edge_schema["target_field"]
-            #edge_rel_field = "relation"
+            # edge_rel_field = "relation"
             edge_relation_field = edge_schema.get("attribute_fields", [])
             edges = []
             with open(edge_path, "r", encoding="utf-8") as f:
@@ -1270,9 +1558,15 @@ class DocumentAPIServer:
                 for row in reader:
                     src = row[edge_src_field]
                     dst = row[edge_dst_field]
-                    #rel = row[edge_rel_field]
-                    if isinstance(edge_relation_field, (list, tuple)) and edge_relation_field:
-                        rel = " ".join(str(row.get(field, "")).strip() for field in edge_relation_field)
+                    # rel = row[edge_rel_field]
+                    if (
+                        isinstance(edge_relation_field, (list, tuple))
+                        and edge_relation_field
+                    ):
+                        rel = " ".join(
+                            str(row.get(field, "")).strip()
+                            for field in edge_relation_field
+                        )
                     else:
                         rel = ""
                     # 如果顶点文件存在，替换 id -> name
@@ -1287,25 +1581,34 @@ class DocumentAPIServer:
             data = {
                 "vertices": name2attribute,
                 "edges": edges,
-                "is_directed": self.each_dataset[graph_name]["schema"]["graph"]["directed"]
+                "is_directed": self.each_dataset[graph_name]["schema"]["graph"][
+                    "directed"
+                ],
             }
 
-            await websocket.send(json.dumps({
-                "type": "data",
-                "contentType": "json",
-                "content": {
-                    "success": True,
-                    "data": data
-                }
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "data",
+                        "contentType": "json",
+                        "content": {"success": True, "data": data},
+                    },
+                    ensure_ascii=False,
+                )
+            )
         except Exception as e:
             print("获取三元组失败:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"获取三元组失败: {str(e)}"
-            }, ensure_ascii=False))
-    
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"获取三元组失败: {str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
+
     async def get_overall_triplets(self, websocket, message):
         """
         异步返回指定知识库的所有三元组给前端
@@ -1313,19 +1616,29 @@ class DocumentAPIServer:
         """
         ds_name = message["ds_name"]
         if not ds_name:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": "缺少 ds_name 参数"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": "缺少 ds_name 参数",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
         self.load_each_dataset(ds_name)
         if self.each_dataset == {}:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"ds '{ds_name}' 没有文件."
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"ds '{ds_name}' 没有文件.",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
         self.load_each_dataset_graph_schema(ds_name)
 
@@ -1342,23 +1655,30 @@ class DocumentAPIServer:
                 overall_triplets.extend(triplets)
 
             # 完成后返回数据
-            await websocket.send(json.dumps({
-                "type": "data",
-                "contentType": "json",
-                "content": {
-                    "success": True,
-                    "data": overall_triplets
-                }
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "data",
+                        "contentType": "json",
+                        "content": {"success": True, "data": overall_triplets},
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
         except Exception as e:
             print("获取三元组失败:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"获取三元组失败: {str(e)}"
-            }, ensure_ascii=False))
-    
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"获取三元组失败: {str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
+
     async def delete_dataset(self, websocket, message):
         """
         删除知识库图及对应的文件
@@ -1368,19 +1688,29 @@ class DocumentAPIServer:
         """
         ds_name = message.get("ds_name")
         if not ds_name:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": "缺少 dataset name 参数"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": "缺少 dataset name 参数",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
 
         if ds_name not in self.datasets:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"图 {ds_name} 不存在"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"图 {ds_name} 不存在",
+                    },
+                    ensure_ascii=False,
+                )
+            )
             return
 
         try:
@@ -1388,12 +1718,14 @@ class DocumentAPIServer:
             data_floder = os.path.join(self.dataset_data_dir, f"{ds_name}")
             if os.path.exists(schema_floder):
                 import shutil
+
                 shutil.rmtree(schema_floder)
-            
+
             if os.path.exists(data_floder):
                 import shutil
+
                 shutil.rmtree(data_floder)
-            
+
             # 更新 YAML 文件：先读全部，再去掉这个 dataset
             allschema_file = os.path.join(self.dataset_schema_dir, f"datasets.yaml")
             if os.path.exists(allschema_file):
@@ -1407,38 +1739,55 @@ class DocumentAPIServer:
                     yaml.dump(all_data, f, sort_keys=False, allow_unicode=True)
 
             # 成功返回
-            await websocket.send(json.dumps({
-                "type": "data",
-                "contentType": "json",
-                "content": {
-                    "success": True,
-                    "data": {
-                        "id": ds_name,
-                        "名称": ds_name,
-                        "删除时间": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    }
-                }
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "data",
+                        "contentType": "json",
+                        "content": {
+                            "success": True,
+                            "data": {
+                                "id": ds_name,
+                                "名称": ds_name,
+                                "删除时间": datetime.datetime.now().strftime(
+                                    "%Y-%m-%d %H:%M:%S"
+                                ),
+                            },
+                        },
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
         except Exception as e:
             print("删除知识库失败:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"删除失败：{str(e)}"
-            }, ensure_ascii=False))
-    
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"删除失败：{str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
+
     async def get_parsing_status(self, websocket, message):
         ds_name = message["ds_name"]
         try:
             self.load_each_dataset(ds_name)
 
             if self.each_dataset == {}:
-                await websocket.send(json.dumps({
-                    "type": "error",
-                    "contentType": "text",
-                    "content": f"ds '{ds_name}' 没有文件."
-                }, ensure_ascii=False))
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "type": "error",
+                            "contentType": "text",
+                            "content": f"ds '{ds_name}' 没有文件.",
+                        },
+                        ensure_ascii=False,
+                    )
+                )
                 return
             detailed_parsing_status = {}
             ack = True
@@ -1450,25 +1799,35 @@ class DocumentAPIServer:
                     ack = False
                 detailed_parsing_status[file_name] = status
 
-            await websocket.send(json.dumps({
-                "type": "data",
-                "contentType": "json",
-                "content": {
-                    "success": True,
-                    "data": {
-                        "total_parsing_status": ack,
-                        "parsing_status": detailed_parsing_status
-                    }
-                }
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "data",
+                        "contentType": "json",
+                        "content": {
+                            "success": True,
+                            "data": {
+                                "total_parsing_status": ack,
+                                "parsing_status": detailed_parsing_status,
+                            },
+                        },
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
         except Exception as e:
             print("获取解析状态失败:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"获取解析状态失败: {str(e)}"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"获取解析状态失败: {str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
     async def get_dataset_schema(self, websocket, message):
         ds_name = message["ds_name"]
@@ -1487,7 +1846,9 @@ class DocumentAPIServer:
                 if hasattr(self, "each_dataset_schema_file"):
                     candidates.append(
                         os.path.normpath(
-                            os.path.join(os.path.dirname(self.each_dataset_schema_file), raw_path)
+                            os.path.join(
+                                os.path.dirname(self.each_dataset_schema_file), raw_path
+                            )
                         )
                     )
                 # Old style fallback: resolve relative to this API file directory
@@ -1503,39 +1864,68 @@ class DocumentAPIServer:
             id = 0
             for key in self.each_dataset:
                 result.append({})
-                result[id]["id"] = id+1
+                result[id]["id"] = id + 1
                 result[id]["name"] = key
                 result[id]["type"] = self.each_dataset[key]["type"]
                 result[id]["uploadDate"] = self.each_dataset[key]["create_time"]
                 result[id]["graph_status"] = self.each_dataset[key]["graph_status"]
                 if self.datasets[ds_name]["type"] == "text":
                     result[id]["parsing_rate"] = self.each_dataset[key]["parsing_rate"]
-                    text_path = resolve_schema_path(self.each_dataset[key]["schema"].get("original_path"))
-                    result[id]["size"] = os.path.getsize(text_path) if text_path and os.path.exists(text_path) else 0
+                    text_path = resolve_schema_path(
+                        self.each_dataset[key]["schema"].get("original_path")
+                    )
+                    result[id]["size"] = (
+                        os.path.getsize(text_path)
+                        if text_path and os.path.exists(text_path)
+                        else 0
+                    )
                 elif self.datasets[ds_name]["type"] == "graph":
-                    edge_path = resolve_schema_path(self.each_dataset[key]["schema"]["edge"][0].get("original_path"))
-                    result[id]["edge_size"] = os.path.getsize(edge_path) if edge_path and os.path.exists(edge_path) else 0
+                    edge_path = resolve_schema_path(
+                        self.each_dataset[key]["schema"]["edge"][0].get("original_path")
+                    )
+                    result[id]["edge_size"] = (
+                        os.path.getsize(edge_path)
+                        if edge_path and os.path.exists(edge_path)
+                        else 0
+                    )
                     if len(self.each_dataset[key]["schema"]["vertex"]) > 0:
-                        vertex_path = resolve_schema_path(self.each_dataset[key]["schema"]["vertex"][0].get("original_path"))
-                        result[id]["vertex_size"] = os.path.getsize(vertex_path) if vertex_path and os.path.exists(vertex_path) else 0
-                        result[id]["vertex_file"] = self.each_dataset[key]["schema"]["vertex"][0].get("original_path")
+                        vertex_path = resolve_schema_path(
+                            self.each_dataset[key]["schema"]["vertex"][0].get(
+                                "original_path"
+                            )
+                        )
+                        result[id]["vertex_size"] = (
+                            os.path.getsize(vertex_path)
+                            if vertex_path and os.path.exists(vertex_path)
+                            else 0
+                        )
+                        result[id]["vertex_file"] = self.each_dataset[key]["schema"][
+                            "vertex"
+                        ][0].get("original_path")
                 id += 1
 
-            await websocket.send(json.dumps({
-            "type": "data",
-            "contentType": "json",
-            "content": {
-                "success": True,
-                "data": result
-            }
-        }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "data",
+                        "contentType": "json",
+                        "content": {"success": True, "data": result},
+                    },
+                    ensure_ascii=False,
+                )
+            )
         except Exception as e:
             print("获取数据集 schema 失败:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"获取数据集 schema 失败: {str(e)}"
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"获取数据集 schema 失败: {str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
     async def get_datasets(self, websocket):
         try:
@@ -1554,22 +1944,29 @@ class DocumentAPIServer:
                 result[id]["file_count"] = len(self.each_dataset)
                 id += 1
 
-            await websocket.send(json.dumps({
-                "type": "data",
-                "contentType": "json",
-                "content": {
-                    "success": True,
-                    "data": result
-                }
-            }, ensure_ascii=False))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "data",
+                        "contentType": "json",
+                        "content": {"success": True, "data": result},
+                    },
+                    ensure_ascii=False,
+                )
+            )
         except Exception as e:
             print("获取数据集列表失败:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"获取数据集列表失败: {str(e)}"
-            }, ensure_ascii=False))
-    
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"获取数据集列表失败: {str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
+
     async def schema_refine(self, websocket, message):
         file_name = message["file_name"]
         ds_name = message["ds_name"]
@@ -1577,21 +1974,34 @@ class DocumentAPIServer:
             self.load_each_dataset(ds_name)
 
             if not file_name in self.each_dataset:
-                await websocket.send(json.dumps({
-                    "type": "error",
-                    "contentType": "text",
-                    "content": f"file '{file_name}' don't exist."
-                }, ensure_ascii=False))
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "type": "error",
+                            "contentType": "text",
+                            "content": f"file '{file_name}' don't exist.",
+                        },
+                        ensure_ascii=False,
+                    )
+                )
                 return
 
-            if self.each_dataset[file_name].get("graph_status", "") != "parsing" and self.each_dataset[file_name].get("graph_status", "") != "completed":
-                await websocket.send(json.dumps({
-                    "type": "error",
-                    "contentType": "text",
-                    "content": f"file '{file_name}' not parsing status."
-                }, ensure_ascii=False))
+            if (
+                self.each_dataset[file_name].get("graph_status", "") != "parsing"
+                and self.each_dataset[file_name].get("graph_status", "") != "completed"
+            ):
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "type": "error",
+                            "contentType": "text",
+                            "content": f"file '{file_name}' not parsing status.",
+                        },
+                        ensure_ascii=False,
+                    )
+                )
                 return
-            
+
             self.each_dataset[file_name]["graph_status"] = "pending"
             self.each_dataset[file_name]["parsing_rate"] = 0
             output_file = []
@@ -1603,13 +2013,17 @@ class DocumentAPIServer:
 
         except Exception as e:
             print("重置解析状态失败:", e)
-            await websocket.send(json.dumps({
-                "type": "error",
-                "contentType": "text",
-                "content": f"重置解析状态失败: {str(e)}"
-            }, ensure_ascii=False))
-            
-    
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "contentType": "text",
+                        "content": f"重置解析状态失败: {str(e)}",
+                    },
+                    ensure_ascii=False,
+                )
+            )
+
     async def handler(self, websocket):
         # async for msg in websocket:
         try:
@@ -1627,7 +2041,9 @@ class DocumentAPIServer:
             elif action == "get_overall_triplets":
                 await self.get_overall_triplets(websocket, data)
             elif action == "get_file_triplets_from_graph_dataset":
-                await self.get_triplets_for_each_graph_for_graph_dataset(websocket, data)
+                await self.get_triplets_for_each_graph_for_graph_dataset(
+                    websocket, data
+                )
             elif action == "get_parsing_status":
                 await self.get_parsing_status(websocket, data)
             elif action == "get_dataset_schema":
@@ -1642,61 +2058,70 @@ class DocumentAPIServer:
                 await self.schema_refine(websocket, data)
 
             else:
-                await websocket.send(json.dumps({"type": "error", "message": "Unknown action."}))
+                await websocket.send(
+                    json.dumps({"type": "error", "message": "Unknown action."})
+                )
         except json.JSONDecodeError:
-            await websocket.send(json.dumps({"type": "error", "message": "Invalid JSON."}))
+            await websocket.send(
+                json.dumps({"type": "error", "message": "Invalid JSON."})
+            )
+
 
 server_Test = DocumentAPIServer()
+
 
 async def main():
     server = DocumentAPIServer()
 
     class DummySocket:
         """模拟前端 websocket"""
+
         async def send(self, msg):
             # In __main__ mode we only have a dummy websocket; print responses
             # so running this file directly shows what's going on.
             print("[TEST OUTPUT]", msg, flush=True)
 
         def __init__(self):
-            self.message = json.dumps({"action": "parsing_file", 
-                            "file_name": "debug_document1.md",
-                            "ds_name": "Debug0320",
-                            "type": "ollama",
-                            "api_key": "YOUR_API_KEY",
-                            "base_url": "YOUR_BASE_URL",
-             
-                            "llm_name": "LLAMA3.1:70B",
-                            "mode":"single",
-                            "thread_count": 1,
-                            "chunk_size": 3072
-                            })
-             #self.message = json.dumps({"action": "parsing_file", 
-                                #"file_name": "debug_document1.md",
-                                #"ds_name": "Debug0320",
-                                #"type": "ollama",
-                                #"llm_name": "llama3.2:3b",
-                                #"mode":"single",
-                                #"thread_count": 1,
-                                #"chunk_size": 5120
-                                #})
-            #self.message = json.dumps({"action":"schema_refine", 
+            self.message = json.dumps(
+                {
+                    "action": "parsing_file",
+                    "file_name": "debug_document1.md",
+                    "ds_name": "Debug0320",
+                    "type": "ollama",
+                    "api_key": os.getenv("DEFAULT_API_KEY", "YOUR_API_KEY"),
+                    "base_url": os.getenv("DEFAULT_BASE_URL", "YOUR_BASE_URL"),
+                    "llm_name": "LLAMA3.1:70B",
+                    "mode": "single",
+                    "thread_count": 1,
+                    "chunk_size": 3072,
+                }
+            )
+            # self.message = json.dumps({"action": "parsing_file",
+            # "file_name": "debug_document1.md",
+            # "ds_name": "Debug0320",
+            # "type": "ollama",
+            # "llm_name": "llama3.2:3b",
+            # "mode":"single",
+            # "thread_count": 1,
+            # "chunk_size": 5120
+            # })
+            # self.message = json.dumps({"action":"schema_refine",
             #                 "file_name": "debug_document1.md",
             #                 "ds_name": "Debug0320"})
             # 模拟前端发送两条消息：创建和删除
-            # self.message = json.dumps({"action": "create_dataset", 
+            # self.message = json.dumps({"action": "create_dataset",
             #                 "name": "fzb_debug_graph",
             #                 "type": "graph"})
-            # self.message = json.dumps({"action": "upload_file", 
+            # self.message = json.dumps({"action": "upload_file",
             #                 "file_name": "example.doc",
             #                 "ds_name": "fzb_debug"})
-            # self.message = json.dumps({"action": "upload_file", 
+            # self.message = json.dumps({"action": "upload_file",
             #                 "file_name": "paper4.pdf",
             #                 "ds_name": "fzb_debug"})
-            # self.message = json.dumps({"action": "upload_file", 
+            # self.message = json.dumps({"action": "upload_file",
             #                 "file_name": "example.txt",
             #                 "ds_name": "fzb_debug"})
-            # self.message = json.dumps({"action": "upload_file", 
+            # self.message = json.dumps({"action": "upload_file",
             #                 "file_name": "example.docx_transactions.csv",
             #                 "source_field": "orig_acct",
             #                 "target_field": "bene_acct",
@@ -1705,44 +2130,42 @@ async def main():
             #                 "vertex_id_field": "acct_id",
             #                 "vertex_name_field": "['first_name', 'last_name']",
             #                 "ds_name": "fzb_debug_graph"})
-            # self.message = json.dumps({"action": "parsing_file", 
+            # self.message = json.dumps({"action": "parsing_file",
             #                 "file_name": "example.txt",
             #                 "ds_name": "fzb_debug"})
-            # self.message = json.dumps({"action": "parsing_file", 
+            # self.message = json.dumps({"action": "parsing_file",
             #                 "file_name": "paper4.pdf",
             #                 "ds_name": "fzb_debug"})
-            # self.message = json.dumps({"action": "parsing_file", 
+            # self.message = json.dumps({"action": "parsing_file",
             #                 "file_name": "Test11.txt",
             #                 "ds_name": "fzb_debug"})
-            # self.message = json.dumps({"action": "get_file_triplets", 
+            # self.message = json.dumps({"action": "get_file_triplets",
             #                 "file_name": "example.txt",
             #                 "ds_name": "fzb_debug"})
-            # self.message = json.dumps({"action": "get_file_triplets", 
+            # self.message = json.dumps({"action": "get_file_triplets",
             #                 "file_name": "paper4.pdf",
             #                 "ds_name": "fzb_debug"})
-            # self.message = json.dumps({"action": "get_file_triplets_from_graph_dataset", 
+            # self.message = json.dumps({"action": "get_file_triplets_from_graph_dataset",
             #                 # "file_name": "example.docx_transactions.csv",
             #                 "ds_name": "fzb_debug_graph"})
-            # self.message = json.dumps({"action": "get_overall_triplets", 
+            # self.message = json.dumps({"action": "get_overall_triplets",
             #                 "ds_name": "fzb_debug"})
-            # self.message = json.dumps({"action": "get_parsing_status", 
-            #                 "ds_name": "fzb_debug"})         
-            # self.message = json.dumps({"action": "get_dataset_schema", 
-            #                 "ds_name": "fzb_debug"})    
-            # self.message = json.dumps({"action": "delete_file", 
+            # self.message = json.dumps({"action": "get_parsing_status",
+            #                 "ds_name": "fzb_debug"})
+            # self.message = json.dumps({"action": "get_dataset_schema",
+            #                 "ds_name": "fzb_debug"})
+            # self.message = json.dumps({"action": "delete_file",
             #                 "file_name": "example.docx",
-            #                 "ds_name": "fzb_debug"})     
-            # self.message = json.dumps({"action": "delete_file", 
+            #                 "ds_name": "fzb_debug"})
+            # self.message = json.dumps({"action": "delete_file",
             #                 "file_name": "example.txt",
-            #                 "ds_name": "fzb_debug"})    
-            # self.message = json.dumps({"action": "delete_dataset", 
-            #                 "ds_name": "fzb_debug"})      
+            #                 "ds_name": "fzb_debug"})
+            # self.message = json.dumps({"action": "delete_dataset",
+            #                 "ds_name": "fzb_debug"})
             # self.message = json.dumps({"action": "get_datasets"})
-            # self.message = json.dumps({"action": "schema_refine", 
+            # self.message = json.dumps({"action": "schema_refine",
             #                 "file_name": "paper.pdf",
             #                 "ds_name": "fzb_debug"})
-
-            
 
     dummy_ws = DummySocket()
     await server.handler(dummy_ws)
