@@ -11,7 +11,9 @@ from aag.error_recovery.policies import get_policy
 logger = logging.getLogger(__name__)
 
 
-def prepare_error_info(error: Exception, *, location: Optional[str] = None, hint: Optional[str] = None) -> Dict[str, Any]:
+def prepare_error_info(
+    error: Exception, *, location: Optional[str] = None, hint: Optional[str] = None
+) -> Dict[str, Any]:
     info = {
         "error_type": type(error).__name__,
         "error": str(error),
@@ -29,7 +31,9 @@ class ErrorRecovery:
         self.trace = PromptTraceBuffer(maxlen=trace_maxlen)
 
     # ---------- Trace ----------
-    def record_prompt(self, fn_name: str, base_prompt: str, meta: Optional[Dict[str, Any]] = None) -> None:
+    def record_prompt(
+        self, fn_name: str, base_prompt: str, meta: Optional[Dict[str, Any]] = None
+    ) -> None:
         self.trace.record(fn_name, base_prompt, meta=meta)
 
     def get_last_base_prompt(self, fn_name: str) -> Optional[str]:
@@ -64,7 +68,18 @@ class ErrorRecovery:
         name: str,
         operation_type: str = "generic",
         location: Optional[str] = None,
+        prompt: Optional[str] = None,
     ) -> Any:
+        """
+        带重试的操作执行器。
+
+        参数：
+            operation: 接收 error_history 并返回结果的异步操作。
+            name: 操作名称，用于日志和 prompt 跟踪。
+            operation_type: 操作类型，用于策略选择。
+            location: 错误发生位置标识。
+            prompt: 操作的原始 prompt，用于记录和增强重试。
+        """
         policy = get_policy(operation_type)
         max_attempts = policy.max_attempts
         max_error_history = policy.max_error_history
@@ -72,11 +87,35 @@ class ErrorRecovery:
         error_history: List[Dict[str, Any]] = []
         last_exc: Optional[Exception] = None
 
-        for attempt in range(max_attempts+1):
+        for attempt in range(max_attempts + 1):
+            # 首次尝试前记录原始 prompt；重试时构建增强 prompt
+            if attempt == 0 and prompt:
+                self.record_prompt(
+                    name,
+                    prompt,
+                    meta={"operation_type": operation_type, "location": location},
+                )
+            elif attempt > 0:
+                enhanced = self.build_enhanced_prompt(
+                    fn_name=name,
+                    error_history=error_history,
+                    operation_type=operation_type,
+                )
+                if enhanced:
+                    error_history.append(
+                        {
+                            "type": "enhanced_prompt",
+                            "content": enhanced,
+                            "attempt": attempt + 1,
+                        }
+                    )
+
             try:
                 result = await operation(error_history)
                 if attempt > 1:
-                    logger.info("✅ %s succeeded on attempt %d/%d", name, attempt, max_attempts)
+                    logger.info(
+                        "✅ %s succeeded on attempt %d/%d", name, attempt, max_attempts
+                    )
                 return result
             except Exception as e:
                 last_exc = e
@@ -85,7 +124,13 @@ class ErrorRecovery:
                 error_history[:] = error_history[-max_error_history:]
 
                 if attempt < max_attempts:
-                    logger.warning("⚠️ %s failed on attempt %d/%d: %s", name, attempt, max_attempts, err["error"])
+                    logger.warning(
+                        "⚠️ %s failed on attempt %d/%d: %s",
+                        name,
+                        attempt,
+                        max_attempts,
+                        err["error"],
+                    )
                 else:
                     logger.error("❌ %s failed after %d attempts", name, max_attempts)
 
@@ -154,7 +199,9 @@ class ErrorRecovery:
         for tid in target_step_ids:
             try:
                 dag.set_pending(tid)
-                logger.info(f"🔄 Cross-step recovery: reset step {tid} -> pending ({reason})")
+                logger.info(
+                    f"🔄 Cross-step recovery: reset step {tid} -> pending ({reason})"
+                )
             except Exception as e:
                 logger.warning(f"⚠️ Failed to reset step {tid} to pending: {e}")
 
@@ -171,12 +218,15 @@ class ErrorRecovery:
         Decide + apply cross-step recovery in one call.
         Returns the target step ids that were reset.
         """
-        targets = self.decide_cross_step_recovery(dag, step_id, error_info, context=context)
+        targets = self.decide_cross_step_recovery(
+            dag, step_id, error_info, context=context
+        )
         if not targets:
             return []
         self.apply_cross_step_recovery(
             dag,
             targets,
-            reason=reason or f"cross_step_recovery(error_type={error_info.get('error_type')})",
+            reason=reason
+            or f"cross_step_recovery(error_type={error_info.get('error_type')})",
         )
         return targets

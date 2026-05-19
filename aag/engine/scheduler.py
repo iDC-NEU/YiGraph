@@ -5,13 +5,18 @@ import logging
 import json
 import difflib
 import re
-from argparse import OPTIONAL
+
 from dataclasses import asdict
 from typing import Any, Dict, Optional, Callable, List, Tuple, Union, Set
 
-from sympy import N
+
 from aag.config.engine_config import *
-from aag.models.graph_workflow_dag import GraphWorkflowDAG, WorkflowStep, OutputSchema, OutputField
+from aag.models.graph_workflow_dag import (
+    GraphWorkflowDAG,
+    WorkflowStep,
+    OutputSchema,
+    OutputField,
+)
 from aag.models.task_types import GraphAnalysisSubType, GraphAnalysisType
 from aag.reasoner.model_deployment import Reasoner
 from aag.engine.router import QueryRouter, QueryType
@@ -30,6 +35,7 @@ from aag.error_recovery.error_manager import ErrorRecovery
 
 logger = logging.getLogger(__name__)
 
+
 class Scheduler:
     """
     Unified scheduler: retrieval / graph computation / graph learning / LLM.
@@ -44,14 +50,20 @@ class Scheduler:
         self.dag: Optional[GraphWorkflowDAG] = None
         self.rag_engine: Optional[VectorRAG] = None
         self.graph_rag_engine: Optional[GraphRAG] = None
-        
+
         self.dataset_manager: Optional[DatasetManager] = None
         self.data_dependency_resolver: Optional[DataDependencyResolver] = None
         self.error_recovery: Optional[ErrorRecovery] = None
 
-        self.current_dataset_name: Optional[str] = None  # Dataset-level name (for text datasets, this is the dataset name)
-        self.current_dataset: Optional[List[DatasetConfig]] = None  # Original dataset config (text/graph, never changes)
-        self.current_graph_dataset: Optional[DatasetConfig] = None  # Current graph dataset config (may be converted graph)
+        self.current_dataset_name: Optional[str] = (
+            None  # Dataset-level name (for text datasets, this is the dataset name)
+        )
+        self.current_dataset: Optional[List[DatasetConfig]] = (
+            None  # Original dataset config (text/graph, never changes)
+        )
+        self.current_graph_dataset: Optional[DatasetConfig] = (
+            None  # Current graph dataset config (may be converted graph)
+        )
         self.global_graph: Optional[GraphData] = None
         self.query_id_mapping: Dict[str, int] = {}
 
@@ -60,11 +72,9 @@ class Scheduler:
         self.on_step_start: Optional[Callable[["WorkflowStep"], None]] = None
         self.on_step_end: Optional[Callable[["WorkflowStep"], None]] = None
 
-
-
     def _initialize_components(self):
         """Initialize scheduler components."""
-        print("Initializing Scheduler components...")
+        logger.info("Initializing Scheduler components...")
 
         self._init_reasoner()
 
@@ -73,7 +83,7 @@ class Scheduler:
         self._init_expert_search_engine()
 
         self._init_dataset_manager()
-        
+
         self._init_router()
 
         self._init_rag_engine()
@@ -83,16 +93,16 @@ class Scheduler:
         self._init_error_recovery()
 
         self._init_data_dependency_resolver()
-    
+
     def _init_reasoner(self):
         """Initialize reasoner."""
         try:
             self.reasoner = Reasoner(self.config.reasoner)
-            print("✓ Reasoner initialized")
+            logger.info("✓ Reasoner initialized")
         except Exception as e:
-            print(f"✗ Reasoner initialization failed: {e}")
+            logger.error(f"✗ Reasoner initialization failed: {e}")
             raise
-    
+
     def _init_computing_engine(self):
         """Initialize computing engine."""
         try:
@@ -100,58 +110,59 @@ class Scheduler:
             neo4j_config_dict = self.config.retrieval.database.neo4j
             if neo4j_config_dict.get("enabled", False):
                 self.computing_engine.initialize_graph_query_engine(
-                    neo4j_config=neo4j_config_dict,
-                    reasoner=self.reasoner
+                    neo4j_config=neo4j_config_dict, reasoner=self.reasoner
                 )
-                print("✓ ComputingEngine with GraphQueryEngine initialized")
+                logger.info("✓ ComputingEngine with GraphQueryEngine initialized")
             else:
-                print("✓ ComputingEngine initialized (GraphQueryEngine disabled)")
+                logger.info("✓ ComputingEngine initialized (GraphQueryEngine disabled)")
         except Exception as e:
-            print(f"✗ ComputingEngine initialization failed: {e}")
+            logger.error(f"✗ ComputingEngine initialization failed: {e}")
             raise
-    
+
     def _init_expert_search_engine(self):
         """Initialize expert search engine."""
         try:
             self.expert_search_engine = ExpertSearchEngine(self.config.retrieval)
-            print("✓ ExpertSearchEngine initialized")
+            logger.info("✓ ExpertSearchEngine initialized")
         except Exception as e:
-            print(f"✗ ExpertSearchEngine initialization failed: {e}")
+            logger.error(f"✗ ExpertSearchEngine initialization failed: {e}")
             raise
-    
+
     def _init_dataset_manager(self):
         """Initialize dataset manager."""
         try:
             self.dataset_manager = DatasetManager()
-            print("✓ DatasetManager initialized")
+            logger.info("✓ DatasetManager initialized")
         except Exception as e:
-            print(f"✗ DatasetManager initialization failed: {e}")
+            logger.error(f"✗ DatasetManager initialization failed: {e}")
             raise
-    
+
     def _init_data_dependency_resolver(self):
         """Initialize data dependency resolver."""
         try:
             # Note: error_recovery will be set after initialization
-            self.data_dependency_resolver = DataDependencyResolver(self.reasoner, self.error_recovery)
-            print("✓ DataDependencyResolver initialized")
+            self.data_dependency_resolver = DataDependencyResolver(
+                self.reasoner, self.error_recovery
+            )
+            logger.info("✓ DataDependencyResolver initialized")
         except Exception as e:
-            print(f"✗ DataDependencyResolver initialization failed: {e}")
+            logger.error(f"✗ DataDependencyResolver initialization failed: {e}")
             raise
 
     def _init_router(self):
         try:
             self.router = QueryRouter(reasoner=self.reasoner)
-            print("✓ Reasoner initialized")
+            logger.info("✓ Reasoner initialized")
         except Exception as e:
-            print(f"✗ Reasoner initialization failed: {e}")
+            logger.error(f"✗ Reasoner initialization failed: {e}")
             raise
 
     def _init_rag_engine(self):
         try:
             self.rag_engine = VectorRAG(self.config.retrieval)
-            print(f"✓ RAGEngine initialized")
+            logger.info("✓ RAGEngine initialized")
         except Exception as e:
-            print(f"✗ RAGEngineinitialization failed: {e}")
+            logger.error(f"✗ RAGEngineinitialization failed: {e}")
             raise
 
     def _init_graph_rag_engine(self):
@@ -163,37 +174,39 @@ class Scheduler:
                 data_type="qa",
                 pruning_mode="embedding_for_perentity",
             )
-            print("✓ GraphRAG initialized")
+            logger.info("✓ GraphRAG initialized")
         except Exception as e:
-            print(f"✗ GraphRAG initialization failed: {e}")
+            logger.error(f"✗ GraphRAG initialization failed: {e}")
             raise
 
     def _init_error_recovery(self):
         """Initialize error recovery module."""
         try:
             self.error_recovery = ErrorRecovery()
-            print("✓ ErrorRecoveryModule initialized")
+            logger.info("✓ ErrorRecoveryModule initialized")
         except Exception as e:
-            print(f"✗ ErrorRecoveryModule initialization failed: {e}")
+            logger.error(f"✗ ErrorRecoveryModule initialization failed: {e}")
             raise
 
     def list_datasets(self, dtype: Optional[str] = None) -> Dict[str, List[str]]:
         return self.dataset_manager.list_datasets(dtype)
 
-    def specific_analysis_dataset(self, name: str, dtype: Optional[str] = None) -> Optional[List[DatasetConfig]]:
+    def specific_analysis_dataset(
+        self, name: str, dtype: Optional[str] = None
+    ) -> Optional[List[DatasetConfig]]:
         """
         Set the original dataset for analysis
-        
+
         Args:
             name: Dataset name (dataset-level)
             dtype: Dataset type (optional)
-            
+
         Returns:
             List[DatasetConfig] - list of configs (single for graph/table, multiple for text)
             None if not found
         """
         self.current_dataset = self.dataset_manager.get_dataset_info(name, dtype)
-        
+
         # Store dataset-level name
         self.current_dataset_name = name
         if self.current_dataset is None or len(self.current_dataset) == 0:
@@ -201,26 +214,29 @@ class Scheduler:
             self.current_graph_dataset = None
             self.global_graph = None
             return None
-        
+
         # Handle graph datasets
-        if self.dataset_manager.get_dataset_original_type(self.current_dataset_name) == "graph":
+        if (
+            self.dataset_manager.get_dataset_original_type(self.current_dataset_name)
+            == "graph"
+        ):
             self.current_graph_dataset = self.current_dataset[0]
-            global_vertices, global_edges = self.dataset_manager.get_dataset_content(self.current_graph_dataset)
+            global_vertices, global_edges = self.dataset_manager.get_dataset_content(
+                self.current_graph_dataset
+            )
             self.global_graph = GraphData(vertices=global_vertices, edges=global_edges)
             graph_nodes, graph_edges = flatten_graph(global_vertices, global_edges)
             self.data_dependency_resolver.set_global_graph(graph_nodes, graph_edges)
-            
+
             neo4j_config_dict = self.config.retrieval.database.neo4j
             self.dataset_manager.load_graph_to_neo4j(
-                self.current_graph_dataset,
-                self.current_dataset_name,
-                neo4j_config_dict
+                self.current_graph_dataset, self.current_dataset_name, neo4j_config_dict
             )
         else:
             # Text/table dataset
             self.current_graph_dataset = None
             self.global_graph = None
-        
+
         return self.current_dataset
 
     def _normalize_graph_mode(self, mode: str) -> str:
@@ -237,11 +253,11 @@ class Scheduler:
         return normalized
 
     async def execute(
-        self, 
-        query: str, 
-        decompose: bool = True, 
+        self,
+        query: str,
+        decompose: bool = True,
         mode: str = "normal",
-        callback: Optional[Callable[[Dict[str, Any]], None]] = None
+        callback: Optional[Callable[[Dict[str, Any]], None]] = None,
     ) -> Union[str, Dict[str, Any]]:
         """
         Execute query with dataset type validation.
@@ -266,12 +282,16 @@ class Scheduler:
             return f"❌ Error: {mode_err}"
 
         decision = self.router.route(query=query)
-        logger.info(f"🚦[Router] query_type={decision.query_type}, reason={decision.reason}")
+        logger.info(
+            f"🚦[Router] query_type={decision.query_type}, reason={decision.reason}"
+        )
 
         if not self.current_dataset or not self.current_dataset_name:
             return "⚠️ No dataset selected; please set the analysis target first."
-        
-        original_type = self.dataset_manager.get_dataset_original_type(self.current_dataset_name)
+
+        original_type = self.dataset_manager.get_dataset_original_type(
+            self.current_dataset_name
+        )
 
         if decision.query_type == QueryType.RAG:
             if original_type == "graph":
@@ -281,36 +301,49 @@ class Scheduler:
 
         elif decision.query_type == QueryType.GRAPH_QUERY:
             if original_type != "graph":
-                converted_graph_config = self.dataset_manager.get_converted_graph_dataset(self.current_dataset_name)
+                converted_graph_config = (
+                    self.dataset_manager.get_converted_graph_dataset(
+                        self.current_dataset_name
+                    )
+                )
                 if not converted_graph_config:
                     return "❌ Error: Graph query requires graph data; current dataset is not graph and has no converted graph."
                 self.current_graph_dataset = converted_graph_config
-            
+
             return await self._execute_graph_query(query)
-        
+
         elif decision.query_type == QueryType.GRAPH:
             if original_type == "text":
-                converted_graph_config = self.dataset_manager.get_converted_graph_dataset(self.current_dataset_name)
+                converted_graph_config = (
+                    self.dataset_manager.get_converted_graph_dataset(
+                        self.current_dataset_name
+                    )
+                )
                 if not converted_graph_config:
                     return "❌ Error: Current dataset is text and has not been converted to graph. Please run text-to-graph conversion first."
-                
+
                 self.current_graph_dataset = converted_graph_config
-                global_vertices, global_edges = self.dataset_manager.get_dataset_content(self.current_graph_dataset)
-                self.global_graph = GraphData(vertices=global_vertices, edges=global_edges)
+                global_vertices, global_edges = (
+                    self.dataset_manager.get_dataset_content(self.current_graph_dataset)
+                )
+                self.global_graph = GraphData(
+                    vertices=global_vertices, edges=global_edges
+                )
                 graph_nodes, graph_edges = flatten_graph(global_vertices, global_edges)
-                self.data_dependency_resolver.set_global_graph(graph_nodes, graph_edges)         
-            
-            return await self._execute_graph(query, decompose=decompose, mode=mode, callback=callback)
-        
+                self.data_dependency_resolver.set_global_graph(graph_nodes, graph_edges)
+
+            return await self._execute_graph(
+                query, decompose=decompose, mode=mode, callback=callback
+            )
+
         return self.reasoner.general_query_response(query)
-    
 
     async def _execute_graph(
-        self, 
-        query: str, 
-        decompose: bool = True, 
+        self,
+        query: str,
+        decompose: bool = True,
         mode: str = "normal",
-        callback: Optional[Callable[[Dict[str, Any]], None]] = None
+        callback: Optional[Callable[[Dict[str, Any]], None]] = None,
     ) -> Union[str, Dict[str, Any]]:
         """
         Execute graph analysis query.
@@ -332,7 +365,7 @@ class Scheduler:
 
         if not self.current_graph_dataset:
             return "⚠️ No graph dataset selected; please set the analysis target first."
-        
+
         if not self.global_graph:
             return "⚠️ Graph data not loaded; please load graph data first."
 
@@ -344,29 +377,26 @@ class Scheduler:
         self._build_dag_from_query(query, decompose)
         self._find_algorithm()
 
-        print("✅ Initial DAG build and algorithm selection done")
+        logger.info("✅ Initial DAG build and algorithm selection done")
         self.dag.print_dag_info()
-        
+
         if mode == "interact":
             dag_info = self.dag.get_dag_info()
             return {
                 "message": "DAG generated; please choose next action.",
-                "dag_info": dag_info
+                "dag_info": dag_info,
             }
-        
+
         self.dag.refresh_data_dependency(self.reasoner)
         self.dag.print_data_dependency()
-        print("✅ DAG build and algorithm selection done; starting computation")
-        
+        logger.info("✅ DAG build and algorithm selection done; starting computation")
+
         analysis_result = await self._run_algorithm_pipeline2()
-        
+
         if callback and mode == "normal":
             dag_info = self.dag.get_dag_info()
-            return {
-                "analysis_result": analysis_result,
-                "dag_info": dag_info
-            }
-        print(f"analysis_result: {analysis_result}")
+            return {"analysis_result": analysis_result, "dag_info": dag_info}
+        logger.debug(f"analysis_result: {analysis_result}")
         return analysis_result
 
     @staticmethod
@@ -383,9 +413,7 @@ class Scheduler:
             return direct_name
 
         lowered_map = {
-            aid.lower(): aid
-            for aid in algo_index.keys()
-            if isinstance(aid, str)
+            aid.lower(): aid for aid in algo_index.keys() if isinstance(aid, str)
         }
         if direct_name.lower() in lowered_map:
             return lowered_map[direct_name.lower()]
@@ -398,12 +426,15 @@ class Scheduler:
                 return algo_id
         return None
 
-    def _suggest_algorithms(self, requested_algorithm: str, limit: int = 5) -> List[str]:
+    def _suggest_algorithms(
+        self, requested_algorithm: str, limit: int = 5
+    ) -> List[str]:
         if not self.expert_search_engine or not self.expert_search_engine.algo_index:
             return []
 
         candidate_algorithms = [
-            aid for aid in self.expert_search_engine.algo_index.keys()
+            aid
+            for aid in self.expert_search_engine.algo_index.keys()
             if isinstance(aid, str)
         ]
 
@@ -420,11 +451,13 @@ class Scheduler:
             self._normalize_algorithm_token(requested_algorithm),
             list(normalized_candidates.keys()),
             n=limit,
-            cutoff=0.45
+            cutoff=0.45,
         )
         return [normalized_candidates[key] for key in normalized_matches]
 
-    def _parse_expert_dag_instruction(self, expert_instruction: str) -> Tuple[Dict[str, Any], Dict[str, str], List[Dict[str, Any]], str]:
+    def _parse_expert_dag_instruction(
+        self, expert_instruction: str
+    ) -> Tuple[Dict[str, Any], Dict[str, str], List[Dict[str, Any]], str]:
         normalized_instruction = (expert_instruction or "").strip()
         if not normalized_instruction:
             raise ValueError("Expert mode input cannot be empty")
@@ -438,7 +471,9 @@ class Scheduler:
         )
 
         if not isinstance(payload, dict):
-            raise ValueError("Expert mode parse failed: LLM did not return a valid subqueries structure")
+            raise ValueError(
+                "Expert mode parse failed: LLM did not return a valid subqueries structure"
+            )
 
         subqueries = payload.get("subqueries")
         if not isinstance(subqueries, list) or not subqueries:
@@ -463,16 +498,18 @@ class Scheduler:
             if not isinstance(depends_on, list):
                 raise ValueError(f"subqueries[{idx}].depends_on must be a list")
 
-            normalized_subqueries.append({
-                "id": query_id,
-                "query": question,
-                "depends_on": [str(dep).strip() for dep in depends_on if str(dep).strip()]
-            })
+            normalized_subqueries.append(
+                {
+                    "id": query_id,
+                    "query": question,
+                    "depends_on": [
+                        str(dep).strip() for dep in depends_on if str(dep).strip()
+                    ],
+                }
+            )
 
             requested_algorithm = (
-                item.get("algorithm")
-                or item.get("graph_algorithm")
-                or item.get("algo")
+                item.get("algorithm") or item.get("graph_algorithm") or item.get("algo")
             )
             if requested_algorithm is not None and str(requested_algorithm).strip():
                 algorithm_hints[query_id] = str(requested_algorithm).strip()
@@ -498,7 +535,9 @@ class Scheduler:
                 mentioned_algorithm = str(item.get("mentioned_algorithm") or "").strip()
                 if not mentioned_algorithm:
                     continue
-                replacement_algorithm_raw = str(item.get("replacement_algorithm") or "").strip()
+                replacement_algorithm_raw = str(
+                    item.get("replacement_algorithm") or ""
+                ).strip()
                 recommendations_raw = item.get("recommendations") or []
                 recommendations = []
                 if isinstance(recommendations_raw, list):
@@ -509,12 +548,14 @@ class Scheduler:
                     ][:5]
                 reason = str(item.get("reason") or "").strip()
 
-                normalized_adjustments.append({
-                    "mentioned_algorithm": mentioned_algorithm,
-                    "replacement_algorithm": replacement_algorithm_raw or None,
-                    "recommendations": recommendations,
-                    "reason": reason,
-                })
+                normalized_adjustments.append(
+                    {
+                        "mentioned_algorithm": mentioned_algorithm,
+                        "replacement_algorithm": replacement_algorithm_raw or None,
+                        "recommendations": recommendations,
+                        "reason": reason,
+                    }
+                )
 
         adjustment_summary = str(
             payload.get("instruction_algorithm_adjustment_summary")
@@ -522,10 +563,19 @@ class Scheduler:
             or ""
         ).strip()
 
-        return {"subqueries": normalized_subqueries}, algorithm_hints, normalized_adjustments, adjustment_summary
+        return (
+            {"subqueries": normalized_subqueries},
+            algorithm_hints,
+            normalized_adjustments,
+            adjustment_summary,
+        )
 
-    def _build_dag_from_expert_instruction(self, expert_instruction: str) -> Dict[str, Any]:
-        subquery_plan, algorithm_hints, instruction_adjustments, adjustment_summary = self._parse_expert_dag_instruction(expert_instruction)
+    def _build_dag_from_expert_instruction(
+        self, expert_instruction: str
+    ) -> Dict[str, Any]:
+        subquery_plan, algorithm_hints, instruction_adjustments, adjustment_summary = (
+            self._parse_expert_dag_instruction(expert_instruction)
+        )
         self.build_dag_from_subquery_plan(subquery_plan)
 
         query_text_map = {
@@ -549,12 +599,14 @@ class Scheduler:
 
             resolved_algorithm = self._resolve_expert_algorithm(requested_algorithm)
             if resolved_algorithm is None:
-                validation["unsupported_algorithms"].append({
-                    "query_id": query_id,
-                    "query": query_text_map.get(query_id, ""),
-                    "requested_algorithm": requested_algorithm,
-                    "suggestions": self._suggest_algorithms(requested_algorithm),
-                })
+                validation["unsupported_algorithms"].append(
+                    {
+                        "query_id": query_id,
+                        "query": query_text_map.get(query_id, ""),
+                        "requested_algorithm": requested_algorithm,
+                        "suggestions": self._suggest_algorithms(requested_algorithm),
+                    }
+                )
                 validation["unsupported_step_ids"].append(step_id)
                 continue
 
@@ -580,30 +632,41 @@ class Scheduler:
             unsupported_step_ids = set(validation.get("unsupported_step_ids", []))
 
             self._find_algorithm(
-                respect_preassigned=True,
-                skip_step_ids=unsupported_step_ids
+                respect_preassigned=True, skip_step_ids=unsupported_step_ids
             )
             self.dag.print_dag_info()
 
             dag_info = self.dag.get_dag_info()
-            has_out_of_boundary_algorithms = bool(validation.get("unsupported_algorithms")) or bool(validation.get("missing_step_ids"))
+            has_out_of_boundary_algorithms = bool(
+                validation.get("unsupported_algorithms")
+            ) or bool(validation.get("missing_step_ids"))
 
             if has_out_of_boundary_algorithms:
                 return {
                     "message": "Expert DAG built, but algorithms outside the library boundary were detected; please fix before starting analysis.",
                     "dag_info": dag_info,
                     "algorithm_validation": {
-                        "provided_algorithms": validation.get("provided_algorithms", {}),
+                        "provided_algorithms": validation.get(
+                            "provided_algorithms", {}
+                        ),
                         "applied_algorithms": validation.get("applied_algorithms", {}),
-                        "unsupported_algorithms": validation.get("unsupported_algorithms", []),
+                        "unsupported_algorithms": validation.get(
+                            "unsupported_algorithms", []
+                        ),
                         "missing_step_ids": validation.get("missing_step_ids", []),
-                        "instruction_algorithm_adjustments": validation.get("instruction_algorithm_adjustments", []),
+                        "instruction_algorithm_adjustments": validation.get(
+                            "instruction_algorithm_adjustments", []
+                        ),
                     },
-                    "can_start_analysis": False
+                    "can_start_analysis": False,
                 }
 
-            instruction_adjustments = validation.get("instruction_algorithm_adjustments", [])
-            adjustment_message = str(validation.get("instruction_algorithm_adjustment_summary") or "").strip()
+            instruction_adjustments = validation.get(
+                "instruction_algorithm_adjustments", []
+            )
+            adjustment_message = str(
+                validation.get("instruction_algorithm_adjustment_summary") or ""
+            ).strip()
             base_message = "Expert DAG built as instructed"
             if adjustment_message:
                 base_message = f"{base_message}. {adjustment_message}"
@@ -618,13 +681,13 @@ class Scheduler:
                     "missing_step_ids": [],
                     "instruction_algorithm_adjustments": instruction_adjustments,
                 },
-                "can_start_analysis": True
+                "can_start_analysis": True,
             }
         except Exception as e:
             logger.error(f"Expert mode build failed: {e}", exc_info=True)
             return {
                 "error": f"Expert mode build failed: {str(e)}",
-                "input_hint": "Enter expert instructions in natural language; the system will generate subqueries."
+                "input_hint": "Enter expert instructions in natural language; the system will generate subqueries.",
             }
 
     async def expert_modify_dag(self, modification_request: str) -> Dict[str, Any]:
@@ -641,20 +704,15 @@ class Scheduler:
             return {
                 "error": "DAG not built yet; please enter a question to generate the DAG first."
             }
-        
+
         try:
             self.dag.modify_dag(self.reasoner, modification_request)
             self._find_algorithm()
             dag_info = self.dag.get_dag_info()
-            return {
-                "message": "DAG updated.",
-                "dag_info": dag_info
-            }
+            return {"message": "DAG updated.", "dag_info": dag_info}
         except Exception as e:
             logger.error(f"DAG modification failed: {e}", exc_info=True)
-            return {
-                "error": f"DAG modification failed: {str(e)}"
-            }
+            return {"error": f"DAG modification failed: {str(e)}"}
 
     async def expert_start_analysis(self) -> str:
         """
@@ -665,10 +723,10 @@ class Scheduler:
         """
         if not self.dag:
             return "❌ Error: DAG not built yet; please enter a question to generate the DAG first."
-                
+
         self.dag.refresh_data_dependency(self.reasoner)
         self.dag.print_data_dependency()
-        print("✅ DAG build and algorithm selection done; starting computation")
+        logger.info("✅ DAG build and algorithm selection done; starting computation")
         return await self._run_algorithm_pipeline2()
 
     async def _execute_graph_rag(self, query: str) -> str:
@@ -687,24 +745,29 @@ class Scheduler:
         except Exception as e:
             logger.error(f"GraphRAG execution failed: {e}", exc_info=True)
             return f"❌ GraphRAG execution failed: {str(e)}"
-            
+
     async def _execute_rag(self, query: str) -> str:
         """
         Execute RAG query
-        
+
         Uses self.current_dataset (original text dataset config, never changes)
         For text datasets, current_dataset is the first file config from the list
         """
         if not self.current_dataset:
             return "⚠️ No analysis data selected; please set the analysis target first."
-        
-        if self.dataset_manager.get_dataset_original_type(self.current_dataset_name) != "text":
+
+        if (
+            self.dataset_manager.get_dataset_original_type(self.current_dataset_name)
+            != "text"
+        ):
             return f"❌ Error: RAG requires text data; current dataset type is {self.current_dataset.type}"
-        
+
         file_paths = [config.schema.path for config in self.current_dataset]
 
         if not self.rag_engine._initialized:
-            self.rag_engine.initialize(db_name=self.current_dataset_name, file_paths=file_paths)
+            self.rag_engine.initialize(
+                db_name=self.current_dataset_name, file_paths=file_paths
+            )
 
         retrieved_context, _ = self.rag_engine.retrieve(query)
 
@@ -724,36 +787,36 @@ class Scheduler:
         """
         try:
             result = self.computing_engine.execute_graph_query(query)
-            
+
             if result.get("success"):
                 results = result.get("results", [])
                 count = result.get("count", 0)
                 query_type = result.get("query_type", "unknown")
-                
+
                 response = f"✅ Graph query succeeded!\n"
                 response += f"Query type: {query_type}\n"
                 response += f"Result count: {count}\n\n"
-                
+
                 if count > 0:
                     response += "Results:\n"
                     for i, item in enumerate(results[:10], 1):
                         serializable_item = self._convert_neo4j_to_dict(item)
                         response += f"{i}. {json.dumps(serializable_item, ensure_ascii=False, indent=2)}\n"
-                    
+
                     if count > 10:
                         response += f"\n... {count - 10} more results not shown"
                 else:
                     response += "No matching results"
-                
+
                 return response
             else:
                 error_msg = result.get("error", "Unknown error")
                 return f"❌ Graph query failed: {error_msg}"
-                
+
         except Exception as e:
             logger.error(f"Graph query execution failed: {e}", exc_info=True)
             return f"❌ Graph query execution failed: {str(e)}"
-    
+
     def _convert_neo4j_to_dict(self, obj):
         """
         Convert Neo4j objects (Node, Relationship, Path) to JSON-serializable dicts.
@@ -764,24 +827,30 @@ class Scheduler:
         Returns:
             Serializable dict or original object.
         """
-        if hasattr(obj, 'labels') and hasattr(obj, 'id') and callable(getattr(obj, 'items', None)):
+        if (
+            hasattr(obj, "labels")
+            and hasattr(obj, "id")
+            and callable(getattr(obj, "items", None))
+        ):
+            return {"id": obj.id, "labels": list(obj.labels), "properties": dict(obj)}
+        elif (
+            hasattr(obj, "type")
+            and hasattr(obj, "id")
+            and callable(getattr(obj, "items", None))
+        ):
             return {
-                'id': obj.id,
-                'labels': list(obj.labels),
-                'properties': dict(obj)
+                "id": obj.id,
+                "type": obj.type,
+                "start_node": obj.start_node.id if hasattr(obj, "start_node") else None,
+                "end_node": obj.end_node.id if hasattr(obj, "end_node") else None,
+                "properties": dict(obj),
             }
-        elif hasattr(obj, 'type') and hasattr(obj, 'id') and callable(getattr(obj, 'items', None)):
+        elif hasattr(obj, "nodes") and hasattr(obj, "relationships"):
             return {
-                'id': obj.id,
-                'type': obj.type,
-                'start_node': obj.start_node.id if hasattr(obj, 'start_node') else None,
-                'end_node': obj.end_node.id if hasattr(obj, 'end_node') else None,
-                'properties': dict(obj)
-            }
-        elif hasattr(obj, 'nodes') and hasattr(obj, 'relationships'):
-            return {
-                'nodes': [self._convert_neo4j_to_dict(node) for node in obj.nodes],
-                'relationships': [self._convert_neo4j_to_dict(rel) for rel in obj.relationships]
+                "nodes": [self._convert_neo4j_to_dict(node) for node in obj.nodes],
+                "relationships": [
+                    self._convert_neo4j_to_dict(rel) for rel in obj.relationships
+                ],
             }
         elif isinstance(obj, dict):
             return {k: self._convert_neo4j_to_dict(v) for k, v in obj.items()}
@@ -791,8 +860,7 @@ class Scheduler:
             return obj
 
     def build_dag_from_subquery_plan(
-        self,
-        subquery_plan: Dict[str, Any]
+        self, subquery_plan: Dict[str, Any]
     ) -> GraphWorkflowDAG:
         """
         Build DAG from JSON subquery plan.
@@ -814,35 +882,34 @@ class Scheduler:
 
         return self.dag
 
-
     def _get_algorithm_library_info(self) -> str:
         """
         Extract algorithm library information from expert_search_engine's knowledge base.
-        
+
         Returns:
             Formatted string containing task types and their algorithms
         """
         if not self.expert_search_engine:
             return "Algorithm library not available"
-        
+
         task_index = self.expert_search_engine.task_index
         algo_index = self.expert_search_engine.algo_index
-        
+
         if not task_index or not algo_index:
             return "Algorithm library not loaded"
-        
+
         library_info = []
         for task_id, task_data in task_index.items():
             task_type = task_data.get("task_type", "Unknown")
             description = task_data.get("description", "")
             algorithms = task_data.get("algorithm", [])
-            
+
             # Get algorithm names
             algo_names = []
             for algo_id in algorithms[:5]:  # Limit to first 5 for brevity
                 if algo_id in algo_index:
                     algo_names.append(algo_id)
-            
+
             if algorithms:
                 algo_list = ", ".join(algo_names)
                 if len(algorithms) > 5:
@@ -850,25 +917,25 @@ class Scheduler:
                 library_info.append(
                     f"- **{task_type}**: {description}\n  Algorithms: {algo_list}"
                 )
-        
+
         return "\n".join(library_info)
-    
+
     def _get_graph_schema_summary(self) -> Optional[str]:
         """
         Get a summary of the current graph dataset schema.
-        
+
         Returns:
             Formatted string with dataset schema information, or None if not available
         """
         if not self.current_graph_dataset:
             return None
-        
+
         try:
             schema_info = []
             schema_info.append(f"Dataset: {self.current_dataset_name}")
-            
+
             # Graph properties
-            if hasattr(self.current_graph_dataset.schema, 'graph'):
+            if hasattr(self.current_graph_dataset.schema, "graph"):
                 graph_props = self.current_graph_dataset.schema.graph
                 graph_type = []
                 if graph_props.directed:
@@ -880,23 +947,27 @@ class Scheduler:
                 if graph_props.weighted:
                     graph_type.append("Weighted")
                 schema_info.append(f"Graph Type: {', '.join(graph_type)}")
-            
+
             # Vertex types
-            if hasattr(self.current_graph_dataset.schema, 'vertex'):
-                vertex_types = [v.type for v in self.current_graph_dataset.schema.vertex]
+            if hasattr(self.current_graph_dataset.schema, "vertex"):
+                vertex_types = [
+                    v.type for v in self.current_graph_dataset.schema.vertex
+                ]
                 schema_info.append(f"Vertex Types: {', '.join(vertex_types)}")
-            
+
             # Edge types
-            if hasattr(self.current_graph_dataset.schema, 'edge'):
+            if hasattr(self.current_graph_dataset.schema, "edge"):
                 edge_types = [e.type for e in self.current_graph_dataset.schema.edge]
                 schema_info.append(f"Edge Types: {', '.join(edge_types)}")
-            
+
             return "\n".join(schema_info)
         except Exception as e:
             logger.warning(f"Failed to get graph schema summary: {e}")
             return None
 
-    def _build_dag_from_query(self, query: str, decompose: bool = True) -> GraphWorkflowDAG:
+    def _build_dag_from_query(
+        self, query: str, decompose: bool = True
+    ) -> GraphWorkflowDAG:
         """
         Convert user query to DAG, including query rewrite.
 
@@ -910,50 +981,51 @@ class Scheduler:
         # Step 1: Get algorithm library information
         algorithm_library_info = self._get_algorithm_library_info()
         logger.info("📚 Algorithm library information extracted")
-        
+
         # Step 2: Get dataset schema information (optional)
         dataset_info = self._get_graph_schema_summary()
         if dataset_info:
             logger.info("📊 Dataset schema information extracted")
-        
+
         # Step 3: Rewrite query with algorithm context
         try:
             rewrite_result = self.reasoner.rewrite_query(
                 original_query=query,
                 algorithm_library_info=algorithm_library_info,
-                dataset_info=dataset_info
+                dataset_info=dataset_info,
             )
-            
+
             rewritten_query = rewrite_result.get("rewritten_query", query)
             reasoning = rewrite_result.get("reasoning", "")
             mapped_concepts = rewrite_result.get("mapped_concepts", [])
-            print(f"rewritten_query: {rewritten_query}")
+            logger.debug(f"rewritten_query: {rewritten_query}")
             logger.info(f"✍️ Query rewritten successfully")
             logger.info(f"Original query: {query}")
             logger.info(f"Rewritten query: {rewritten_query}")
             logger.info(f"Reasoning: {reasoning}")
-            
+
             if mapped_concepts:
                 logger.info("🔗 Concept mappings:")
                 for mapping in mapped_concepts:
-                    logger.info(f"  - {mapping.get('original_concept')} → {mapping.get('mapped_to')}")
-            
+                    logger.info(
+                        f"  - {mapping.get('original_concept')} → {mapping.get('mapped_to')}"
+                    )
+
             # Use rewritten query for planning
             query_to_use = rewritten_query
-            
+
         except Exception as e:
             logger.warning(f"⚠️ Query rewriting failed: {e}, using original query")
             query_to_use = query
-        
+
         # Step 4: Continue with existing flow (plan subqueries)
         subquery_plan = self.reasoner.plan_subqueries(decompose, query_to_use)
         return self.build_dag_from_subquery_plan(subquery_plan)
 
-
     def _find_algorithm(
         self,
         respect_preassigned: bool = False,
-        skip_step_ids: Optional[Set[int]] = None
+        skip_step_ids: Optional[Set[int]] = None,
     ):
         """
         Walk the DAG and assign a graph algorithm to each step from its question.
@@ -978,132 +1050,197 @@ class Scheduler:
                 )
                 continue
 
-            question_classification = self.reasoner.classify_question_type(step.question)
+            question_classification = self.reasoner.classify_question_type(
+                step.question
+            )
             logger.info(f"🔍 Question classification: {question_classification}")
 
             if question_classification is None:
                 error_msg = "Question classification failed: returned None"
                 logger.error(f"❌ {error_msg} | question: {step.question}")
                 raise RuntimeError(error_msg)
-            
+
             if "error" in question_classification:
                 error_msg = f"Question classification failed: {question_classification.get('error', 'Unknown error')}"
-                logger.error(f"❌ {error_msg} | question: {step.question} | details: {question_classification}")
+                logger.error(
+                    f"❌ {error_msg} | question: {step.question} | details: {question_classification}"
+                )
                 raise RuntimeError(error_msg)
-            
+
             question_type = question_classification.get("type", "graph_algorithm")
-            
+
             if question_type == "graph_query":
                 step.task_type = GraphAnalysisType.GRAPH_QUERY
                 step.graph_algorithm = None
-                logger.info(f"✅ Classified as graph query | question: {step.question}, task_type: {step.task_type}, reason: {question_classification.get('reason', '')}")
+                logger.info(
+                    f"✅ Classified as graph query | question: {step.question}, task_type: {step.task_type}, reason: {question_classification.get('reason', '')}"
+                )
             elif question_type == "numeric_analysis":
                 step.task_type = GraphAnalysisType.NUMERIC_ANALYSIS
                 step.graph_algorithm = None
-                logger.info(f"✅ Classified as numeric analysis | question: {step.question}, task_type: {step.task_type}, reason: {question_classification.get('reason', '')}")
+                logger.info(
+                    f"✅ Classified as numeric analysis | question: {step.question}, task_type: {step.task_type}, reason: {question_classification.get('reason', '')}"
+                )
             else:
                 logger.info(f"📋 Task type selection | question: {step.question}")
-                task_type_list = self.expert_search_engine.retrieve_task_type(step.question)
+                task_type_list = self.expert_search_engine.retrieve_task_type(
+                    step.question
+                )
                 logger.info(f"📋 Retrieved task types: {task_type_list}")
-                
-                task_type_result = self.reasoner.select_task_type(step.question, task_type_list)
+
+                task_type_result = self.reasoner.select_task_type(
+                    step.question, task_type_list
+                )
                 logger.info(f"📋 Task type selection result: {task_type_result}")
-                
+
                 if task_type_result is None:
                     error_msg = "Task type selection failed: LLM returned None"
                     logger.error(f"❌ {error_msg} | question: {step.question}")
                     raise RuntimeError(error_msg)
-                
+
                 if "error" in task_type_result:
                     error_msg = f"Task type selection failed: {task_type_result.get('error', 'Unknown error')}"
-                    logger.error(f"❌ {error_msg} | question: {step.question} | details: {task_type_result}")
+                    logger.error(
+                        f"❌ {error_msg} | question: {step.question} | details: {task_type_result}"
+                    )
                     raise RuntimeError(error_msg)
-                
+
                 selected_task_type_id = task_type_result.get("id")
                 if not selected_task_type_id:
                     error_msg = "Task type selection failed: result missing 'id' field"
                     logger.error(f"❌ {error_msg} | result: {task_type_result}")
                     raise RuntimeError(error_msg)
-                
-                logger.info(f"🔍 Algorithm selection | task_type: {selected_task_type_id}")
-                algorithm_list = self.expert_search_engine.retrieve_algorithm(step.question, selected_task_type_id)
+
+                logger.info(
+                    f"🔍 Algorithm selection | task_type: {selected_task_type_id}"
+                )
+                algorithm_list = self.expert_search_engine.retrieve_algorithm(
+                    step.question, selected_task_type_id
+                )
                 logger.info(f"🔍 Retrieved algorithms: {algorithm_list}")
                 graph_schema_info = None
                 if self.current_graph_dataset:
                     graph_schema_info = {
                         "dataset_name": self.current_dataset_name,
                         "graph_properties": {
-                            "directed": self.current_graph_dataset.schema.graph.directed if hasattr(self.current_graph_dataset.schema, 'graph') else True,
-                            "heterogeneous": self.current_graph_dataset.schema.graph.heterogeneous if hasattr(self.current_graph_dataset.schema, 'graph') else False,
-                            "multigraph": self.current_graph_dataset.schema.graph.multigraph if hasattr(self.current_graph_dataset.schema, 'graph') else False,
-                            "weighted": self.current_graph_dataset.schema.graph.weighted if hasattr(self.current_graph_dataset.schema, 'graph') else False,
+                            "directed": self.current_graph_dataset.schema.graph.directed
+                            if hasattr(self.current_graph_dataset.schema, "graph")
+                            else True,
+                            "heterogeneous": self.current_graph_dataset.schema.graph.heterogeneous
+                            if hasattr(self.current_graph_dataset.schema, "graph")
+                            else False,
+                            "multigraph": self.current_graph_dataset.schema.graph.multigraph
+                            if hasattr(self.current_graph_dataset.schema, "graph")
+                            else False,
+                            "weighted": self.current_graph_dataset.schema.graph.weighted
+                            if hasattr(self.current_graph_dataset.schema, "graph")
+                            else False,
                         },
-                        "vertex_types": [v.type for v in self.current_graph_dataset.schema.vertex] if hasattr(self.current_graph_dataset.schema, 'vertex') else [],
-                        "edge_types": [e.type for e in self.current_graph_dataset.schema.edge] if hasattr(self.current_graph_dataset.schema, 'edge') else [],
-                        "vertex_configs": [{"type": v.type, "query_field": v.query_field, "attribute_fields": v.attribute_fields}
-                                          for v in self.current_graph_dataset.schema.vertex] if hasattr(self.current_graph_dataset.schema, 'vertex') else [],
-                        "edge_configs": [{"type": e.type, "source_field": e.source_field, "target_field": e.target_field, "weight_field": e.weight_field}
-                                        for e in self.current_graph_dataset.schema.edge] if hasattr(self.current_graph_dataset.schema, 'edge') else [],
+                        "vertex_types": [
+                            v.type for v in self.current_graph_dataset.schema.vertex
+                        ]
+                        if hasattr(self.current_graph_dataset.schema, "vertex")
+                        else [],
+                        "edge_types": [
+                            e.type for e in self.current_graph_dataset.schema.edge
+                        ]
+                        if hasattr(self.current_graph_dataset.schema, "edge")
+                        else [],
+                        "vertex_configs": [
+                            {
+                                "type": v.type,
+                                "query_field": v.query_field,
+                                "attribute_fields": v.attribute_fields,
+                            }
+                            for v in self.current_graph_dataset.schema.vertex
+                        ]
+                        if hasattr(self.current_graph_dataset.schema, "vertex")
+                        else [],
+                        "edge_configs": [
+                            {
+                                "type": e.type,
+                                "source_field": e.source_field,
+                                "target_field": e.target_field,
+                                "weight_field": e.weight_field,
+                            }
+                            for e in self.current_graph_dataset.schema.edge
+                        ]
+                        if hasattr(self.current_graph_dataset.schema, "edge")
+                        else [],
                     }
-                
-                algorithm_result = self.reasoner.select_algorithm(step.question, algorithm_list, graph_schema=graph_schema_info)
+
+                algorithm_result = self.reasoner.select_algorithm(
+                    step.question, algorithm_list, graph_schema=graph_schema_info
+                )
                 logger.info(f"🔍 Algorithm selection result: {algorithm_result}")
-                
+
                 if algorithm_result is None:
                     error_msg = "Algorithm selection failed: LLM returned None"
-                    logger.error(f"❌ {error_msg} | question: {step.question} | task_type: {selected_task_type_id}")
+                    logger.error(
+                        f"❌ {error_msg} | question: {step.question} | task_type: {selected_task_type_id}"
+                    )
                     raise RuntimeError(error_msg)
-                
+
                 if "error" in algorithm_result:
                     error_msg = f"Algorithm selection failed: {algorithm_result.get('error', 'Unknown error')}"
-                    logger.error(f"❌ {error_msg} | question: {step.question} | task_type: {selected_task_type_id} | details: {algorithm_result}")
+                    logger.error(
+                        f"❌ {error_msg} | question: {step.question} | task_type: {selected_task_type_id} | details: {algorithm_result}"
+                    )
                     raise RuntimeError(error_msg)
-                
+
                 selected_algorithm_id = algorithm_result.get("id")
                 if not selected_algorithm_id:
                     error_msg = "Algorithm selection failed: result missing 'id' field"
                     logger.error(f"❌ {error_msg} | result: {algorithm_result}")
                     raise RuntimeError(error_msg)
-                
+
                 step.task_type = GraphAnalysisType.GRAPH_ALGORITHM
                 step.graph_algorithm = selected_algorithm_id
-                logger.info(f"✅ Algorithm selected | question: {step.question}, task_type: {selected_task_type_id}, algorithm: {step.graph_algorithm}")
+                logger.info(
+                    f"✅ Algorithm selected | question: {step.question}, task_type: {selected_task_type_id}, algorithm: {step.graph_algorithm}"
+                )
 
     async def _run_algorithm_pipeline(self):
         analysis_result = ""
 
-        for step_id in self.dag.topological_order(): 
+        for step_id in self.dag.topological_order():
             step = self.dag.steps[step_id]
 
             if not step.graph_algorithm:
-                self.dag.set_failed(step_id, "No graph algorithm selected for this step")
+                self.dag.set_failed(
+                    step_id, "No graph algorithm selected for this step"
+                )
                 raise RuntimeError(f"Step {step_id} missing graph_algorithm")
 
-            tool_description,  tool_metadata = await self.computing_engine.get_algorithm_description(
+            (
+                tool_description,
+                tool_metadata,
+            ) = await self.computing_engine.get_algorithm_description(
                 step.graph_algorithm
             )
 
             logger.info(f"tool_description:{tool_description}")
 
             extraction_result = self.reasoner.extract_parameters_with_postprocess(
-                question=step.question,
-                tool_description=tool_description
+                question=step.question, tool_description=tool_description
             )
-            
+
             logger.info(
-                f"✅ LLM extracted parameters: {json.dumps(extraction_result.get('parameters'), ensure_ascii=False)}")
+                f"✅ LLM extracted parameters: {json.dumps(extraction_result.get('parameters'), ensure_ascii=False)}"
+            )
 
             if extraction_result.get("post_processing_code"):
                 logger.info(
-                    f"✅ Post-processing code:\n{extraction_result.get('post_processing_code','')}...")
+                    f"✅ Post-processing code:\n{extraction_result.get('post_processing_code', '')}..."
+                )
 
             tool_result = await self.computing_engine.run_algorithm(
                 step.graph_algorithm,
                 extraction_result.get("parameters", {}),
-                extraction_result.get("post_processing_code", "")
+                extraction_result.get("post_processing_code", ""),
             )
 
-            logger.info(f"✅ Tool execution: {tool_result.get('summary','done')}")
+            logger.info(f"✅ Tool execution: {tool_result.get('summary', 'done')}")
 
             if not tool_result.get("success", False):
                 error_msg = tool_result.get("error", "Algorithm execution failed")
@@ -1118,411 +1255,47 @@ class Scheduler:
 
             analysis_result += llm_analysis
 
-            self.dag.set_success(
-                step_id,
-                output_data = None,
-                llm_analysis= llm_analysis
-            )
+            self.dag.set_success(step_id, output_data=None, llm_analysis=llm_analysis)
 
         return analysis_result
-    
 
     async def _run_algorithm_pipeline2(self, global_round: int = 0):
+        """编排方法：遍历DAG步骤，分发执行，聚合结果，生成最终报告"""
         max_global_rounds = 3
         analysis_blocks: Dict[str, Dict[str, Any]] = {}
 
-        logger.info(f"🧩 _run_algorithm_pipeline2 global_round={global_round}/{max_global_rounds}")
+        logger.info(
+            f"🧩 _run_algorithm_pipeline2 global_round={global_round}/{max_global_rounds}"
+        )
 
         for step_id in self.dag.topological_order():
             step = self.dag.steps[step_id]
-            tool_description = None
-            tool_metadata = None
-            tool_result = None 
 
-            data_dependency_parents = [self.dag.steps[pid] for pid in self.dag.parents_of(step_id)]
-            data_dependency_context = {
-                "graph_dependencies": [],
-                "parameter_dependencies": [],
-                "graph_input_adapter_result": None,
-                "parameter_input_adapter_result": None,
+            result = await self._execute_single_step(
+                step=step,
+                step_id=step_id,
+                global_round=global_round,
+                max_global_rounds=max_global_rounds,
+            )
+
+            if result is None:
+                # 步骤失败，跳过
+                continue
+
+            result_type, payload = result
+
+            if result_type == "recursive":
+                # 全局恢复触发递归重试，直接返回递归结果
+                return payload
+
+            # 正常完成：聚合本步骤结果
+            analysis_blocks[str(step_id)] = {
+                "question": step.question,
+                "tool_description": payload.get("tool_description"),
+                "tool_result": payload.get("tool_result"),
             }
-            
-            if data_dependency_parents:
-                data_dependency_context = await self.data_dependency_resolver.resolve_dependencies(
-                    step_id=step_id,
-                    step=step,
-                    alg_des_info=tool_metadata,
-                    data_dependency_parents=data_dependency_parents
-                )
-                logger.info(
-                    "📊 Dependency context | graph deps: %s | param deps: %s",
-                    len(data_dependency_context.get("graph_dependencies", [])),
-                    len(data_dependency_context.get("parameter_dependencies", [])),
-                )
-                
 
-            if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
-                if not step.graph_algorithm:
-                    self.dag.set_failed(step_id, "No graph algorithm selected for this step")
-                    logger.error(f"❌ Step {step_id} missing graph_algorithm, skipping")
-                    continue
-
-                tool_description,  tool_metadata = await self.computing_engine.get_algorithm_description(
-                    step.graph_algorithm
-                )
-                
-                if tool_metadata is None:
-                    error_msg = f"Cannot get algorithm description for '{step.graph_algorithm}'"
-                    logger.error(f"❌ {error_msg}")
-                    self.dag.set_failed(step_id, error_msg)
-                    continue
-                
-                logger.info(f"tool_description:{tool_description}")
-
-                try:
-                    await self._prepare_graph_for_execution(
-                        graph_dependencies=data_dependency_context.get("graph_dependencies") or [],
-                        graph_adapter_result=data_dependency_context.get("graph_input_adapter_result"),
-                    )
-                except Exception as graph_err:
-                    self.dag.set_failed(step_id, f"Failed to initialize working graph: {graph_err}")
-                    logger.error(f"❌ Step {step_id} graph init failed: {graph_err}, skipping")
-                    continue
-
-                # extraction_result = self._prepare_parameters_for_execution(
-                #     step=step,
-                #     tool_description=tool_description,
-                #     vertex_schema=self.global_graph.get_vertex_properties_schema(),
-                #     edge_schema=self.global_graph.get_edge_properties_schema(),
-                #     dependency_parameters=data_dependency_context.get("parameter_input_adapter_result") or {},
-                # )
-                
-                # if extraction_result is None:
-                #     error_msg = "Parameter extraction returned None"
-                #     logger.error(f"❌ {error_msg}")
-                #     self.dag.set_failed(step_id, error_msg)
-                #     raise ValueError(error_msg)
-
-                # logger.info(
-                #     "✅ LLM/dependency extracted params: %s",
-                #     json.dumps(extraction_result.get("parameters", {}), ensure_ascii=False)
-                # )
-
-                # post_processing_info = extraction_result.get("post_processing_code") or {}  
-                # is_has_extract_code = bool(post_processing_info.get("is_calculate"))
-                # output_schema = post_processing_info.get("output_schema") or {}
-
-                # if post_processing_info.get("code"):
-                #     logger.info(
-                #         f"✅ Post-processing code:\n{post_processing_info.get('code','')}...")
-        
-                # tool_result = await self.computing_engine.run_algorithm(
-                #     step.graph_algorithm,
-                #     extraction_result.get("parameters", {}),
-                #     post_processing_info.get("code"),
-                #     global_graph=self.global_graph
-                # )
-                
-                # if tool_result is None:
-                #     error_msg = "Algorithm execution returned None"
-                #     logger.error(f"❌ {error_msg}")
-                #     self.dag.set_failed(step_id, error_msg)
-                #     raise ValueError(error_msg)
-                
-                # # Check nested result.error
-                # result_data = tool_result.get("result")
-                # if result_data is not None and isinstance(result_data, dict) and "error" in result_data:
-                #     error_msg = result_data.get("error")
-                #     logger.error(f"❌ {error_msg}")
-                #     self.dag.set_failed(step_id, error_msg)
-                #     raise RuntimeError(error_msg)
-                
-                # if not tool_result.get("success", False):
-                #     error_msg = tool_result.get("error", "Algorithm execution failed")
-                #     logger.error(f"❌ {error_msg}")
-                #     self.dag.set_failed(step_id, error_msg)
-                #     raise RuntimeError(error_msg)
-                async def op_prepare_params_and_postprocess_then_execute(error_history):
-                    extraction_result = self._prepare_parameters_for_execution(
-                        step=step,
-                        tool_description=tool_description,
-                        vertex_schema=self.global_graph.get_vertex_properties_schema(),
-                        edge_schema=self.global_graph.get_edge_properties_schema(),
-                        dependency_parameters=data_dependency_context.get("parameter_input_adapter_result") or {},
-                        error_history=error_history
-                    )
-
-                    if extraction_result is None:
-                        raise ValueError("Parameter adaptation and post-processing code generation failed, returning an empty result.")
-
-                    post_processing_info = extraction_result.get("post_processing_code") or {} 
-                    is_has_extract_code = bool(post_processing_info.get("is_calculate"))
-                    output_schema = post_processing_info.get("output_schema") or {}
-
-                    logger.info(
-                        f"✅ Generated post-processing code: {post_processing_info.get('code')}"
-                    )
-
-                    tool_result = await self.computing_engine.run_algorithm(
-                        step.graph_algorithm,
-                        extraction_result.get("parameters", {}),
-                        post_processing_info.get("code"),
-                        global_graph=self.global_graph
-                    )
-
-                    if tool_result is None:
-                        raise ValueError("Algorithm execution returned None")
-                    logger.info(f"tool_result:{tool_result}")
-
-                    result_data = tool_result.get("result")
-                    if isinstance(result_data, dict) and "error" in result_data:
-                        raise RuntimeError(result_data.get("error") or "Algorithm execution failed")
-                    logger.info(f"tool_result:{result_data}")
-
-
-                    if not tool_result.get("success", False):
-                        error_msg = tool_result.get("error") or "Algorithm execution failed"
-                        logger.info(f"tool_result:{error_msg}")
-                        raise RuntimeError(error_msg)
-
-                    return is_has_extract_code, output_schema, tool_result
-
-                try:
-                    is_has_extract_code, output_schema, tool_result = await self.error_recovery.run(
-                        op_prepare_params_and_postprocess_then_execute,
-                        name=f"prepare_params+postprocess+execute(step={step_id})",
-                        operation_type="generic",
-                        location=f"step_{step_id}"
-                    )
-                except Exception as e:
-                    self.dag.set_failed(step_id, str(e))
-                    logger.error(f"❌ Step {step_id} algorithm execution failed: {e}, skipping")
-                    continue
-
-                step.add_algorithm_result(
-                    tool_name=tool_metadata.get("name", ""),
-                    tool_result_data=tool_result.get("result", {}),
-                    output_schema=output_schema,
-                    is_has_extract_code=is_has_extract_code
-                )
-                logger.info(f"✅ Tool execution: {tool_result.get('summary','done')}")
-
-                self.dag.set_success(step_id)
-
-            elif step.task_type == GraphAnalysisType.NUMERIC_ANALYSIS:
-                logger.info("🧮 Task type: Numeric Analysis")
-                
-                graph_deps = data_dependency_context.get("graph_dependencies", [])
-                param_deps = data_dependency_context.get("parameter_dependencies", [])
-                if data_dependency_parents and not graph_deps and not param_deps:
-                    dep_empty_reason = "Dependency resolution returned empty graph/parameter dependencies"
-                    logger.error(f"❌ Step {step_id} numeric analysis: {dep_empty_reason}")
-                    self.dag.set_failed(step_id, dep_empty_reason)
-                    if self.error_recovery and global_round < max_global_rounds:
-                        self.error_recovery.global_recover(
-                            self.dag,
-                            step_id,
-                            {"error_type": "DEPENDENCY_EMPTY", "stage": "dependency_resolve"},
-                            context={"dependency_parents": [p.step_id for p in data_dependency_parents]},
-                            reason="numeric_analysis_dependency_empty",
-                        )
-                        return await self._run_algorithm_pipeline2(global_round=global_round + 1)
-                    continue
-                
-                dependency_items = []
-                execution_data = {}
-                tool_description = (
-                    "##This step is a numeric analysis task executed by a generated Python function.\n\n"
-                    "Inputs are dependency fields extracted from the workflow context.\n"
-                )
-                for dep_item in graph_deps + param_deps:
-                    value = take_sample(dep_item.value)
-                    execution_data[dep_item.field_key] = value
-                    dependency_items.append({
-                        "field_key": dep_item.field_key,
-                        "field_type": str(dep_item.field_type) if dep_item.field_type else "unknown",
-                        "field_desc": dep_item.field_desc,
-                        "value": value
-                    })
-                    tool_description += (
-                        f"- `{dep_item.field_key}`: {dep_item.field_desc or ''} "
-                        f"(type: {str(dep_item.field_type) if dep_item.field_type else 'unknown'})\n"
-                    )
-                
-            
-                vertex_schema = {}
-                edge_schema = {}
-                if self.global_graph:
-                    vertex_schema = self.global_graph.get_vertex_properties_schema()
-                    edge_schema = self.global_graph.get_edge_properties_schema()
-                
-                async def op_generate_and_execute_numeric_analysis(error_history):
-                    code_result = self.reasoner.generate_numeric_analysis_code(
-                        question=step.question,
-                        dependency_items=dependency_items,
-                        vertex_schema=vertex_schema,
-                        edge_schema=edge_schema
-                    )
-                    if code_result is None:
-                        raise ValueError("Numeric analysis code generation returned None")
-
-                    numeric_analysis_code = code_result.get("numeric_analysis_code", {})
-                    generated_code = numeric_analysis_code.get("code", "")
-                    output_schema = numeric_analysis_code.get("output_schema", {})
-                    if not generated_code or not generated_code.strip():
-                        raise ValueError("Generated numeric analysis code is empty")
-
-                    logger.info(f"✅ Generated numeric analysis code: {generated_code}")
-                    code_result_value = self.computing_engine.execute_code(
-                        code=generated_code,
-                        data=execution_data,
-                        global_graph=self.global_graph,
-                        is_numeric_analysis=True
-                    )
-
-                    if not isinstance(code_result_value, dict):
-                        raise RuntimeError("Numeric analysis executor returned non-dict result")
-
-                    if code_result_value.get("error") or code_result_value.get("result").get("error"):
-                        raise RuntimeError(code_result_value.get("error") or "Numeric analysis execution failed")
-
-                    return output_schema, code_result_value
-
-                try:
-                    output_schema, code_result_value = await self.error_recovery.run(
-                        op_generate_and_execute_numeric_analysis,
-                        name=f"generate_numeric_code+execute(step={step_id})",
-                        operation_type="generic",
-                        location=f"step_{step_id}"
-                    )
-                except Exception as e:
-                    self.dag.set_failed(step_id, str(e))
-                    logger.error(f"❌ Step {step_id} numeric analysis failed: {e}, skipping")
-                    if self.error_recovery and global_round < max_global_rounds:
-                        self.error_recovery.global_recover(
-                            self.dag,
-                            step_id,
-                            {"error_type": "NUMERIC_EXEC_FAIL", "stage": "numeric_execute"},
-                            context={"dependency_parents": [p.step_id for p in data_dependency_parents]},
-                            reason="numeric_analysis_execution_failed",
-                        )
-                        return await self._run_algorithm_pipeline2(global_round=global_round + 1)
-                    continue
-
-                result = code_result_value.get("result")
-                logger.info(f"result:{result}")
-                step.add_output(
-                    task_type=GraphAnalysisSubType.NUMERIC_COMPUTATION,
-                    source="numeric analysis code",
-                    output_schema=OutputSchema(
-                        description=output_schema.get("description", ""),
-                        type=output_schema.get("type", "dict"),
-                        fields={
-                            name: OutputField(
-                                type=info.get("type", ""),
-                                field_description=info.get("field_description", "")
-                            )
-                            for name, info in output_schema.get("fields", {}).items()
-                        }
-                    ) if output_schema else None,
-                    value = result if isinstance(result, dict) else {"result": result},
-                    path=None,
-                    validate_schema=True
-                )
-
-                tool_description += "\nExpected output:\n"
-                if output_schema:
-                    output_fields = output_schema.get("fields", {}) or {}
-                    if output_fields:
-                        for name, info in output_fields.items():
-                            tool_description += (
-                                f"- `{name}`: {info.get('field_description', '')} "
-                                f"(type: {info.get('type', '')})\n"
-                            )
-                    else:
-                        tool_description += f"- Output type: {output_schema.get('type', 'dict')}\n"
-                else:
-                    tool_description += "- Output: numeric analysis result\n"
-
-                tool_result = code_result_value
-                
-                logger.info("✅ Numeric analysis completed")
-                self.dag.set_success(step_id)
-
-            elif step.task_type == GraphAnalysisType.GRAPH_QUERY:
-                logger.info("🔍 Task type: Graph Query")
-                try:
-                    query_result = self.computing_engine.execute_graph_query(step.question)
-                    
-                    if query_result.get("success"):
-                        step.add_output(
-                            task_type=GraphAnalysisSubType.SUBGRAPH_EXTRACTION,
-                            source="graph_query",
-                            output_schema=OutputSchema(
-                                description="Graph query result",
-                                type="list",
-                                fields={
-                                    "results": OutputField(
-                                        type="list",
-                                        field_description="List of query results"
-                                    ),
-                                    "count": OutputField(
-                                        type="int",
-                                        field_description="Result count"
-                                    ),
-                                    "query_type": OutputField(
-                                        type="str",
-                                        field_description="Query type"
-                                    )
-                                }
-                            ),
-                            value={
-                                "results": query_result.get("results", []),
-                                "count": query_result.get("count", 0),
-                                "query_type": query_result.get("query_type", "unknown")
-                            },
-                            path=None,
-                            validate_schema=False
-                        )
-                        logger.info(f"✅ Graph query done; returned {query_result.get('count', 0)} results")
-                        self.dag.set_success(step_id)
-                        
-                        tool_result = {
-                            "success": True,
-                            "result": query_result.get("results", []),
-                            "summary": f"Graph query succeeded; returned {query_result.get('count', 0)} results"
-                        }
-                    else:
-                        error_msg = query_result.get("error", "Graph query failed")
-                        logger.error(f"❌ Step {step_id} graph query failed: {error_msg}, skipping")
-                        self.dag.set_failed(step_id, error_msg)
-                        continue
-                        
-                except Exception as query_err:
-                    error_msg = f"Graph query execution failed: {query_err}"
-                    logger.error(error_msg, exc_info=True)
-                    self.dag.set_failed(step_id, error_msg)
-                    continue
-
-            if tool_result is not None:
-                analysis_blocks[str(step_id)] = {
-                    "question": step.question,
-                    "tool_description": tool_description,
-                    "tool_result": tool_result,
-                }
-            #     try:
-            #         llm_analysis = self.reasoner.generate_answer_from_algorithm_result(
-            #             question=step.question,
-            #             tool_description=tool_description,
-            #             tool_result=tool_result,
-            #         )
-            #         analysis_blocks.append(llm_analysis)
-            #         analysis_result += llm_analysis
-            #     except Exception as analysis_err:
-            #         logger.error(f"❌ Step {step_id} LLM analysis generation failed: {analysis_err}, skipping")
-            # else:
-            #     logger.warning(f"⚠️ Step {step_id} skipped (no result), excluded from final report")
-        
+        # 生成最终汇总报告
         final_question = (
             "You will be given a mapping of step_id to each step's tool execution output. "
             "Please reorganize all available step results into a single, clear and well-structured "
@@ -1539,6 +1312,547 @@ class Scheduler:
         )
         return final_report
 
+    async def _execute_single_step(
+        self,
+        step: WorkflowStep,
+        step_id: int,
+        global_round: int,
+        max_global_rounds: int,
+    ) -> Optional[Tuple[str, Dict[str, Any]]]:
+        """
+        解析步骤依赖，根据任务类型分发到对应的执行子方法。
+
+        Args:
+            step: 当前工作流步骤
+            step_id: 步骤ID
+            global_round: 全局重试轮次
+            max_global_rounds: 最大全局重试轮次
+
+        Returns:
+            None → 步骤失败，跳过
+            ("recursive", final_report_str) → 触发全局递归重启
+            ("success", {"tool_result": ..., "tool_description": ...}) → 步骤正常完成
+        """
+        tool_metadata = None
+
+        # 解析数据依赖
+        data_dependency_parents = [
+            self.dag.steps[pid] for pid in self.dag.parents_of(step_id)
+        ]
+        data_dependency_context = {
+            "graph_dependencies": [],
+            "parameter_dependencies": [],
+            "graph_input_adapter_result": None,
+            "parameter_input_adapter_result": None,
+        }
+
+        if data_dependency_parents:
+            data_dependency_context = (
+                await self.data_dependency_resolver.resolve_dependencies(
+                    step_id=step_id,
+                    step=step,
+                    alg_des_info=tool_metadata,
+                    data_dependency_parents=data_dependency_parents,
+                )
+            )
+            logger.info(
+                "📊 Dependency context | graph deps: %s | param deps: %s",
+                len(data_dependency_context.get("graph_dependencies", [])),
+                len(data_dependency_context.get("parameter_dependencies", [])),
+            )
+
+        # 根据任务类型分发
+        if step.task_type == GraphAnalysisType.GRAPH_ALGORITHM:
+            return await self._execute_graph_algorithm_step(
+                step=step,
+                step_id=step_id,
+                tool_metadata=tool_metadata,
+                data_dependency_context=data_dependency_context,
+                global_round=global_round,
+                max_global_rounds=max_global_rounds,
+            )
+        elif step.task_type == GraphAnalysisType.NUMERIC_ANALYSIS:
+            return await self._execute_numeric_analysis_step(
+                step=step,
+                step_id=step_id,
+                data_dependency_parents=data_dependency_parents,
+                data_dependency_context=data_dependency_context,
+                global_round=global_round,
+                max_global_rounds=max_global_rounds,
+            )
+        elif step.task_type == GraphAnalysisType.GRAPH_QUERY:
+            return await self._execute_graph_query_step(
+                step=step,
+                step_id=step_id,
+            )
+
+        # 未知任务类型，跳过
+        logger.warning(
+            f"⚠️ Unknown task type {step.task_type} for step {step_id}, skipping"
+        )
+        return None
+
+    async def _execute_graph_algorithm_step(
+        self,
+        step: WorkflowStep,
+        step_id: int,
+        tool_metadata: Optional[Dict],
+        data_dependency_context: dict,
+        global_round: int,
+        max_global_rounds: int,
+    ) -> Optional[Tuple[str, Dict[str, Any]]]:
+        """处理 GRAPH_ALGORITHM 类型步骤：参数准备 → 算法执行 → 结果后处理"""
+        # 前置验证：必须已选择图算法
+        if not step.graph_algorithm:
+            self.dag.set_failed(step_id, "No graph algorithm selected for this step")
+            logger.error(f"❌ Step {step_id} missing graph_algorithm, skipping")
+            return None
+
+        # 获取算法描述和元数据
+        (
+            tool_description,
+            tool_metadata,
+        ) = await self.computing_engine.get_algorithm_description(step.graph_algorithm)
+
+        if tool_metadata is None:
+            error_msg = f"Cannot get algorithm description for '{step.graph_algorithm}'"
+            logger.error(f"❌ {error_msg}")
+            self.dag.set_failed(step_id, error_msg)
+            return None
+
+        logger.info(f"tool_description:{tool_description}")
+
+        # 准备工作图
+        try:
+            await self._prepare_graph_for_execution(
+                graph_dependencies=data_dependency_context.get("graph_dependencies")
+                or [],
+                graph_adapter_result=data_dependency_context.get(
+                    "graph_input_adapter_result"
+                ),
+            )
+        except Exception as graph_err:
+            self.dag.set_failed(
+                step_id, f"Failed to initialize working graph: {graph_err}"
+            )
+            logger.error(f"❌ Step {step_id} graph init failed: {graph_err}, skipping")
+            return None
+
+        # 通过 error_recovery 包装执行：准备参数 + 执行算法 + 后处理
+        try:
+            (
+                is_has_extract_code,
+                output_schema,
+                tool_result,
+            ) = await self.error_recovery.run(
+                lambda eh: self._graph_algorithm_exec_inner(
+                    error_history=eh,
+                    step=step,
+                    tool_description=tool_description,
+                    data_dependency_context=data_dependency_context,
+                ),
+                name=f"prepare_params+postprocess+execute(step={step_id})",
+                operation_type="generic",
+                location=f"step_{step_id}",
+            )
+        except Exception as e:
+            self.dag.set_failed(step_id, str(e))
+            logger.error(f"❌ Step {step_id} algorithm execution failed: {e}, skipping")
+            return None
+
+        # 记录执行结果
+        step.add_algorithm_result(
+            tool_name=tool_metadata.get("name", ""),
+            tool_result_data=tool_result.get("result", {}),
+            output_schema=output_schema,
+            is_has_extract_code=is_has_extract_code,
+        )
+        logger.info(f"✅ Tool execution: {tool_result.get('summary', 'done')}")
+
+        self.dag.set_success(step_id)
+
+        return (
+            "success",
+            {
+                "tool_result": tool_result,
+                "tool_description": tool_description,
+            },
+        )
+
+    async def _graph_algorithm_exec_inner(
+        self,
+        error_history: list,
+        step: WorkflowStep,
+        tool_description: Optional[str],
+        data_dependency_context: dict,
+    ) -> Tuple[bool, dict, dict]:
+        """
+        图算法执行体：准备参数 → 运行算法 → 返回结果三元组。
+
+        作为 error_recovery.run() 的回调函数，接受 error_history 用于错误追踪。
+
+        Args:
+            error_history: 错误历史列表（由 error_recovery 注入）
+            step: 当前工作流步骤
+            tool_description: 算法工具描述
+            data_dependency_context: 数据依赖上下文
+
+        Returns:
+            (is_has_extract_code, output_schema, tool_result) 三元组
+
+        Raises:
+            ValueError: 参数准备失败或算法返回 None
+            RuntimeError: 算法执行失败
+        """
+        extraction_result = self._prepare_parameters_for_execution(
+            step=step,
+            tool_description=tool_description or "",
+            vertex_schema=self.global_graph.get_vertex_properties_schema(),
+            edge_schema=self.global_graph.get_edge_properties_schema(),
+            dependency_parameters=data_dependency_context.get(
+                "parameter_input_adapter_result"
+            )
+            or {},
+            error_history=error_history,
+        )
+
+        if extraction_result is None:
+            raise ValueError(
+                "Parameter adaptation and post-processing code generation failed, "
+                "returning an empty result."
+            )
+
+        post_processing_info = extraction_result.get("post_processing_code") or {}
+        is_has_extract_code = bool(post_processing_info.get("is_calculate"))
+        output_schema = post_processing_info.get("output_schema") or {}
+
+        logger.info(
+            f"✅ Generated post-processing code: {post_processing_info.get('code')}"
+        )
+
+        tool_result = await self.computing_engine.run_algorithm(
+            step.graph_algorithm,
+            extraction_result.get("parameters", {}),
+            post_processing_info.get("code"),
+            global_graph=self.global_graph,
+        )
+
+        if tool_result is None:
+            raise ValueError("Algorithm execution returned None")
+        logger.info(f"tool_result:{tool_result}")
+
+        result_data = tool_result.get("result")
+        if isinstance(result_data, dict) and "error" in result_data:
+            raise RuntimeError(result_data.get("error") or "Algorithm execution failed")
+        logger.info(f"tool_result:{result_data}")
+
+        if not tool_result.get("success", False):
+            error_msg = tool_result.get("error") or "Algorithm execution failed"
+            logger.info(f"tool_result:{error_msg}")
+            raise RuntimeError(error_msg)
+
+        return is_has_extract_code, output_schema, tool_result
+
+    async def _execute_numeric_analysis_step(
+        self,
+        step: WorkflowStep,
+        step_id: int,
+        data_dependency_parents: list,
+        data_dependency_context: dict,
+        global_round: int,
+        max_global_rounds: int,
+    ) -> Optional[Tuple[str, Dict[str, Any]]]:
+        """处理 NUMERIC_ANALYSIS 类型步骤：依赖检查 → 代码生成 → 执行分析"""
+        logger.info("🧮 Task type: Numeric Analysis")
+
+        graph_deps = data_dependency_context.get("graph_dependencies", [])
+        param_deps = data_dependency_context.get("parameter_dependencies", [])
+
+        # 依赖为空：可能触发全局恢复递归
+        if data_dependency_parents and not graph_deps and not param_deps:
+            dep_empty_reason = (
+                "Dependency resolution returned empty graph/parameter dependencies"
+            )
+            logger.error(f"❌ Step {step_id} numeric analysis: {dep_empty_reason}")
+            self.dag.set_failed(step_id, dep_empty_reason)
+            if self.error_recovery and global_round < max_global_rounds:
+                self.error_recovery.global_recover(
+                    self.dag,
+                    step_id,
+                    {
+                        "error_type": "DEPENDENCY_EMPTY",
+                        "stage": "dependency_resolve",
+                    },
+                    context={
+                        "dependency_parents": [
+                            p.step_id for p in data_dependency_parents
+                        ]
+                    },
+                    reason="numeric_analysis_dependency_empty",
+                )
+                return (
+                    "recursive",
+                    await self._run_algorithm_pipeline2(global_round=global_round + 1),
+                )
+            return None
+
+        # 构建依赖项和执行数据
+        dependency_items = []
+        execution_data = {}
+        tool_description = (
+            "##This step is a numeric analysis task executed by a generated Python function.\n\n"
+            "Inputs are dependency fields extracted from the workflow context.\n"
+        )
+        for dep_item in graph_deps + param_deps:
+            value = take_sample(dep_item.value)
+            execution_data[dep_item.field_key] = value
+            dependency_items.append(
+                {
+                    "field_key": dep_item.field_key,
+                    "field_type": str(dep_item.field_type)
+                    if dep_item.field_type
+                    else "unknown",
+                    "field_desc": dep_item.field_desc,
+                    "value": value,
+                }
+            )
+            tool_description += (
+                f"- `{dep_item.field_key}`: {dep_item.field_desc or ''} "
+                f"(type: {str(dep_item.field_type) if dep_item.field_type else 'unknown'})\n"
+            )
+
+        vertex_schema = {}
+        edge_schema = {}
+        if self.global_graph:
+            vertex_schema = self.global_graph.get_vertex_properties_schema()
+            edge_schema = self.global_graph.get_edge_properties_schema()
+
+        # 通过 error_recovery 包装执行：生成代码 + 执行分析
+        try:
+            output_schema, code_result_value = await self.error_recovery.run(
+                lambda eh: self._numeric_analysis_exec_inner(
+                    error_history=eh,
+                    step=step,
+                    dependency_items=dependency_items,
+                    execution_data=execution_data,
+                    vertex_schema=vertex_schema,
+                    edge_schema=edge_schema,
+                ),
+                name=f"generate_numeric_code+execute(step={step_id})",
+                operation_type="generic",
+                location=f"step_{step_id}",
+            )
+        except Exception as e:
+            self.dag.set_failed(step_id, str(e))
+            logger.error(f"❌ Step {step_id} numeric analysis failed: {e}, skipping")
+            if self.error_recovery and global_round < max_global_rounds:
+                self.error_recovery.global_recover(
+                    self.dag,
+                    step_id,
+                    {
+                        "error_type": "NUMERIC_EXEC_FAIL",
+                        "stage": "numeric_execute",
+                    },
+                    context={
+                        "dependency_parents": [
+                            p.step_id for p in data_dependency_parents
+                        ]
+                    },
+                    reason="numeric_analysis_execution_failed",
+                )
+                return (
+                    "recursive",
+                    await self._run_algorithm_pipeline2(global_round=global_round + 1),
+                )
+            return None
+
+        # 记录执行结果
+        result = code_result_value.get("result")
+        logger.info(f"result:{result}")
+        step.add_output(
+            task_type=GraphAnalysisSubType.NUMERIC_COMPUTATION,
+            source="numeric analysis code",
+            output_schema=OutputSchema(
+                description=output_schema.get("description", ""),
+                type=output_schema.get("type", "dict"),
+                fields={
+                    name: OutputField(
+                        type=info.get("type", ""),
+                        field_description=info.get("field_description", ""),
+                    )
+                    for name, info in output_schema.get("fields", {}).items()
+                },
+            )
+            if output_schema
+            else None,
+            value=result if isinstance(result, dict) else {"result": result},
+            path=None,
+            validate_schema=True,
+        )
+
+        tool_description += "\nExpected output:\n"
+        if output_schema:
+            output_fields = output_schema.get("fields", {}) or {}
+            if output_fields:
+                for name, info in output_fields.items():
+                    tool_description += (
+                        f"- `{name}`: {info.get('field_description', '')} "
+                        f"(type: {info.get('type', '')})\n"
+                    )
+            else:
+                tool_description += (
+                    f"- Output type: {output_schema.get('type', 'dict')}\n"
+                )
+        else:
+            tool_description += "- Output: numeric analysis result\n"
+
+        tool_result = code_result_value
+
+        logger.info("✅ Numeric analysis completed")
+        self.dag.set_success(step_id)
+
+        return (
+            "success",
+            {
+                "tool_result": tool_result,
+                "tool_description": tool_description,
+            },
+        )
+
+    async def _numeric_analysis_exec_inner(
+        self,
+        error_history: list,
+        step: WorkflowStep,
+        dependency_items: list,
+        execution_data: dict,
+        vertex_schema: dict,
+        edge_schema: dict,
+    ) -> Tuple[dict, dict]:
+        """
+        数值分析执行体：生成分析代码 → 执行 → 返回结果。
+
+        作为 error_recovery.run() 的回调函数，接受 error_history 用于错误追踪。
+
+        Args:
+            error_history: 错误历史列表（由 error_recovery 注入）
+            step: 当前工作流步骤
+            dependency_items: 依赖项描述列表
+            execution_data: 执行时使用的数据字典
+            vertex_schema: 顶点属性模式
+            edge_schema: 边属性模式
+
+        Returns:
+            (output_schema, code_result_value) 二元组
+
+        Raises:
+            ValueError: 代码生成失败或代码为空
+            RuntimeError: 执行结果非 dict 或包含错误
+        """
+        code_result = self.reasoner.generate_numeric_analysis_code(
+            question=step.question,
+            dependency_items=dependency_items,
+            vertex_schema=vertex_schema,
+            edge_schema=edge_schema,
+        )
+        if code_result is None:
+            raise ValueError("Numeric analysis code generation returned None")
+
+        numeric_analysis_code = code_result.get("numeric_analysis_code", {})
+        generated_code = numeric_analysis_code.get("code", "")
+        output_schema = numeric_analysis_code.get("output_schema", {})
+        if not generated_code or not generated_code.strip():
+            raise ValueError("Generated numeric analysis code is empty")
+
+        logger.info(f"✅ Generated numeric analysis code: {generated_code}")
+        code_result_value = self.computing_engine.execute_code(
+            code=generated_code,
+            data=execution_data,
+            global_graph=self.global_graph,
+            is_numeric_analysis=True,
+        )
+
+        if not isinstance(code_result_value, dict):
+            raise RuntimeError("Numeric analysis executor returned non-dict result")
+
+        if code_result_value.get("error") or code_result_value.get("result").get(
+            "error"
+        ):
+            raise RuntimeError(
+                code_result_value.get("error") or "Numeric analysis execution failed"
+            )
+
+        return output_schema, code_result_value
+
+    async def _execute_graph_query_step(
+        self,
+        step: WorkflowStep,
+        step_id: int,
+    ) -> Optional[Tuple[str, Dict[str, Any]]]:
+        """处理 GRAPH_QUERY 类型步骤：执行图查询并记录结果"""
+        logger.info("🔍 Task type: Graph Query")
+        try:
+            query_result = self.computing_engine.execute_graph_query(step.question)
+
+            if query_result.get("success"):
+                step.add_output(
+                    task_type=GraphAnalysisSubType.SUBGRAPH_EXTRACTION,
+                    source="graph_query",
+                    output_schema=OutputSchema(
+                        description="Graph query result",
+                        type="list",
+                        fields={
+                            "results": OutputField(
+                                type="list",
+                                field_description="List of query results",
+                            ),
+                            "count": OutputField(
+                                type="int", field_description="Result count"
+                            ),
+                            "query_type": OutputField(
+                                type="str", field_description="Query type"
+                            ),
+                        },
+                    ),
+                    value={
+                        "results": query_result.get("results", []),
+                        "count": query_result.get("count", 0),
+                        "query_type": query_result.get("query_type", "unknown"),
+                    },
+                    path=None,
+                    validate_schema=False,
+                )
+                logger.info(
+                    f"✅ Graph query done; returned {query_result.get('count', 0)} results"
+                )
+                self.dag.set_success(step_id)
+
+                tool_result = {
+                    "success": True,
+                    "result": query_result.get("results", []),
+                    "summary": (
+                        f"Graph query succeeded; returned "
+                        f"{query_result.get('count', 0)} results"
+                    ),
+                }
+                return (
+                    "success",
+                    {
+                        "tool_result": tool_result,
+                        "tool_description": None,
+                    },
+                )
+
+            # 查询失败
+            error_msg = query_result.get("error", "Graph query failed")
+            logger.error(f"❌ Step {step_id} graph query failed: {error_msg}, skipping")
+            self.dag.set_failed(step_id, error_msg)
+            return None
+
+        except Exception as query_err:
+            error_msg = f"Graph query execution failed: {query_err}"
+            logger.error(error_msg, exc_info=True)
+            self.dag.set_failed(step_id, error_msg)
+            return None
 
     async def _prepare_graph_for_execution(
         self,
@@ -1577,7 +1891,9 @@ class Scheduler:
                     self.global_graph.edges,
                 )
             else:
-                logger.warning("⚠️ Subgraph dependency has no valid nodes/edges; falling back to full graph.")
+                logger.warning(
+                    "⚠️ Subgraph dependency has no valid nodes/edges; falling back to full graph."
+                )
                 use_subgraph = False
 
         payload = {
@@ -1608,7 +1924,7 @@ class Scheduler:
         vertex_schema: Dict[str, str],
         edge_schema: Dict[str, str],
         dependency_parameters: Dict[str, Any],
-        error_history: Optional[List[Dict[str, Any]]] = None
+        error_history: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
         """
         Prepare graph algorithm input parameters from data dependencies or LLM output.
@@ -1635,72 +1951,47 @@ class Scheduler:
             error_history=error_history,
             trace=trace,
         )
-        # result = None
-        # try:
-        #     if dependency_parameters:
-        #         result = self.reasoner.merge_parameters_from_dependencies(
-        #             question=step.question,
-        #             tool_description=tool_description,
-        #             vertex_schema=vertex_schema,
-        #             edge_schema=edge_schema,
-        #             dependency_parameters=dependency_parameters,
-        #             error_history=error_history, 
-        #             error_recovery=self.error_recovery
-        #         )
-        #     else:
-        #         result = self.reasoner.extract_parameters_with_postprocess_new(
-        #             question=step.question,
-        #             tool_description=tool_description,
-        #             vertex_schema=vertex_schema,
-        #             edge_schema=edge_schema,
-        #             error_history=error_history, 
-        #             error_recovery=self.error_recovery
-        #         )
-        # except Exception as e:
-        #     logger.info(f"Parameter processing failed: {e}")
-        #     result = None
 
-        # return result
-    
     def _extract_dag_structure(self) -> Dict[str, Any]:
         """
-        Extract subquery structure from the current DAG.
+        从当前 DAG 中提取子查询结构（使用反向映射优化 O(n×m) 查找为 O(1)）。
 
         Returns:
-            Dict with a list of subqueries.
+            包含 subqueries 列表的字典。
         """
+        # 预先构建 step_id → query_id 反向映射，避免嵌套循环 O(n×m) 查找
+        step_id_to_query_id: Dict[int, str] = {
+            sid: qid for qid, sid in self.query_id_mapping.items()
+        }
+
         subqueries = []
         for step_id in self.dag.topological_order():
             step = self.dag.steps[step_id]
-            
-            query_id = None
-            for qid, sid in self.query_id_mapping.items():
-                if sid == step_id:
-                    query_id = qid
-                    break
-            
-            if query_id is None:
-                query_id = f"q{step_id}"
-            
+
+            query_id = step_id_to_query_id.get(step_id, f"q{step_id}")
+
             depends_on = []
             parent_step_ids = self.dag.parents_of(step_id)
             for dep_step_id in parent_step_ids:
-                for qid, sid in self.query_id_mapping.items():
-                    if sid == dep_step_id:
-                        depends_on.append(qid)
-                        break
-            
-            subqueries.append({
-                "id": query_id,
-                "query": step.question,
-                "depends_on": depends_on,
-                "task_type": str(step.task_type) if step.task_type else None,
-                "algorithm": step.graph_algorithm
-            })
-        
+                dep_query_id = step_id_to_query_id.get(dep_step_id)
+                if dep_query_id:
+                    depends_on.append(dep_query_id)
+
+            subqueries.append(
+                {
+                    "id": query_id,
+                    "query": step.question,
+                    "depends_on": depends_on,
+                    "task_type": str(step.task_type) if step.task_type else None,
+                    "algorithm": step.graph_algorithm,
+                }
+            )
+
         return {"subqueries": subqueries}
-    
-    def _is_dag_changed(self, old_structure: Dict[str, Any], new_structure: Dict[str, Any]) -> bool:
+
+    def _is_dag_changed(
+        self, old_structure: Dict[str, Any], new_structure: Dict[str, Any]
+    ) -> bool:
         """
         Check whether the DAG structure has changed.
 
@@ -1713,18 +2004,18 @@ class Scheduler:
         """
         old_queries = old_structure.get("subqueries", [])
         new_queries = new_structure.get("subqueries", [])
-        
+
         if len(old_queries) != len(new_queries):
             return True
-        
+
         for old_q, new_q in zip(old_queries, new_queries):
             if old_q.get("query") != new_q.get("query"):
                 return True
             if set(old_q.get("depends_on", [])) != set(new_q.get("depends_on", [])):
                 return True
-        
+
         return False
-    
+
     def _refine_dag_with_retry(self, max_retries: int = 1) -> Dict[str, Any]:
         """
         Refine DAG with LLM to clarify task type boundaries.
@@ -1736,39 +2027,46 @@ class Scheduler:
             Refined DAG info.
         """
         logger.info("🔄 Starting DAG refinement...")
-        
+
         for retry_count in range(max_retries + 1):
             try:
                 current_dag_structure = self._extract_dag_structure()
-                
-                logger.info(f"📋 Current DAG structure (attempt {retry_count + 1}/{max_retries + 1}):")
-                logger.info(json.dumps(current_dag_structure, ensure_ascii=False, indent=2))
-                
-                refined_structure = self.reasoner.refine_subqueries(current_dag_structure)
-                
+
+                logger.info(
+                    f"📋 Current DAG structure (attempt {retry_count + 1}/{max_retries + 1}):"
+                )
+                logger.info(
+                    json.dumps(current_dag_structure, ensure_ascii=False, indent=2)
+                )
+
+                refined_structure = self.reasoner.refine_subqueries(
+                    current_dag_structure
+                )
+
                 logger.info("✅ LLM refined DAG:")
                 logger.info(json.dumps(refined_structure, ensure_ascii=False, indent=2))
-                
+
                 if self._is_dag_changed(current_dag_structure, refined_structure):
                     logger.info("🔄 DAG structure changed; rebuilding...")
-                    
+
                     self.build_dag_from_subquery_plan(refined_structure)
                     self._find_algorithm()
-                    
+
                     logger.info(f"✅ DAG refinement done (iteration {retry_count + 1})")
                 else:
                     logger.info("✅ DAG already refined; no further changes")
                     break
-                    
+
             except Exception as e:
-                logger.error(f"❌ DAG refinement failed (attempt {retry_count + 1}/{max_retries + 1}): {e}")
+                logger.error(
+                    f"❌ DAG refinement failed (attempt {retry_count + 1}/{max_retries + 1}): {e}"
+                )
                 if retry_count == max_retries:
                     logger.warning("⚠️ Max retries reached; continuing with current DAG")
                 continue
-        
+
         return self.dag.get_dag_info()
 
     async def shutdown(self):
         if self.computing_engine:
             await self.computing_engine.shutdown()
-        

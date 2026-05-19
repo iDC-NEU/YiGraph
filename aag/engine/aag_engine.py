@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Any, Union, Callable
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
-from aag.config.engine_config import EngineConfig   
+from aag.config.engine_config import EngineConfig
 from aag.engine.scheduler import Scheduler
 
 
@@ -37,32 +37,32 @@ class AAGEngine:
             "generation_time": [],
             "total_time": [],
             "retrieval_quality": [],
-            "generation_quality": []
+            "generation_quality": [],
         }
         self._init_scheduler()
-        
 
     def _init_scheduler(self):
         """Initialize the scheduler."""
         try:
-            self.scheduler = Scheduler(config = self.config)
+            self.scheduler = Scheduler(config=self.config)
             print("✓ Scheduler initialized")
         except Exception as e:
             print(f"✗ Scheduler initialization failed: {e}")
             raise
-    
+
     def _initialize_components(self):
-        """Initialize engine components."""
+        """初始化引擎组件（幂等：仅当 scheduler 未初始化时创建）。"""
+        if self.scheduler is not None:
+            return
         print("Initializing AAG components...")
         self._init_scheduler()
         print("Engine initialization completed!")
-    
 
     async def run(
         self,
         query: str,
         mode: str = "normal",
-        callback: Optional[Callable[[Dict[str, Any]], None]] = None
+        callback: Optional[Callable[[Dict[str, Any]], None]] = None,
     ) -> Union[str, Dict[str, Any]]:
         """
         Run a query (normal or expert mode).
@@ -78,7 +78,7 @@ class AAGEngine:
             Interact/expert: dict with dag_info, message, etc.
         """
         return await self.scheduler.execute(query, mode=mode, callback=callback)
-    
+
     async def expert_modify_dag(self, modification_request: str) -> Dict[str, Any]:
         """
         Expert mode: modify the DAG.
@@ -90,7 +90,7 @@ class AAGEngine:
             Dict with updated DAG info.
         """
         return await self.scheduler.expert_modify_dag(modification_request)
-    
+
     async def expert_start_analysis(self) -> str:
         """
         Expert mode: start analysis.
@@ -100,7 +100,6 @@ class AAGEngine:
         """
         return await self.scheduler.expert_start_analysis()
 
-        
     def list_datasets(self, dtype: Optional[str] = None) -> Dict[str, List[str]]:
         return self.scheduler.list_datasets(dtype)
 
@@ -113,31 +112,35 @@ class AAGEngine:
         self._current_dataset_type = dtype
         return result if result is not None else None
 
-
-    def _record_metrics(self, retrieval_time: float, generation_time: float, total_time: float):
+    def _record_metrics(
+        self, retrieval_time: float, generation_time: float, total_time: float
+    ):
         """Record performance metrics."""
         self.metrics["retrieval_time"].append(retrieval_time)
         self.metrics["generation_time"].append(generation_time)
         self.metrics["total_time"].append(total_time)
-    
+
     def get_performance_summary(self) -> Dict[str, Any]:
         """Return a performance summary."""
         if not self.metrics["total_time"]:
             return {"message": "No queries processed yet"}
-        
+
         return {
             "total_queries": len(self.metrics["total_time"]),
-            "avg_retrieval_time": sum(self.metrics["retrieval_time"]) / len(self.metrics["retrieval_time"]),
-            "avg_generation_time": sum(self.metrics["generation_time"]) / len(self.metrics["generation_time"]),
-            "avg_total_time": sum(self.metrics["total_time"]) / len(self.metrics["total_time"]),
-            "total_time": sum(self.metrics["total_time"])
+            "avg_retrieval_time": sum(self.metrics["retrieval_time"])
+            / len(self.metrics["retrieval_time"]),
+            "avg_generation_time": sum(self.metrics["generation_time"])
+            / len(self.metrics["generation_time"]),
+            "avg_total_time": sum(self.metrics["total_time"])
+            / len(self.metrics["total_time"]),
+            "total_time": sum(self.metrics["total_time"]),
         }
-    
+
     def clear_metrics(self):
         """Clear performance metrics."""
         for key in self.metrics:
             self.metrics[key].clear()
-     
+
     async def shutdown(self):
         """Shut down the engine and release resources."""
         print("Shutting down GraphLLM Engine...")

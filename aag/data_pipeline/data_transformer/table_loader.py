@@ -17,7 +17,12 @@ from aag.config.data_upload_config import *
 
 
 class TableDataLoader:
-    """Table data loader for structured tabular datasets."""
+    """
+    表格数据加载引擎（TableDataLoader），用于加载结构化表格数据集。
+
+    注意：核心方法（load_table_dataset 等）当前处于待实现状态。
+    调用未实现的方法将抛出 NotImplementedError 而非静默返回空值。
+    """
 
     def __init__(self, registry_path: Optional[str] = None):
         """
@@ -37,15 +42,17 @@ class TableDataLoader:
         Returns:
             dict: 已解析的注册表内容。
         """
-        pass
-
+        raise NotImplementedError(
+            "TableDataLoader._load_registry: YAML 注册表加载功能尚未实现"
+        )
 
     def list_datasets(self) -> List[str]:
         """
         列出当前注册表中所有表格数据集名称。
         """
-        # TODO: 遍历 self.registry_data["datasets"] 并返回 name 列表
-        return []
+        raise NotImplementedError(
+            "TableDataLoader.list_datasets: 数据集列表功能尚未实现"
+        )
 
     def get_dataset_info(self, name: str) -> Dict[str, Any]:
         """
@@ -56,8 +63,9 @@ class TableDataLoader:
         Returns:
             dict: 数据集定义信息。
         """
-        # TODO: 从 self.registry_data["datasets"] 中查找匹配 name 的项
-        return {}
+        raise NotImplementedError(
+            "TableDataLoader.get_dataset_info: 数据集信息查询功能尚未实现"
+        )
 
     def load_table_dataset(self, name: str) -> pd.DataFrame:
         """
@@ -68,12 +76,10 @@ class TableDataLoader:
         Returns:
             pd.DataFrame: 加载后的 DataFrame。
         """
-        # TODO:
-        # 1. 查找数据集定义
-        # 2. 读取文件路径
-        # 3. 根据格式调用 pandas 加载
-        # 4. 返回 DataFrame
-        return pd.DataFrame()
+        raise NotImplementedError(
+            "TableDataLoader.load_table_dataset: 表格数据集加载功能尚未实现。"
+            "需要完成: 1. 查找数据集定义 2. 读取文件路径 3. 调用 pandas 加载 4. 返回 DataFrame"
+        )
 
     # ==========================================================
     # 可扩展方法
@@ -83,8 +89,7 @@ class TableDataLoader:
         """
         预览前 n 行数据。
         """
-        # TODO: 调用 load_table_dataset(name) 然后返回 df.head(n)
-        return None
+        raise NotImplementedError("TableDataLoader.preview: 数据预览功能尚未实现")
 
     def register_new_dataset(self, dataset_info: Dict[str, Any]) -> None:
         """
@@ -93,18 +98,18 @@ class TableDataLoader:
         Args:
             dataset_info (dict): 数据集的配置项。
         """
-        # TODO:
-        # 1. 读取 YAML
-        # 2. 追加新的数据集配置
-        # 3. 保存回文件
-        pass
+        raise NotImplementedError(
+            "TableDataLoader.register_new_dataset: 数据集注册功能尚未实现。"
+            "需要完成: 1. 读取 YAML 2. 追加配置 3. 保存回文件"
+        )
 
     def validate_schema(self, dataset_info: Dict[str, Any]) -> bool:
         """
         校验数据集 schema 是否符合模板要求。
         """
-        # TODO: 读取 schema/table_schema_template.yaml 验证字段合法性
-        return True
+        raise NotImplementedError(
+            "TableDataLoader.validate_schema: Schema 校验功能尚未实现"
+        )
 
     # ==========================================================
     # 工具函数

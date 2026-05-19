@@ -12,7 +12,8 @@ llama_keyword_extract_prompt = (
     "---------------------\n"
     "question: {question}\n"
     "---------------------\n"
-    "KEYWORDS: ")
+    "KEYWORDS: "
+)
 llama_keyword_extract_prompt_template = PromptTemplate(
     llama_keyword_extract_prompt,
     prompt_type=PromptType.QUERY_KEYWORD_EXTRACT,
@@ -29,7 +30,8 @@ llama_synonym_expand_prompt = (
     "---------------------\n"
     "KEYWORDS: {question}\n"
     "---------------------\n"
-    "SYNONYMS: ")
+    "SYNONYMS: "
+)
 
 llama_synonym_expand_prompt_template = PromptTemplate(
     llama_synonym_expand_prompt,
@@ -88,7 +90,6 @@ gemma_synonym_expand_prompt = (
     "---------------------\n"
     "<end_of_turn>\n"
     "<start_of_turn>model\n"
-
     # "---------------------\n"
     # "KEYWORDS: {question}\n"
     # "---------------------\n"
@@ -179,8 +180,11 @@ gemma_keyword_extract_prompt_template = PromptTemplate(
 #     print(response)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # llm_env = OllamaEnv(llm_mode_name=args.llm, port=args.port)
     # llm_env = OllamaEnv(llm_mode_name='llama3:8b', 11435)
 
-    kg_prompt()
+    # TODO: kg_prompt() 函数定义已被注释（第149行），此处调用将引发 NameError。
+    #       如需恢复，请先取消函数定义的注释并确保依赖项可用。
+    # kg_prompt()
+    print("kg_prompt() 已被禁用 — 函数定义处于注释状态，请先实现后取消注释。")
