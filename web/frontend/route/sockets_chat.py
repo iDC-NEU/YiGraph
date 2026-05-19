@@ -3,14 +3,66 @@ import os
 import re
 import logging
 import asyncio
-from flask_socketio import emit
+from flask import request
+from flask_socketio import emit, disconnect
 from . import socketio
-# Add project path to import AAG services
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-from aag.api.async_runtime import get_background_loop, get_chat_service
 
+# Add project path to import AAG services
+sys.path.append(
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    )
+)
+from aag.api.async_runtime import get_background_loop, get_chat_service
+from aag.api.services.chat_service import CHAT_FRIENDLY_ERROR_MSG
 
 logger = logging.getLogger(__name__)
+
+# WebSocket 连接跟踪：记录活跃连接的 session ID
+_active_connections: set = set()
+
+
+@socketio.on("connect")
+def on_connect():
+    """WebSocket 连接认证：验证 token 后才允许连接"""
+    expected_token = os.getenv("YIGRAPH_WS_TOKEN", "")
+
+    # 未设置环境变量则跳过验证（开发环境兼容）
+    if not expected_token:
+        logger.warning(
+            "YIGRAPH_WS_TOKEN 未设置，WebSocket 连接跳过认证（仅建议开发环境使用）"
+        )
+        _active_connections.add(request.sid)
+        logger.info(
+            f"WebSocket 客户端已连接（无认证）: {request.sid}, 活跃连接数: {len(_active_connections)}"
+        )
+        return
+
+    # 从请求参数或 Header 中提取 token
+    token = request.args.get("token", "")
+    if not token:
+        token = request.headers.get("X-WS-Token", "")
+
+    if token != expected_token:
+        logger.warning(f"WebSocket 认证失败，拒绝连接: {request.sid}")
+        # 认证失败：拒绝连接并返回错误信息
+        disconnect()
+        return False
+
+    _active_connections.add(request.sid)
+    logger.info(
+        f"WebSocket 客户端已连接: {request.sid}, 活跃连接数: {len(_active_connections)}"
+    )
+
+
+@socketio.on("disconnect")
+def on_disconnect():
+    """WebSocket 断开连接：清理资源并记录"""
+    sid = request.sid
+    _active_connections.discard(sid)
+    logger.info(
+        f"WebSocket 客户端已断开: {sid}, 剩余活跃连接数: {len(_active_connections)}"
+    )
 
 
 def split_into_sentences(text: str, max_len: int = 80):
@@ -20,15 +72,17 @@ def split_into_sentences(text: str, max_len: int = 80):
     # Step 1: split by punctuation (CJK and Western)
     # (?<=[。！？\n])  after CJK punctuation or newline
     # (?<=[.!?]\s)     after period/question/exclamation + space
-    sentences = re.split(r'(?<=[。！？\n])|(?<=[.!?]\s)', text)
-    
+    sentences = re.split(r"(?<=[。！？\n])|(?<=[.!?]\s)", text)
+
     # Filter empty strings and strip whitespace
     sentences = [s.strip() for s in sentences if s.strip()]
-    
+
     # If no sentence boundaries found (e.g. long run-on text), split by paragraphs
     if len(sentences) <= 1:
         # Split by blank lines, then by single newlines
-        paragraphs = [p.strip() for p in text.replace('\n\n', '\n').split('\n') if p.strip()]
+        paragraphs = [
+            p.strip() for p in text.replace("\n\n", "\n").split("\n") if p.strip()
+        ]
         if len(paragraphs) > 1:
             sentences = paragraphs
 
@@ -36,39 +90,39 @@ def split_into_sentences(text: str, max_len: int = 80):
     def smart_split_long_sentence(sentence: str, max_len: int):
         if len(sentence) <= max_len:
             return [sentence]
-        
+
         result = []
         start = 0
         text_len = len(sentence)
-        
+
         while start < text_len:
             end = start + max_len
-            
+
             # Already at end, append remainder
             if end >= text_len:
                 result.append(sentence[start:].strip())
                 break
-            
+
             # Look backward from end for first space or CJK punctuation as split point
             split_pos = -1
             for i in range(end, max(start, end - 20), -1):
-                if sentence[i] in ' \t\n。！？,!?':
+                if sentence[i] in " \t\n。！？,!?":
                     split_pos = i
                     break
-            
+
             # No break character found, force split at max_len
             if split_pos == -1:
                 split_pos = end
-            
-            chunk = sentence[start:split_pos + 1].strip()
+
+            chunk = sentence[start : split_pos + 1].strip()
             if chunk:
                 result.append(chunk)
             start = split_pos + 1
-            
+
             # Guard against infinite loop
             if start >= text_len:
                 break
-                
+
         return result
 
     final = []
@@ -77,8 +131,9 @@ def split_into_sentences(text: str, max_len: int = 80):
             final.extend(smart_split_long_sentence(sent, max_len))
         else:
             final.append(sent)
-    
+
     return final if final else [text.strip()]
+
 
 def smart_split_markdown(text: str, max_len: int = 80):
     """
@@ -91,52 +146,54 @@ def smart_split_markdown(text: str, max_len: int = 80):
     # --- Layer 1: preserve code blocks ---
     # Split into [plain, code block, plain, code block, ...]
     # (```[\s\S]*?```) multi-line code, (`[^`\n]+`) inline code
-    parts = re.split(r'(```[\s\S]*?```|`[^`\n]+`)', text)
+    parts = re.split(r"(```[\s\S]*?```|`[^`\n]+`)", text)
 
     atoms = []
-    
+
     for part in parts:
         if not part:
             continue
-            
+
         # 1. Code block (starts with `): treat as single atom
-        if part.startswith('`'):
+        if part.startswith("`"):
             # Very long block: split by newlines for streaming
-            if len(part) > max_len and '\n' in part:
-                code_lines = part.split('\n')
+            if len(part) > max_len and "\n" in part:
+                code_lines = part.split("\n")
                 for idx, line in enumerate(code_lines):
-                    suffix = '\n' if idx < len(code_lines) - 1 else ''
+                    suffix = "\n" if idx < len(code_lines) - 1 else ""
                     atoms.append(line + suffix)
             else:
                 atoms.append(part)
-        
+
         # 2. Plain text: fine-grained split
         else:
             # Split by paragraph/newline first (important in Markdown)
-            lines = part.split('\n')
+            lines = part.split("\n")
             for i, line in enumerate(lines):
-                suffix = '\n' if i < len(lines) - 1 else ''
+                suffix = "\n" if i < len(lines) - 1 else ""
                 full_line = line + suffix
-                
+
                 if not line.strip():
                     atoms.append(full_line)
                     continue
 
                 # Split by sentence punctuation within line
-                sub_parts = re.split(r'([。！？]|(?<=[.!?])\s)', line)
-                
+                sub_parts = re.split(r"([。！？]|(?<=[.!?])\s)", line)
+
                 current_sent = ""
                 for sub in sub_parts:
                     current_sent += sub
-                    if sub in ['。', '！', '？'] or (sub.strip() == '' and len(current_sent) > 0):
+                    if sub in ["。", "！", "？"] or (
+                        sub.strip() == "" and len(current_sent) > 0
+                    ):
                         atoms.append(current_sent)
                         current_sent = ""
-                    elif len(current_sent) > 0 and current_sent[-1] in '.!?':
-                         pass
-                
+                    elif len(current_sent) > 0 and current_sent[-1] in ".!?":
+                        pass
+
                 if current_sent:
                     atoms.append(current_sent)
-                
+
                 if suffix:
                     if atoms:
                         atoms[-1] += suffix
@@ -162,7 +219,7 @@ def smart_split_markdown(text: str, max_len: int = 80):
     return final_chunks
 
 
-@socketio.on('chat_request')
+@socketio.on("chat_request")
 def handle_chat_request(data):
     """WebSocket chat handler: receive user message, push streaming results."""
     # 1. Parse parameters
@@ -170,26 +227,36 @@ def handle_chat_request(data):
         user_message = str(data.get("message") or "").strip()
         selected_model = str(data.get("model") or "")
         dag_confirm = str(data.get("dag_confirm") or "").strip()
-        is_dag_modification = str(data.get("is_dag_modification", "false")).lower() == "true"
+        is_dag_modification = (
+            str(data.get("is_dag_modification", "false")).lower() == "true"
+        )
         dag_id = str(data.get("dag_id") or "")
         modifications = data.get("modifications", "")  # may be str or other
         expert_mode = data.get("expert_mode", False)
         dataset = str(data.get("dataset") or "").strip()  # dataset name from frontend
         _dtype = data.get("dataset_type") or data.get("file_type")
-        dataset_type = str(_dtype).strip() if _dtype else None  # "text" | "graph" | None
+        dataset_type = (
+            str(_dtype).strip() if _dtype else None
+        )  # "text" | "graph" | None
         custom_mode = data.get("mode")
     except Exception as e:
         logger.error(f"Failed to parse parameters: {e}")
-        emit('chat_response', {"error": "Invalid request format. Please check parameters."})
+        emit(
+            "chat_response",
+            {"error": "Invalid request format. Please check parameters."},
+        )
         return
 
     # 2. Validation
     if not user_message and not dag_confirm and not is_dag_modification:
-        emit('chat_response', {"error": "Message content cannot be empty."})
+        emit("chat_response", {"error": "Message content cannot be empty."})
         return
 
     if not dataset:
-        emit('chat_response', {"error": "Dataset is empty. Please specify a dataset first."})
+        emit(
+            "chat_response",
+            {"error": "Dataset is empty. Please specify a dataset first."},
+        )
         return
 
     try:
@@ -199,15 +266,19 @@ def handle_chat_request(data):
         # Callback to send streaming data (called from background event loop thread)
         def send_response(data_chunk):
             """Send response data to frontend."""
-            socketio.emit('chat_response', data_chunk)
+            socketio.emit("chat_response", data_chunk)
 
         # Determine mode
         if custom_mode == "interact":
             mode = "interact"
         else:
             mode = "expert" if expert_mode else "normal"
-        logger.info(f"WS request: model={selected_model}, dataset={dataset}, message={user_message[:20]}..., expertMode={expert_mode}, mode={mode}")
-        print(f"WS request: model={selected_model}, dataset={dataset}, message={user_message[:20]}..., expertMode={expert_mode}, mode={mode}")
+        logger.info(
+            f"WS request: model={selected_model}, dataset={dataset}, message={user_message[:20]}..., expertMode={expert_mode}, mode={mode}"
+        )
+        print(
+            f"WS request: model={selected_model}, dataset={dataset}, message={user_message[:20]}..., expertMode={expert_mode}, mode={mode}"
+        )
 
         async def process_request():
             try:
@@ -219,41 +290,53 @@ def handle_chat_request(data):
 
                     if result.get("success"):
                         result_text = result.get("result", "")
-                        paragraphs = [p.strip() for p in result_text.split('\n') if p.strip()]
+                        paragraphs = [
+                            p.strip() for p in result_text.split("\n") if p.strip()
+                        ]
                         for i, para in enumerate(paragraphs):
-                            send_response({
-                                'type': 'result',
-                                'contentType': 'text',
-                                'content': para
-                            })
-                            await asyncio.sleep(0.5 if i < len(paragraphs)-1 else 0.3)
+                            send_response(
+                                {
+                                    "type": "result",
+                                    "contentType": "text",
+                                    "content": para,
+                                }
+                            )
+                            await asyncio.sleep(0.5 if i < len(paragraphs) - 1 else 0.3)
                     else:
-                        send_response({
-                            'error': result.get("error", "Analysis execution failed.")
-                        })
-                    send_response({'type': 'stream_end'})
+                        send_response(
+                            {"error": result.get("error", "Analysis execution failed.")}
+                        )
+                    send_response({"type": "stream_end"})
                     return
 
                 if is_dag_modification or (dag_confirm == "no" and modifications):
                     engine = chat_service.engine_service.get_engine()
                     engine.specific_dataset(dataset, dataset_type)
                     modification_request = modifications or user_message
-                    logger.info(f"DAG modification request received: {modification_request}")
+                    logger.info(
+                        f"DAG modification request received: {modification_request}"
+                    )
 
-                    result = await chat_service.process_dag_modification(modification_request)
+                    result = await chat_service.process_dag_modification(
+                        modification_request
+                    )
 
                     if result.get("success"):
-                        dag_content = chat_service._convert_dag_to_frontend_format(result)
-                        send_response({
-                            'type': 'result',
-                            'contentType': 'dag',
-                            'content': dag_content
-                        })
+                        dag_content = chat_service._convert_dag_to_frontend_format(
+                            result
+                        )
+                        send_response(
+                            {
+                                "type": "result",
+                                "contentType": "dag",
+                                "content": dag_content,
+                            }
+                        )
                     else:
-                        send_response({
-                            'error': result.get("error", "DAG modification failed.")
-                        })
-                    send_response({'type': 'stream_end'})
+                        send_response(
+                            {"error": result.get("error", "DAG modification failed.")}
+                        )
+                    send_response({"type": "stream_end"})
                     return
 
                 # Normal chat request — streaming (stream_end is sent internally)
@@ -265,12 +348,18 @@ def handle_chat_request(data):
                     dataset_type=dataset_type,
                     mode=mode,
                     expert_mode=expert_mode,
-                    callback=send_response
+                    callback=send_response,
                 )
             except Exception as exc:
                 logger.error(f"Background processing failed: {exc}", exc_info=True)
-                send_response({'type': 'result', 'contentType': 'text', 'content': CHAT_FRIENDLY_ERROR_MSG})
-                send_response({'type': 'stream_end'})
+                send_response(
+                    {
+                        "type": "result",
+                        "contentType": "text",
+                        "content": CHAT_FRIENDLY_ERROR_MSG,
+                    }
+                )
+                send_response({"type": "stream_end"})
 
         future = asyncio.run_coroutine_threadsafe(process_request(), loop)
         future.result()
@@ -280,5 +369,12 @@ def handle_chat_request(data):
     except Exception as e:
         error_msg = f"Processing failed: {str(e)}"
         logger.error(error_msg, exc_info=True)
-        emit('chat_response', {'type': 'result', 'contentType': 'text', 'content': CHAT_FRIENDLY_ERROR_MSG})
-        emit('chat_response', {'type': 'stream_end'})
+        emit(
+            "chat_response",
+            {
+                "type": "result",
+                "contentType": "text",
+                "content": CHAT_FRIENDLY_ERROR_MSG,
+            },
+        )
+        emit("chat_response", {"type": "stream_end"})
