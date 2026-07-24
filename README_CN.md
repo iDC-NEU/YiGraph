@@ -17,7 +17,10 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
   <a href="http://iDC-NEU.github.io/YiGraphDocs/"><img src="https://img.shields.io/badge/📚-用户文档-purple.svg" alt="Docs"></a>
-  <a href="#-联系我们"><img src="https://img.shields.io/badge/📞-联系我们-green.svg" alt="Contact"></a>
+  <a href="figure/wechat.jpg"><img src="https://img.shields.io/badge/-%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7-07C160.svg?logo=wechat&logoColor=white" alt="微信公众号"></a>
+  <a href="figure/wechat_group.png"><img src="https://img.shields.io/badge/-%E5%BE%AE%E4%BF%A1%E7%BE%A4-07C160.svg?logo=wechat&logoColor=white" alt="微信群"></a>
+  <a href="figure/rednote.png"><img src="https://img.shields.io/badge/-%E5%B0%8F%E7%BA%A2%E4%B9%A6-FF2442.svg?logo=xiaohongshu&logoColor=white" alt="小红书"></a>
+  <a href="https://x.com/idcneu"><img src="https://img.shields.io/badge/-%40idcneu-000000.svg?logo=x&logoColor=white" alt="在 X 上关注 @idcneu"></a>
 </p>
 
 [English](README.md) | 简体中文
@@ -440,33 +443,6 @@ python aag/main.py
 - **API 参考**：完整的 API 接口文档
 - **最佳实践**：典型场景的分析案例和经验总结
 
-## 📞 联系我们
-
-
-### 贡献指南
-
-我们欢迎各种形式的贡献：
-
-- 🐛 报告 Bug
-- 💡 提出新功能建议
-- 📝 改进文档
-- 🔧 提交代码
-
-
-### 社区交流
-
-
-
-<div align="center">
-
-| 微信 | 小红书 | Twitter |
-|:---:|:---:|:---:|
-| <img src="figure/wechat.png" alt="微信" width="200"/> | <img src="figure/redbook.png" alt="小红书" width="200"/> | <img src="figure/twitter.png" alt="Twitter" width="200"/> |
-
-</div>
-
-
-
 ---
 
 ## 📚 引用
@@ -509,8 +485,3 @@ python aag/main.py
 </div>
 
 ---
-
-
-
-
-

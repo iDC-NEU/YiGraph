@@ -17,7 +17,10 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
   <a href="http://iDC-NEU.github.io/YiGraphDocs/"><img src="https://img.shields.io/badge/📚-Docs-purple.svg" alt="Docs"></a>
-  <a href="#-contact-us"><img src="https://img.shields.io/badge/📞-Contact_Us-green.svg" alt="Contact"></a>
+  <a href="figure/wechat.jpg"><img src="https://img.shields.io/badge/-WeChat_Official_Account-07C160.svg?logo=wechat&logoColor=white" alt="WeChat Official Account"></a>
+  <a href="figure/wechat_group.png"><img src="https://img.shields.io/badge/-WeChat_Group-07C160.svg?logo=wechat&logoColor=white" alt="WeChat Group"></a>
+  <a href="figure/rednote.png"><img src="https://img.shields.io/badge/-Xiaohongshu-FF2442.svg?logo=xiaohongshu&logoColor=white" alt="Xiaohongshu"></a>
+  <a href="https://x.com/idcneu"><img src="https://img.shields.io/badge/-%40idcneu-000000.svg?logo=x&logoColor=white" alt="Follow @idcneu on X"></a>
 </p>
 
 English | [简体中文](README_CN.md)
@@ -441,34 +444,6 @@ Documentation includes:
 
 
 
-## 📞 Contact Us
-
-
-
-### Contribution Guidelines
-
-We welcome all forms of contributions:
-
-- 🐛 Report Bugs
-- 💡 Suggest New Features
-- 📝 Improve Documentation
-- 🔧 Submit Code
-
-
-### Community Communication
-
-
-
-<div align="center">
-
-| WeChat | Xiaohongshu | Twitter |
-|:---:|:---:|:---:|
-| <img src="figure/wechat.png" alt="WeChat" width="200"/> | <img src="figure/redbook.png" alt="Xiaohongshu" width="200"/> | <img src="figure/twitter.png" alt="Twitter" width="200"/> |
-
-</div>
-
-
-
 ---
 
 ## 📚 Citation
@@ -511,7 +486,3 @@ This project is licensed under the [MIT License](LICENSE).
 </div>
 
 ---
-
-
-
-
