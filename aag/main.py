@@ -18,9 +18,7 @@ from aag.utils.path_utils import DEFAULT_CONFIG_PATH
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d - %(funcName)s(): %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
+    handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger(__name__)
 
@@ -36,10 +34,10 @@ GRAY = "\033[90m"
 def get_user_prompt(current_mode: str) -> str:
     """
     根据当前模式生成用户输入提示符
-    
+
     Args:
         current_mode: 当前模式 "normal" | "interact" | "expert"
-    
+
     Returns:
         格式化的提示符字符串
     """
@@ -54,9 +52,9 @@ def print_dag_info(dag_info: Dict[str, Any]) -> None:
     """打印DAG信息（格式化输出）"""
     if not dag_info:
         return
-    
+
     print("\n📊 --- DAG 信息 ---")
-    
+
     # 打印子查询计划
     if "subquery_plan" in dag_info:
         plan = dag_info["subquery_plan"]
@@ -64,68 +62,85 @@ def print_dag_info(dag_info: Dict[str, Any]) -> None:
             print("\n子查询列表：")
             for i, subq in enumerate(plan["subqueries"], 1):
                 print(f"  {i}. [{subq.get('id', '?')}] {subq.get('query', '')}")
-                deps = subq.get('depends_on', [])
+                deps = subq.get("depends_on", [])
                 if deps:
                     print(f"     依赖: {', '.join(deps)}")
-    
+
     # 打印步骤信息
     if "steps" in dag_info:
         print("\n步骤详情：")
         for step_id, step_info in dag_info["steps"].items():
             print(f"  [{step_id}] {step_info.get('question', '')}")
-            if step_info.get('algorithm'):
+            if step_info.get("algorithm"):
                 print(f"      算法: {step_info['algorithm']}")
-            if step_info.get('task_type'):
+            if step_info.get("task_type"):
                 print(f"      类型: {step_info['task_type']}")
-    
+
     # 打印拓扑顺序
     if "topological_order" in dag_info:
         order = dag_info["topological_order"]
         print(f"\n执行顺序: {' → '.join(order)}")
-    
+
     print("-" * 74)
 
 
 def parse_arguments():
     """解析命令行参数"""
-    parser = argparse.ArgumentParser(description="Analytics Augmented Generation Engine - 端到端分析增强生成框架")
-    
+    parser = argparse.ArgumentParser(
+        description="Analytics Augmented Generation Engine - 端到端分析增强生成框架"
+    )
+
     # 基础配置
-    parser.add_argument("--mode", choices=["interactive", "batch", "process"], 
-                       default="interactive", help="运行模式")
+    parser.add_argument(
+        "--mode",
+        choices=["interactive", "batch", "process"],
+        default="interactive",
+        help="运行模式",
+    )
     parser.add_argument("--config", type=str, help="配置文件路径")
-    
+
     # 数据库配置
-    parser.add_argument("--graph-space", type=str, default="graph_space",
-                       help="图数据库空间名称")
-    parser.add_argument("--vector-collection", type=str, default="vector_collection",
-                       help="向量数据库集合名称")
-    
+    parser.add_argument(
+        "--graph-space", type=str, default="graph_space", help="图数据库空间名称"
+    )
+    parser.add_argument(
+        "--vector-collection",
+        type=str,
+        default="vector_collection",
+        help="向量数据库集合名称",
+    )
+
     # 模型配置
-    parser.add_argument("--llm-model", type=str, default="llama3.1:70b",
-                       help="LLM模型名称")
-    parser.add_argument("--embedding-model", type=str, default="BAAI/bge-large-en-v1.5",
-                       help="嵌入模型名称")
-    parser.add_argument("--llm-type", choices=["ollama", "openai"], default="ollama",
-                       help="LLM类型")
-    
+    parser.add_argument(
+        "--llm-model", type=str, default="llama3.1:70b", help="LLM模型名称"
+    )
+    parser.add_argument(
+        "--embedding-model",
+        type=str,
+        default="BAAI/bge-large-en-v1.5",
+        help="嵌入模型名称",
+    )
+    parser.add_argument(
+        "--llm-type", choices=["ollama", "openai"], default="ollama", help="LLM类型"
+    )
+
     # 设备配置
-    parser.add_argument("--llm-device", type=str, default="cuda:0",
-                       help="LLM设备")
-    parser.add_argument("--embed-device", type=str, default="cuda:0",
-                       help="嵌入模型设备")
-    
+    parser.add_argument("--llm-device", type=str, default="cuda:0", help="LLM设备")
+    parser.add_argument(
+        "--embed-device", type=str, default="cuda:0", help="嵌入模型设备"
+    )
+
     # RAG配置
-    parser.add_argument("--graph-k-hop", type=int, default=2,
-                       help="图遍历跳数")
-    parser.add_argument("--vector-k-similarity", type=int, default=5,
-                       help="向量相似度检索数量")
-    
+    parser.add_argument("--graph-k-hop", type=int, default=2, help="图遍历跳数")
+    parser.add_argument(
+        "--vector-k-similarity", type=int, default=5, help="向量相似度检索数量"
+    )
+
     # 输入输出
     parser.add_argument("--input-file", type=str, help="输入文件路径")
     parser.add_argument("--output-file", type=str, help="输出文件路径")
     parser.add_argument("--questions", nargs="+", help="问题列表")
-    
+
     return parser.parse_args()
 
 
@@ -144,11 +159,11 @@ async def interactive_mode(engine: AAGEngine):
         try:
             question = input(f"\n{get_user_prompt(current_mode)}").strip()
 
-            if question.lower() in ['quit', 'exit', 'q']:
+            if question.lower() in ["quit", "exit", "q"]:
                 print("🐾 AAG小助手退下喵~ 再见! (ฅ'ω'ฅ)")
                 break
 
-            elif question.lower().startswith('mode '):
+            elif question.lower().startswith("mode "):
                 mode_arg = question[5:].strip().lower()
                 if mode_arg in ["normal", "interact", "expert"]:
                     old_mode = current_mode
@@ -161,14 +176,18 @@ async def interactive_mode(engine: AAGEngine):
                         elif current_mode == "interact":
                             print("   提示：生成DAG后可 modify/start 交互调整")
                         else:
-                            print("   提示：输入自然语言专家指令，系统会构建DAG并校验算法边界")
+                            print(
+                                "   提示：输入自然语言专家指令，系统会构建DAG并校验算法边界"
+                            )
                     print("-" * 74)
                 else:
-                    print("⚠️ 无效模式，请使用 'mode normal' / 'mode interact' / 'mode expert'")
+                    print(
+                        "⚠️ 无效模式，请使用 'mode normal' / 'mode interact' / 'mode expert'"
+                    )
                     print("-" * 74)
                 continue
 
-            elif question.lower() == 'stats':
+            elif question.lower() == "stats":
                 response = engine.get_performance_summary()
                 print("\n📊 --- 性能统计 ---")
                 for key, value in response.items():
@@ -176,31 +195,33 @@ async def interactive_mode(engine: AAGEngine):
                 print("-" * 74)
                 continue
 
-            elif question.lower() in ['datasets', 'list', 'list datasets']:
+            elif question.lower() in ["datasets", "list", "list datasets"]:
                 try:
                     ds_map = engine.list_datasets()
                     print("\n📁 --- 可用数据集 ---")
                     for dtype, names in ds_map.items():
-                        print(f"{dtype} ({len(names)}): {', '.join(names) if names else '(empty)'}")
+                        print(
+                            f"{dtype} ({len(names)}): {', '.join(names) if names else '(empty)'}"
+                        )
                     print("-" * 74)
                 except Exception as e:
                     print(f"⚠️ 列出数据集失败: {e}")
                     print("-" * 74)
                 continue
 
-            elif question.lower().startswith('use '):
+            elif question.lower().startswith("use "):
                 cmd = question[4:].strip()
                 dtype = None
                 name = cmd
 
-                if ':' in cmd:
-                    parts = cmd.split(':', 1)
+                if ":" in cmd:
+                    parts = cmd.split(":", 1)
                     if len(parts) == 2:
                         dtype, name = parts[0].strip(), parts[1].strip()
                 else:
                     toks = cmd.split()
                     if len(toks) >= 2:
-                        name = ' '.join(toks[:-1]).strip()
+                        name = " ".join(toks[:-1]).strip()
                         dtype = toks[-1].strip()
 
                 try:
@@ -209,7 +230,10 @@ async def interactive_mode(engine: AAGEngine):
                         scope = dtype if dtype else "graph/table/text"
                         print(f"❌ 未找到数据集: '{name}' (搜索范围: {scope})")
                     else:
-                        print(f"✅ 已选择数据集: {name}" + (f" ({dtype})" if dtype else ""))
+                        print(
+                            f"✅ 已选择数据集: {name}"
+                            + (f" ({dtype})" if dtype else "")
+                        )
                     dag_built = False
                     print("-" * 74)
                 except Exception as e:
@@ -217,13 +241,17 @@ async def interactive_mode(engine: AAGEngine):
                     print("-" * 74)
                 continue
 
-            elif question.lower() in ['help', 'h']:
+            elif question.lower() in ["help", "h"]:
                 print("\n📌 === 帮助菜单 ===")
                 print("通用命令：")
                 print("  📊 stats                                显示性能统计")
                 print("  📁 datasets | list                      列出所有可用数据集")
-                print("  🗂 use <name>                           选定数据集 (自动推断类型)")
-                print("  🗂 use <name> <dtype>                   指定类型 (graph/table/text)")
+                print(
+                    "  🗂 use <name>                           选定数据集 (自动推断类型)"
+                )
+                print(
+                    "  🗂 use <name> <dtype>                   指定类型 (graph/table/text)"
+                )
                 print("  🗂 use <dtype>:<name>                   dtype:name 形式选择")
                 print("  🔄 mode normal|interact|expert          切换执行模式")
                 print("  ❓ help | h                             显示帮助")
@@ -236,13 +264,17 @@ async def interactive_mode(engine: AAGEngine):
 
                 if current_mode == "expert":
                     print("\n专家模式输入示例：")
-                    print("  自然语言: 先找节点23所在社区，再在社区里用pagerank找前10个关键节点")
+                    print(
+                        "  自然语言: 先找节点23所在社区，再在社区里用pagerank找前10个关键节点"
+                    )
 
                 print(f"\n当前模式: {mode_label[current_mode]}模式")
                 print("\n问题前缀示例：")
                 print("  normal: 找出节点45的社区")
                 print("  interact: 找出节点45的社区")
-                print("  expert: 先找节点23所在社区，再在社区里用pagerank找前10关键节点")
+                print(
+                    "  expert: 先找节点23所在社区，再在社区里用pagerank找前10关键节点"
+                )
                 print("-" * 74)
                 continue
 
@@ -270,7 +302,9 @@ async def interactive_mode(engine: AAGEngine):
                 current_mode = question_mode
                 dag_built = False
 
-            if current_mode == "interact" and actual_question.lower().startswith("modify "):
+            if current_mode == "interact" and actual_question.lower().startswith(
+                "modify "
+            ):
                 if not dag_built:
                     print("⚠️ 请先输入问题生成DAG")
                     continue
@@ -286,7 +320,7 @@ async def interactive_mode(engine: AAGEngine):
                         print(f"❌ {result['error']}")
                     else:
                         print(f"✅ {result.get('message', 'DAG已更新')}")
-                        print_dag_info(result.get('dag_info', {}))
+                        print_dag_info(result.get("dag_info", {}))
                         print("\n请选择下一步操作：")
                         print("  🔧 modify <request>  修改DAG")
                         print("  ▶️  start            开始分析")
@@ -296,7 +330,11 @@ async def interactive_mode(engine: AAGEngine):
                 print("-" * 74)
                 continue
 
-            if current_mode in {"interact", "expert"} and actual_question.lower() in ['start', 'analyze', '开始分析']:
+            if current_mode in {"interact", "expert"} and actual_question.lower() in [
+                "start",
+                "analyze",
+                "开始分析",
+            ]:
                 if not dag_built:
                     print("⚠️ 请先输入问题生成DAG")
                     continue
@@ -326,7 +364,7 @@ async def interactive_mode(engine: AAGEngine):
                         dag_built = False
                     else:
                         print(f"✅ {result.get('message', 'DAG已生成')}")
-                        print_dag_info(result.get('dag_info', {}))
+                        print_dag_info(result.get("dag_info", {}))
                         print("\n请选择下一步操作：")
                         print("  🔧 modify <request>  修改DAG")
                         print("  ▶️  start            开始分析")
@@ -344,19 +382,23 @@ async def interactive_mode(engine: AAGEngine):
                     dag_built = False
                 else:
                     print(f"✅ {result.get('message', '专家DAG处理完成')}")
-                    print_dag_info(result.get('dag_info', {}))
+                    print_dag_info(result.get("dag_info", {}))
 
                     validation = result.get("algorithm_validation", {})
                     unsupported = validation.get("unsupported_algorithms", [])
                     if unsupported:
                         print("\n⚠️ 以下算法不在算法库中：")
                         for item in unsupported:
-                            print(f"  - {item.get('query_id')}: {item.get('requested_algorithm')}")
+                            print(
+                                f"  - {item.get('query_id')}: {item.get('requested_algorithm')}"
+                            )
                             suggestions = item.get("suggestions") or []
                             if suggestions:
                                 print(f"    建议: {', '.join(suggestions)}")
 
-                    instruction_adjustments = validation.get("instruction_algorithm_adjustments", [])
+                    instruction_adjustments = validation.get(
+                        "instruction_algorithm_adjustments", []
+                    )
                     if instruction_adjustments:
                         print("\nℹ️ 专家指令算法替换说明：")
                         for item in instruction_adjustments:
@@ -389,35 +431,38 @@ async def interactive_mode(engine: AAGEngine):
             print(f"⚠️ 处理分析时出错: {e}")
 
 
-def batch_mode(engine: AAGEngine, questions: List[str], output_file: Optional[str] = None):
-    """批处理模式"""
+async def batch_mode(
+    engine: AAGEngine, questions: List[str], output_file: Optional[str] = None
+):
+    """批处理模式（异步）"""
     print(f"=== AAG Pipeline 批处理模式 ===")
     print(f"处理 {len(questions)} 个问题")
-    
+
     results = []
-    
+
     for i, question in enumerate(questions, 1):
         print(f"\n处理问题 {i}/{len(questions)}: {question}")
-        
+
         try:
-            result = engine.run(question)
+            result = await engine.run(question)
             results.append(result)
-            
-            
+
         except Exception as e:
             print(f"✗ 处理失败: {e}")
-            results.append({
-                "question": question,
-                "raise error": f"处理失败: {e}",
-            })
-    
+            results.append(
+                {
+                    "question": question,
+                    "raise error": f"处理失败: {e}",
+                }
+            )
+
     # 输出结果
     if output_file:
         import json
-        with open(output_file, 'w', encoding='utf-8') as f:
+
+        with open(output_file, "w", encoding="utf-8") as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
         print(f"\n结果已保存到: {output_file}")
-    
 
 
 async def main():
@@ -429,7 +474,9 @@ async def main():
             raise FileNotFoundError(f"默认配置文件未找到: {config_path}")
 
         print(f"{CYAN}\n{'=' * 74}{RESET}")
-        print(f"{BOLD} 🧠  欢迎使用 AAG 智能分析系统  (Analytics Augmented Generation Engine) {RESET}")
+        print(
+            f"{BOLD} 🧠  欢迎使用 AAG 智能分析系统  (Analytics Augmented Generation Engine) {RESET}"
+        )
         print(f"{CYAN}{'=' * 74}{RESET}")
         print(f" 配置文件: {config_path}")
         print(f" 启动时间 : {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -452,7 +499,9 @@ async def main():
         if mode == "interactive":
             print(f"{BOLD}💬 当前运行模式：交互模式 (Interactive Mode){RESET}")
             print("-" * 74)
-            print(" 输入问题按 Enter 分析；命令：stats | datasets | use <name> [dtype] | mode | help | quit")
+            print(
+                " 输入问题按 Enter 分析；命令：stats | datasets | use <name> [dtype] | mode | help | quit"
+            )
             print(" 支持 normal / interact / expert 三种模式，使用 'mode <name>' 切换")
             print(f"{CYAN}{'=' * 74}{RESET}")
             # interactive_mode(engine)
@@ -467,9 +516,11 @@ async def main():
             questions = config.get("questions")
             output_file = config.get("output_file", "results.json")
             if not questions:
-                print(f"{YELLOW}错误：批处理模式需要在配置文件中提供 'questions' 字段{RESET}")
+                print(
+                    f"{YELLOW}错误：批处理模式需要在配置文件中提供 'questions' 字段{RESET}"
+                )
                 return 1
-            batch_mode(engine, questions, output_file)
+            await batch_mode(engine, questions, output_file)
 
         else:
             print(f"{YELLOW}❌ 未知的运行模式: {mode}{RESET}")
@@ -486,17 +537,17 @@ async def main():
     return 0
 
 
-def main_delay():
-    """主函数"""
+async def main_delay():
+    """主函数（异步）"""
     args = parse_arguments()
-    
+
     try:
         # 创建配置 - 优先从配置文件读取，否则使用命令行参数
         if args.config:
             print(f"从配置文件加载配置: {args.config}")
             config = load_config_from_yaml(args.config)
         else:
-            # TODO(chaoyi): 数过多， llm 现在不支持通过命令行适配 可选的llm，后期需要修正 
+            # TODO(chaoyi): 数过多， llm 现在不支持通过命令行适配 可选的llm，后期需要修正
             print("使用命令行参数创建配置")
             config = create_engine_config(
                 graph_space_name=args.graph_space,
@@ -507,30 +558,30 @@ def main_delay():
                 ollama_device=args.llm_device,
                 embed_device=args.embed_device,
                 graph_k_hop=args.graph_k_hop,
-                vector_k_similarity=args.vector_k_similarity
+                vector_k_similarity=args.vector_k_similarity,
             )
-        
+
         # 初始化Engine
         print("正在初始化 AAG Engine...")
         engine = AAGEngine(config)
         print("✓ Engine 初始化完成")
-        
+
         # 根据模式运行
         if args.mode == "interactive":
-            interactive_mode(engine)
+            await interactive_mode(engine)
         elif args.mode == "batch":
             if not args.questions:
                 print("批处理模式需要提供问题列表，使用 --questions 参数")
                 return
-            batch_mode(engine, args.questions, args.output_file)
-        
+            await batch_mode(engine, args.questions, args.output_file)
+
         # 清理资源
-        engine.shutdown()
-        
+        await engine.shutdown()
+
     except Exception as e:
         print(f"运行出错: {e}")
         return 1
-    
+
     return 0
 
 
