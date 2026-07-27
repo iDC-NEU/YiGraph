@@ -5,10 +5,12 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 from neo4j import GraphDatabase
 from neo4j.exceptions import ClientError, DatabaseError, TransientError
+import os
 import re
 import time
 
 JsonDict = Dict[str, Any]
+
 
 @dataclass
 class Neo4jConfig:
@@ -33,10 +35,33 @@ class Neo4jGraphClient:
 
     # Neo4j reserved keywords (partial list)
     RESERVED_KEYWORDS = {
-        'MATCH', 'RETURN', 'WHERE', 'CREATE', 'DELETE', 'SET', 
-        'MERGE', 'WITH', 'UNWIND', 'CASE', 'WHEN', 'THEN', 
-        'ELSE', 'END', 'ORDER', 'BY', 'SKIP', 'LIMIT', 'AS',
-        'AND', 'OR', 'NOT', 'IN', 'IS', 'NULL', 'TRUE', 'FALSE'
+        "MATCH",
+        "RETURN",
+        "WHERE",
+        "CREATE",
+        "DELETE",
+        "SET",
+        "MERGE",
+        "WITH",
+        "UNWIND",
+        "CASE",
+        "WHEN",
+        "THEN",
+        "ELSE",
+        "END",
+        "ORDER",
+        "BY",
+        "SKIP",
+        "LIMIT",
+        "AS",
+        "AND",
+        "OR",
+        "NOT",
+        "IN",
+        "IS",
+        "NULL",
+        "TRUE",
+        "FALSE",
     }
 
     def __init__(self, config: Neo4jConfig):
@@ -47,11 +72,11 @@ class Neo4jGraphClient:
             config: Neo4j connection settings.
         """
         self._driver = GraphDatabase.driver(
-            config.uri, 
+            config.uri,
             auth=(config.user, config.password),
             max_connection_lifetime=3600,  # Max connection lifetime: 1 hour
-            max_connection_pool_size=50,    # Connection pool size
-            connection_acquisition_timeout=60.0  # Connection acquisition timeout (seconds)
+            max_connection_pool_size=50,  # Connection pool size
+            connection_acquisition_timeout=60.0,  # Connection acquisition timeout (seconds)
         )
         self._db = config.database
 
@@ -76,7 +101,7 @@ class Neo4jGraphClient:
         *,
         read: bool = True,
         max_retries: int = 3,
-        show_query: bool = True
+        show_query: bool = True,
     ) -> List[JsonDict]:
         """
         Run a Cypher query with automatic retries on transient failures.
@@ -95,11 +120,11 @@ class Neo4jGraphClient:
             RuntimeError: Query failed after retries or on non-transient errors.
         """
         params = params or {}
-        
+
         # Optionally print filled query (debug)
         if show_query:
             self._print_filled_query(cypher, params)
-        
+
         # Retry loop
         for attempt in range(max_retries):
             try:
@@ -112,7 +137,7 @@ class Neo4jGraphClient:
                         return session.write_transaction(
                             lambda tx: [r.data() for r in tx.run(cypher, params)]
                         )
-            
+
             except TransientError as e:
                 # Transient error: retry
                 if attempt == max_retries - 1:
@@ -120,17 +145,17 @@ class Neo4jGraphClient:
                         f"Neo4j TransientError after {max_retries} retries: {e}\n"
                         f"Cypher: {cypher}\nParams: {params}"
                     ) from e
-                
-                wait_time = 2 ** attempt  # Exponential backoff
-                print(f"⚠️  TransientError, retrying in {wait_time}s ({attempt + 1}/{max_retries})...")
+
+                wait_time = 2**attempt  # Exponential backoff
+                print(
+                    f"⚠️  TransientError, retrying in {wait_time}s ({attempt + 1}/{max_retries})..."
+                )
                 time.sleep(wait_time)
-            
+
             except (ClientError, DatabaseError) as e:
                 # Client or database error: do not retry
                 raise RuntimeError(
-                    f"Neo4j Error: {e}\n"
-                    f"Cypher: {cypher}\n"
-                    f"Params: {params}"
+                    f"Neo4j Error: {e}\nCypher: {cypher}\nParams: {params}"
                 ) from e
 
     def _print_filled_query(self, cypher: str, params: Dict) -> None:
@@ -139,28 +164,33 @@ class Neo4jGraphClient:
 
         Note: Display only; execution still uses parameterized queries via the driver.
         """
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("📝 执行的 Cypher 查询语句（参数已填充）:")
-        print("-"*80)
-        
+        print("-" * 80)
+
         filled_cypher = cypher
         if params:
             import json
+
             # Sort param names by length descending to avoid partial $id vs $id2 replacements
-            sorted_params = sorted(params.items(), key=lambda x: len(x[0]), reverse=True)
-            
+            sorted_params = sorted(
+                params.items(), key=lambda x: len(x[0]), reverse=True
+            )
+
             for key, value in sorted_params:
                 # CRITICAL: Skip tuple params (DSL internal form; must not appear in final Cypher)
                 # Tuple form like (">", 500000) should already be expanded in WHERE building
                 if isinstance(value, tuple):
                     # Should not happen; indicates a bug if it does
-                    print(f"⚠️ WARNING: 参数 ${key} 是元组格式 {value}，这不应该出现在最终查询中！")
+                    print(
+                        f"⚠️ WARNING: 参数 ${key} 是元组格式 {value}，这不应该出现在最终查询中！"
+                    )
                     continue
-                
+
                 # Format value by type
                 if isinstance(value, str):
                     # Escape single quotes
-                    formatted_value = f"'{value.replace(chr(39), chr(39)+chr(39))}'"
+                    formatted_value = f"'{value.replace(chr(39), chr(39) + chr(39))}'"
                 elif isinstance(value, (int, float)):
                     formatted_value = str(value)
                 elif isinstance(value, bool):
@@ -176,22 +206,22 @@ class Neo4jGraphClient:
                     formatted_value = json.dumps(value, ensure_ascii=False)
                 else:
                     formatted_value = str(value)
-                
+
                 # Regex for full token match (avoid $id matching inside $id2)
                 filled_cypher = re.sub(
-                    r'\$' + re.escape(key) + r'\b',  # Word boundary
+                    r"\$" + re.escape(key) + r"\b",  # Word boundary
                     formatted_value,
-                    filled_cypher
+                    filled_cypher,
                 )
-        
+
         print(filled_cypher)
-        print("="*80 + "\n")
+        print("=" * 80 + "\n")
 
     # ===== Schema introspection =====
     def get_schema(self) -> Dict:
         """
         Fetch graph schema metadata (extended).
-        
+
         Returns:
             {
                 "node_labels": {
@@ -209,63 +239,72 @@ class Neo4jGraphClient:
                 "patterns": [pattern_strings]
             }
         """
-        schema = {
-            "node_labels": {},
-            "relationship_types": {},
-            "patterns": []
-        }
-        
+        schema = {"node_labels": {}, "relationship_types": {}, "patterns": []}
+
         # 1. All node labels and properties (with sample values)
-        labels_result = self.run("CALL db.labels() YIELD label RETURN label", show_query=False)
+        labels_result = self.run(
+            "CALL db.labels() YIELD label RETURN label", show_query=False
+        )
         valid_labels = [item["label"] for item in labels_result]
-        
+
         for label in valid_labels:
             if not label or not self._is_valid_identifier(label):
                 continue
-            
+
             # Properties and sample values for this label
-            props_result = self.run(f"""
+            props_result = self.run(
+                f"""
                 MATCH (n:`{label}`)
                 WITH n LIMIT 1
                 UNWIND keys(n) AS key
                 RETURN key, n[key] AS sample_value
                 ORDER BY key
-            """, show_query=False)
-            
+            """,
+                show_query=False,
+            )
+
             if props_result:
                 schema["node_labels"][label] = {
                     "properties": [p["key"] for p in props_result],
-                    "sample_values": {p["key"]: p["sample_value"] for p in props_result}
+                    "sample_values": {
+                        p["key"]: p["sample_value"] for p in props_result
+                    },
                 }
-        
+
         # 2. All relationship types and properties (with sample values)
         rels_result = self.run(
             "CALL db.relationshipTypes() YIELD relationshipType RETURN relationshipType",
-            show_query=False
+            show_query=False,
         )
         valid_rels = [item["relationshipType"] for item in rels_result]
-        
+
         for rel_type in valid_rels:
             if not rel_type or not self._is_valid_identifier(rel_type):
                 continue
-            
+
             # Properties and sample values for this relationship type
-            props_result = self.run(f"""
+            props_result = self.run(
+                f"""
                 MATCH ()-[r:`{rel_type}`]->()
                 WITH r LIMIT 1
                 UNWIND keys(r) AS key
                 RETURN key, r[key] AS sample_value
                 ORDER BY key
-            """, show_query=False)
-            
+            """,
+                show_query=False,
+            )
+
             if props_result:
                 schema["relationship_types"][rel_type] = {
                     "properties": [p["key"] for p in props_result],
-                    "sample_values": {p["key"]: p["sample_value"] for p in props_result}
+                    "sample_values": {
+                        p["key"]: p["sample_value"] for p in props_result
+                    },
                 }
-        
+
         # 3. Relationship patterns (start_label, rel, end_label)
-        patterns = self.run("""
+        patterns = self.run(
+            """
             MATCH (a)-[r]->(b)
             WITH labels(a)[0] AS start_label,
                  type(r) AS rel_type,
@@ -275,20 +314,22 @@ class Neo4jGraphClient:
               AND end_label IS NOT NULL
             RETURN DISTINCT start_label, rel_type, end_label
             LIMIT 100
-        """, show_query=False)
-        
+        """,
+            show_query=False,
+        )
+
         schema["patterns"] = [
             f"({p['start_label']})-[:{p['rel_type']}]->({p['end_label']})"
             for p in patterns
         ]
-        
+
         return schema
 
     # ===== Validation helpers =====
     @staticmethod
     def _is_valid_identifier(name: str) -> bool:
         """Return True if name is a simple alphanumeric/underscore identifier."""
-        return bool(re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', name))
+        return bool(re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", name))
 
     @classmethod
     def _sanitize_label(cls, label: Optional[str]) -> str:
@@ -303,19 +344,21 @@ class Neo4jGraphClient:
         """
         if not label:
             return ""
-        
+
         # Length check
         if len(label) > 255:
             raise ValueError(f"Label too long (max 255): {label}")
-        
+
         # Format check
-        if not re.match(r'^[A-Za-z][A-Za-z0-9_]*$', label):
-            raise ValueError(f"Invalid label format (must start with letter, contain only alphanumeric and underscore): {label}")
-        
+        if not re.match(r"^[A-Za-z][A-Za-z0-9_]*$", label):
+            raise ValueError(
+                f"Invalid label format (must start with letter, contain only alphanumeric and underscore): {label}"
+            )
+
         # Reserved keyword check
         if label.upper() in cls.RESERVED_KEYWORDS:
             raise ValueError(f"Reserved keyword cannot be used as label: {label}")
-        
+
         return label
 
     @classmethod
@@ -330,17 +373,19 @@ class Neo4jGraphClient:
         """
         if not rel_type:
             return ""
-        
+
         if len(rel_type) > 255:
             raise ValueError(f"Relationship type too long (max 255): {rel_type}")
-        
+
         # Format: letter first, then alphanumeric/underscore
-        if not re.match(r'^[A-Za-z][A-Za-z0-9_]*$', rel_type):
+        if not re.match(r"^[A-Za-z][A-Za-z0-9_]*$", rel_type):
             raise ValueError(f"Invalid relationship type format: {rel_type}")
-        
+
         if rel_type.upper() in cls.RESERVED_KEYWORDS:
-            raise ValueError(f"Reserved keyword cannot be used as relationship type: {rel_type}")
-        
+            raise ValueError(
+                f"Reserved keyword cannot be used as relationship type: {rel_type}"
+            )
+
         return rel_type
 
     @staticmethod
@@ -355,23 +400,20 @@ class Neo4jGraphClient:
         """
         if not key:
             raise ValueError("Property key cannot be empty")
-        
+
         if len(key) > 255:
             raise ValueError(f"Property key too long (max 255): {key}")
-        
-        if not re.match(r'^[a-zA-Z][a-zA-Z0-9_]*$', key):
+
+        if not re.match(r"^[a-zA-Z][a-zA-Z0-9_]*$", key):
             raise ValueError(f"Invalid property key format: {key}")
-        
+
         return key
 
     # =========================================================
     # 1. Lookup by internal ID / unique business key
     # =========================================================
     def get_node_by_internal_id(
-        self,
-        internal_id: int,
-        *,
-        return_props: bool = True
+        self, internal_id: int, *, return_props: bool = True
     ) -> Optional[JsonDict]:
         """
         Look up a node by Neo4j internal id(n).
@@ -387,7 +429,7 @@ class Neo4jGraphClient:
         """
         cypher = "MATCH (n) WHERE id(n) = $id RETURN n AS node"
         res = self.run(cypher, {"id": internal_id})
-        
+
         if not res:
             return None
         return res[0]["node"] if return_props else res[0]
@@ -398,7 +440,7 @@ class Neo4jGraphClient:
         key: str,
         value: Any,
         *,
-        return_fields: Optional[List[str]] = None
+        return_fields: Optional[List[str]] = None,
     ) -> Optional[JsonDict]:
         """
         Find a node by label and a unique key property.
@@ -422,7 +464,7 @@ class Neo4jGraphClient:
         """
         label = self._sanitize_label(label)
         key = self._sanitize_property_key(key)
-        
+
         # Build RETURN clause
         if return_fields:
             # Projected fields
@@ -434,13 +476,13 @@ class Neo4jGraphClient:
         else:
             # Whole node
             return_clause = "RETURN n AS node"
-        
+
         cypher = f"MATCH (n:`{label}` {{`{key}`: $value}}) {return_clause} LIMIT 1"
         res = self.run(cypher, {"value": value})
-        
+
         if not res:
             return None
-        
+
         # Dict of fields vs. full node
         if return_fields:
             return res[0]
@@ -456,7 +498,7 @@ class Neo4jGraphClient:
         return_fields: Optional[List[str]] = None,
         order_by: Optional[str] = None,
         order_direction: str = "ASC",
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[JsonDict]:
         """
         Filter multiple nodes by property predicates (AND-combined).
@@ -522,25 +564,35 @@ class Neo4jGraphClient:
             - Conditions are ANDed; for OR use filter_query or custom Cypher.
         """
         label = self._sanitize_label(label)
-        
+
         if not conditions:
             raise ValueError("conditions cannot be empty")
-        
+
         if order_direction not in {"ASC", "DESC"}:
             raise ValueError("order_direction must be 'ASC' or 'DESC'")
-        
+
         # Build WHERE clause
         where_parts = []
         params = {}
         for i, (key, value) in enumerate(conditions.items()):
             key = self._sanitize_property_key(key)
             param_name = f"cond_{i}"
-            
+
             # Fix 2: (operator, value) tuple or [operator, value] list
-            if (isinstance(value, (tuple, list)) and len(value) == 2):
+            if isinstance(value, (tuple, list)) and len(value) == 2:
                 operator, actual_value = value
                 # Validate operator
-                valid_operators = ["=", ">", "<", ">=", "<=", "!=", "IN", "CONTAINS", "STARTS WITH"]
+                valid_operators = [
+                    "=",
+                    ">",
+                    "<",
+                    ">=",
+                    "<=",
+                    "!=",
+                    "IN",
+                    "CONTAINS",
+                    "STARTS WITH",
+                ]
                 if operator.upper() in ["IN", "CONTAINS"]:
                     where_parts.append(f"a.`{key}` {operator.upper()} ${param_name}")
                 elif operator.upper() == "STARTS WITH":
@@ -554,9 +606,9 @@ class Neo4jGraphClient:
                 # Equality
                 where_parts.append(f"a.`{key}` = ${param_name}")
                 params[param_name] = value
-        
+
         where_clause = "WHERE " + " AND ".join(where_parts)
-        
+
         # Build RETURN clause
         if return_fields:
             # Projected fields
@@ -568,19 +620,19 @@ class Neo4jGraphClient:
         else:
             # Whole node
             return_clause = "RETURN a AS node"
-        
+
         # Optional ORDER BY
         order_clause = ""
         if order_by:
             order_by = self._sanitize_property_key(order_by)
             order_clause = f"ORDER BY a.`{order_by}` {order_direction}"
-        
+
         # Optional LIMIT
         limit_clause = ""
         if limit is not None:
             limit_clause = "LIMIT $limit"
             params["limit"] = limit
-        
+
         # Full query
         cypher = f"""
         MATCH (a:`{label}`)
@@ -589,7 +641,7 @@ class Neo4jGraphClient:
         {order_clause}
         {limit_clause}
         """
-        
+
         return self.run(cypher, params)
 
     # add gjq
@@ -605,7 +657,7 @@ class Neo4jGraphClient:
         aggregate_field: Optional[str] = None,
         order_by: Optional[str] = None,
         order_direction: str = "ASC",
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[JsonDict]:
         """
         Filter relationships by relationship properties; optional aggregates.
@@ -673,18 +725,22 @@ class Neo4jGraphClient:
             - rel_conditions are ANDed; for OR use filter_query or custom Cypher.
         """
         rel_type = self._sanitize_rel_type(rel_type)
-        
+
         if order_direction not in {"ASC", "DESC"}:
             raise ValueError("order_direction must be 'ASC' or 'DESC'")
-        
+
         # Node patterns
-        start_pattern = f"(from:`{self._sanitize_label(start_label)}`)" if start_label else "(from)"
-        end_pattern = f"(to:`{self._sanitize_label(end_label)}`)" if end_label else "(to)"
-        
+        start_pattern = (
+            f"(from:`{self._sanitize_label(start_label)}`)" if start_label else "(from)"
+        )
+        end_pattern = (
+            f"(to:`{self._sanitize_label(end_label)}`)" if end_label else "(to)"
+        )
+
         # WHERE clause
         where_parts = []
         params = {}
-        
+
         if rel_conditions:
             for i, (key, condition) in enumerate(rel_conditions.items()):
                 # Keys like tran_timestamp_start / _end → strip suffix for real prop name
@@ -694,33 +750,37 @@ class Neo4jGraphClient:
                     actual_key = self._sanitize_property_key(actual_key)
                 else:
                     actual_key = self._sanitize_property_key(key)
-                
+
                 if isinstance(condition, (tuple, list)) and len(condition) == 2:
                     operator, value = condition
                     param_name = f"rel_cond_{i}"
-                    
+
                     if operator.upper() in ["IN", "CONTAINS"]:
-                        where_parts.append(f"t.`{actual_key}` {operator.upper()} ${param_name}")
+                        where_parts.append(
+                            f"t.`{actual_key}` {operator.upper()} ${param_name}"
+                        )
                     elif operator.upper() == "STARTS WITH":
-                        where_parts.append(f"t.`{actual_key}` STARTS WITH ${param_name}")
+                        where_parts.append(
+                            f"t.`{actual_key}` STARTS WITH ${param_name}"
+                        )
                     else:
                         where_parts.append(f"t.`{actual_key}` {operator} ${param_name}")
-                    
+
                     params[param_name] = value
                 else:
                     # Equality
                     param_name = f"rel_cond_{i}"
                     where_parts.append(f"t.`{actual_key}` = ${param_name}")
                     params[param_name] = condition
-        
+
         where_clause = "WHERE " + " AND ".join(where_parts) if where_parts else ""
-        
+
         # Aggregate branch
         if aggregate:
             agg_type = aggregate.upper()
             if agg_type not in ["COUNT", "SUM", "AVG", "MAX", "MIN"]:
                 raise ValueError(f"Invalid aggregate type: {aggregate}")
-            
+
             if agg_type == "COUNT":
                 agg_expr = "COUNT(t)"
             else:
@@ -728,18 +788,20 @@ class Neo4jGraphClient:
                     raise ValueError(f"aggregate_field is required for {agg_type}")
                 agg_field = self._sanitize_property_key(aggregate_field)
                 agg_expr = f"{agg_type}(t.`{agg_field}`)"
-            
+
             cypher = f"""
             MATCH {start_pattern}-[t:`{rel_type}`]->{end_pattern}
             {where_clause}
             RETURN {agg_expr} AS value
             """
-            
+
             result = self.run(cypher, params)
             if result:
-                return [{"aggregate_type": agg_type.lower(), "value": result[0]["value"]}]
+                return [
+                    {"aggregate_type": agg_type.lower(), "value": result[0]["value"]}
+                ]
             return [{"aggregate_type": agg_type.lower(), "value": 0}]
-        
+
         # Row-returning query
         if return_fields:
             # RETURN list
@@ -761,24 +823,24 @@ class Neo4jGraphClient:
                     # Relationship property (bare name)
                     prop = self._sanitize_property_key(field)
                     return_parts.append(f"t.`{prop}` AS {prop}")
-            
+
             return_clause = "RETURN " + ", ".join(return_parts)
         else:
             # Full from / rel / to
             return_clause = "RETURN from, t AS relationship, to"
-        
+
         # Optional ORDER BY
         order_clause = ""
         if order_by:
             order_by = self._sanitize_property_key(order_by)
             order_clause = f"ORDER BY t.`{order_by}` {order_direction}"
-        
+
         # Optional LIMIT
         limit_clause = ""
         if limit is not None:
             limit_clause = "LIMIT $limit"
             params["limit"] = limit
-        
+
         # Full Cypher
         cypher = f"""
         MATCH {start_pattern}-[t:`{rel_type}`]->{end_pattern}
@@ -787,7 +849,7 @@ class Neo4jGraphClient:
         {order_clause}
         {limit_clause}
         """
-        
+
         return self.run(cypher, params)
 
     # add gjq
@@ -805,7 +867,7 @@ class Neo4jGraphClient:
         where: Optional[str] = None,
         order_by: Optional[str] = None,
         order_direction: str = "DESC",
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[JsonDict]:
         """
         Aggregations with grouping by node or by a node property.
@@ -875,12 +937,12 @@ class Neo4jGraphClient:
         agg_type = aggregate_type.upper()
         if agg_type not in ["COUNT", "SUM", "AVG", "MAX", "MIN"]:
             raise ValueError(f"Invalid aggregate type: {aggregate_type}")
-        
+
         if order_direction not in {"ASC", "DESC"}:
             raise ValueError("order_direction must be 'ASC' or 'DESC'")
-        
+
         params = {}
-        
+
         # Aggregate expression
         if agg_type == "COUNT":
             if rel_type:
@@ -898,18 +960,18 @@ class Neo4jGraphClient:
             else:
                 agg_expr = f"{agg_type}(n.`{agg_field}`) AS total"
             agg_alias = "total"
-        
+
         # Case 1: group by property on nodes only (no rel_type)
         if group_by_property and not rel_type:
             label = self._sanitize_label(node_label) if node_label else ""
             label_pattern = f":`{label}`" if label else ""
             prop = self._sanitize_property_key(group_by_property)
-            
+
             where_clause = f"WHERE {where}" if where else ""
             limit_clause = "LIMIT $limit" if limit is not None else ""
             if limit is not None:
                 params["limit"] = limit
-            
+
             cypher = f"""
             MATCH (n{label_pattern})
             {where_clause}
@@ -917,13 +979,13 @@ class Neo4jGraphClient:
             ORDER BY {order_by or agg_alias} {order_direction}
             {limit_clause}
             """
-        
+
         # Case 2: group by node + relationship aggregation
         elif group_by_node and rel_type:
             label = self._sanitize_label(node_label) if node_label else ""
             label_pattern = f":`{label}`" if label else ""
             rt = self._sanitize_rel_type(rel_type)
-            
+
             # Relationship pattern
             if direction == "out":
                 if group_by_node == "start":
@@ -937,7 +999,7 @@ class Neo4jGraphClient:
                     pattern = f"()<-[r:`{rt}`]-(n{label_pattern})"
             else:
                 pattern = f"(n{label_pattern})-[r:`{rt}`]-()"
-            
+
             # RETURN parts
             return_parts = []
             if return_fields:
@@ -946,14 +1008,14 @@ class Neo4jGraphClient:
                     return_parts.append(f"n.`{field}` AS {field}")
             else:
                 return_parts.append("n.node_key AS node_key")
-            
+
             return_clause = ", ".join(return_parts) + f", {agg_expr}"
-            
+
             where_clause = f"WHERE {where}" if where else ""
             limit_clause = "LIMIT $limit" if limit is not None else ""
             if limit is not None:
                 params["limit"] = limit
-            
+
             cypher = f"""
             MATCH {pattern}
             {where_clause}
@@ -961,10 +1023,12 @@ class Neo4jGraphClient:
             ORDER BY {order_by or agg_alias} {order_direction}
             {limit_clause}
             """
-        
+
         else:
-            raise ValueError("Must specify either group_by_property or (group_by_node + rel_type)")
-        
+            raise ValueError(
+                "Must specify either group_by_property or (group_by_node + rel_type)"
+            )
+
         return self.run(cypher, params)
 
     # =========================================================
@@ -987,7 +1051,7 @@ class Neo4jGraphClient:
         limit: Optional[int] = None,
         return_distinct: bool = False,
         exclude_start: bool = False,
-        return_path_length: bool = False
+        return_path_length: bool = False,
     ) -> List[JsonDict]:
         """
         N-hop neighbors from a start node (filters, projection, path stats).
@@ -1058,19 +1122,19 @@ class Neo4jGraphClient:
         """
         label = self._sanitize_label(label)
         key = self._sanitize_property_key(key)
-        
+
         if not (1 <= hops <= 10):
             raise ValueError("hops must be between 1 and 10")
-        
+
         if direction not in {"out", "in", "both"}:
             raise ValueError("direction must be 'out', 'in', or 'both'")
-        
+
         if order_direction not in {"ASC", "DESC"}:
             raise ValueError("order_direction must be 'ASC' or 'DESC'")
-        
+
         rt = self._sanitize_rel_type(rel_type) if rel_type else ""
         rel = f":`{rt}`" if rt else ""
-        
+
         # Fast path: single hop + projection + no path length → skip path aggregation
         if hops == 1 and return_fields and not return_path_length:
             # One-hop pattern
@@ -1080,7 +1144,7 @@ class Neo4jGraphClient:
                 pattern = f"(start)<-[r{rel}]-(nbr)"
             else:
                 pattern = f"(start)-[r{rel}]-(nbr)"
-            
+
             # Optional WHERE
             where_parts = []
             if where:
@@ -1088,7 +1152,7 @@ class Neo4jGraphClient:
             if exclude_start:
                 where_parts.append("nbr <> start")
             where_clause = "WHERE " + " AND ".join(where_parts) if where_parts else ""
-            
+
             # RETURN
             return_parts = []
             for field in return_fields:
@@ -1104,15 +1168,19 @@ class Neo4jGraphClient:
                     # Treat bare name as neighbor property
                     prop = self._sanitize_property_key(field)
                     return_parts.append(f"nbr.`{prop}` AS {prop}")
-            
-            return_clause = "RETURN " + (" DISTINCT " if return_distinct else " ") + ", ".join(return_parts)
-            
+
+            return_clause = (
+                "RETURN "
+                + (" DISTINCT " if return_distinct else " ")
+                + ", ".join(return_parts)
+            )
+
             # Optional ORDER BY
             order_clause = f"ORDER BY {order_by} {order_direction}" if order_by else ""
-            
+
             # Optional LIMIT
             limit_clause = "LIMIT $limit" if limit is not None else ""
-            
+
             cypher = f"""
             MATCH (start:`{label}` {{`{key}`: $value}})
             MATCH {pattern}
@@ -1130,7 +1198,7 @@ class Neo4jGraphClient:
                 pattern = f"(start)<-[r{rel}*1..{hops}]-(nbr)"
             else:
                 pattern = f"(start)-[r{rel}*1..{hops}]-(nbr)"
-            
+
             # Optional WHERE
             where_parts = []
             if where:
@@ -1138,7 +1206,7 @@ class Neo4jGraphClient:
             if exclude_start:
                 where_parts.append("nbr <> start")
             where_clause = "WHERE " + " AND ".join(where_parts) if where_parts else ""
-            
+
             # RETURN
             if return_path_length:
                 # Include hop count as path_length
@@ -1160,7 +1228,7 @@ class Neo4jGraphClient:
                        firstRel AS rel,
                        type(firstRel) AS relType
                 """
-            
+
             # Optional ORDER BY
             if order_by:
                 if order_by == "path_length" and return_path_length:
@@ -1169,10 +1237,10 @@ class Neo4jGraphClient:
                     order_clause = f"ORDER BY {order_by} {order_direction}"
             else:
                 order_clause = ""
-            
+
             # Optional LIMIT
             limit_clause = "LIMIT $limit" if limit is not None else ""
-            
+
             cypher = f"""
             MATCH (start:`{label}` {{`{key}`: $value}})
             MATCH p = {pattern}
@@ -1183,11 +1251,11 @@ class Neo4jGraphClient:
             {order_clause}
             {limit_clause}
             """
-        
+
         params = {"value": value}
         if limit is not None:
             params["limit"] = limit
-        
+
         return self.run(cypher, params)
 
     # =========================================================
@@ -1204,7 +1272,7 @@ class Neo4jGraphClient:
         order_by: Optional[str] = None,
         order_direction: str = "ASC",
         limit: Optional[int] = None,
-        aggregate: bool = False
+        aggregate: bool = False,
     ) -> List[JsonDict]:
         """
         One-hop common neighbors of two nodes; optional count-based ordering.
@@ -1229,21 +1297,21 @@ class Neo4jGraphClient:
         """
         (la, ka, va) = a
         (lb, kb, vb) = b
-        
+
         la = self._sanitize_label(la)
         lb = self._sanitize_label(lb)
         ka = self._sanitize_property_key(ka)
         kb = self._sanitize_property_key(kb)
-        
+
         if direction not in {"out", "in", "both"}:
             raise ValueError("direction must be 'out', 'in', or 'both'")
-        
+
         if order_direction not in {"ASC", "DESC"}:
             raise ValueError("order_direction must be 'ASC' or 'DESC'")
-        
+
         rt = self._sanitize_rel_type(rel_type) if rel_type else ""
         rel = f":`{rt}`" if rt else ""
-        
+
         # Path patterns A–C and B–C
         if direction == "out":
             pat_a = f"(A)-[rA{rel}]->(C)"
@@ -1254,20 +1322,24 @@ class Neo4jGraphClient:
         else:
             pat_a = f"(A)-[rA{rel}]-(C)"
             pat_b = f"(B)-[rB{rel}]-(C)"
-        
+
         # Optional WHERE
         where_clause = f"WHERE {where}" if where else ""
-        
+
         # Optional LIMIT
         limit_clause = "LIMIT $limit" if limit is not None else ""
-        
+
         # Aggregate: COUNT per common neighbor
         if aggregate:
             if order_by == "count":
                 order_clause = f"ORDER BY count {order_direction}"
             else:
-                order_clause = f"ORDER BY {order_by} {order_direction}" if order_by else "ORDER BY count DESC"
-            
+                order_clause = (
+                    f"ORDER BY {order_by} {order_direction}"
+                    if order_by
+                    else "ORDER BY count DESC"
+                )
+
             cypher = f"""
             MATCH (A:`{la}` {{`{ka}`: $va}})
             MATCH (B:`{lb}` {{`{kb}`: $vb}})
@@ -1281,7 +1353,7 @@ class Neo4jGraphClient:
         else:
             # Full relA / relB per pair
             order_clause = f"ORDER BY {order_by} {order_direction}" if order_by else ""
-            
+
             cypher = f"""
             MATCH (A:`{la}` {{`{ka}`: $va}})
             MATCH (B:`{lb}` {{`{kb}`: $vb}})
@@ -1292,11 +1364,11 @@ class Neo4jGraphClient:
             {order_clause}
             {limit_clause}
             """
-        
+
         params = {"va": va, "vb": vb}
         if limit is not None:
             params["limit"] = limit
-        
+
         return self.run(cypher, params)
 
     def common_neighbors_with_rel_filter(
@@ -1311,7 +1383,7 @@ class Neo4jGraphClient:
         return_fields: Optional[List[str]] = None,
         order_by: Optional[str] = None,
         order_direction: str = "ASC",
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[JsonDict]:
         """
         Common neighbors with identical predicates on edges A–C and B–C.
@@ -1367,21 +1439,21 @@ class Neo4jGraphClient:
         """
         (la, ka, va) = a
         (lb, kb, vb) = b
-        
+
         la = self._sanitize_label(la)
         lb = self._sanitize_label(lb)
         ka = self._sanitize_property_key(ka)
         kb = self._sanitize_property_key(kb)
-        
+
         if direction not in {"out", "in", "both"}:
             raise ValueError("direction must be 'out', 'in', or 'both'")
-        
+
         if order_direction not in {"ASC", "DESC"}:
             raise ValueError("order_direction must be 'ASC' or 'DESC'")
-        
+
         rt = self._sanitize_rel_type(rel_type) if rel_type else ""
         rel = f":`{rt}`" if rt else ""
-        
+
         # A–C / B–C patterns
         if direction == "out":
             pat_a = f"(A)-[rA{rel}]->(C)"
@@ -1392,31 +1464,35 @@ class Neo4jGraphClient:
         else:
             pat_a = f"(A)-[rA{rel}]-(C)"
             pat_b = f"(B)-[rB{rel}]-(C)"
-        
+
         # WHERE
         where_parts = []
         params = {"va": va, "vb": vb}
-        
+
         # Duplicate rel_conditions onto rA and rB
         if rel_conditions:
             for i, (key, condition) in enumerate(rel_conditions.items()):
                 key = self._sanitize_property_key(key)
-                
+
                 if isinstance(condition, (tuple, list)) and len(condition) == 2:
                     operator, value = condition
                     param_name_a = f"rel_cond_a_{i}"
                     param_name_b = f"rel_cond_b_{i}"
-                    
+
                     if operator.upper() in ["IN", "CONTAINS"]:
-                        where_parts.append(f"rA.`{key}` {operator.upper()} ${param_name_a}")
-                        where_parts.append(f"rB.`{key}` {operator.upper()} ${param_name_b}")
+                        where_parts.append(
+                            f"rA.`{key}` {operator.upper()} ${param_name_a}"
+                        )
+                        where_parts.append(
+                            f"rB.`{key}` {operator.upper()} ${param_name_b}"
+                        )
                     elif operator.upper() == "STARTS WITH":
                         where_parts.append(f"rA.`{key}` STARTS WITH ${param_name_a}")
                         where_parts.append(f"rB.`{key}` STARTS WITH ${param_name_b}")
                     else:
                         where_parts.append(f"rA.`{key}` {operator} ${param_name_a}")
                         where_parts.append(f"rB.`{key}` {operator} ${param_name_b}")
-                    
+
                     params[param_name_a] = value
                     params[param_name_b] = value
                 else:
@@ -1427,13 +1503,13 @@ class Neo4jGraphClient:
                     where_parts.append(f"rB.`{key}` = ${param_name_b}")
                     params[param_name_a] = condition
                     params[param_name_b] = condition
-        
+
         # Predicate on C
         if neighbor_where:
             where_parts.append(f"({neighbor_where})")
-        
+
         where_clause = "WHERE " + " AND ".join(where_parts) if where_parts else ""
-        
+
         # RETURN
         if return_fields:
             return_parts = []
@@ -1452,15 +1528,15 @@ class Neo4jGraphClient:
             return_clause = "RETURN " + ", ".join(return_parts)
         else:
             return_clause = "RETURN C AS commonNeighbor, rA AS relA, rB AS relB"
-        
+
         # Optional ORDER BY
         order_clause = f"ORDER BY {order_by} {order_direction}" if order_by else ""
-        
+
         # Optional LIMIT
         limit_clause = "LIMIT $limit" if limit is not None else ""
         if limit is not None:
             params["limit"] = limit
-        
+
         cypher = f"""
         MATCH (A:`{la}` {{`{ka}`: $va}})
         MATCH (B:`{lb}` {{`{kb}`: $vb}})
@@ -1471,7 +1547,7 @@ class Neo4jGraphClient:
         {order_clause}
         {limit_clause}
         """
-        
+
         return self.run(cypher, params)
 
     # =========================================================
@@ -1487,7 +1563,7 @@ class Neo4jGraphClient:
         node_where: Optional[str] = None,
         rel_where: Optional[str] = None,
         params: Optional[JsonDict] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[JsonDict]:
         """
         One hop from `start` with optional rel/node predicates.
@@ -1508,16 +1584,16 @@ class Neo4jGraphClient:
         (sl, sk, sv) = start
         sl = self._sanitize_label(sl)
         sk = self._sanitize_property_key(sk)
-        
+
         rt = self._sanitize_rel_type(rel_type) if rel_type else ""
         rel = f":`{rt}`" if rt else ""
-        
+
         tl = self._sanitize_label(node_label) if node_label else ""
         tlabel = f":`{tl}`" if tl else ""
-        
+
         if direction not in {"out", "in", "both"}:
             raise ValueError("direction must be 'out', 'in', or 'both'")
-        
+
         # s–(r)–n pattern
         if direction == "out":
             pat = f"(s)-[r{rel}]->(n{tlabel})"
@@ -1525,7 +1601,7 @@ class Neo4jGraphClient:
             pat = f"(s)<-[r{rel}]-(n{tlabel})"
         else:
             pat = f"(s)-[r{rel}]-(n{tlabel})"
-        
+
         # WHERE fragments
         where_parts = []
         if rel_where:
@@ -1533,10 +1609,10 @@ class Neo4jGraphClient:
         if node_where:
             where_parts.append(f"({node_where})")
         where_clause = ("WHERE " + " AND ".join(where_parts)) if where_parts else ""
-        
+
         # Optional LIMIT
         limit_clause = "LIMIT $limit" if limit is not None else ""
-        
+
         cypher = f"""
         MATCH (s:`{sl}` {{`{sk}`: $sv}})
         MATCH {pat}
@@ -1544,13 +1620,13 @@ class Neo4jGraphClient:
         RETURN s AS start, r AS rel, n AS node
         {limit_clause}
         """
-        
+
         p = {"sv": sv}
         if limit is not None:
             p["limit"] = limit
         if params:
             p.update(params)
-        
+
         return self.run(cypher, p)
 
     # =========================================================
@@ -1564,7 +1640,7 @@ class Neo4jGraphClient:
         rel_type: Optional[str] = None,
         direction: str = "both",
         where: Optional[str] = None,
-        limit_paths: int = 200
+        limit_paths: int = 200,
     ) -> JsonDict:
         """
         Ego network around `center` up to `hops` (distinct nodes and rels from paths).
@@ -1582,13 +1658,13 @@ class Neo4jGraphClient:
         (cl, ck, cv) = center
         cl = self._sanitize_label(cl)
         ck = self._sanitize_property_key(ck)
-        
+
         if not (1 <= hops <= 5):
             raise ValueError("hops must be between 1 and 5")
-        
+
         rt = self._sanitize_rel_type(rel_type) if rel_type else ""
         rel = f":`{rt}`" if rt else ""
-        
+
         # Variable-length from center
         if direction == "out":
             pat = f"(c)-[r{rel}*1..{hops}]->(n)"
@@ -1596,10 +1672,10 @@ class Neo4jGraphClient:
             pat = f"(c)<-[r{rel}*1..{hops}]-(n)"
         else:
             pat = f"(c)-[r{rel}*1..{hops}]-(n)"
-        
+
         # Optional WHERE
         where_clause = f"WHERE {where}" if where else ""
-        
+
         cypher = f"""
         MATCH (c:`{cl}` {{`{ck}`: $cv}})
         MATCH p = {pat}
@@ -1611,15 +1687,15 @@ class Neo4jGraphClient:
         WITH collect(DISTINCT nn) AS nodes, collect(DISTINCT rr) AS relationships
         RETURN nodes, relationships
         """
-        
+
         res = self.run(cypher, {"cv": cv, "limit_paths": limit_paths})
-        
+
         if res and res[0]:
             return {
                 "nodes": res[0].get("nodes", []),
-                "relationships": res[0].get("relationships", [])
+                "relationships": res[0].get("relationships", []),
             }
-        
+
         return {"nodes": [], "relationships": []}
 
     def subgraph_extract_by_nodes(
@@ -1631,7 +1707,7 @@ class Neo4jGraphClient:
         include_internal: bool = True,
         rel_type: Optional[str] = None,
         direction: str = "both",
-        where: Optional[str] = None
+        where: Optional[str] = None,
     ) -> JsonDict:
         """
         Induced subgraph on a set of nodes keyed by (label, key, values).
@@ -1676,17 +1752,17 @@ class Neo4jGraphClient:
         """
         label = self._sanitize_label(label)
         key = self._sanitize_property_key(key)
-        
+
         if not values or len(values) == 0:
             raise ValueError("values list cannot be empty")
-        
+
         if direction not in {"out", "in", "both"}:
             raise ValueError("direction must be 'out', 'in', or 'both'")
-        
+
         # Relationship type token
         rt = self._sanitize_rel_type(rel_type) if rel_type else ""
         rel = f":`{rt}`" if rt else ""
-        
+
         # n1-(r)-n2 pattern
         if direction == "out":
             pattern = f"(n1)-[r{rel}]->(n2)"
@@ -1694,21 +1770,21 @@ class Neo4jGraphClient:
             pattern = f"(n1)<-[r{rel}]-(n2)"
         else:
             pattern = f"(n1)-[r{rel}]-(n2)"
-        
+
         # Both endpoints in values
         where_parts = []
-        
+
         where_parts.append("n1.`" + key + "` IN $values")
         where_parts.append("n2.`" + key + "` IN $values")
-        
+
         if not include_internal:
             where_parts.append("n1 <> n2")
-        
+
         if where:
             where_parts.append(f"({where})")
-        
+
         where_clause = "WHERE " + " AND ".join(where_parts)
-        
+
         cypher = f"""
         MATCH (n1:`{label}`)
         WHERE n1.`{key}` IN $values
@@ -1723,22 +1799,22 @@ class Neo4jGraphClient:
                size(allNodes) AS node_count,
                size(allRels) AS relationship_count
         """
-        
+
         res = self.run(cypher, {"values": values})
-        
+
         if res and res[0]:
             return {
                 "nodes": res[0].get("nodes", []),
                 "relationships": res[0].get("relationships", []),
                 "node_count": res[0].get("node_count", 0),
-                "relationship_count": res[0].get("relationship_count", 0)
+                "relationship_count": res[0].get("relationship_count", 0),
             }
-        
+
         return {
             "nodes": [],
             "relationships": [],
             "node_count": 0,
-            "relationship_count": 0
+            "relationship_count": 0,
         }
 
     def subgraph_extract_by_rel_filter(
@@ -1749,7 +1825,7 @@ class Neo4jGraphClient:
         start_label: Optional[str] = None,
         end_label: Optional[str] = None,
         direction: str = "both",
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> JsonDict:
         """
         Subgraph from relationships matching property predicates (endpoints + edges).
@@ -1796,14 +1872,18 @@ class Neo4jGraphClient:
             - relationship_count reflects collected edges after LIMIT.
         """
         rel_type = self._sanitize_rel_type(rel_type)
-        
+
         if direction not in {"out", "in", "both"}:
             raise ValueError("direction must be 'out', 'in', or 'both'")
-        
+
         # Endpoint patterns
-        start_pattern = f"(from:`{self._sanitize_label(start_label)}`)" if start_label else "(from)"
-        end_pattern = f"(to:`{self._sanitize_label(end_label)}`)" if end_label else "(to)"
-        
+        start_pattern = (
+            f"(from:`{self._sanitize_label(start_label)}`)" if start_label else "(from)"
+        )
+        end_pattern = (
+            f"(to:`{self._sanitize_label(end_label)}`)" if end_label else "(to)"
+        )
+
         # Directional relationship pattern
         if direction == "out":
             rel_pattern = f"{start_pattern}-[r:`{rel_type}`]->{end_pattern}"
@@ -1811,11 +1891,11 @@ class Neo4jGraphClient:
             rel_pattern = f"{start_pattern}<-[r:`{rel_type}`]-{end_pattern}"
         else:
             rel_pattern = f"{start_pattern}-[r:`{rel_type}`]-{end_pattern}"
-        
+
         # WHERE on r.*
         where_parts = []
         params = {}
-        
+
         if rel_conditions:
             for i, (key, condition) in enumerate(rel_conditions.items()):
                 # *_start / *_end key suffix → real property name
@@ -1824,32 +1904,36 @@ class Neo4jGraphClient:
                     actual_key = self._sanitize_property_key(actual_key)
                 else:
                     actual_key = self._sanitize_property_key(key)
-                
+
                 if isinstance(condition, (tuple, list)) and len(condition) == 2:
                     operator, value = condition
                     param_name = f"rel_cond_{i}"
-                    
+
                     if operator.upper() in ["IN", "CONTAINS"]:
-                        where_parts.append(f"r.`{actual_key}` {operator.upper()} ${param_name}")
+                        where_parts.append(
+                            f"r.`{actual_key}` {operator.upper()} ${param_name}"
+                        )
                     elif operator.upper() == "STARTS WITH":
-                        where_parts.append(f"r.`{actual_key}` STARTS WITH ${param_name}")
+                        where_parts.append(
+                            f"r.`{actual_key}` STARTS WITH ${param_name}"
+                        )
                     else:
                         where_parts.append(f"r.`{actual_key}` {operator} ${param_name}")
-                    
+
                     params[param_name] = value
                 else:
                     # Equality
                     param_name = f"rel_cond_{i}"
                     where_parts.append(f"r.`{actual_key}` = ${param_name}")
                     params[param_name] = condition
-        
+
         where_clause = "WHERE " + " AND ".join(where_parts) if where_parts else ""
-        
+
         # Optional LIMIT
         limit_clause = "LIMIT $limit" if limit is not None else ""
         if limit is not None:
             params["limit"] = limit
-        
+
         cypher = f"""
         MATCH {rel_pattern}
         {where_clause}
@@ -1861,22 +1945,22 @@ class Neo4jGraphClient:
                size(allNodes) AS node_count,
                size(allRels) AS relationship_count
         """
-        
+
         res = self.run(cypher, params)
-        
+
         if res and res[0]:
             return {
                 "nodes": res[0].get("nodes", []),
                 "relationships": res[0].get("relationships", []),
                 "node_count": res[0].get("node_count", 0),
-                "relationship_count": res[0].get("relationship_count", 0)
+                "relationship_count": res[0].get("relationship_count", 0),
             }
-        
+
         return {
             "nodes": [],
             "relationships": [],
             "node_count": 0,
-            "relationship_count": 0
+            "relationship_count": 0,
         }
 
     # =========================================================
@@ -1888,7 +1972,7 @@ class Neo4jGraphClient:
         pattern: str,
         where: Optional[str] = None,
         params: Optional[JsonDict] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[JsonDict]:
         """
         Run MATCH p = <pattern> with optional WHERE (caller-built Cypher).
@@ -1911,20 +1995,20 @@ class Neo4jGraphClient:
         """
         # Optional LIMIT
         limit_clause = "LIMIT $limit" if limit is not None else ""
-        
+
         cypher = f"""
         MATCH p = {pattern}
         {("WHERE " + where) if where else ""}
         RETURN p AS path
         {limit_clause}
         """
-        
+
         p = {}
         if limit is not None:
             p["limit"] = limit
         if params:
             p.update(params)
-        
+
         return self.run(cypher, p)
 
     # =========================================================
@@ -1938,7 +2022,7 @@ class Neo4jGraphClient:
         where: Optional[str] = None,
         params: Optional[JsonDict] = None,
         metrics: Optional[Sequence[str]] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[JsonDict]:
         """
         Simple aggregation on nodes of a label (optional GROUP BY).
@@ -1965,15 +2049,15 @@ class Neo4jGraphClient:
         """
         label = self._sanitize_label(label)
         metrics = list(metrics) if metrics else ["count(*) AS cnt"]
-        
+
         # Optional LIMIT
         limit_clause = "LIMIT $limit" if limit is not None else ""
-        
+
         if group_by:
             group_by = self._sanitize_property_key(group_by)
             group_expr = f"n.`{group_by}` AS {group_by}"
             return_expr = ", ".join([group_expr] + list(metrics))
-            
+
             cypher = f"""
             MATCH (n:`{label}`)
             {("WHERE " + where) if where else ""}
@@ -1984,21 +2068,22 @@ class Neo4jGraphClient:
             """
         else:
             return_expr = ", ".join(metrics)
-            
+
             cypher = f"""
             MATCH (n:`{label}`)
             {("WHERE " + where) if where else ""}
             RETURN {return_expr}
             {limit_clause}
             """
-        
+
         p = {}
         if limit is not None:
             p["limit"] = limit
         if params:
             p.update(params)
-        
+
         return self.run(cypher, p)
+
     # =========================================================
     # Paths between two nodes (not necessarily shortest)
     # =========================================================
@@ -2015,7 +2100,7 @@ class Neo4jGraphClient:
         return_fields: Optional[List[str]] = None,
         order_by: Optional[str] = None,
         order_direction: str = "ASC",
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[JsonDict]:
         """
         Enumerate paths between A and B with hop bounds, filters, and derived metrics.
@@ -2085,25 +2170,25 @@ class Neo4jGraphClient:
         """
         (la, ka, va) = a
         (lb, kb, vb) = b
-        
+
         # Validate identifiers and hop bounds
         la = self._sanitize_label(la)
         lb = self._sanitize_label(lb)
         ka = self._sanitize_property_key(ka)
         kb = self._sanitize_property_key(kb)
-        
+
         if not (0 <= min_hops <= max_hops <= 10):
             raise ValueError("Invalid hop bounds: 0 <= min_hops <= max_hops <= 10")
-        
+
         if direction not in {"out", "in", "both"}:
             raise ValueError("direction must be 'out', 'in', or 'both'")
-        
+
         if order_direction not in {"ASC", "DESC"}:
             raise ValueError("order_direction must be 'ASC' or 'DESC'")
-        
+
         rt = self._sanitize_rel_type(rel_type) if rel_type else ""
         rel = f":`{rt}`" if rt else ""
-        
+
         # Variable-length pattern A … B
         if direction == "out":
             pattern = f"(A)-[r{rel}*{min_hops}..{max_hops}]->(B)"
@@ -2111,15 +2196,15 @@ class Neo4jGraphClient:
             pattern = f"(A)<-[r{rel}*{min_hops}..{max_hops}]-(B)"
         else:
             pattern = f"(A)-[r{rel}*{min_hops}..{max_hops}]-(B)"
-        
+
         where_clause = f"WHERE {where}" if where else ""
-        
+
         if return_fields:
             # Custom RETURN list
             return_parts = []
             for field in return_fields:
                 field_lower = field.lower()
-                
+
                 if field_lower == "path":
                     return_parts.append("p AS path")
                 elif field_lower == "hops":
@@ -2128,37 +2213,45 @@ class Neo4jGraphClient:
                     return_parts.append("pathNodes AS nodes")
                 elif field_lower == "relationships":
                     return_parts.append("pathRels AS relationships")
-                
+
                 elif field_lower == "totalamount":
-                    return_parts.append("REDUCE(s = 0, r IN pathRels | s + r.base_amt) AS totalAmount")
-                
+                    return_parts.append(
+                        "REDUCE(s = 0, r IN pathRels | s + r.base_amt) AS totalAmount"
+                    )
+
                 elif field_lower == "maxamount":
-                    return_parts.append("REDUCE(m = 0, r IN pathRels | CASE WHEN r.base_amt > m THEN r.base_amt ELSE m END) AS maxAmount")
-                
+                    return_parts.append(
+                        "REDUCE(m = 0, r IN pathRels | CASE WHEN r.base_amt > m THEN r.base_amt ELSE m END) AS maxAmount"
+                    )
+
                 elif field_lower == "minamount":
-                    return_parts.append("REDUCE(m = 999999, r IN pathRels | CASE WHEN r.base_amt < m THEN r.base_amt ELSE m END) AS minAmount")
-                
+                    return_parts.append(
+                        "REDUCE(m = 999999, r IN pathRels | CASE WHEN r.base_amt < m THEN r.base_amt ELSE m END) AS minAmount"
+                    )
+
                 elif field_lower == "avgamount":
-                    return_parts.append("REDUCE(s = 0, r IN pathRels | s + r.base_amt) / hops AS avgAmount")
-                
+                    return_parts.append(
+                        "REDUCE(s = 0, r IN pathRels | s + r.base_amt) / hops AS avgAmount"
+                    )
+
                 else:
                     return_parts.append(field)
-            
+
             return_clause = "RETURN " + ", ".join(return_parts)
         else:
             return_clause = """RETURN p AS path,
                 hops,
                 pathNodes AS nodes,
                 pathRels AS relationships"""
-        
+
         # ORDER BY (default hops ASC)
         if order_by:
             order_clause = f"ORDER BY {order_by} {order_direction}"
         else:
             order_clause = "ORDER BY hops ASC"
-        
+
         limit_clause = "LIMIT $limit" if limit is not None else ""
-        
+
         cypher = f"""
         MATCH (A:`{la}` {{`{ka}`: $va}}), (B:`{lb}` {{`{kb}`: $vb}})
         MATCH p = {pattern}
@@ -2168,13 +2261,12 @@ class Neo4jGraphClient:
         {order_clause}
         {limit_clause}
         """
-        
+
         params = {"va": va, "vb": vb}
         if limit is not None:
             params["limit"] = limit
-        
-        return self.run(cypher, params)
 
+        return self.run(cypher, params)
 
 
 # ==========================================
@@ -2186,47 +2278,42 @@ if __name__ == "__main__":
         Neo4jConfig(
             uri="bolt://localhost:7687",
             user="neo4j",
-            password="password"
+            password=os.getenv("NEO4J_PASSWORD", ""),
         )
     ) as client:
-        
         # Schema introspection
         schema = client.get_schema()
         print("=== Schema 信息 ===")
         print(f"节点类型: {list(schema['node_labels'].keys())}")
         print(f"关系类型: {list(schema['relationship_types'].keys())}")
         print(f"模式样例: {schema['patterns'][:3]}\n")
-        
+
         # 1. Lookup by unique key
         print("=== 测试1: 唯一键查节点 ===")
         user = client.get_node_by_unique_key("User", "userId", "u123")
         print(f"用户: {user}\n")
-        
+
         # 2. N-hop neighbors
         print("=== 测试2: N跳邻居 ===")
         neighbors = client.neighbors_n_hop(
-            "User", "userId", "u123",
+            "User",
+            "userId",
+            "u123",
             hops=2,
             rel_type="FOLLOWS",
             direction="out",
-            limit=10
+            limit=10,
         )
         print(f"找到 {len(neighbors)} 个邻居\n")
-        
+
         # 3. Common neighbors
         print("=== 测试3: 公共邻居 ===")
         common = client.common_neighbors(
-            ("User", "userId", "u1"),
-            ("User", "userId", "u2"),
-            rel_type="FOLLOWS"
+            ("User", "userId", "u1"), ("User", "userId", "u2"), rel_type="FOLLOWS"
         )
         print(f"找到 {len(common)} 个公共邻居\n")
-        
+
         # 4. aggregate_stats
         print("=== 测试4: 聚合统计 ===")
-        stats = client.aggregate_stats(
-            "User",
-            group_by="country",
-            limit=5
-        )
+        stats = client.aggregate_stats("User", group_by="country", limit=5)
         print(f"统计结果: {stats}\n")

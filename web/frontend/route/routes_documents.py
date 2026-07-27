@@ -3,6 +3,7 @@ import logging
 import sys
 import json
 import asyncio
+from pathlib import Path
 from document_schema import (
     load_knowledge_bases,
     create_knowledge_base,
@@ -11,23 +12,58 @@ from document_schema import (
     update_all_knowledge_bases_file_count,
 )
 from DummySocket import DummySocket
-sys.path.append("../../")
+
+# ⚠️ 此文件位于 web/frontend/route/，需要从顶级包 aag/ 导入模块
+# web/ 和 web/frontend/ 已有 __init__.py，但 aag 与 web 是同级顶级包（非父子关系），
+# Python 包相对导入无法跨顶级包边界（from ....aag... 会触发 ValueError）。
+# 折中方案：使用 pathlib.Path 计算项目根目录并临时加入 sys.path，
+# 使 aag/ 可作为顶级包被绝对导入（from aag.api.DocumentAPI import server_Test）。
+_PROJECT_ROOT = str(
+    Path(__file__).resolve().parents[3]
+)  # route → frontend → web → YiGraph
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 from aag.api.DocumentAPI import server_Test
 
+# 尝试使用后台事件循环运行异步任务，避免每次请求创建/销毁事件循环
+try:
+    from aag.api.async_runtime import get_background_loop
+
+    _HAS_BACKGROUND_LOOP = True
+except ImportError:
+    _HAS_BACKGROUND_LOOP = False
+
 # 创建蓝图
-bp = Blueprint('documents', __name__, url_prefix='/api')
+bp = Blueprint("documents", __name__, url_prefix="/api")
 
 # 配置日志
 logger = logging.getLogger(__name__)
 
+
+def _run_async(coro, timeout: int = 30):
+    """
+    在后台事件循环中执行异步协程；若运行时未初始化则回退到 asyncio.run()。
+    回退时会记录警告日志，帮助排查生产环境中异步运行时未启动的问题。
+    """
+    if _HAS_BACKGROUND_LOOP:
+        try:
+            loop = get_background_loop()
+            future = asyncio.run_coroutine_threadsafe(coro, loop)
+            return future.result(timeout=timeout)
+        except RuntimeError:
+            pass
+    logger.warning(
+        "异步运行时未初始化，回退到 asyncio.run()（每次调用将创建并销毁事件循环）"
+    )
+    return asyncio.run(coro)
+
+
 def load_knowledge_bases():
     a23 = DummySocket(json.dumps({"action": "get_datasets"}))
-    asyncio.run(server_Test.handler(a23))
+    _run_async(server_Test.handler(a23))
     knowledge_bases_with_count = a23.returnmsg
-    print(jsonify({
-        'success': True,
-        'data': knowledge_bases_with_count
-    }))
+    print(jsonify({"success": True, "data": knowledge_bases_with_count}))
     basescy = json.loads(knowledge_bases_with_count)
     return basescy["content"]["data"]
 
@@ -48,18 +84,20 @@ def _parse_ws_result(raw_msg: str):
         return payload
     return None
 
+
 def get_knowledge_base_name(kb_id):
     """根据知识库ID获取知识库名称"""
     try:
-        kb_id = int(kb_id)  
-        knowledge_bases = load_knowledge_bases() 
+        kb_id = int(kb_id)
+        knowledge_bases = load_knowledge_bases()
         for kb in knowledge_bases:
             if kb["id"] == kb_id:
                 return kb["name"]
-        return f"kb_{kb_id}"  
+        return f"kb_{kb_id}"
     except Exception as e:
         logger.error(f"获取知识库名称错误: {str(e)}")
         return f"kb_{kb_id}"
+
 
 # 获取知识库列表
 @bp.route("/knowledge_bases", methods=["GET"])
@@ -67,32 +105,40 @@ def get_knowledge_bases():
     """获取知识库列表"""
     try:
         a1 = DummySocket(json.dumps({"action": "get_datasets"}))
-        asyncio.run(server_Test.handler(a1))
+        _run_async(server_Test.handler(a1))
         gkb = a1.returnmsg
         knowledge_bases = json.loads(gkb)
         for kb in knowledge_bases["content"]["data"]:
             if kb["file_type"] == "graph":
                 if kb["file_count"] == 1:
-                    a6 = DummySocket(json.dumps({"action": "get_dataset_schema","ds_name":kb["name"]}))
-                    asyncio.run(server_Test.handler(a6))
+                    a6 = DummySocket(
+                        json.dumps(
+                            {"action": "get_dataset_schema", "ds_name": kb["name"]}
+                        )
+                    )
+                    _run_async(server_Test.handler(a6))
                     gkb6 = a6.returnmsg
                     gkb6_json = json.loads(gkb6)
-                    if gkb6_json["content"]["data"][0].get("vertex_file",None) is not None:
+                    if (
+                        gkb6_json["content"]["data"][0].get("vertex_file", None)
+                        is not None
+                    ):
                         kb["file_count"] = 2
-        
-        return jsonify({
-            "success": True,
-            "data": knowledge_bases["content"]["data"],
-            "count": len(knowledge_bases)
-        })
-        
+
+        return jsonify(
+            {
+                "success": True,
+                "data": knowledge_bases["content"]["data"],
+                "count": len(knowledge_bases),
+            }
+        )
+
     except Exception as e:
         logger.error(f"获取知识库列表失败：{str(e)}", exc_info=True)
-        return jsonify({
-            "success": False,
-            "error": "获取知识库列表失败",
-            "message": str(e)
-        }), 500
+        return jsonify(
+            {"success": False, "error": "获取知识库列表失败", "message": str(e)}
+        ), 500
+
 
 # 创建知识库
 @bp.route("/knowledge_bases", methods=["POST"])
@@ -103,10 +149,7 @@ def create_knowledge_base_route():
 
         name = data.get("name") or data.get("名称")
         if not data or not name:
-            return jsonify({
-                "success": False,
-                "error": "知识库名称不能为空"
-            }), 400
+            return jsonify({"success": False, "error": "知识库名称不能为空"}), 400
 
         file_type = data.get("file_type") or data.get("文件类型", "text")
         if file_type not in ["text", "graph"]:
@@ -118,79 +161,69 @@ def create_knowledge_base_route():
         #     file_type=file_type
         # )
 
-        a2 = DummySocket(json.dumps({"action": "create_dataset","name": name,"type": file_type}))
-        asyncio.run(server_Test.handler(a2))
+        a2 = DummySocket(
+            json.dumps({"action": "create_dataset", "name": name, "type": file_type})
+        )
+        _run_async(server_Test.handler(a2))
         result = _parse_ws_result(getattr(a2, "returnmsg", "{}"))
 
         if result and result.get("success"):
             # DocumentAPI 返回 content.data 里包含 db_name/message
-            return jsonify({
-                "success": True,
-                "data": result.get("data", {})
-            })
+            return jsonify({"success": True, "data": result.get("data", {})})
         else:
             err = None
             if result:
                 err = result.get("error") or result.get("message")
-            return jsonify({
-                "success": False,
-                "error": err or "创建知识库失败"
-            }), 500
-            
+            return jsonify({"success": False, "error": err or "创建知识库失败"}), 500
+
     except Exception as e:
         logger.error(f"创建知识库失败：{str(e)}", exc_info=True)
-        return jsonify({
-            "success": False,
-            "error": "创建知识库失败",
-            "message": str(e)
-        }), 500
+        return jsonify(
+            {"success": False, "error": "创建知识库失败", "message": str(e)}
+        ), 500
+
 
 @bp.route("/knowledge_bases/<int:kb_id>", methods=["DELETE"])
 def delete_knowledge_base_route(kb_id):
     """删除知识库"""
     try:
-        # 获取要删除的知识库名称，用于后续调用 
-        #knowledge_bases = load_knowledge_bases()
+        # 获取要删除的知识库名称，用于后续调用
+        # knowledge_bases = load_knowledge_bases()
         kb_to_delete = get_knowledge_base_name(kb_id)
         # for kb in knowledge_bases:
         #     if kb.get("id") == kb_id:
         #         kb_to_delete = kb
         #         break
-        
+
         if not kb_to_delete:
             logger.warning(f"未找到指定的知识库 ID: {kb_id}")
-            return jsonify({
-                "success": False,
-                "error": "未找到指定的知识库"
-            }), 404
-        
-        a3 = DummySocket(json.dumps({"action": "delete_dataset","ds_name":kb_to_delete}))
-        asyncio.run(server_Test.handler(a3))
+            return jsonify({"success": False, "error": "未找到指定的知识库"}), 404
+
+        a3 = DummySocket(
+            json.dumps({"action": "delete_dataset", "ds_name": kb_to_delete})
+        )
+        _run_async(server_Test.handler(a3))
         result = _parse_ws_result(getattr(a3, "returnmsg", "{}"))
 
         if result and result.get("success"):
-            return jsonify({
-                "success": True,
-                "message": result.get("message") or "成功删除知识库"
-            })
+            return jsonify(
+                {"success": True, "message": result.get("message") or "成功删除知识库"}
+            )
         else:
             err = None
             if result:
                 err = result.get("error") or result.get("message")
             logger.warning(f"未找到指定的知识库 ID: {kb_id}")
-            return jsonify({
-                "success": False,
-                "error": err or "未找到指定的知识库"
-            }), 404
-            
+            return jsonify(
+                {"success": False, "error": err or "未找到指定的知识库"}
+            ), 404
+
     except Exception as e:
         logger.error(f"删除知识库失败：{str(e)}", exc_info=True)
-        return jsonify({
-            "success": False,
-            "error": "删除知识库失败",
-            "message": str(e)
-        }), 500
-        
+        return jsonify(
+            {"success": False, "error": "删除知识库失败", "message": str(e)}
+        ), 500
+
 
 # 获取知识库文件个数（实时统计，不更新JSON）
 @bp.route("/knowledge_bases/<int:kb_id>/file_count", methods=["GET"])
@@ -198,22 +231,17 @@ def get_knowledge_base_file_count(kb_id):
     """获取指定知识库的实时文件个数（不更新JSON）"""
     try:
         file_count = count_files_in_knowledge_base(kb_id)
-        
-        return jsonify({
-            "success": True,
-            "data": {
-                "kb_id": kb_id,
-                "file_count": file_count
-            }
-        })
-        
+
+        return jsonify(
+            {"success": True, "data": {"kb_id": kb_id, "file_count": file_count}}
+        )
+
     except Exception as e:
         logger.error(f"获取知识库文件个数失败：{str(e)}", exc_info=True)
-        return jsonify({
-            "success": False,
-            "error": "获取文件个数失败",
-            "message": str(e)
-        }), 500
+        return jsonify(
+            {"success": False, "error": "获取文件个数失败", "message": str(e)}
+        ), 500
+
 
 # 更新所有知识库文件个数
 @bp.route("/knowledge_bases/update_all_file_counts", methods=["POST"])
@@ -221,26 +249,23 @@ def update_all_file_counts_route():
     """更新所有知识库的文件个数"""
     try:
         success = update_all_knowledge_bases_file_count()
-        
+
         if success:
             # 重新加载更新后的知识库数据
             knowledge_bases = load_knowledge_bases()
-            
-            return jsonify({
-                "success": True,
-                "message": "成功更新所有知识库文件个数",
-                "data": knowledge_bases
-            })
+
+            return jsonify(
+                {
+                    "success": True,
+                    "message": "成功更新所有知识库文件个数",
+                    "data": knowledge_bases,
+                }
+            )
         else:
-            return jsonify({
-                "success": False,
-                "error": "更新文件个数失败"
-            }), 500
-            
+            return jsonify({"success": False, "error": "更新文件个数失败"}), 500
+
     except Exception as e:
         logger.error(f"更新所有文件个数失败：{str(e)}", exc_info=True)
-        return jsonify({
-            "success": False,
-            "error": "更新所有文件个数失败",
-            "message": str(e)
-        }), 500
+        return jsonify(
+            {"success": False, "error": "更新所有文件个数失败", "message": str(e)}
+        ), 500

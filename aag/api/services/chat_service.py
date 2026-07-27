@@ -5,11 +5,6 @@ Chat service: wraps AAG engine chat, handles user messages.
 import logging
 import asyncio
 from typing import Dict, Any, Optional, Callable, List
-import sys
-import os
-
-# Add project root to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 from .engine_service import EngineService
 
@@ -36,14 +31,14 @@ class ChatService:
     def __init__(self):
         """Initialize chat service."""
         self.engine_service = EngineService.get_instance()
-    
+
     async def process_message(
         self,
         message: str,
         model: Optional[str] = None,
         dataset: Optional[str] = None,
         mode: str = "normal",
-        expert_mode: bool = False
+        expert_mode: bool = False,
     ) -> Dict[str, Any]:
         """
         Process a user message (sync-style API).
@@ -68,26 +63,19 @@ class ChatService:
                 logger.info(f"Select dataset: {dataset}")
                 engine.specific_dataset(dataset)
 
-            logger.info(f"Process message: mode={mode}, model={model}, message={message[:50]}...")
+            logger.info(
+                f"Process message: mode={mode}, model={model}, message={message[:50]}..."
+            )
 
             result = await engine.run(message, mode=mode)
 
-            return {
-                "success": True,
-                "result": result,
-                "mode": mode
-            }
+            return {"success": True, "result": result, "mode": mode}
         except Exception as e:
             logger.error(f"Process message failed: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e),
-                "mode": mode
-            }
-    
+            return {"success": False, "error": str(e), "mode": mode}
+
     async def process_dag_modification(
-        self,
-        modification_request: str
+        self, modification_request: str
     ) -> Dict[str, Any]:
         """
         Handle DAG modification request (expert mode).
@@ -104,17 +92,11 @@ class ChatService:
 
             result = await engine.expert_modify_dag(modification_request)
 
-            return {
-                "success": True,
-                **result
-            }
+            return {"success": True, **result}
         except Exception as e:
             logger.error(f"DAG modification failed: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
-    
+            return {"success": False, "error": str(e)}
+
     async def start_expert_analysis(self) -> Dict[str, Any]:
         """
         Start expert-mode analysis.
@@ -128,17 +110,11 @@ class ChatService:
 
             result = await engine.expert_start_analysis()
 
-            return {
-                "success": True,
-                "result": result
-            }
+            return {"success": True, "result": result}
         except Exception as e:
             logger.error(f"Expert analysis failed: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
-    
+            return {"success": False, "error": str(e)}
+
     async def process_streaming_chat(
         self,
         message: str,
@@ -147,7 +123,7 @@ class ChatService:
         dataset_type: Optional[str] = None,
         mode: str = "normal",
         expert_mode: bool = False,
-        callback: Optional[Callable[[Dict[str, Any]], None]] = None
+        callback: Optional[Callable[[Dict[str, Any]], None]] = None,
     ):
         """
         Stream chat (for WebSocket).
@@ -168,11 +144,13 @@ class ChatService:
             engine = self.engine_service.get_engine()
 
             if callback:
-                callback({
-                    "type": "thinking",
-                    "contentType": "text",
-                    "content": "Analyzing your question..."
-                })
+                callback(
+                    {
+                        "type": "thinking",
+                        "contentType": "text",
+                        "content": "Analyzing your question...",
+                    }
+                )
 
             if dataset:
                 logger.info(f"Select dataset: {dataset}, type: {dataset_type}")
@@ -182,71 +160,79 @@ class ChatService:
 
             result = await engine.run(message, mode=mode, callback=callback)
 
-            if mode in {"interact", "expert"} and isinstance(result, dict) and "dag_info" in result:
+            if (
+                mode in {"interact", "expert"}
+                and isinstance(result, dict)
+                and "dag_info" in result
+            ):
                 dag_content = self._convert_dag_to_frontend_format(result)
                 if callback:
-                    callback({
-                        "type": "result",
-                        "contentType": "dag",
-                        "content": dag_content
-                    })
-            elif mode in {"interact", "expert"} and isinstance(result, dict) and "error" in result:
+                    callback(
+                        {"type": "result", "contentType": "dag", "content": dag_content}
+                    )
+            elif (
+                mode in {"interact", "expert"}
+                and isinstance(result, dict)
+                and "error" in result
+            ):
                 if callback:
-                    callback({
-                        "type": "result",
-                        "contentType": "text",
-                        "content": CHAT_FRIENDLY_ERROR_MSG
-                    })
+                    callback(
+                        {
+                            "type": "result",
+                            "contentType": "text",
+                            "content": CHAT_FRIENDLY_ERROR_MSG,
+                        }
+                    )
             elif mode == "normal" and isinstance(result, dict) and "dag_info" in result:
                 # Normal mode: result has DAG info — send DAG first
-                dag_content = self._convert_dag_to_frontend_format({
-                    "dag_info": result.get("dag_info", {})
-                })
+                dag_content = self._convert_dag_to_frontend_format(
+                    {"dag_info": result.get("dag_info", {})}
+                )
                 if callback:
-                    callback({
-                        "type": "result",
-                        "contentType": "dag",
-                        "content": dag_content
-                    })
+                    callback(
+                        {"type": "result", "contentType": "dag", "content": dag_content}
+                    )
 
                 result_text = result.get("analysis_result", "")
                 if callback and result_text:
-                    paragraphs = [p.strip() for p in result_text.split('\n') if p.strip()]
+                    paragraphs = [
+                        p.strip() for p in result_text.split("\n") if p.strip()
+                    ]
                     for para in paragraphs:
-                        callback({
-                            "type": "result",
-                            "contentType": "text",
-                            "content": para
-                        })
+                        callback(
+                            {"type": "result", "contentType": "text", "content": para}
+                        )
             else:
                 result_text = str(result) if result else "No result."
                 if _is_scheduler_error_text(result_text):
                     result_text = CHAT_FRIENDLY_ERROR_MSG
                 if callback:
-                    paragraphs = [p.strip() for p in result_text.split('\n') if p.strip()]
+                    paragraphs = [
+                        p.strip() for p in result_text.split("\n") if p.strip()
+                    ]
                     for para in paragraphs:
-                        callback({
-                            "type": "result",
-                            "contentType": "text",
-                            "content": para
-                        })
+                        callback(
+                            {"type": "result", "contentType": "text", "content": para}
+                        )
             if callback:
-                callback({
-                    "type": "stream_end"
-                })
-                
+                callback({"type": "stream_end"})
+
         except Exception as e:
             logger.error(f"Stream chat failed: {str(e)}", exc_info=True)
             if callback:
-                callback({
-                    "type": "result",
-                    "contentType": "text",
-                    "content": CHAT_FRIENDLY_ERROR_MSG
-                })
+                callback(
+                    {
+                        "type": "result",
+                        "contentType": "text",
+                        "content": CHAT_FRIENDLY_ERROR_MSG,
+                    }
+                )
                 callback({"type": "stream_end"})
             return
-    
-    def _convert_dag_to_frontend_format(self, dag_result: Dict[str, Any]) -> Dict[str, Any]:
+
+    def _convert_dag_to_frontend_format(
+        self, dag_result: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Convert DAG result to frontend format.
 
@@ -277,11 +263,13 @@ class ChatService:
                 else:
                     tasktype_str = "Unknown"
 
-                nodes.append({
-                    "id": str(step_id),
-                    "label": step_info.get("question", ""),
-                    "tasktype": tasktype_str
-                })
+                nodes.append(
+                    {
+                        "id": str(step_id),
+                        "label": step_info.get("question", ""),
+                        "tasktype": tasktype_str,
+                    }
+                )
 
             edges_info = dag_info.get("edges", [])
             if edges_info:
@@ -289,26 +277,22 @@ class ChatService:
             else:
                 topological_order = dag_info.get("topological_order", [])
                 for i in range(len(topological_order) - 1):
-                    edges.append({
-                        "from": str(topological_order[i]),
-                        "to": str(topological_order[i + 1])
-                    })
+                    edges.append(
+                        {
+                            "from": str(topological_order[i]),
+                            "to": str(topological_order[i + 1]),
+                        }
+                    )
 
-            return {
-                "nodes": nodes,
-                "edges": edges
-            }
+            return {"nodes": nodes, "edges": edges}
         except Exception as e:
             logger.error(f"Convert DAG format failed: {str(e)}")
-            return {
-                "nodes": [],
-                "edges": []
-            }
-    
+            return {"nodes": [], "edges": []}
+
     def process_dag_confirmation(
         self,
         dag_confirm: str,
-        callback: Optional[Callable[[Dict[str, Any]], None]] = None
+        callback: Optional[Callable[[Dict[str, Any]], None]] = None,
     ) -> Dict[str, Any]:
         """
         Handle DAG confirmation (yes/no).
@@ -324,12 +308,11 @@ class ChatService:
             return self.start_expert_analysis()
         else:
             if callback:
-                callback({
-                    "type": "result",
-                    "contentType": "text",
-                    "content": "DAG rejected. Please modify and resubmit."
-                })
-            return {
-                "success": True,
-                "message": "DAG rejected"
-            }
+                callback(
+                    {
+                        "type": "result",
+                        "contentType": "text",
+                        "content": "DAG rejected. Please modify and resubmit.",
+                    }
+                )
+            return {"success": True, "message": "DAG rejected"}

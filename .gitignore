@@ -147,3 +147,13 @@ docs/_build
 
 # database
 *.db 
+
+# ==========================================
+# 含敏感凭证的配置文件（禁止提交真实密钥）
+# ==========================================
+web/frontend/models.json
+aag/expert_search_engine/data_process/openai_extractor/openai_config.json
+aag/expert_search_engine/data_process/openai_extractor/openai_config_4o.json
+
+# 示例模板（允许提交）
+!*.example

@@ -7,9 +7,12 @@ from typing import Dict, Any, Optional
 from aag.utils.path_utils import DEFAULT_CONFIG_SERVER_PATH
 
 from aag.computing_engine.mcp_client import GraphMCPClient
-from aag.computing_engine.code_executor import DynamicCodeExecutor
+from aag.computing_engine.code_executor import DynamicCodeExecutor, SAFE_BUILTINS
 from aag.expert_search_engine.database.datatype import GraphData
-from aag.computing_engine.graph_query.nl_query_engine import NaturalLanguageQueryEngine, LLMInterface
+from aag.computing_engine.graph_query.nl_query_engine import (
+    NaturalLanguageQueryEngine,
+    LLMInterface,
+)
 from aag.computing_engine.graph_query.graph_query import Neo4jGraphClient, Neo4jConfig
 
 
@@ -27,8 +30,8 @@ class ComputingEngine:
     def __init__(self, config_path: str = DEFAULT_CONFIG_SERVER_PATH):
         self.config_path = Path(config_path)
         self.clients: Dict[str, GraphMCPClient] = {}
-        self.engine_supported_algorithms = {}   # algorithm_type -> engine_name
-        self.algorithm_tool_mapping = {}        # algorithm_name -> tool_name
+        self.engine_supported_algorithms = {}  # algorithm_type -> engine_name
+        self.algorithm_tool_mapping = {}  # algorithm_name -> tool_name
         self.parameter_modules = {}
         self._initialized = False
         self.code_executor = DynamicCodeExecutor(timeout=120, auto_install=True)
@@ -36,16 +39,27 @@ class ComputingEngine:
         self.neo4j_config: Optional[Dict[str, Any]] = None
         self.reasoner = None  # set in initialize_graph_query_engine
 
+    # 引擎名白名单：防止 YAML 配置注入导致的任意模块加载
+    ALLOWED_ENGINES = {"networkx", "pyg"}
+
     async def initialize(self):
         """Load config and connect to all MCP servers."""
         config = self._load_config()
         self.engine_supported_algorithms = config.get("engine_supported_algorithms", {})
-        self._parse_algorithm_tool_mapping(config.get("engine_supported_algorithms", {}))
-        
+        self._parse_algorithm_tool_mapping(
+            config.get("engine_supported_algorithms", {})
+        )
+
         for engine_name, server in config.get("servers", {}).items():
+            # 白名单校验：仅允许加载已知引擎模块
+            if engine_name not in self.ALLOWED_ENGINES:
+                logger.error(
+                    f"❌ Engine '{engine_name}' not in ALLOWED_ENGINES whitelist; skipped"
+                )
+                continue
             client = GraphMCPClient(
                 server_command=server.get("command", "python"),
-                server_args=server.get("args", [])
+                server_args=server.get("args", []),
             )
             ok = await client.connect()
             if ok:
@@ -55,16 +69,19 @@ class ComputingEngine:
                 logger.warning(f"⚠️ Engine '{engine_name}' failed to connect")
 
             try:
-                module_path = f"aag.computing_engine.{engine_name}_server.parameter_utils"
+                module_path = (
+                    f"aag.computing_engine.{engine_name}_server.parameter_utils"
+                )
                 module = importlib.import_module(module_path)
                 self.parameter_modules[engine_name] = module
                 logger.info(f"🧩 Loaded parameter module: {module_path}")
             except ImportError as e:
-                logger.warning(f"⚠️ No parameter_utils.py found for engine '{engine_name}' ({e})")
+                logger.warning(
+                    f"⚠️ No parameter_utils.py found for engine '{engine_name}' ({e})"
+                )
         self._initialized = True
         logger.info(f"✅ Loaded {len(self.clients)} computing engines")
         # logger.info(f"🧠 Annotation modules loaded: {list(self.parameter_modules.keys())}")
-
 
     def _load_config(self) -> dict:
         """Load engine definitions from config file."""
@@ -80,10 +97,10 @@ class ComputingEngine:
             bfs:
               - tool: bfs_edges
         """
-        
+
         for engine_name, algorithms in engine_algorithms.items():
             engine_mapping = {}
-            
+
             for algo_name, tool_configs in algorithms.items():
                 if isinstance(tool_configs, list) and len(tool_configs) > 0:
                     tool_config = tool_configs[0]
@@ -91,11 +108,15 @@ class ComputingEngine:
                     if tool_base_name and isinstance(tool_base_name, str):
                         engine_mapping[algo_name] = f"run_{tool_base_name}"
                     else:
-                        logger.warning(f"⚠️ Invalid tool name for algorithm '{algo_name}' in engine '{engine_name}': {tool_base_name}")
-            
+                        logger.warning(
+                            f"⚠️ Invalid tool name for algorithm '{algo_name}' in engine '{engine_name}': {tool_base_name}"
+                        )
+
             self.algorithm_tool_mapping[engine_name] = engine_mapping
-        
-        logger.info(f"✅ Parsed {sum(len(m) for m in self.algorithm_tool_mapping.values())} algorithm-tool mappings")
+
+        logger.info(
+            f"✅ Parsed {sum(len(m) for m in self.algorithm_tool_mapping.values())} algorithm-tool mappings"
+        )
         logger.debug(f"Algorithm-tool mapping: {self.algorithm_tool_mapping}")
 
     def _resolve_engine(self, algo_name: str) -> str:
@@ -105,7 +126,9 @@ class ComputingEngine:
             if isinstance(algorithms, dict):
                 if algo_name in algorithms:
                     return engine
-        logger.warning(f"⚠️ Algorithm '{algo_name}' not found in config; fallback to 'networkx'")
+        logger.error(
+            f"❌ Algorithm '{algo_name}' not found in config; fallback to 'networkx'"
+        )
         return "networkx"
 
     def _resolve_tool_name(self, algo_name: str, engine_name: str) -> str:
@@ -125,34 +148,55 @@ class ComputingEngine:
         engine_mapping = self.algorithm_tool_mapping.get(engine_name, {})
         if algo_name in engine_mapping:
             return engine_mapping[algo_name]
-        
-        logger.error(f"❌ Cannot resolve tool name for algorithm '{algo_name}' in engine '{engine_name}'")
-        raise ValueError(f"Algorithm '{algo_name}' has no tool mapping in engine '{engine_name}'. "
-                         f"Please check config_servers.yaml")
 
-    async def run_algorithm(self, algo_name: str, parameters: Dict[str, Any], post_processing_code: Optional[str] = None, global_graph: Optional[GraphData] = None) -> Dict[str, Any]:
+        logger.error(
+            f"❌ Cannot resolve tool name for algorithm '{algo_name}' in engine '{engine_name}'"
+        )
+        raise ValueError(
+            f"Algorithm '{algo_name}' has no tool mapping in engine '{engine_name}'. "
+            f"Please check config_servers.yaml"
+        )
+
+    async def run_algorithm(
+        self,
+        algo_name: str,
+        parameters: Dict[str, Any],
+        post_processing_code: Optional[str] = None,
+        global_graph: Optional[GraphData] = None,
+    ) -> Dict[str, Any]:
         """Run the specified algorithm."""
         try:
             engine_name = self._resolve_engine(algo_name)
             if engine_name not in self.clients:
-                return {"success": False, "error": f"Engine '{engine_name}' not connected"}
+                return {
+                    "success": False,
+                    "error": f"Engine '{engine_name}' not connected",
+                }
 
             client = self.clients[engine_name]
             tool_name = self._resolve_tool_name(algo_name, engine_name)
-            
+
             prepared_params = parameters or {}
             if self._should_normalize(engine_name, tool_name):
-                prepared_params = self._normalize_parameters(engine_name, tool_name, prepared_params)
-            
-            logger.info(f"🚀 Running '{algo_name}' (tool: {tool_name}) on engine [{engine_name}]")
-            result = await client.call_tool(tool_name, prepared_params, post_processing_code, global_graph)
+                prepared_params = self._normalize_parameters(
+                    engine_name, tool_name, prepared_params
+                )
+
+            logger.info(
+                f"🚀 Running '{algo_name}' (tool: {tool_name}) on engine [{engine_name}]"
+            )
+            result = await client.call_tool(
+                tool_name, prepared_params, post_processing_code, global_graph
+            )
             return result
 
         except Exception as e:
             logger.error(f"❌ Algorithm '{algo_name}' failed: {e}")
             return {"success": False, "error": str(e)}
 
-    async def get_algorithm_description(self, algo_name: str) -> tuple[str, Optional[dict]]:
+    async def get_algorithm_description(
+        self, algo_name: str
+    ) -> tuple[str, Optional[dict]]:
         """Get tool description (input/output schema) for the given algorithm."""
         engine = self._resolve_engine(algo_name)
         client = self.clients.get(engine)
@@ -174,7 +218,7 @@ class ComputingEngine:
             f"```json\n{json.dumps(annotated_input, indent=2, ensure_ascii=False)}\n```\n\n"
             f"**Output Structure** *(data received by your `process(data)` in the `result` field)*:\n"
             f"```json\n{json.dumps(output_schema, indent=2, ensure_ascii=False)}\n```\n"
-            f"{'-'*50}\n"
+            f"{'-' * 50}\n"
         )
 
         tool_metadata = {
@@ -202,9 +246,10 @@ class ComputingEngine:
             try:
                 return annotate_func(input_schema)
             except Exception as e:
-                logger.error(f"❌ Error running annotate_schema() for '{engine_name}': {e}")
+                logger.error(
+                    f"❌ Error running annotate_schema() for '{engine_name}': {e}"
+                )
         return input_schema
-    
 
     def _should_normalize(self, engine_name: str, tool_name: str) -> bool:
         module = self.parameter_modules.get(engine_name)
@@ -215,7 +260,9 @@ class ComputingEngine:
             return guard(tool_name)
         return hasattr(module, "normalize_parameters")
 
-    def _normalize_parameters(self, engine_name: str, tool_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
+    def _normalize_parameters(
+        self, engine_name: str, tool_name: str, parameters: Dict[str, Any]
+    ) -> Dict[str, Any]:
         module = self.parameter_modules.get(engine_name)
         if not module:
             return parameters
@@ -226,12 +273,21 @@ class ComputingEngine:
         client = self.clients.get(engine_name)
         tool_info = client.available_tools.get(tool_name) if client else None
         try:
-            return normalize_fn(tool_name, dict(parameters or {}), tool_info, logger=logger)
+            return normalize_fn(
+                tool_name, dict(parameters or {}), tool_info, logger=logger
+            )
         except Exception as exc:
             logger.warning("⚠️ Parameter normalization failed (%s): %s", tool_name, exc)
             return parameters
 
-    def execute_code(self, code: str, data: Any, global_graph: Optional[GraphData] = None, fallback_to_direct_exec: bool = True, is_numeric_analysis: bool = False) -> Any:
+    def execute_code(
+        self,
+        code: str,
+        data: Any,
+        global_graph: Optional[GraphData] = None,
+        fallback_to_direct_exec: bool = True,
+        is_numeric_analysis: bool = False,
+    ) -> Any:
         """
         Execute dynamically generated code (numeric analysis, post-processing, etc.).
 
@@ -248,34 +304,54 @@ class ComputingEngine:
             RuntimeError: If execution fails.
         """
         try:
-            value = self.code_executor.execute(code, data, global_graph=global_graph, is_numeric_analysis=is_numeric_analysis)
+            value = self.code_executor.execute(
+                code,
+                data,
+                global_graph=global_graph,
+                is_numeric_analysis=is_numeric_analysis,
+            )
             return {
                 "algorithm": "numeric_analysis_code",
                 "success": True,
                 "result": value,
                 "error": None,
                 "summary": "Numeric analysis code executed successfully.",
-        }
+            }
         except (ValueError, AttributeError) as e:
             if not fallback_to_direct_exec:
-                return {"success": False, "result": None, "error": str(e), "summary": "Numeric analysis code execution failed."}
+                return {
+                    "success": False,
+                    "result": None,
+                    "error": str(e),
+                    "summary": "Numeric analysis code execution failed.",
+                }
             try:
                 if isinstance(data, dict):
-                    namespace = {**data, "__builtins__": __builtins__}
+                    namespace = {**data, "__builtins__": SAFE_BUILTINS}
                 else:
-                    namespace = {"data": data, "__builtins__": __builtins__}
+                    namespace = {"data": data, "__builtins__": SAFE_BUILTINS}
                 exec(code, namespace)
                 return {
-                        "algorithm": "numeric_analysis_code",
-                        "success": True,
-                        "result": namespace.get("result", data),
-                        "error": None,
-                        "summary": "Numeric analysis code executed successfully via direct exec fallback.",
+                    "algorithm": "numeric_analysis_code",
+                    "success": True,
+                    "result": namespace.get("result", data),
+                    "error": None,
+                    "summary": "Numeric analysis code executed successfully via direct exec fallback.",
                 }
             except Exception as fallback_error:
-                return {"success": False, "result": None, "error": str(fallback_error), "summary": "Numeric analysis code execution failed."}
+                return {
+                    "success": False,
+                    "result": None,
+                    "error": str(fallback_error),
+                    "summary": "Numeric analysis code execution failed.",
+                }
         except Exception as e:
-            return {"success": False, "result": None, "error": str(e), "summary": "Numeric analysis code execution failed."}
+            return {
+                "success": False,
+                "result": None,
+                "error": str(e),
+                "summary": "Numeric analysis code execution failed.",
+            }
 
     def initialize_graph_query_engine(self, neo4j_config: Dict[str, Any], reasoner):
         """
@@ -299,7 +375,7 @@ class ComputingEngine:
             config = Neo4jConfig(
                 uri=neo4j_config.get("uri", "bolt://localhost:7687"),
                 user=neo4j_config.get("user", "neo4j"),
-                password=neo4j_config.get("password", "")
+                password=neo4j_config.get("password", ""),
             )
             logger.info(f"📝 Creating Neo4jGraphClient, uri={config.uri}")
             db_client = Neo4jGraphClient(config)
@@ -310,7 +386,10 @@ class ComputingEngine:
             self.nl_query_engine.initialize()
             logger.info("✓ NaturalLanguageQueryEngine initialized in ComputingEngine")
         except Exception as e:
-            logger.error(f"✗ NaturalLanguageQueryEngine initialization failed: {e}", exc_info=True)
+            logger.error(
+                f"✗ NaturalLanguageQueryEngine initialization failed: {e}",
+                exc_info=True,
+            )
             self.nl_query_engine = None
 
     def execute_graph_query(self, query: str) -> Dict[str, Any]:
@@ -326,7 +405,7 @@ class ComputingEngine:
         if not self.nl_query_engine:
             return {
                 "success": False,
-                "error": "Graph query engine not initialized; check Neo4j config."
+                "error": "Graph query engine not initialized; check Neo4j config.",
             }
         try:
             result = self.nl_query_engine.ask(query)
@@ -335,7 +414,7 @@ class ComputingEngine:
             logger.error(f"Graph query execution failed: {e}", exc_info=True)
             return {
                 "success": False,
-                "error": f"Graph query execution failed: {str(e)}"
+                "error": f"Graph query execution failed: {str(e)}",
             }
 
     async def shutdown(self):
