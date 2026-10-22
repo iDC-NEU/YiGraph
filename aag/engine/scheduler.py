@@ -18,6 +18,7 @@ from aag.reasoner.model_deployment import Reasoner
 from aag.engine.router import QueryRouter, QueryType
 from aag.computing_engine.computing_engine import ComputingEngine
 from aag.expert_search_engine.search import ExpertSearchEngine
+from aag.expert_search_engine.web_search import answer_web_command
 from aag.data_pipeline.data_transformer.dataset_manager import DatasetManager
 from aag.config.data_upload_config import DatasetConfig
 from aag.engine.dependency_resolver import DataDependencyResolver
@@ -265,6 +266,17 @@ class Scheduler:
             mode = self._normalize_graph_mode(mode)
         except ValueError as mode_err:
             return f"❌ Error: {mode_err}"
+
+        # Web access requires an explicit command; never send uploaded data or
+        # let the LLM router turn ordinary local queries into network requests.
+        parts = query.split(maxsplit=1)
+        command = parts[0].lower() if parts else ""
+        text = parts[1].strip() if len(parts) > 1 else ""
+        if command in {"/web", "/fetch"}:
+            return await answer_web_command(
+                command, text,
+                self.config.retrieval.web_search, self.reasoner,
+            )
 
         decision = self.router.route(query=query)
         logger.info(f"🚦[Router] query_type={decision.query_type}, reason={decision.reason}")
