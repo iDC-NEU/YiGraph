@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Watch YiGraph's Chinese and English product demos: graph construction, intelligent analysis, traceable reports and expert workflows.">
+<title>易图 YiGraph · 演示视频</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;color:#153c49;background:#f2f8fa;font-synthesis:none}*{box-sizing:border-box}body{margin:0}main{max-width:1100px;margin:auto;padding:30px 24px 48px}header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:28px;border-bottom:1px solid #d5e5ea}.brand{font-size:22px;font-weight:750;text-decoration:none;color:#098eae;white-space:nowrap}a{color:#087e9c;text-underline-offset:4px}header>a:last-child{font-size:14px}h1{font-size:clamp(26px,4.4vw,42px);line-height:1.3;margin:35px 0 12px;letter-spacing:-.5px}.description{color:#58747f;line-height:1.8;max-width:760px;margin:0 0 24px}.languages{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}.languages a{padding:10px 20px;border:1px solid #cfdee4;border-radius:7px;background:#fff;color:#4d6c77;text-decoration:none;font-weight:600}.languages a[aria-current="page"]{background:#087f9f;border-color:#087f9f;color:#fff}.player{overflow:hidden;border:1px solid #cfdfe6;border-radius:12px;background:white;box-shadow:0 12px 45px #1a4b5b0a}video{display:block;width:100%;aspect-ratio:16/9;background:#10232a}.player-info{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px}.player-info h2{font-size:18px;margin:0 0 5px}.player-info p{font-size:14px;color:#607b86;margin:0}.download{font-size:14px;white-space:nowrap}.error{margin:0;padding:16px 24px;background:#fff5e9;color:#8a4c15;line-height:1.7}footer{padding-top:24px;color:#65808b;font-size:13px;line-height:1.8}a:focus-visible{outline:3px solid #00b8d5;outline-offset:4px}noscript{display:block;padding:20px}@media(max-width:540px){main{padding:22px 16px 34px}header{padding-bottom:22px}.brand{font-size:20px}h1{margin-top:28px}.player-info{align-items:flex-start;flex-direction:column;padding:18px}.description{font-size:14px}.languages a{padding:9px 17px}}
+</style>
+</head>
+<body><main>
+<header><a class="brand" href="?lang=zh">易图(YiGraph)</a><a href="https://github.com/iDC-NEU/YiGraph">GitHub ↗</a></header>
+<h1 id="heading">看看易图如何完成图数据分析</h1>
+<p class="description" id="description">从原始数据导入与自动构图，到可疑交易分析、可追溯报告生成和专家模式下的工作流调整。</p>
+<nav class="languages" aria-label="Video language"><a href="?lang=zh" id="tab-zh">中文演示</a><a href="?lang=en" id="tab-en">English demo</a></nav>
+<section class="player" aria-label="YiGraph demo player">
+<video id="demo" controls playsinline preload="metadata" poster="yigraph-demo-zh.jpg" src="yigraph-demo-zh.mp4"><track kind="subtitles" src="yigraph-demo-zh.vtt" srclang="zh" label="中文"><p><a href="yigraph-demo-zh.mp4">下载视频 / Download video</a></p></video>
+<p class="error" id="error" hidden>视频暂时无法加载，请刷新重试，或使用下方的下载链接。 / Unable to load the video. Please retry or download it below.</p>
+<div class="player-info"><div><h2 id="video-title">中文演示</h2><p id="duration">3 分 34 秒</p></div><a class="download" id="download" href="yigraph-demo-zh.mp4" download>下载视频 ↓</a></div>
+</section>
+<noscript><a href="yigraph-demo-zh.mp4">中文演示</a> · <a href="yigraph-demo-en.mp4">English demo</a></noscript>
+<footer id="footer">YiGraph · 由东北大学 iDC 实验室研发</footer>
+</main>
+<script>
+const lang=new URLSearchParams(location.search).get('lang')==='en'?'en':'zh';
+const video=document.getElementById('demo');
+document.documentElement.lang=lang==='en'?'en':'zh-CN';
+document.getElementById('tab-'+lang).setAttribute('aria-current','page');
+if(lang==='en'){
+ document.title='YiGraph · English demo';
+ document.getElementById('heading').textContent='See YiGraph turn data into insight';
+ document.getElementById('description').textContent='From raw data and automatic graph construction to suspicious transaction analysis, traceable reports, and expert workflow refinement.';
+ video.poster='yigraph-demo-en.jpg';video.src='yigraph-demo-en.mp4';video.querySelector('track').remove();
+ document.getElementById('video-title').textContent='English demo';
+ document.getElementById('duration').textContent='3 min 57 sec';
+ const download=document.getElementById('download');download.href='yigraph-demo-en.mp4';download.textContent='Download video ↓';
+ document.getElementById('footer').textContent='YiGraph · Developed by iDC Lab, Northeastern University';
+}
+video.addEventListener('error',()=>{document.getElementById('error').hidden=false;});
+</script></body></html>
