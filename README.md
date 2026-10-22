@@ -33,8 +33,6 @@ English | [简体中文](README_CN.md)
 
 Watch YiGraph turn raw data into a graph, analyze suspicious transactions, generate a traceable report, and refine a workflow in expert mode.
 
-### English · 3 min 57 sec
-
 https://github.com/user-attachments/assets/dcbbc3a0-1ab8-4997-9a00-9bea480bad5e
 
 [Open the standalone English player](https://anoodle3.github.io/YiGraph-1/figure/demo/?lang=en)
