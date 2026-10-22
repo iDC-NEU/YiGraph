@@ -33,20 +33,9 @@
 
 从原始数据导入与自动构图，到可疑交易分析、可追溯报告生成和专家模式下的工作流调整，查看易图的完整操作过程。
 
-### 中文演示 · 3 分 34 秒
-
 https://github.com/user-attachments/assets/595de226-147f-40eb-aa3e-475a789fbc76
 
 [打开独立中文播放器](https://anoodle3.github.io/YiGraph-1/figure/demo/?lang=zh) · [中文字幕](figure/demo/yigraph-demo-zh.srt)
-
-<details>
-<summary>English demo · 3 min 57 sec</summary>
-
-https://github.com/user-attachments/assets/dcbbc3a0-1ab8-4997-9a00-9bea480bad5e
-
-[Open the standalone English player](https://anoodle3.github.io/YiGraph-1/figure/demo/?lang=en)
-
-</details>
 
 ---
 
