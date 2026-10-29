@@ -323,6 +323,15 @@ cd bin
 
 After starting Neo4j, you can access the web interface at `http://localhost:7474` to verify the installation.
 
+#### 1.4 Node.js and npm (Required for the Web Interface)
+
+The Web frontend uses Next.js 16 and React 19 and requires **Node.js >= 20.9.0** and npm. Verify that both commands are available:
+
+```bash
+node --version
+npm --version
+```
+
 ### 2. Get Source Code and Install Dependencies
 
 #### 2.1 Download Source Code
@@ -332,10 +341,18 @@ git clone https://github.com/iDC-NEU/YiGraph.git
 cd YiGraph
 ```
 
-#### 2.2 Install Dependencies
+#### 2.2 Install Python Dependencies
 
 ```bash
 pip install -r requirements.txt
+```
+
+#### 2.3 Install Frontend Dependencies (Web Mode)
+
+Run the following command in the project root:
+
+```bash
+npm install
 ```
 
 ### 3. Configure System Parameters
@@ -428,13 +445,34 @@ YiGraph supports the following two operating modes:
 
 #### 4.1 Web Interactive Mode
 
-Execute the following command in the project root directory to start the Web service:
+Activate the Python environment where you installed the dependencies, then run the following commands from the project root.
+
+##### Option 1: Build and Serve (Recommended for Daily Use and Demos)
+
+For the first launch, build the frontend before starting the backend:
 
 ```bash
-python web/frontend/run.py
+npm run build
+npm run serve
 ```
 
-After successful startup, the terminal will output the accessible service address. Please open the corresponding address in your browser according to the prompt to enter YiGraph's Web interface.
+After startup, open **[http://localhost:5089](http://localhost:5089)**.
+
+##### Option 2: Development Mode (Frontend Hot Reload)
+
+Start the backend and frontend in two terminals, both from the project root:
+
+```bash
+# Terminal 1: start the backend (activate the Python environment first)
+npm run serve
+```
+
+```bash
+# Terminal 2: start the frontend development server
+npm run dev
+```
+
+After startup, open **[http://localhost:3000](http://localhost:3000)**.
 
 In the Web interface, users can input business questions in natural language, and the system will automatically complete the analysis process and display analysis results and reports.
 
