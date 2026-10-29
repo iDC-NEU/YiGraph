@@ -562,6 +562,45 @@ Whether using Web mode or terminal mode, YiGraph's basic usage process is consis
 
 For more advanced features, parameter descriptions, and usage examples, please refer to the project's README documentation or operation prompts in the interface.
 
+#### Web research
+
+Use these explicit commands in an engine query (including terminal or web chat)
+to research graph algorithms or read a public reference page:
+
+```text
+/web NetworkX PageRank convergence documentation
+/fetch https://networkx.org/documentation/stable/reference/algorithms/link_analysis.html
+```
+
+YiGraph uses [Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp)
+over Streamable HTTP. Search uses Fast mode; anonymous search and page fetching
+need no account or API key, with service rate limits. The configured reasoner
+summarizes the returned sources and is asked to cite their URLs. These commands
+do not run graph calculations. Engine and terminal queries need no selected
+dataset; the web interface keeps its existing dataset-selection requirement.
+
+Web access happens only for `/web` and `/fetch`. Only the text after the command
+is sent to the MCP endpoint; uploaded datasets and previous messages are not
+included. Each command is standalone. Use ordinary queries for local graph or
+document analysis. Retrieved pages are untrusted source material.
+
+Existing configuration files work without a new setting. To disable web access,
+add this under `retrieval` in `config/engine_config.yaml`:
+
+```yaml
+retrieval:
+  web_search:
+    enabled: false
+```
+
+The optional `web_search` mapping accepts `provider: parallel` (the default),
+`url: https://search.parallel.ai/mcp`, `timeout: 30` (seconds for retrieval), and
+`api_key` for an explicitly configured Bearer token. Store credentials only in
+your private configuration. Ambient `PARALLEL_API_KEY` is not read. Saved settings
+are honored; unknown providers and failed requests return an error without
+falling back to another service. Endpoint overrides must be trusted HTTP(S) MCP
+servers providing `web_search` and `web_fetch` with the Parallel tool schemas.
+
 ### 6. Common Issues and Suggestions
 
 - **GPU device unavailable**: Please confirm that `embedding.device` is set correctly

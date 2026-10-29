@@ -569,6 +569,36 @@ python aag/main.py
 
 更多高级功能、参数说明与使用示例，请参考项目的 README 文档或界面中的操作提示。
 
+#### 联网检索
+
+在引擎查询中（包括终端或 Web 聊天）显式输入以下命令，即可检索图算法资料或读取公开参考页面：
+
+```text
+/web NetworkX PageRank convergence documentation
+/fetch https://networkx.org/documentation/stable/reference/algorithms/link_analysis.html
+```
+
+易图通过 Streamable HTTP 使用 [Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp)。
+搜索采用 Fast 模式；匿名搜索与页面读取无需账户或 API Key，受服务速率限制。
+当前配置的推理模型会总结检索到的资料，并被要求引用来源 URL。这些命令不执行图计算。
+引擎和终端查询无需选择数据集；Web 界面仍需按现有流程选择数据集。
+
+只有显式使用 `/web` 或 `/fetch` 才会联网。发送给 MCP 服务的内容仅为命令后的文本，不包括已上传的数据集或历史消息；
+每条命令独立执行。本地图分析和文档检索仍使用普通查询。网页内容应视为不可信的参考资料。
+
+已有配置文件无需修改。若要禁用联网检索，在 `config/engine_config.yaml` 的 `retrieval` 下添加：
+
+```yaml
+retrieval:
+  web_search:
+    enabled: false
+```
+
+可选的 `web_search` 配置支持 `provider: parallel`（默认值）、`url: https://search.parallel.ai/mcp`、
+`timeout: 30`（检索超时秒数）及显式配置的 Bearer `api_key`。凭据仅应保存在私有配置中；
+不会读取环境变量 `PARALLEL_API_KEY`。配置会被保留，未知提供方或请求失败会返回错误，不会自动切换到其他服务。
+自定义端点必须是可信的 HTTP(S) MCP 服务，并提供与 Parallel 参数格式一致的 `web_search` 和 `web_fetch` 工具。
+
 ### 6. 常见问题建议
 
 - **GPU 设备不可用**：请确认 `embedding.device` 设置正确
