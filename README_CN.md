@@ -217,6 +217,15 @@ cd bin
 
 启动 Neo4j 后，可以通过浏览器访问 `http://localhost:7474` 来验证安装是否成功。
 
+#### 1.4 Node.js 与 npm（Web 界面必需）
+
+Web 前端基于 Next.js 16 和 React 19，需要 **Node.js >= 20.9.0** 及 npm，确认命令可用：
+
+```bash
+node --version
+npm --version
+```
+
 ### 2. 获取源码并安装依赖
 
 #### 2.1 下载源码
@@ -226,10 +235,18 @@ git clone https://github.com/iDC-NEU/YiGraph.git
 cd YiGraph
 ```
 
-#### 2.2 安装依赖
+#### 2.2 安装 Python 依赖
 
 ```bash
 pip install -r requirements.txt
+```
+
+#### 2.3 安装前端依赖（Web 模式）
+
+在项目根目录执行：
+
+```bash
+npm install
 ```
 
 ### 3. 配置系统参数
@@ -322,13 +339,34 @@ datasets:
 
 #### 4.1 Web 交互模式
 
-在项目根目录下执行以下命令启动 Web 服务：
+请先激活已安装 Python 依赖的环境，并在项目根目录执行以下命令。
+
+##### 方式一：构建后启动（推荐日常使用与演示）
+
+首次使用时，先构建前端，再启动后端服务：
 
 ```bash
-python web/frontend/run.py
+npm run build
+npm run serve
 ```
 
-启动成功后，终端会输出可访问的服务地址。请根据提示在浏览器中打开对应地址，即可进入易图的 Web 界面。
+启动后访问 **[http://localhost:5089](http://localhost:5089)**。
+
+##### 方式二：开发模式（前端热更新）
+
+在两个终端中分别启动后端和前端，均从项目根目录执行：
+
+```bash
+# 终端 1：启动后端（先激活 Python 环境）
+npm run serve
+```
+
+```bash
+# 终端 2：启动前端开发服务
+npm run dev
+```
+
+启动后访问 **[http://localhost:3000](http://localhost:3000)**。
 
 在 Web 界面中，用户可以通过自然语言输入业务问题，系统将自动完成分析流程，并展示分析结果与报告。
 
