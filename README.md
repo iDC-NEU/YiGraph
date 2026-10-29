@@ -502,7 +502,7 @@ Basic steps for using the YiGraph web interface for analysis:
 
 In the web interface, you can conveniently manage datasets:
 
-1. **Create Dataset**: Click the "Create New" button.
+1. **Create Dataset**: Click the "Create Dataset" button.
 
 2. **Fill in Dataset Information**:
    - Enter the dataset name
@@ -518,13 +518,13 @@ In the web interface, you can conveniently manage datasets:
 
 In the file management interface, you can manage and visualize files in datasets:
 
-1. **Select Dataset**: Choose the corresponding dataset from the dropdown list.
+1. **Select Dataset**: Choose the corresponding dataset from the list on the left.
 
 2. **Upload Files**: Upload files to the selected dataset.
 
 3. **View Parsing Progress**: The system will display file parsing progress and provide real-time status feedback.
 
-4. **Visualize Knowledge Graph**: After file parsing is complete, click the "Visualization" button to view the knowledge graph visualization for that dataset.
+4. **Visualize Knowledge Graph**: After file parsing is complete, click the "Generate Graph" button to view the knowledge graph visualization for that dataset.
 
 #### 4.2 Terminal Interactive Mode
 
