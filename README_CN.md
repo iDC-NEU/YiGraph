@@ -18,7 +18,7 @@
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
   <a href="http://iDC-NEU.github.io/YiGraphDocs/"><img src="https://img.shields.io/badge/📚-用户文档-purple.svg" alt="Docs"></a>
   <a href="figure/wechat.jpg"><img src="https://img.shields.io/badge/-%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7-07C160.svg?logo=wechat&logoColor=white" alt="微信公众号"></a>
-  <a href="figure/wechat_group.png"><img src="https://img.shields.io/badge/-%E5%BE%AE%E4%BF%A1%E7%BE%A4-07C160.svg?logo=wechat&logoColor=white" alt="微信群"></a>
+  <a href="https://drive.google.com/file/d/1nhr1P8BQHBAIY02CLtFe7Uz_h0vPgWjp/view?usp=share_link"><img src="https://img.shields.io/badge/-%E5%BE%AE%E4%BF%A1%E7%BE%A4-07C160.svg?logo=wechat&logoColor=white" alt="微信群"></a>
   <a href="figure/rednote.png"><img src="https://img.shields.io/badge/-%E5%B0%8F%E7%BA%A2%E4%B9%A6-FF2442.svg?logo=xiaohongshu&logoColor=white" alt="小红书"></a>
   <a href="https://x.com/idcneu"><img src="https://img.shields.io/badge/-%40idcneu-000000.svg?logo=x&logoColor=white" alt="在 X 上关注 @idcneu"></a>
 </p>
