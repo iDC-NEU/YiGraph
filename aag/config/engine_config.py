@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 import json
 from typing import Dict, Any
 import yaml
@@ -29,6 +29,7 @@ class RetrievalConfig:
     database: DatabaseConfig
     embedding: Dict[str, Any]
     rag: RagConfig
+    web_search: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class EngineConfig:
@@ -76,7 +77,8 @@ def load_config_from_yaml(config_path: str) -> EngineConfig:
         retrieval_config = RetrievalConfig(
             database=database_config,
             embedding=retrieval_section.get("embedding", {}) or {},
-            rag=rag_config
+            rag=rag_config,
+            web_search=retrieval_section.get("web_search", {}),
         )
 
         monitoring_config = config_data.get("monitoring", {}) or {}
@@ -179,6 +181,7 @@ def create_engine_config(
             "device": kwargs.get("embed_device", "cuda:0"),
         },
         rag=rag,
+        web_search=kwargs.get("web_search", {}),
     )
 
     monitoring = {
