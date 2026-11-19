@@ -29,6 +29,24 @@ English | [简体中文](README_CN.md)
 
 ---
 
+## Windows: configure once, then double-click
+
+For **Windows 10/11 x64**. Python, Java, Neo4j and Node.js are downloaded automatically.
+
+1. Choose **Code → Download ZIP**, then extract the project to a permanent directory.
+2. Double-click **`configure.cmd`**. Fill in your provider's API base URL, API key and model name, save the file and close Notepad. The installation directory can keep its default value.
+3. Double-click **`install.cmd`** and wait for the installation to finish. The script prepares an isolated Python environment, JDK 11, Neo4j, Node.js, project dependencies and the frontend build.
+
+Double-click **`start.cmd`** to start the database and application. The browser opens when the application is ready. The first launch also downloads the embedding model. Double-click **`stop.cmd`** to stop the application. Subsequent launches only need `start.cmd`.
+
+`configure.cmd` creates `install-config.json` from [the example](install-config.example.json). Only the provider address, API key and model name normally need editing. After changing them, stop and restart the application. Your provider must supply a valid API key.
+
+If a download fails, restore connectivity and run `install.cmd` again. Logs are stored in `.yigraph-runtime/logs`. An occupied database port requires stopping the existing Neo4j instance. The default installation covers CPU graph analytics and the Web interface; text vector retrieval additionally requires a Milvus service. macOS/Linux users should follow the manual deployment guide below.
+
+[中文安装步骤](README_CN.md#windows-安装填写配置后双击运行)
+
+---
+
 ## 🎬 Demo
 
 Watch YiGraph turn raw data into a graph, analyze suspicious transactions, generate a traceable report, and refine a workflow in expert mode.
@@ -235,7 +253,12 @@ python scripts/publish_pypi.py
 to replace an existing release. After publication, install with
 `python -m pip install yigraph==2.0.0`. Increment the version before future releases.
 
-## 🚀 Source Deployment Guide
+## Manual deployment (macOS/Linux or custom environments)
+
+<details>
+<summary>Show manual installation steps</summary>
+
+Windows users can follow the double-click instructions at the top of this README. The following steps are for users managing their own environment.
 
 ### 1. Environment Preparation
 
@@ -344,7 +367,7 @@ cd YiGraph
 #### 2.2 Install Python Dependencies
 
 ```bash
-pip install -r requirements.txt
+python -m pip install ".[engine,web,pyg]"
 ```
 
 #### 2.3 Install Frontend Dependencies (Web Mode)
@@ -568,6 +591,8 @@ For more advanced features, parameter descriptions, and usage examples, please r
 - **Port conflict**: Check if graph database and vector database services have been started
 - **Model cannot be loaded**: Confirm that API Key and model name are valid
 
+
+</details>
 
 ## 📖 Documentation & Resources
 

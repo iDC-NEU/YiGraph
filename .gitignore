@@ -152,3 +152,7 @@ docs/_build
 web/frontend/models.json
 
 node_modules
+
+# Local Windows installer settings, credentials and managed runtime
+install-config.json
+.yigraph-runtime/

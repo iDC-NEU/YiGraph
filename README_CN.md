@@ -29,6 +29,42 @@
 
 ---
 
+## Windows 安装：填写配置后双击运行
+
+适用于 **Windows 10/11 64 位**。不需要提前安装 Python、Java、Neo4j 或 Node.js。
+
+1. 点击 GitHub 页面上的 **Code → Download ZIP**，解压到一个固定目录，例如 `D:\YiGraph`。后续不要移动这个文件夹。
+2. 双击 **`configure.cmd`**。在打开的配置文件中填写服务商提供的 **服务地址、API Key、模型名称**，保存并关闭记事本。安装目录通常不需要修改。
+3. 双击 **`install.cmd`**，等待窗口显示“环境安装完成”。首次安装需要联网下载软件，保留窗口即可；它会自动准备 Python、JDK、Neo4j、Node.js，安装依赖并构建网页。
+
+安装完成后，双击 **`start.cmd`**。程序自动启动数据库和应用，就绪后打开浏览器。首次启动还会下载嵌入模型，可能比以后启动更久。用完后双击 **`stop.cmd`**，以后使用只需再次双击 `start.cmd`。
+
+配置文件示例（双击 `configure.cmd` 会自动生成，无需自己创建）：
+
+```json
+{
+  "api_base_url": "https://api.openai.com/v1/",
+  "api_key": "填写你的 API Key",
+  "model_name": "gpt-4o-mini",
+  "install_directory": ".yigraph-runtime"
+}
+```
+
+使用其他兼容 OpenAI 的服务时，将地址和模型名称换成该服务商提供的值。修改后保存，再双击 `start.cmd` 即可应用；应用正在运行时先双击 `stop.cmd`。API Key 必须由你自己的服务商提供。
+
+**遇到问题时：**
+
+- 下载或安装失败：查看窗口中的错误；网络恢复后再次双击 `install.cmd`，会复用已有缓存。
+- 提示配置格式错误：保留文件中的英文双引号和逗号，参照上面的格式修改。
+- 提示端口被占用：先停止已有的 Neo4j，或双击本项目的 `stop.cmd`，再启动。
+- 启动没有打开网页：到 `.yigraph-runtime/logs` 查看 `web.stderr.log` 和 `neo4j.stderr.log`；报错时请同时提供错误文字。
+
+此入口默认安装 CPU 图分析和 Web 环境。文本向量检索还需要 Milvus 服务，见下方手动部署说明；安装 Python 驱动不会自动提供该数据库。macOS/Linux 请使用手动部署步骤。
+
+本地配置、数据库、模型缓存都保存在安装目录。需要保留数据时不要删除 `.yigraph-runtime`；`install-config.json` 含你的个人配置，不要分享给别人。
+
+---
+
 ## 🎬 演示视频
 
 从原始数据导入与自动构图，到可疑交易分析、可追溯报告生成和专家模式下的工作流调整，查看易图的完整操作过程。
@@ -242,7 +278,12 @@ python scripts/publish_pypi.py
 wheel 与源码包，并拒绝重复发布已有版本。发布成功后，可用
 `python -m pip install yigraph==2.0.0` 安装。后续发布需提升版本号并重新构建。
 
-## 🚀 源码部署指南
+## 手动部署（macOS/Linux 或自定义环境）
+
+<details>
+<summary>展开手动安装步骤</summary>
+
+Windows 用户使用本文开头的双击安装步骤即可。以下内容供需要自行管理环境的用户参考。
 
 ### 1. 准备环境
 
@@ -351,7 +392,7 @@ cd YiGraph
 #### 2.2 安装 Python 依赖
 
 ```bash
-pip install -r requirements.txt
+python -m pip install ".[engine,web,pyg]"
 ```
 
 #### 2.3 安装前端依赖（Web 模式）
@@ -575,6 +616,8 @@ python aag/main.py
 - **端口冲突**：检查图数据库与向量数据库服务是否已启动
 - **模型无法加载**：确认 API Key 与模型名称是否有效
 
+
+</details>
 
 ## 📖 文档与资源
 
